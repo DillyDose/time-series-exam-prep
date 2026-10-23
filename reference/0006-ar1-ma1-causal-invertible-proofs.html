@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Guide: Invertibility และ Causality ตามวิธีของอาจารย์ (Class 7-2)</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span>Reference 6</span>
+  <span><a href="0007-invertible-causal-answer-sheets.html">ใบคำตอบ (ลอกได้)</a> · <a href="0005-arima-open-book-answer-guide.html">Open-book guide Lecture 7</a></span>
+</nav>
+
+<p class="kicker">Open book — ตามวิดีโอ TIME SERIES (CLASS 7-2)</p>
+<h1>Invertibility และ Causality ตามวิธีของอาจารย์</h1>
+
+<div class="box">
+<div class="label">วิธีใช้</div>
+<p>เอกสารนี้ถอดจากกระดาษที่อาจารย์เขียนในวิดีโอ TIME SERIES (CLASS 7-2) ช่วงนาทีที่ 5:30 ถึง 60:30 ใช้สัญลักษณ์และลำดับการเขียนเดียวกับอาจารย์ กล่องขอบเขียวคือคำตอบที่ลอกลงกระดาษได้ หัวข้อที่มีเวลากำกับมาจากวิดีโอโดยตรง หัวข้อที่เขียนว่า “ต่อยอด” เป็นการนำวิธีเดียวกันไปใช้กับกรณีที่อาจารย์ไม่ได้เขียนไว้</p>
+<p>ผมอ่านจากภาพในวิดีโอเท่านั้น ไม่ได้ฟังเสียง คำอธิบายภาษาไทยจึงเป็นการอธิบายสิ่งที่อาจารย์เขียน ไม่ใช่สิ่งที่อาจารย์พูด</p>
+</div>
+
+<table>
+<tr><th>โจทย์ถาม</th><th>เปิดหัวข้อ</th><th>เวลาในวิดีโอ</th></tr>
+<tr><td>นิยาม invertible และ causal</td><td><a href="#v1">1</a></td><td>5:30, 18:30, 45:30</td></tr>
+<tr><td>Show that MA(1) is invertible</td><td><a href="#v2">2</a></td><td>7:00–12:00</td></tr>
+<tr><td>ทำไมต้องมี invertibility</td><td><a href="#v3">3</a></td><td>12:00–15:00</td></tr>
+<tr><td>ทฤษฎีบทรากของ θ(B) และ Φ(B)</td><td><a href="#v4">4</a></td><td>15:30–21:00</td></tr>
+<tr><td>AR(1) causal หรือไม่ (ตัวเลขหรือกรณีทั่วไป)</td><td><a href="#v5">5</a></td><td>21:15–24:00</td></tr>
+<tr><td>MA(2) invertible หรือไม่</td><td><a href="#v6">6</a></td><td>25:00–28:30</td></tr>
+<tr><td>ARMA(1,2) ที่รากเป็นจำนวนเชิงซ้อน</td><td><a href="#v7">7</a></td><td>29:00–37:30</td></tr>
+<tr><td>ARMA(2,2) ที่มี parameter redundancy (Ex 3.7)</td><td><a href="#v8">8</a></td><td>37:50–44:00</td></tr>
+<tr><td>เขียน ARMA เป็น MA(∞): หา ψ</td><td><a href="#v9">9</a></td><td>48:30–57:40</td></tr>
+<tr><td>เขียน ARMA เป็น AR(∞): หา π</td><td><a href="#v10">10</a></td><td>57:40–60:30</td></tr>
+<tr><td>แม่แบบทั่วไปและจุดที่พลาดบ่อย</td><td><a href="#v11">11</a></td><td></td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="v0">0. สัญลักษณ์ที่อาจารย์ใช้</h2>
+<table class="fix">
+<tr><th>สัญลักษณ์</th><th>ความหมาย</th></tr>
+<tr><td>\(X_t\), \(w_t\)</td><td>ค่าข้อมูลที่เวลา t และ white noise ที่เวลา t</td></tr>
+<tr><td>\(B\)</td><td>backshift operator: \(BX_t=X_{t-1}\), \(B^2X_t=X_{t-2}\) และใช้กับ \(w_t\) ได้เหมือนกัน</td></tr>
+<tr><td>\(\Phi(B)\)</td><td>พหุนามของส่วน AR: \(\Phi(B)=1-\phi_1B-\phi_2B^2-\dots-\phi_pB^p\) เครื่องหมายเป็นลบ</td></tr>
+<tr><td>\(\theta(B)\)</td><td>พหุนามของส่วน MA: \(\theta(B)=1+\theta_1B+\theta_2B^2+\dots+\theta_qB^q\) เครื่องหมายเป็นบวก</td></tr>
+<tr><td>รูปย่อของ ARMA</td><td>\(\Phi(B)X_t=\theta(B)w_t\)</td></tr>
+<tr><td>\(\pi(B)\), \(\psi(B)\)</td><td>พหุนามอนันต์ของรูป AR(∞) และ MA(∞)</td></tr>
+<tr><td>root, modulus</td><td>root คือค่า x ที่ทำให้พหุนามเท่ากับ 0 ส่วน modulus คือค่าสัมบูรณ์ ถ้ารากเป็น \(a+bi\) modulus คือ \(\sqrt{a^2+b^2}\)</td></tr>
+</table>
+<p>วิธีเปลี่ยนสมการเป็นรูป B: ย้ายพจน์ของ X ไปทางซ้ายทั้งหมด พจน์ของ w ไว้ทางขวา แล้วแทน \(X_{t-k}\) ด้วย \(B^kX_t\) ตัวอย่าง \(X_t=0.5X_{t-1}+w_t-0.3w_{t-1}\) ได้ \(X_t-0.5X_{t-1}=w_t-0.3w_{t-1}\) คือ \((1-0.5B)X_t=(1-0.3B)w_t\)</p>
+
+<!-- ===================================================== -->
+<h2 id="v1">1. นิยาม (5:30, 18:30, 45:30)</h2>
+<div class="copy">
+<p><strong>Invertibility</strong> — check \(\theta(B)\) (MA part).</p>
+<p>\(X_t\) is invertible if it can be written as AR(∞), a meaningful process: MA(q) → AR(∞).</p>
+\[w_t=\pi(B)X_t,\qquad \pi(B)=\frac{\Phi(B)}{\theta(B)}\]
+<p><strong>Causality</strong> — check \(\Phi(B)\) (AR part).</p>
+<p>\(X_t\) is causal if it can be written as MA(∞): AR(p) → MA(∞).</p>
+\[X_t=\psi(B)w_t,\qquad \psi(B)=\frac{\theta(B)}{\Phi(B)}\]
+</div>
+<table>
+<tr><th></th><th>ตรวจพหุนาม</th><th>เปลี่ยนรูป</th><th>เขียนได้ว่า</th></tr>
+<tr><td>Invertible</td><td>\(\theta(B)\)</td><td>MA(q) เป็น AR(∞)</td><td>\(w_t\) ในรูปของ X ปัจจุบันและอดีต</td></tr>
+<tr><td>Causal</td><td>\(\Phi(B)\)</td><td>AR(p) เป็น MA(∞)</td><td>\(X_t\) ในรูปของ w ปัจจุบันและอดีต</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="v2">2. พิสูจน์ MA(1) invertible (7:00–12:00)</h2>
+<p>อาจารย์เขียน MA(1) ด้วยเครื่องหมายลบ คือ \(X_t=w_t-\theta w_{t-1}\) ผลที่ได้จึงเป็นบวกทุกพจน์</p>
+<div class="copy">
+<p>MA(1) ⇒ \(X_t=w_t-\theta w_{t-1}\)</p>
+\[w_t=X_t+\theta w_{t-1}\]
+<p>Since \(w_{t-1}=X_{t-1}+\theta w_{t-2}\),</p>
+\[w_t=X_t+\theta\,[X_{t-1}+\theta w_{t-2}]\]
+<p>Continuing,</p>
+\[w_t=X_t+\theta X_{t-1}+\theta^2X_{t-2}+\theta^3X_{t-3}+\dots\qquad\text{AR}(\infty)\]
+<p>This is a meaningful process only if the coefficients converge:</p>
+\[\sum_{j=1}^{\infty}\theta^j&lt;\infty\ \text{(converge)}\quad\text{if and only if}\quad -1&lt;\theta&lt;1,\ \text{i.e. } |\theta|&lt;1.\]
+<p>Therefore MA(1) is invertible if and only if \(|\theta|&lt;1\).</p>
+</div>
+<table class="fix">
+<tr><th>บรรทัด</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>\(w_t=X_t+\theta w_{t-1}\)</td><td>ย้าย \(-\theta w_{t-1}\) ไปอีกข้าง</td><td>ต้องการ \(w_t\) อยู่ทางซ้ายตัวเดียว ลบย้ายข้างเป็นบวก</td></tr>
+<tr><td>\(w_{t-1}=X_{t-1}+\theta w_{t-2}\)</td><td>ใช้บรรทัดก่อนหน้าที่เวลา t−1</td><td>โมเดลเป็นจริงทุกเวลา</td></tr>
+<tr><td>แทนในวงเล็บเหลี่ยม</td><td>แทน \(w_{t-1}\)</td><td>กำจัด w ตัวเก่า ได้ X เพิ่มหนึ่งตัว และ w ถอยไปอีกหนึ่งช่วง</td></tr>
+<tr><td>AR(∞)</td><td>แทนซ้ำไปเรื่อย ๆ</td><td>\(X_{t-j}\) มีสัมประสิทธิ์ \(\theta^j\) รูปนี้คือ \(X_t\) เขียนด้วยค่าในอดีตของตัวเองจำนวนอนันต์</td></tr>
+<tr><td>เงื่อนไขลู่เข้า</td><td>ตรวจผลรวมของสัมประสิทธิ์</td><td>ถ้า \(|\theta|\ge1\) ค่า \(\theta^j\) ไม่ลดลง ค่าในอดีตไกล ๆ จะมีน้ำหนักมากขึ้นเรื่อย ๆ ซึ่งไม่ meaningful</td></tr>
+</table>
+<div class="calc">
+<div class="calc-title">ถ้าโจทย์เขียน MA(1) ด้วยเครื่องหมายบวก (ต่อยอด)</div>
+<p>ถ้าโจทย์ให้ \(X_t=w_t+\theta w_{t-1}\) ทำขั้นตอนเดียวกัน เครื่องหมายจะสลับ</p>
+<div class="copy">
+\[w_t=X_t-\theta w_{t-1}=X_t-\theta\,[X_{t-1}-\theta w_{t-2}]\]
+\[w_t=X_t-\theta X_{t-1}+\theta^2X_{t-2}-\theta^3X_{t-3}+\dots=\sum_{j=0}^{\infty}(-\theta)^jX_{t-j}\qquad\text{AR}(\infty)\]
+<p>The coefficients converge if and only if \(|\theta|&lt;1\). Therefore MA(1) is invertible if and only if \(|\theta|&lt;1\).</p>
+</div>
+<p>เงื่อนไขเหมือนกันทั้งสองแบบ ให้เขียนตามเครื่องหมายที่โจทย์ให้</p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="v3">3. ทำไมต้องมี invertibility (12:00–15:00)</h2>
+<div class="copy">
+<p>Consider two MA(1) models:</p>
+\[X_t=w_t+\tfrac15w_{t-1}\qquad\text{and}\qquad X_t=w_t+5w_{t-1}\]
+<p>Both have the same ACF at lag 1:</p>
+\[\rho(1)=\frac{\theta}{1+\theta^2}:\qquad \frac{1/5}{1+1/25}=0.1923,\qquad \frac{5}{1+25}=0.1923\]
+<p>The data cannot tell them apart. We choose the invertible one, \(X_t=w_t+\tfrac15w_{t-1}\) (\(|\theta|=0.2&lt;1\)), because it can be written as AR(∞): MA(q) → AR(∞).</p>
+</div>
+<p>โมเดลที่มี \(\theta\) กับ \(1/\theta\) ให้ ACF เดียวกันเสมอ เงื่อนไข invertible จึงใช้เลือกให้เหลือโมเดลเดียว</p>
+
+<!-- ===================================================== -->
+<h2 id="v4">4. ทฤษฎีบท (15:30–21:00)</h2>
+<div class="copy">
+<p><strong>Theorem.</strong> For an MA(q) to be invertible, we need the roots of</p>
+\[\theta(B)=1+\theta_1B+\theta_2B^2+\theta_3B^3+\dots+\theta_qB^q\]
+<p>to all exceed 1 in absolute value (or modulus).</p>
+<p><strong>Theorem.</strong> For an AR(p) to be causal, we need the roots of</p>
+\[\Phi(B)=1-\phi_1B-\phi_2B^2-\dots-\phi_pB^p\]
+<p>to all exceed 1 in absolute value (or modulus).</p>
+</div>
+<h3>ขั้นตอนใช้ทฤษฎีบท</h3>
+<ol>
+<li>เขียนโมเดลในรูป \(\Phi(B)X_t=\theta(B)w_t\)</li>
+<li>เปลี่ยน B เป็น x แล้วตั้งพหุนามเท่ากับ 0</li>
+<li>หาราก: พหุนามกำลังหนึ่งแก้ตรง ๆ พหุนามกำลังสองใช้ \(x=\dfrac{-b\pm\sqrt{b^2-4ac}}{2a}\) โดย \(a\) คือสัมประสิทธิ์ของ \(x^2\), \(b\) ของ \(x\), \(c\) คือค่าคงที่</li>
+<li>ถ้า \(b^2-4ac&lt;0\) รากเป็น \(a'\pm b'i\) ให้หา modulus \(\sqrt{a'^2+b'^2}\)</li>
+<li>ทุกรากมากกว่า 1: ผ่าน ถ้ามีรากใดไม่เกิน 1: ไม่ผ่าน</li>
+</ol>
+
+<!-- ===================================================== -->
+<h2 id="v5">5. AR(1) causal หรือไม่ (21:15–24:00)</h2>
+<div class="copy">
+<p>1) \(X_t=0.3X_{t-1}+w_t\)  (AR(1) with \(\phi=0.3\))</p>
+\[(1-0.3B)X_t=w_t,\qquad \Phi(B)=1-0.3B\]
+\[\Phi(x)=1-0.3x=0\ \Rightarrow\ |x|=\left|\frac{1}{0.3}\right|=3.33&gt;1\]
+<p>Causal.</p>
+</div>
+<div class="calc">
+<div class="calc-title">AR(1) กรณีทั่วไป (ต่อยอดจากตัวอย่างของอาจารย์)</div>
+<div class="copy">
+<p>AR(1): \(X_t=\phi X_{t-1}+w_t\)</p>
+\[(1-\phi B)X_t=w_t,\qquad \Phi(B)=1-\phi B\]
+\[\Phi(x)=1-\phi x=0\ \Rightarrow\ x=\frac{1}{\phi}\]
+\[|x|=\left|\frac1\phi\right|&gt;1\iff|\phi|&lt;1\]
+<p>Therefore AR(1) is causal if and only if \(|\phi|&lt;1\).</p>
+<p><strong>MA(∞) form.</strong> \(\psi(B)=\dfrac{\theta(B)}{\Phi(B)}=(1-\phi B)^{-1}=1+\phi B+\phi^2B^2+\phi^3B^3+\dots\) (power series), so</p>
+\[X_t=\psi(B)w_t=w_t+\phi w_{t-1}+\phi^2w_{t-2}+\dots=\sum_{j=0}^{\infty}\phi^jw_{t-j}\qquad\text{MA}(\infty)\]
+<p><strong>Invertibility.</strong> AR(1) has \(\theta(B)=1\), which has no roots. \(w_t=X_t-\phi X_{t-1}\) is already an AR form, so AR(1) is always invertible.</p>
+</div>
+</div>
+<div class="calc">
+<div class="calc-title">AR(1) เขียนเป็น MA(∞) ด้วยการแทนค่าซ้ำ (ต่อยอด: วิธีเดียวกับที่อาจารย์ใช้กับ MA(1) ในหัวข้อ 2)</div>
+<div class="copy">
+<p>AR(1) ⇒ \(X_t=\phi X_{t-1}+w_t\)</p>
+<p>Since \(X_{t-1}=\phi X_{t-2}+w_{t-1}\),</p>
+\[X_t=\phi\,[\phi X_{t-2}+w_{t-1}]+w_t=\phi^2X_{t-2}+\phi w_{t-1}+w_t\]
+<p>Continuing,</p>
+\[X_t=w_t+\phi w_{t-1}+\phi^2w_{t-2}+\phi^3w_{t-3}+\dots\qquad\text{MA}(\infty)\]
+\[\sum_{j=1}^{\infty}\phi^j&lt;\infty\ \text{(converge)}\quad\text{if and only if}\quad -1&lt;\phi&lt;1.\]
+<p>Therefore AR(1) is causal if and only if \(|\phi|&lt;1\).</p>
+</div>
+<p>ถ้าโจทย์เขียนว่า show by the theorem หรือ check the roots ให้ใช้กล่องบน ถ้าโจทย์ให้ write as MA(∞) หรือ show directly ให้ใช้กล่องนี้</p>
+</div>
+<div class="calc">
+<div class="calc-title">MA(1) ด้วยทฤษฎีบท (ต่อยอด)</div>
+<div class="copy">
+<p>MA(1): \(X_t=w_t+\theta w_{t-1}=(1+\theta B)w_t\), \(\theta(B)=1+\theta B\)</p>
+\[\theta(x)=1+\theta x=0\ \Rightarrow\ x=-\frac1\theta,\qquad |x|=\left|\frac1\theta\right|&gt;1\iff|\theta|&lt;1\]
+<p>Therefore MA(1) is invertible if and only if \(|\theta|&lt;1\). MA(1) has \(\Phi(B)=1\), so it is always causal.</p>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="v6">6. MA(2) invertible หรือไม่ (25:00–28:30)</h2>
+<div class="copy">
+<p>2) \(X_t=w_t-1.3w_{t-1}+0.4w_{t-2}\)</p>
+\[X_t=(1-1.3B+0.4B^2)\,w_t,\qquad \theta(B)=1-1.3B+0.4B^2\]
+\[\theta(x)=1-1.3x+0.4x^2\qquad(ax^2+bx+c:\ a=0.4,\ b=-1.3,\ c=1)\]
+\[b^2-4ac=(-1.3)^2-4(0.4)(1)=1.69-1.6=0.09&gt;0\]
+\[x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}=\frac{1.3\pm0.3}{0.8}=2,\ 1.25\quad(&gt;1)\]
+<p>Both roots exceed 1, so the process is invertible.</p>
+</div>
+<p>จุดที่ต้องระวังคือการจับคู่ a, b, c พหุนามเขียนเรียงจากค่าคงที่ไปกำลังสอง ค่า a จึงเป็นตัวท้าย คือ 0.4 และ c เป็นตัวแรก คือ 1</p>
+
+<!-- ===================================================== -->
+<h2 id="v7">7. ARMA(1,2) ที่รากเป็นจำนวนเชิงซ้อน (29:00–37:30)</h2>
+<div class="copy">
+<p>3) ARMA(1,2): \(X_t=0.5X_{t-1}+w_t-0.3w_{t-1}+1.2w_{t-2}\)</p>
+\[(1-0.5B)X_t=(1-0.3B+1.2B^2)\,w_t\]
+<p>• \(\Phi(x)=1-0.5x=0\ \Rightarrow\ x=2&gt;1\). Causal.</p>
+<p>• \(\theta(x)=1-0.3x+1.2x^2\qquad(a=1.2,\ b=-0.3,\ c=1)\)</p>
+\[D=b^2-4ac=(-0.3)^2-4(1.2)(1)=0.09-4.8=-4.71&lt;0\]
+<p>The roots are complex, \(a'\pm b'i\):</p>
+\[x=\frac{-b}{2a}\pm\frac{i\sqrt{|D|}}{2a}=\frac{-(-0.3)}{2(1.2)}\pm\frac{i\sqrt{|-4.71|}}{2(1.2)}\approx0.125\pm0.904\,i\]
+\[\text{modulus}=\sqrt{0.125^2+0.904^2}=0.913&lt;1\]
+<p>The roots do not exceed 1 in modulus, so the process is not invertible.</p>
+<p>Conclusion: causal but not invertible.</p>
+</div>
+<p>บรรทัดสรุป “not invertible” ผมเติมจากผล 0.913 น้อยกว่า 1 ตามทฤษฎีบท ในเฟรมที่อ่านได้อาจารย์เขียนถึงค่า 0.913</p>
+<table class="compact">
+<tr><th>ค่า</th><th>คำนวณ</th><th>ผล</th></tr>
+<tr><td>ส่วนจริง</td><td>\(0.3/2.4\)</td><td>0.125</td></tr>
+<tr><td>ส่วนจินตภาพ</td><td>\(\sqrt{4.71}/2.4=2.170/2.4\)</td><td>0.904</td></tr>
+<tr><td>modulus</td><td>\(\sqrt{0.0156+0.8177}\)</td><td>0.913</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="v8">8. ARMA(2,2) ที่มี parameter redundancy: Ex 3.7 (37:50–44:00)</h2>
+<div class="copy">
+<p>4) Ex 3.7  ARMA(2,2)?</p>
+\[X_t=0.4X_{t-1}+0.45X_{t-2}+w_t+w_{t-1}+0.25w_{t-2}\]
+\[(1-0.4B-0.45B^2)\,X_t=(1+B+0.25B^2)\,w_t\]
+<p>Factor both sides:</p>
+\[(1+0.5B)(1-0.9B)\,X_t=(1+0.5B)(1+0.5B)\,w_t\]
+<p>The common factor \((1+0.5B)\) cancels (parameter redundancy):</p>
+\[(1-0.9B)\,X_t=(1+0.5B)\,w_t\]
+<p>The model is ARMA(1,1), not ARMA(2,2): \(X_t=0.9X_{t-1}+w_t+0.5w_{t-1}\).</p>
+<p>• \(\Phi(x)=1-0.9x=0\ \Rightarrow\ x=1/0.9=1.11&gt;1\). Causal.</p>
+<p>• \(\theta(x)=1+0.5x=0\ \Rightarrow\ x=-2,\ |x|=2&gt;1\). Invertible.</p>
+</div>
+<table class="fix">
+<tr><th>ขั้น</th><th>วิธีทำ</th></tr>
+<tr><td>แยกตัวประกอบฝั่ง AR</td><td>ตรวจโดยคูณกลับ: \((1+0.5B)(1-0.9B)=1-0.9B+0.5B-0.45B^2=1-0.4B-0.45B^2\)</td></tr>
+<tr><td>แยกตัวประกอบฝั่ง MA</td><td>\((1+0.5B)^2=1+B+0.25B^2\)</td></tr>
+<tr><td>หาตัวประกอบเมื่อมองไม่ออก</td><td>หารากของพหุนามด้วยสูตรกำลังสอง ถ้ารากคือ \(r_1,r_2\) ตัวประกอบคือ \((1-B/r_1)(1-B/r_2)\) ฝั่ง AR มีราก −2 และ 1.11 จึงได้ \((1+0.5B)(1-0.9B)\)</td></tr>
+<tr><td>ตัดตัวประกอบร่วม</td><td>ตัวประกอบที่เหมือนกันทั้งสองฝั่งตัดออกได้ โมเดลจึงเล็กลง ต้องตัดก่อนตรวจ causal และ invertible</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="v9">9. เขียน ARMA(1,1) เป็น MA(∞): หา ψ (48:30–57:40)</h2>
+<p>ใช้โมเดลจากหัวข้อ 8 คือ \((1-0.9B)X_t=(1+0.5B)w_t\) อาจารย์เปลี่ยน B เป็น z ขณะกระจายพหุนาม</p>
+<div class="copy">
+\[\Phi(z)=1-0.9z,\qquad \theta(z)=1+0.5z\]
+\[\psi(z)=\frac{\theta(z)}{\Phi(z)}=\frac{1+0.5z}{1-0.9z}=(1+0.5z)(1-0.9z)^{-1}\]
+<p>Power series: \((1+\theta z)^{-1}=1+(-\theta)z+(-\theta)^2z^2+(-\theta)^3z^3+\dots\)</p>
+<p>With \(\theta=-0.9\): \((1-0.9z)^{-1}=1+0.9z+0.9^2z^2+0.9^3z^3+\dots\)</p>
+\[\psi(z)=(1+0.5z)(1+0.9z+0.9^2z^2+\dots)\]
+\[=1+1.4z+(1.4)(0.9)z^2+(1.4)(0.9)^2z^3+(1.4)(0.9)^3z^4+\dots\]
+\[X_t=\psi(B)w_t=\big(1+1.4B+(1.4)(0.9)B^2+(1.4)(0.9)^2B^3+\dots\big)\,w_t\qquad\text{MA}(\infty)\]
+\[X_t=w_t+\sum_{j=1}^{\infty}1.4\,(0.9)^{j-1}\,w_{t-j}\]
+</div>
+<table class="fix">
+<tr><th>สัมประสิทธิ์ของ</th><th>มาจาก</th><th>ผล</th></tr>
+<tr><td>\(z^0\)</td><td>\(1\times1\)</td><td>1</td></tr>
+<tr><td>\(z^1\)</td><td>\(1\times0.9+0.5\times1\)</td><td>1.4</td></tr>
+<tr><td>\(z^2\)</td><td>\(1\times0.9^2+0.5\times0.9=0.9(0.9+0.5)\)</td><td>\(1.4(0.9)=1.26\)</td></tr>
+<tr><td>\(z^3\)</td><td>\(1\times0.9^3+0.5\times0.9^2=0.9^2(0.9+0.5)\)</td><td>\(1.4(0.9)^2=1.134\)</td></tr>
+<tr><td>\(z^j\)</td><td>\(0.9^{j-1}(0.9+0.5)\)</td><td>\(1.4(0.9)^{j-1}\)</td></tr>
+</table>
+<p>วิธีคูณคือนำ 1 และ 0.5z ในวงเล็บแรกคูณกระจายเข้าไปในอนุกรม แล้วรวมพจน์ที่มีกำลังของ z เท่ากัน ค่า 1.4 มาจาก 0.9 + 0.5 ซึ่งคือ \(\phi+\theta\)</p>
+
+<!-- ===================================================== -->
+<h2 id="v10">10. เขียน ARMA(1,1) เป็น AR(∞): หา π (57:40–60:30)</h2>
+<div class="copy">
+<p>Invertibility:</p>
+\[\pi(z)=\frac{\Phi(z)}{\theta(z)}=(1-0.9z)(1+0.5z)^{-1}\]
+<p>Power series with \(\theta=0.5\): \((1+0.5z)^{-1}=1-0.5z+0.5^2z^2-0.5^3z^3+\dots\)</p>
+\[\pi(z)=(1-0.9z)(1-0.5z+0.5^2z^2-0.5^3z^3+\dots)\]
+\[=1-1.4z+(1.4)(0.5)z^2-(1.4)(0.5)^2z^3+\dots\]
+\[w_t=\pi(B)X_t\]
+\[w_t=X_t-1.4\sum_{j=1}^{\infty}(-0.5)^{j-1}X_{t-j}\qquad\text{AR}(\infty)\]
+</div>
+<div class="box exam">
+<div class="label">จุดที่ต้องตรวจกับวิดีโอ</div>
+<p>ในเฟรมที่นาที 60:00 บรรทัดสุดท้ายบนกระดาษอ่านได้ว่า \(w_t=X_t+1.4\sum(-0.5)^{j-1}X_{t-j}\) คือเครื่องหมายบวกหน้า 1.4 แต่เมื่อคูณกระจายแล้วได้เครื่องหมายลบ ตามตารางข้างล่าง และตำรา Shumway Example 3.7 ก็เป็นเครื่องหมายลบ กล่องขอบเขียวข้างบนจึงใช้เครื่องหมายลบ อาจารย์อาจแก้ด้วยปากเปล่าหรือเขียนทับในช่วงที่ผมไม่ได้จับภาพ ให้เปิดวิดีโอช่วง 59:30 ถึง 60:30 ตรวจอีกครั้ง</p>
+</div>
+<table class="fix">
+<tr><th>สัมประสิทธิ์ของ</th><th>มาจาก</th><th>ผล</th></tr>
+<tr><td>\(z^0\)</td><td>\(1\times1\)</td><td>1</td></tr>
+<tr><td>\(z^1\)</td><td>\(1\times(-0.5)+(-0.9)\times1\)</td><td>−1.4</td></tr>
+<tr><td>\(z^2\)</td><td>\(1\times0.25+(-0.9)(-0.5)\)</td><td>\(0.7=-1.4(-0.5)\)</td></tr>
+<tr><td>\(z^3\)</td><td>\(1\times(-0.125)+(-0.9)(0.25)\)</td><td>\(-0.35=-1.4(-0.5)^2\)</td></tr>
+<tr><td>\(z^j\)</td><td></td><td>\(-1.4(-0.5)^{j-1}\)</td></tr>
+</table>
+<p>เขียนกระจายได้ว่า \(w_t=X_t-1.4X_{t-1}+0.7X_{t-2}-0.35X_{t-3}+\dots\)</p>
+
+<!-- ===================================================== -->
+<h2 id="v11">11. แม่แบบทั่วไปและจุดที่พลาดบ่อย</h2>
+<div class="tpl">Write the model as Φ(B)X_t = θ(B)w_t:<u>( ... )X_t = ( ... )w_t</u>. • Φ(x) =<u>...</u> = 0 ⇒ x =<u>...</u>, |x| =<u>...</u><u>&gt; 1 / ≤ 1</u> ⇒<u>causal / not causal</u>. • θ(x) =<u>...</u> = 0 ⇒ x =<u>...</u>, |x| =<u>...</u><u>&gt; 1 / ≤ 1</u> ⇒<u>invertible / not invertible</u>.</div>
+
+<h3>สูตรสำเร็จสำหรับ ARMA(1,1): \((1-\phi B)X_t=(1+\theta B)w_t\) (ต่อยอด)</h3>
+<table>
+<tr><th>ต้องการ</th><th>สูตร</th><th>ตรวจกับ Ex 3.7 (φ = 0.9, θ = 0.5)</th></tr>
+<tr><td>MA(∞)</td><td>\(X_t=w_t+\sum_{j=1}^{\infty}(\phi+\theta)\,\phi^{j-1}w_{t-j}\)</td><td>\(1.4(0.9)^{j-1}\)</td></tr>
+<tr><td>AR(∞)</td><td>\(w_t=X_t-\sum_{j=1}^{\infty}(\phi+\theta)\,(-\theta)^{j-1}X_{t-j}\)</td><td>\(-1.4(-0.5)^{j-1}\)</td></tr>
+</table>
+
+<h3>ตารางตรวจเร็ว</h3>
+<table>
+<tr><th>โมเดล</th><th>Causal เมื่อ</th><th>Invertible เมื่อ</th></tr>
+<tr><td>AR(1): \(X_t=\phi X_{t-1}+w_t\)</td><td>\(|\phi|&lt;1\)</td><td>เสมอ</td></tr>
+<tr><td>MA(1): \(X_t=w_t\pm\theta w_{t-1}\)</td><td>เสมอ</td><td>\(|\theta|&lt;1\)</td></tr>
+<tr><td>ARMA(1,1)</td><td>\(|\phi|&lt;1\)</td><td>\(|\theta|&lt;1\)</td></tr>
+<tr><td>อันดับ 2 ขึ้นไป</td><td>ทุกรากของ \(\Phi(x)\) มี modulus มากกว่า 1</td><td>ทุกรากของ \(\theta(x)\) มี modulus มากกว่า 1</td></tr>
+</table>
+
+<h3>จุดที่พลาดบ่อย</h3>
+<table class="fix">
+<tr><th>จุด</th><th>ที่ถูก</th></tr>
+<tr><td>เครื่องหมายใน \(\Phi(B)\)</td><td>ย้ายพจน์ X ไปทางซ้ายแล้วเครื่องหมายกลับ \(X_t=0.5X_{t-1}+\dots\) ได้ \(1-0.5B\)</td></tr>
+<tr><td>เครื่องหมายใน \(\theta(B)\)</td><td>พจน์ w อยู่ทางขวาอยู่แล้ว เครื่องหมายคงเดิม \(w_t-0.3w_{t-1}\) ได้ \(1-0.3B\)</td></tr>
+<tr><td>รากกับสัมประสิทธิ์</td><td>ทฤษฎีบทพูดถึงราก ซึ่งต้องมากกว่า 1 ส่วนสัมประสิทธิ์ของ AR(1) หรือ MA(1) ต้องน้อยกว่า 1 สองข้อความนี้เท่ากัน เพราะรากคือ \(1/\phi\)</td></tr>
+<tr><td>a, b, c ในสูตรกำลังสอง</td><td>a คือสัมประสิทธิ์ของ \(x^2\) ซึ่งเขียนอยู่ท้ายสุดของพหุนาม</td></tr>
+<tr><td>รากเชิงซ้อน</td><td>ห้ามดูเฉพาะส่วนจริง ต้องหา modulus \(\sqrt{a'^2+b'^2}\)</td></tr>
+<tr><td>รากติดลบ</td><td>ดูค่าสัมบูรณ์ ราก −2 มี \(|x|=2&gt;1\) ผ่าน</td></tr>
+<tr><td>Parameter redundancy</td><td>แยกตัวประกอบทั้งสองฝั่งและตัดตัวร่วมก่อนตรวจ และตอบอันดับของโมเดลหลังตัดแล้ว</td></tr>
+<tr><td>Power series</td><td>\((1-az)^{-1}=1+az+a^2z^2+\dots\) และ \((1+az)^{-1}=1-az+a^2z^2-\dots\)</td></tr>
+<tr><td>MA(1) เขียนด้วยบวกหรือลบ</td><td>ลอกตามเครื่องหมายของโจทย์ แล้วใช้กล่องที่ตรงกันในหัวข้อ 2</td></tr>
+</table>
+
+<h3>เรื่องอื่นที่อยู่ในวิดีโอเดียวกัน</h3>
+<table class="fix">
+<tr><th>เวลา</th><th>เนื้อหา</th></tr>
+<tr><td>0:00–5:30</td><td>ARIMA(p,d,q): \(\Phi(B)\nabla^dX_t=\theta(B)w_t\) โดย \(\Phi(B)\) คือ p-order, \(\nabla^d\) คือ differencing, \(\theta(B)\) คือ q-order อาจารย์เขียน PACF ใต้ฝั่ง AR และ ACF ใต้ฝั่ง MA</td></tr>
+<tr><td>60:50–62:47</td><td>EACF สำหรับ ARMA(p,q): ตารางที่แถวคือ p และคอลัมน์คือ q ตั้งแต่ 0 ถึง 4 อาจารย์วาดมุมของสามเหลี่ยมที่แถว 2 คอลัมน์ 2 และเขียน (2,2) ผมอ่านสัญลักษณ์ในแต่ละช่องจากภาพได้ไม่ชัด ให้ดูวิดีโอช่วงนี้เองถ้าจะใช้</td></tr>
+</table>
+
+</body>
+</html>

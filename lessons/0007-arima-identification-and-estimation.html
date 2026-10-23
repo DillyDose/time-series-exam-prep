@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Lesson 7: ARIMA — Exponential Smoothing, Transformation, Model Identification, Estimation</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span><a href="0006-ar2-pacf-and-arima.html">← Lesson 6</a> · Lesson 7 (Lecture 7)</span>
+  <span><a href="../reference/0005-arima-open-book-answer-guide.html">Open-book guide</a> · <a href="../reference/0007-invertible-causal-answer-sheets.html">ใบคำตอบ invertible/causal</a></span>
+</nav>
+
+<p class="kicker">Slide_7 — Time Series Analysis · ARIMA and Exponential Smoothing · 39 หน้า + R_codes + times.txt · วิดีโอ Class 7-1 และ 7-2</p>
+<h1>ARIMA: เทียบกับ exponential smoothing, การแปลงข้อมูล, การเลือกโมเดล และการประมาณค่า</h1>
+
+<div class="box">
+<div class="label">วิธีใช้บทเรียนนี้</div>
+<p>บทนี้แสดงสไลด์ Lecture 7 ทุกหน้าที่มีเนื้อหาตามลำดับ แต่ละหน้ามีคำอธิบายและตัวอย่างตัวเลข ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ ซึ่งมีโอกาสออกสอบสูง</p>
+<p>กล่องสีส้มชื่อ "อาจารย์พูดในคลิป" มาจากการถอดเสียงวิดีโอ Class 7-1 และ 7-2 พร้อมเวลาในวิดีโอ ถ้าสงสัยให้เปิดคลิปที่เวลานั้นฟังซ้ำ บันทึกฉบับเต็มอยู่ในโฟลเดอร์ <code>video-notes/</code></p>
+<p>วิชานี้สอบปลายภาคอย่างเดียว บทนี้จึงมีทั้งการพิสูจน์สมการ การคำนวณตัวเลข และการอ่านผลจาก R</p>
+</div>
+
+<div class="box exam">
+<div class="label">อาจารย์พูดในคลิป: เรื่องที่บอกว่าเคยออกหรืออาจออกสอบ</div>
+<ul>
+<li>ARIMA(0,1,1) เทียบกับ single exponential smoothing "ข้อสอบเก่าผมเคยออก" (Class 7-1, 7:38)</li>
+<li>"ข้อสอบผมอาจจะให้โมเดล ARIMA(0,1,1) มา ให้นิสิตประมาณว่าค่า alpha ที่ได้จาก exponential จะเป็นยังไง" (Class 7-1, 11:21) วิธีทำอยู่ใน<a href="#s1">หัวข้อ 1</a></li>
+<li>Transformation "เป็นหัวข้อที่สำคัญมาก" (Class 7-1, 12:36)</li>
+<li>ADF test: "อย่าลืมว่า H1 คือนิ่ง" (Class 7-1, 30:52)</li>
+</ul>
+</div>
+
+<div class="box source">
+<div class="label">แหล่งอ่านหลัก</div>
+<p>Shumway &amp; Stoffer บทที่ 2 หัวข้อ 2.2 หน้า 53 (AIC, BIC) และบทที่ 3 Example 3.26 หน้า 122 (Yule-Walker ของ AR(2)) กับหน้า 124–128 (Newton-Raphson สำหรับ MLE, อ่านเสริม) ข้อมูล electricity มาจาก package TSA ของ Cryer &amp; Chan</p>
+</div>
+
+<table>
+<tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
+<tr><td><a href="#s0">0</a></td><td>ทบทวน ARIMA(p,d,q) และ simulation ของ IMA</td><td>R_codes</td></tr>
+<tr><td><a href="#s1">1</a></td><td>ARIMA(0,1,1) เท่ากับ single exponential smoothing</td><td>2–3</td></tr>
+<tr><td><a href="#s2">2</a></td><td>Double exponential smoothing กับ ARIMA(0,2,2)</td><td>4</td></tr>
+<tr><td><a href="#s3">3</a></td><td>Transformation และ Box-Cox</td><td>6–8</td></tr>
+<tr><td><a href="#s4">4</a></td><td>ตัวอย่างข้อมูล electricity</td><td>9–12</td></tr>
+<tr><td><a href="#s5">5</a></td><td>Model identification: ACF, PACF, EACF</td><td>14</td></tr>
+<tr><td><a href="#s6">6</a></td><td>สัญญาณของ nonstationarity และการเลือก d</td><td>15–16</td></tr>
+<tr><td><a href="#s7">7</a></td><td>ADF test</td><td>17</td></tr>
+<tr><td><a href="#s8">8</a></td><td>AIC และ BIC</td><td>18–20</td></tr>
+<tr><td><a href="#s9">9</a></td><td>ตัวอย่าง times.txt: ACF, PACF, ตาราง AIC/BIC</td><td>21–23</td></tr>
+<tr><td><a href="#s10">10</a></td><td>สรุปขั้นตอนเลือกโมเดล</td><td>24–27</td></tr>
+<tr><td><a href="#s11">11</a></td><td>Estimation: ภาพรวมและปัญหาของ likelihood</td><td>29–31</td></tr>
+<tr><td><a href="#s12">12</a></td><td>Method of moments และ Yule-Walker</td><td>32–34</td></tr>
+<tr><td><a href="#s13">13</a></td><td>Maximum likelihood</td><td>35–38</td></tr>
+<tr><td><a href="#s14">14</a></td><td>อ่านผล arima() และตรวจโมเดล</td><td>39</td></tr>
+<tr><td><a href="#s15">15</a></td><td>โค้ด R_codes ส่วนที่เหลือ</td><td>—</td></tr>
+<tr><td><a href="#s16">16</a></td><td>แบบฝึกท้ายบท</td><td>—</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="s0">0. ทบทวน ARIMA(p,d,q) และ simulation ของ IMA</h2>
+
+<div class="box prereq">
+<div class="label">พื้นฐานที่ต้องรู้ก่อน</div>
+<p>ARIMA(p,d,q) มีตัวเลขสามตัว p คือจำนวนพารามิเตอร์ของส่วน AR, q คือจำนวนพารามิเตอร์ของส่วน MA และ d คือจำนวนครั้งที่ทำ differencing ถ้าข้อมูลนิ่งอยู่แล้ว d = 0 ถ้ามี trend อาจต้องใช้ d = 1 หรือ 2 ขึ้นกับว่า trend แรงแค่ไหน</p>
+<p>Differencing ครั้งที่หนึ่งคือ \(\nabla X_t=X_t-X_{t-1}\) ตัวอย่าง ข้อมูล 10, 13, 15, 20 ได้ผลต่าง 3, 2, 5 ซึ่งไม่มี trend เหลือแล้ว ครั้งที่สองคือทำซ้ำกับผลต่าง: 3, 2, 5 ได้ −1, 3</p>
+<p>เขียนด้วย backshift operator \(B\) ซึ่ง \(BX_t=X_{t-1}\): \(\nabla X_t=(1-B)X_t\) และ \(\nabla^2X_t=(1-B)^2X_t\) ARIMA จึงเขียนรวมได้เป็น \(\Phi(B)(1-B)^dX_t=\theta(B)w_t\) รายละเอียดอยู่ใน <a href="0006-ar2-pacf-and-arima.html#s9">Lesson 6 หัวข้อ 9</a></p>
+</div>
+
+<p>ชื่อพิเศษที่ใช้บ่อย: IMA(d,q) คือ ARIMA(0,d,q) เช่น IMA(1,1) คือ ARIMA(0,1,1) อาจารย์อธิบายความหมายว่า "differencing แล้วเป็นอนุกรมเวลาแบบ MA(1)" แปลว่าข้อมูลเดิมมี trend จึงไม่นิ่ง เมื่อทำผลต่างแล้วนิ่ง และผลต่างมีรูปแบบของ MA(1) (Class 7-1, 1:23) เปรียบได้กับคนเดินขึ้นบันได ตำแหน่งความสูงเพิ่มขึ้นเรื่อย ๆ จึงไม่นิ่ง แต่ความสูงของแต่ละขั้นที่ก้าว (ผลต่าง) ค่อนข้างคงที่และมีรูปแบบที่ศึกษาได้</p>
+
+<figure>
+<img src="../assets/slides/ts7-r1-ima11.png" alt="ผลจาก R_codes ส่วน IMA(1,1): กราฟข้อมูล ACF ผลต่าง และ ACF ของผลต่าง" loading="lazy">
+<figcaption>ภาพจากการรัน R_codes ส่วน IMA(1,1) ด้วย set.seed(7) (ไม่ใช่สไลด์ ตัวเลขจะต่างไปถ้ารันโดยไม่ตั้ง seed)</figcaption>
+</figure>
+
+<p>โค้ด <code>arima.sim(list(order = c(0,1,1), ma = c(-0.5)), n = 150)</code> สร้างข้อมูล 150 จุดจาก IMA(1,1) ที่ \(\theta=-0.5\) ข้อมูลเดิมเดินเป็น trend และ ACF ลดลงช้ามาก: lag 1 = 0.934, lag 5 = 0.749 และ lag 10 ยังเป็น 0.537 ซึ่งสูงกว่าเส้นขอบ \(2/\sqrt{150}=0.163\) มาก อาจารย์บอกว่าเมื่อข้อมูลไม่นิ่ง ACF "ลงช้า ๆ แบบช้ากว่า AR(p) ด้วยซ้ำ" (Class 7-1, 3:02) หลังทำผลต่างหนึ่งครั้ง ACF ที่ lag 1 = −0.376 และ lag 2 = 0.099 อยู่ในขอบ รูปแบบนี้คือ MA(1) ที่ตัดหลัง lag 1 ค่าทางทฤษฎีของ MA(1) ใน R คือ \(\rho_1=\theta/(1+\theta^2)=-0.5/1.25=-0.4\) ใกล้กับ −0.376 ที่ได้จากข้อมูล</p>
+
+<figure>
+<img src="../assets/slides/ts7-r2-ima22.png" alt="ผลจาก R_codes ส่วน IMA(2,2): ข้อมูลเดิม ผลต่างครั้งที่หนึ่งและสอง พร้อม ACF" loading="lazy">
+<figcaption>ภาพจากการรัน R_codes ส่วน IMA(2,2) ด้วย set.seed(7)</figcaption>
+</figure>
+
+<p>IMA(2,2) ที่ \(\theta_1=-0.3,\ \theta_2=0.3\) มี trend แรงกว่า ACF ของข้อมูลเดิมที่ lag 10 ยังเป็น 0.795 หลังผลต่างครั้งที่หนึ่ง ACF ที่ lag 10 ยังเป็น 0.471 แปลว่ายังมี trend เหลือ อาจารย์อธิบายว่าแถวกลาง "ยังมี linear trend หลงเหลืออยู่ ACF ลงช้าเหมือนเดิมแต่เร็วขึ้นกว่าข้างบน" (Class 7-1, 4:41) หลังผลต่างครั้งที่สอง ACF เหลือ lag 1 = −0.226 และ lag 2 = 0.284 ที่เกินขอบ ส่วน lag 3 = 0.016 อยู่ในขอบ ตรงกับ MA(2) ที่ตัดหลัง lag 2 ค่าทางทฤษฎีคือ −0.331 และ 0.254 อาจารย์เตือนว่าข้อมูลจำลอง "อาจไม่ perfect" รันใหม่แล้ว lag 2 อาจปริ่มเส้น (Class 7-1, 5:05)</p>
+
+<figure>
+<img src="../assets/slides/ts7-r3-arima111.png" alt="ผลจาก R_codes ส่วน ARIMA(1,1,1)" loading="lazy">
+<figcaption>ภาพจากการรัน R_codes ส่วน ARIMA(1,1,1) (Extra) ด้วย set.seed(7)</figcaption>
+</figure>
+
+<p>ARIMA(1,1,1) ที่ \(\phi=0.5,\ \theta=0.5\) หลังผลต่างหนึ่งครั้งได้ ACF lag 1 ถึง 4 เป็น 0.647, 0.198, −0.026, −0.120 ซึ่งลดลงแบบค่อย ๆ หาย ไม่ตัดทันที เพราะผลต่างเป็น ARMA(1,1) ที่มีทั้งส่วน AR และ MA ค่าทางทฤษฎีคือ 0.714, 0.357, 0.179 ซึ่งลดลงทีละครึ่งตาม \(\phi=0.5\) ข้อมูลจำลอง 150 จุดจึงใกล้เคียงแต่ไม่ตรงเป๊ะ</p>
+
+<p>อาจารย์ให้เหตุผลที่สอนการจำลองข้อมูลสองข้อ ข้อแรก ใช้จำลองสถานการณ์ต่าง ๆ เพื่อศึกษาว่าแต่ละโมเดลมีรูปแบบอย่างไร ข้อที่สอง เมื่อเจอข้อมูลจริงที่มีรูปแบบคล้ายกัน จะรู้ว่าควรใช้โมเดลไหน (Class 7-1, 5:52) เหมือนแพทย์ที่ดูภาพเอกซเรย์ตัวอย่างของแต่ละโรคมาก่อน จึงจำอาการเมื่อเจอผู้ป่วยจริงได้</p>
+
+<!-- ===================================================== -->
+<h2 id="s1">1. ARIMA(0,1,1) เท่ากับ single exponential smoothing</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p02.png" alt="Slide 7 หน้า 2: ARIMA(0,1,1) and Exponential equivalence" loading="lazy">
+<figcaption>Slide 7 หน้า 2 — ARIMA(0,1,1) and Exponential equivalence</figcaption>
+</figure>
+
+<p>อาจารย์เริ่มหัวข้อนี้ว่า "ต้องเข้าใจก่อนว่ามันเป็นคนละโมเดลกัน" ARIMA เป็นโมเดลแบบ Box-Jenkins ส่วน exponential smoothing เป็นวิธีที่เรียนใน <a href="0004-smoothing-methods.html">Lesson 4</a> แต่ "มันเทียบกันได้ใน p, d, q บางกรณี" (Class 7-1, 6:35–7:48) สไลด์นี้พิสูจน์กรณีแรก คือ ARIMA(0,1,1) ที่ <mark class="src" data-p="2">mean = 0 for the first differences</mark> โมเดลคือผลต่างครั้งที่หนึ่งเป็น MA(1): \(X_t-X_{t-1}=w_t+\theta w_{t-1}\) ย้ายข้างได้ \(X_t=X_{t-1}+w_t+\theta w_{t-1}\)</p>
+
+<div class="calc" id="s1-proof">
+<div class="calc-title">พิสูจน์ทีละบรรทัด: จาก ARIMA(0,1,1) ไปเป็นสูตร smoothing</div>
+<ol class="steps">
+<li><div class="st-title">เขียนโมเดลที่เวลา t + 1</div><p>เลื่อนเวลาไปหนึ่งช่วง: \(X_{t+1}=X_t+w_{t+1}+\theta w_t\)</p></li>
+<li><div class="st-title">ใช้ความหมายของ residual</div><p>\(w_{t+1}\) คือความคลาดเคลื่อนของการพยากรณ์ \(w_{t+1}=X_{t+1}-\hat X_{t+1}\) อาจารย์เทียบกับ regression ว่า "residual เกิดจาก data ลบด้วย model เหมือน e = Y − Ŷ" (Class 7-1, 9:16) และเขียนสีแดงบนสไลด์ว่า \(e_t=Y_t-\hat Y_t\)</p></li>
+<li><div class="st-title">แทนค่า</div><p>\(X_{t+1}=X_t+(X_{t+1}-\hat X_{t+1})+\theta w_t\)</p></li>
+<li><div class="st-title">ตัด \(X_{t+1}\) ที่อยู่ทั้งสองข้าง</div><p>\(0=X_t-\hat X_{t+1}+\theta w_t\) จึงได้ \(\hat X_{t+1}=X_t+\theta w_t\)</p></li>
+<li><div class="st-title">ใช้ความหมายของ residual อีกครั้งที่เวลา t</div><p>\(w_t=X_t-\hat X_t\) แทนลงไป: \(\hat X_{t+1}=X_t+\theta(X_t-\hat X_t)\)</p></li>
+<li><div class="st-title">จัดกลุ่มพจน์ \(X_t\)</div><p>\(\hat X_{t+1}=(1+\theta)X_t-\theta\hat X_t\)</p></li>
+</ol>
+</div>
+
+<figure>
+<img src="../assets/slides/ts7-p03.png" alt="Slide 7 หน้า 3: ARIMA(0,1,1) and Exponential equivalence (ต่อ)" loading="lazy">
+<figcaption>Slide 7 หน้า 3 — ARIMA(0,1,1) and Exponential equivalence (ต่อ)</figcaption>
+</figure>
+
+<p>ขั้นสุดท้ายคือตั้งชื่อใหม่ ให้ \(\alpha=1+\theta\) แล้ว \(-\theta=1-\alpha\) สมการจึงกลายเป็น \(\hat X_{t+1}=\alpha X_t+(1-\alpha)\hat X_t\) ซึ่งเป็นสูตร single exponential smoothing \(F_{t+1}=\alpha X_t+(1-\alpha)F_t\) ใน Lesson 4 พอดี อาจารย์ย้ำว่า "พารามิเตอร์มันสามารถ transfer หรือคำนวณเทียบกันได้" (Class 7-1, 11:44) สไลด์สรุปการใช้งานว่า <mark class="src" data-p="3">Basically, we just fit an ARIMA(0,1,1) to the data and determine the α coefficient.</mark> คือถ้าต้องการ α ที่ดีที่สุดของ exponential smoothing ให้ fit ARIMA(0,1,1) แล้วแปลง θ ที่ได้เป็น α</p>
+
+<div class="calc" id="s1-num">
+<div class="calc-title">ตัวอย่างตัวเลข: แปลง θ เป็น α แล้วพยากรณ์สองวิธีให้ได้ค่าเดียวกัน</div>
+<ol class="steps">
+<li><div class="st-title">โจทย์</div><p>ARIMA(0,1,1) มี \(\theta=-0.6\) ข้อมูลล่าสุด \(X_t=50\) ค่าพยากรณ์ของเวลา t ที่ทำไว้ก่อนหน้าคือ \(\hat X_t=46\) จงหา α และ \(\hat X_{t+1}\)</p></li>
+<li><div class="st-title">หา α</div><p>\(\alpha=1+\theta=1+(-0.6)=0.4\)</p></li>
+<li><div class="st-title">วิธีที่ 1 ใช้สูตร smoothing</div><p>\(\hat X_{t+1}=0.4(50)+(1-0.4)(46)=20+27.6=47.6\)</p></li>
+<li><div class="st-title">วิธีที่ 2 ใช้สูตร ARIMA</div><p>\(w_t=X_t-\hat X_t=50-46=4\) แล้ว \(\hat X_{t+1}=X_t+\theta w_t=50+(-0.6)(4)=50-2.4=47.6\)</p></li>
+<li><div class="st-title">ตรวจด้วย R</div><p>จำลอง ARIMA(0,1,1) ที่ \(\theta=-0.6\) จำนวน 300 จุด แล้ว fit สองวิธี: <code>arima(x, order=c(0,1,1))</code> ได้ ma1 = −0.6129 ส่วน <code>HoltWinters(x, beta=FALSE, gamma=FALSE)</code> ได้ alpha = 0.386 ซึ่งตรงกับ \(1+(-0.6129)=0.3871\) จนถึงทศนิยมตำแหน่งที่สอง</p></li>
+</ol>
+<div class="answer">\(\alpha=0.4\) และ \(\hat X_{t+1}=47.6\) ทั้งสองวิธี</div>
+</div>
+
+<p>ช่วงของค่าที่ใช้ได้: exponential smoothing ต้องการ \(0&lt;\alpha\le 1\) จึงตรงกับ \(-1&lt;\theta\le 0\) ถ้า R ให้ θ เป็นบวก เช่น 0.3 จะได้ α = 1.3 ซึ่งเกิน 1 แปลว่าข้อมูลไม่เข้ากับ single exponential smoothing แม้ ARIMA(0,1,1) จะยัง invertible อยู่ ค่า θ ใกล้ −1 ให้ α ใกล้ 0 คือพยากรณ์เรียบมาก เชื่อค่าเก่า ส่วน θ ใกล้ 0 ให้ α ใกล้ 1 คือพยากรณ์ตามค่าล่าสุดเกือบทั้งหมด เหมือนพนักงานใหม่ที่เชื่อข่าวล่าสุดทุกเรื่อง</p>
+
+<div class="box exam">
+<div class="label">ระวังเครื่องหมายของ θ</div>
+<p>สไลด์และ R เขียน MA ด้วยเครื่องหมายบวก \(w_t+\theta w_{t-1}\) จึงได้ \(\alpha=1+\theta\) แต่ในวิดีโอ Class 7-2 อาจารย์เขียน MA(1) เป็น \(X_t=w_t-\theta w_{t-1}\) ถ้าโจทย์ใช้เครื่องหมายลบ ผลการพิสูจน์จะเป็น \(\hat X_{t+1}=(1-\theta)X_t+\theta\hat X_t\) และ \(\alpha=1-\theta\) ก่อนตอบให้ดูเครื่องหมายในโจทย์ก่อนเสมอ</p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. Double exponential smoothing กับ ARIMA(0,2,2)</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p04.png" alt="Slide 7 หน้า 4: Double Exponential Smoothing" loading="lazy">
+<figcaption>Slide 7 หน้า 4 — Double Exponential Smoothing</figcaption>
+</figure>
+
+<p>Double exponential smoothing (Holt) ใช้ <mark class="src" data-p="4">when there's trend (either long run or short run), but no seasonality</mark> มีสองส่วนที่ปรับทุกเวลา ส่วน level ซึ่งเทียบได้กับ single exponential smoothing ของข้อมูล และส่วน trend ซึ่งเทียบได้กับ single exponential smoothing ของผลต่างครั้งที่หนึ่ง สไลด์สรุปว่า <mark class="src" data-p="4">The procedure is equivalent to fitting an ARIMA(0,2,2) model, with no constant</mark> เหตุผลที่ต้องเป็น d = 2: ส่วน trend คือ smoothing ของผลต่าง ถ้าต้อง smooth ผลต่างอีกชั้น ข้อมูลจึงต้องทำผลต่างสองครั้งจึงจะนิ่ง ส่วน q = 2 มาจากการมีพารามิเตอร์ smoothing สองตัว</p>
+
+<p>อาจารย์บอกว่ามีการพิสูจน์ในหลายแหล่ง "แต่ผมจะไม่ลงดีเทล" (Class 7-1, 12:06) และบอกว่าคาบหลัง ๆ จะมีตารางเทียบ Box-Jenkins กับ exponential smoothing ว่าคู่ไหน equivalent กัน ระดับที่ควรจำสำหรับสอบคือคู่ที่เทียบกัน: single ES คู่กับ ARIMA(0,1,1) และ double ES คู่กับ ARIMA(0,2,2)</p>
+
+<table>
+<tr><th>Exponential smoothing</th><th>ARIMA ที่เทียบได้</th><th>เหตุผลของ d</th><th>เหตุผลของ q</th></tr>
+<tr><td>Single (simple)</td><td>ARIMA(0,1,1)</td><td>level เดินได้ ต้อง diff 1 ครั้ง</td><td>มี α ตัวเดียว</td></tr>
+<tr><td>Double (Holt)</td><td>ARIMA(0,2,2)</td><td>มี trend ต้อง diff 2 ครั้ง</td><td>มี α และ β สองตัว</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="s3">3. Transformation และ Box-Cox</h2>
+
+<p>อาจารย์เปิดหัวข้อนี้ว่า "หัวข้อนี้เป็นหัวข้อที่สำคัญมาก" และทวนว่าอนุกรมเวลาที่ไม่นิ่งเกิดจากสองสาเหตุหลัก สาเหตุแรกคือ trend ขาขึ้น ขาลง หรือโค้ง ซึ่งแก้ด้วย differencing สาเหตุที่สองคือ non-constant variance คือการแกว่งไม่สม่ำเสมอ ช่วงแรกแกว่งน้อย ช่วงหลังแกว่งมาก ซึ่งแก้ด้วย transformation หลักการที่อาจารย์ย้ำคือ "ทำให้มันนิ่งก่อนแล้วศึกษาเชิงลึก ไม่ว่าจะใช้โมเดลไหน" (Class 7-1, 12:36–13:21)</p>
+
+<figure>
+<img src="../assets/slides/ts7-p06.png" alt="Slide 7 หน้า 6: Transformation" loading="lazy">
+<figcaption>Slide 7 หน้า 6 — Transformation</figcaption>
+</figure>
+
+<p>สไลด์บอกว่าถ้าข้อมูลไม่นิ่ง ควรแปลงข้อมูลก่อนดูผลต่าง หรือก่อน detrend ด้วย regression ถ้ามี <mark class="src" data-p="6">clear evidence of nonconstant variance over time</mark> การแปลงที่เหมาะสมช่วยลดหรือกำจัดปัญหานี้ได้ และการแปลงถือเป็น <mark class="src" data-p="6">“first step.”</mark> ที่ต้องทำก่อน differencing อาจารย์เทียบกับ regression ว่าความแปรปรวนคงที่คือ homoscedasticity ส่วนความแปรปรวนไม่คงที่คือ heteroscedasticity และอธิบายว่าเป็นสัญญาณของ lack of fit: ช่วงที่ residual แกว่งมากคือช่วงที่โมเดล fit ไม่ดี (Class 7-1, 13:30–14:41)</p>
+
+<p>วิธีแก้ที่อาจารย์บอกว่าง่ายที่สุดคือ take log ซึ่งเป็นการ "บีบข้อมูล" ให้แกว่งน้อยลง อีกวิธีคือ square root อาจารย์ชอบ log มากกว่าด้วยเหตุผลสองข้อ ข้อแรก แปลงกลับด้วย exponential ซึ่งเข้าใจง่ายกว่ายกกำลังสอง ข้อที่สอง ค่าที่แปลงกลับจาก log จะไม่ติดลบ เหมาะกับข้อมูลอย่างยอดขาย (Class 7-1, 15:20–17:07) หลัง take log แล้ว "เรากำลังทำอนุกรมเวลาของ log X_t ไม่ใช่ X_t" (Class 7-1, 17:47)</p>
+
+<div class="calc" id="s3-log">
+<div class="calc-title">ทำไม log ทำให้การแกว่งเท่ากัน: ตัวอย่างตัวเลข</div>
+<ol class="steps">
+<li><div class="st-title">ข้อมูลที่แกว่งตามขนาด</div><p>ช่วงแรกระดับ 100 แกว่ง 90 ถึง 110 ช่วงหลังระดับ 400 แกว่ง 360 ถึง 440 คือแกว่ง ±10% เท่ากันทั้งสองช่วง</p></li>
+<li><div class="st-title">ความกว้างของการแกว่งบนข้อมูลเดิม</div><p>ช่วงแรก \(110-90=20\) ช่วงหลัง \(440-360=80\) ต่างกัน 4 เท่า</p></li>
+<li><div class="st-title">หลัง square root</div><p>ช่วงแรก \(\sqrt{110}-\sqrt{90}=10.488-9.487=1.001\) ช่วงหลัง \(\sqrt{440}-\sqrt{360}=20.976-18.974=2.002\) ลดเหลือต่างกัน 2 เท่า</p></li>
+<li><div class="st-title">หลัง log</div><p>ช่วงแรก \(\ln110-\ln90=4.7005-4.4998=0.2007\) ช่วงหลัง \(\ln440-\ln360=6.0868-5.8861=0.2007\) เท่ากันพอดี</p></li>
+</ol>
+<div class="answer">log ทำให้การเปลี่ยนแปลงแบบร้อยละเท่ากันกลายเป็นระยะห่างเท่ากัน เพราะ \(\ln(1.1a)-\ln(0.9a)=\ln(1.1/0.9)\) ไม่ขึ้นกับระดับ \(a\)</div>
+</div>
+
+<p>เปรียบได้กับการดูราคาหุ้น หุ้นราคา 10 บาทขึ้น 1 บาท กับหุ้นราคา 1,000 บาทขึ้น 100 บาท ถ้าดูเป็นบาทจะคิดว่าหุ้นตัวหลังผันผวนกว่า 100 เท่า แต่ถ้าดูเป็นร้อยละ ทั้งสองตัวขึ้น 10% เท่ากัน log คือการเปลี่ยนมุมมองจาก "บาท" เป็น "ร้อยละ"</p>
+
+<figure>
+<img src="../assets/slides/ts7-p07.png" alt="Slide 7 หน้า 7: Box-Cox Transformation" loading="lazy">
+<figcaption>Slide 7 หน้า 7 — Box-Cox Transformation</figcaption>
+</figure>
+
+<p>Box-Cox (1964) รวมการแปลงแบบยกกำลังไว้ในสูตรเดียว ถ้า \(\lambda\ne0\) ใช้ \(T(X_t)=\dfrac{X_t^{\lambda}-1}{\lambda}\) และถ้า \(\lambda=0\) ใช้ \(T(X_t)=\ln(X_t)\) อาจารย์เขียนบนสไลด์ว่า λ = 1/2 คือ \(\sqrt{x}\) และ λ = 1/10 คือ \(x^{1/10}\) แล้วเน้นว่า "ถ้า λ เป็น 0 มันจะไม่ใช่ x กำลัง 0 แต่เป็น log x หรือ ln x" (Class 7-1, 18:16–18:44) ค่าลบ 1 และการหารด้วย λ มีไว้เพื่อให้สูตรต่อเนื่อง เมื่อ λ เข้าใกล้ 0 ค่าของสูตรบนจะเข้าใกล้ ln x</p>
+
+<div class="calc" id="s3-boxcox">
+<div class="calc-title">แทนค่า Box-Cox ด้วย X = 100</div>
+<ol class="steps">
+<li><div class="st-title">λ = 1</div><p>\((100^1-1)/1=99\) คือข้อมูลเดิมลบ 1 รูปร่างของกราฟไม่เปลี่ยน จึงเท่ากับไม่แปลง</p></li>
+<li><div class="st-title">λ = 0.5</div><p>\((100^{0.5}-1)/0.5=(10-1)/0.5=18\) ซึ่งเป็น \(2(\sqrt{x}-1)\) รูปร่างเหมือน square root</p></li>
+<li><div class="st-title">λ = 0.01</div><p>\(100^{0.01}=e^{0.01\ln100}=e^{0.04605}=1.04713\) จึงได้ \((1.04713-1)/0.01=4.713\)</p></li>
+<li><div class="st-title">λ = 0.001</div><p>\(100^{0.001}=e^{0.004605}=1.004616\) จึงได้ \(4.616\)</p></li>
+<li><div class="st-title">λ = 0</div><p>\(\ln100=4.605\) ค่าในข้อ 3 และ 4 เข้าใกล้ค่านี้ นี่คือเหตุผลที่สูตรกำหนดให้ λ = 0 ใช้ log</p></li>
+<li><div class="st-title">λ = −1</div><p>\((100^{-1}-1)/(-1)=(0.01-1)/(-1)=0.99\) รูปร่างเหมือน \(1/x\) ที่กลับทิศให้ค่ามากยังมาก</p></li>
+</ol>
+</div>
+
+<table>
+<tr><th>λ</th><th>การแปลงที่ได้</th><th>ใช้เมื่อ</th></tr>
+<tr><td>1</td><td>ไม่แปลง</td><td>การแกว่งคงที่อยู่แล้ว</td></tr>
+<tr><td>0.5</td><td>\(\sqrt{x}\)</td><td>การแกว่งโตตามระดับ แต่ไม่มาก</td></tr>
+<tr><td>0</td><td>\(\ln x\)</td><td>การแกว่งโตเป็นสัดส่วนกับระดับ</td></tr>
+<tr><td>−0.5</td><td>\(1/\sqrt{x}\)</td><td>การแกว่งโตเร็วกว่าระดับ</td></tr>
+<tr><td>−1</td><td>\(1/x\)</td><td>การแกว่งโตเร็วมาก</td></tr>
+</table>
+
+<p>Box-Cox ใช้ได้กับข้อมูลที่เป็นบวกเท่านั้น เพราะ log ของศูนย์หรือค่าลบหาไม่ได้ ถ้าข้อมูลมีค่าลบ ต้องบวกค่าคงที่ให้เป็นบวกทุกตัวก่อน อาจารย์บอกว่าเรื่องนี้เคยเรียนในวิชา regression มาแล้ว ความต่างคือครั้งนี้ใช้กับอนุกรมเวลาโดยตรง (Class 7-1, 19:14–20:04)</p>
+
+<figure>
+<img src="../assets/slides/ts7-p08.png" alt="Slide 7 หน้า 8: Box-Cox Transformation: ให้ข้อมูลเลือก λ" loading="lazy">
+<figcaption>Slide 7 หน้า 8 — Box-Cox Transformation: ให้ข้อมูลเลือก λ</figcaption>
+</figure>
+
+<p>แทนที่จะเดา λ เอง ให้ข้อมูล <mark class="src" data-p="8">“suggest”</mark> ค่าที่เหมาะสม ฟังก์ชัน <code>BoxCox.ar</code> ใน package TSA คำนวณ log-likelihood ของแต่ละ λ แล้วเลือก λ ที่ทำให้ log-likelihood สูงสุด ซึ่งเป็น maximum likelihood estimate และให้ <mark class="src" data-p="8">approximate 95 percent confidence interval for λ</mark> กติกาที่อาจารย์ใช้: ถ้าช่วงเชื่อมั่นคลุม 0 ใช้ log ถ้าไม่คลุม 0 ต้องใช้การแปลงแบบอื่น อาจารย์ "เล็ง log ไว้เป็นหลัก" เพราะ λ อย่าง 1/10 หรือ 1/6 "แปลงกลับยากและความหมายแปลยาก" (Class 7-1, 18:44–19:52) อาจารย์บอกด้วยว่า <code>BoxCox.ar</code> รันนาน เพราะต้องประมาณ maximum likelihood หลายรอบ (Class 7-1, 26:15)</p>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. ตัวอย่างข้อมูล electricity</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p09.png" alt="Slide 7 หน้า 9: Data: electricity (TSA)" loading="lazy">
+<figcaption>Slide 7 หน้า 9 — Data: electricity (TSA)</figcaption>
+</figure>
+
+<p>ข้อมูล electricity คือปริมาณการใช้ไฟฟ้ารายเดือนของสหรัฐอเมริกาจากถ่านหิน ก๊าซธรรมชาติ นิวเคลียร์ ปิโตรเลียม และลม ตั้งแต่ <mark class="src" data-p="9">January, 1973 and December, 2005</mark> รวม 396 เดือน อาจารย์บอกว่าตำราหลายเล่มใช้ข้อมูลนี้เป็น case study เพราะ "มีทั้ง trend และ seasonal" (Class 7-1, 21:04) อ่านจากกราฟ: ปี 1975 ค่าอยู่ราว 140,000 ถึง 180,000 แกว่งกว้างประมาณ 40,000 ปี 2005 ค่าอยู่ราว 290,000 ถึง 400,000 แกว่งกว้างประมาณ 110,000 การแกว่งโตขึ้นเกือบสามเท่าตามระดับ นี่คือ non-constant variance ส่วนระดับที่ขึ้นจาก 150,000 เป็น 350,000 คือ trend</p>
+
+<figure>
+<img src="../assets/slides/ts7-p10.png" alt="Slide 7 หน้า 10: Box-Cox log-likelihood ของ electricity" loading="lazy">
+<figcaption>Slide 7 หน้า 10 — Box-Cox log-likelihood ของ electricity</figcaption>
+</figure>
+
+<p>กราฟนี้คือผลของ <code>BoxCox.ar(electricity)</code> แกนนอนคือ λ จาก −2 ถึง 2 แกนตั้งคือ log-likelihood เส้นโค้งเป็นรูปคว่ำ (concave) จุดสูงสุดอยู่ที่ λ ประมาณ −0.1 ซึ่งให้ log-likelihood ราว 1,498 เส้นประแนวนอนที่เขียนว่า 95% ตัดเส้นโค้งที่ λ ประมาณ −0.4 และ 0.2 นี่คือช่วงเชื่อมั่น 95% ของ λ ช่วงนี้คลุม 0 จึงเลือก log อาจารย์อ่านกราฟนี้ว่า "ขอบเขตล่างกับขอบเขตบนมันคลุมศูนย์ ผมจะ take log" (Class 7-1, 21:57–22:10) ถ้าเลือก λ = −0.1 ตรง ๆ ก็ใช้ได้ทางสถิติ แต่ log ตีความง่ายกว่าและอยู่ในช่วงเชื่อมั่น</p>
+
+<figure>
+<img src="../assets/slides/ts7-p11.png" alt="Slide 7 หน้า 11: Electricity data (log-transformed)" loading="lazy">
+<figcaption>Slide 7 หน้า 11 — Electricity data (log-transformed)</figcaption>
+</figure>
+
+<p>หลัง take log ค่าอยู่ราว 11.9 ถึง 12.9 ช่วงปี 1975 แกว่งจากราว 11.85 ถึง 12.1 กว้างราว 0.25 ช่วงปี 2005 แกว่งจากราว 12.6 ถึง 12.9 กว้างราว 0.3 ความกว้างใกล้กันแล้ว ปัญหา non-constant variance หมดไป แต่ trend ขาขึ้นยังอยู่ อาจารย์สรุปว่า "non-constant variance แก้ไขปัญหาไปแล้ว แต่ trend มันยังมีอยู่ ก็ต้อง differencing" (Class 7-1, 23:03)</p>
+
+<div class="box exam">
+<div class="label">อาจารย์ถามในคลิป: log ก่อน หรือ differencing ก่อน</div>
+<p>คำถาม (Class 7-1, 23:11): "take log ของ differencing หรือ differencing ของ log อันไหนง่ายกว่า" คำตอบของอาจารย์: log ก่อน แล้วค่อยทำผลต่าง คือ \(\nabla\log X_t=\log X_t-\log X_{t-1}\) ง่ายกว่าเวลาแปลงกลับและตีความ เหตุผลเพิ่มเติม: ผลต่างของข้อมูลมีค่าลบได้ ถ้าทำผลต่างก่อนจะ take log ไม่ได้ และสไลด์หน้า 6, 16, 24 ก็ย้ำว่าการแปลงทำก่อน differencing เสมอ</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts7-p12.png" alt="Slide 7 หน้า 12: ACF ของ ∇log X_t" loading="lazy">
+<figcaption>Slide 7 หน้า 12 — ACF ของ ∇log X_t</figcaption>
+</figure>
+
+<p>\(\nabla\log X_t=\log X_t-\log X_{t-1}=\log(X_t/X_{t-1})\) มีความหมายประมาณอัตราการเปลี่ยนแปลงรายเดือน เช่น เดือนก่อนใช้ไฟ 300,000 เดือนนี้ 315,000 ได้ \(\log(1.05)=0.0488\) ใกล้กับ 5% แกนนอนของ ACF นับเป็นปี เพราะข้อมูลเป็นรายเดือนที่ frequency = 12 lag 1.0 คือ 12 เดือน ACF ที่ lag 1.0, 2.0, 3.0 สูงราว 0.87, 0.84, 0.81 ส่วน lag 0.25 (3 เดือน) และ 0.75 (9 เดือน) ติดลบราว −0.49 และ −0.47 รูปแบบนี้คือ seasonality: เดือนเดียวกันของปีต่างกันมีพฤติกรรมเหมือนกัน อาจารย์อธิบายว่า "หน้าร้อนคนเปิดแอร์เยอะ มันก็จะเป็นรอบของมัน" (Class 7-1, 27:56) และบอกว่าจะสอนต่อในเรื่อง SARIMA ตอนนี้ trend และ non-constant variance หมดแล้ว เหลือเพียง seasonal pattern (Class 7-1, 25:28) อาจารย์ให้การบ้านว่าลองทำ ACF ของ \(X_t\) เดิมเทียบด้วย ซึ่งจะลดลงช้ามากเพราะมีทั้ง trend และ non-constant variance (Class 7-1, 27:11)</p>
+
+<pre><code>library(TSA)
+data(electricity)
+plot(electricity, ylab="Electricity usage", xlab="Time", type="o")
+BoxCox.ar(electricity)
+plot(log(electricity), ylab="(Log) electricity usage", xlab="Time", type="o")
+acf(diff(log(electricity)), main="", lag.max=36,
+    ylab="ACF of the 1st differences of the logged series")</code></pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>library(TSA); data(electricity)</td><td>โหลด package TSA และข้อมูล electricity ซึ่งเป็น ts รายเดือน</td></tr>
+<tr><td>plot(..., type="o")</td><td>วาดเส้นพร้อมจุด ได้สไลด์หน้า 9</td></tr>
+<tr><td>BoxCox.ar(electricity)</td><td>คำนวณ log-likelihood ของ λ หลายค่า วาดกราฟพร้อมช่วงเชื่อมั่น 95% ได้สไลด์หน้า 10</td></tr>
+<tr><td>log(electricity)</td><td>ln ของทุกเดือน (log ใน R คือฐาน e) ได้สไลด์หน้า 11</td></tr>
+<tr><td>diff(log(electricity))</td><td>ผลต่างครั้งที่หนึ่งของ log ลำดับคือ log ก่อน แล้ว diff</td></tr>
+<tr><td>lag.max=36</td><td>แสดง ACF ถึง 36 เดือน คือ 3 ปี เพื่อให้เห็น seasonal ซ้ำสามรอบ ได้สไลด์หน้า 12</td></tr>
+</table>
+<p>ในเครื่องที่ทำบทเรียนนี้ไม่มี package TSA จึงยังไม่ได้รันส่วนนี้ ค่าที่อ่านในหัวข้อนี้อ่านจากกราฟในสไลด์ ถ้าต้องการใช้ Box-Cox โดยไม่มี TSA ใช้ <code>forecast::BoxCox.lambda(electricity)</code> แทนได้ แต่วิธีเลือก λ ต่างกัน ค่าที่ได้อาจไม่ตรงกับสไลด์</p>
+
+<!-- ===================================================== -->
+<h2 id="s5">5. Model identification: ACF, PACF, EACF</h2>
+
+<p>Model identification คือการระบุว่า p, d และ q ควรเป็นเท่าไร ยังไม่ใช่การประมาณค่าพารามิเตอร์ อาจารย์เล่าว่าสมัยก่อนต้องดูกราฟ ACF และ PACF ด้วยตา แต่บางครั้งกราฟไม่ชัดว่า p หรือ q ควรเป็นเท่าไร จึงมีเครื่องมือที่เป็นตัวเลขมาช่วย คือ EACF, AIC และ BIC ผลที่ได้คือ "ค่า p ที่เป็นไปได้ ค่า q ที่เป็นไปได้" ไม่ใช่คำตอบเดียว (Class 7-1, 28:28–29:37) เปรียบเหมือนนักสืบที่ใช้หลักฐานหลายชิ้นตัดผู้ต้องสงสัยให้เหลือสองสามคน แล้วค่อยสอบสวนต่อ</p>
+
+<figure>
+<img src="../assets/slides/ts7-p14.png" alt="Slide 7 หน้า 14: ACF/PACF/EACF" loading="lazy">
+<figcaption>Slide 7 หน้า 14 — ACF/PACF/EACF</figcaption>
+</figure>
+
+<p>สไลด์สรุปสามข้อ: ACF ใช้หา q ของ MA, PACF ใช้หา p ของ AR และ <mark class="src" data-p="14">Both ACF and PACF (also EACF)</mark> ใช้หา p และ q ของ ARMA ที่ผสมกัน เหตุผลที่ ACF ใช้กับ MA คือ MA(q) มี ACF เป็นศูนย์หลัง lag q เพราะค่าที่ห่างกันเกิน q ช่วงไม่มี white noise ตัวไหนร่วมกัน ส่วน PACF ของ AR(p) เป็นศูนย์หลัง lag p เพราะเมื่อรู้ค่าย้อนหลัง p ตัวแล้ว ค่าที่เก่ากว่านั้นไม่ให้ข้อมูลเพิ่ม (พิสูจน์ใน <a href="0005-ma-and-ar-models.html">Lesson 5</a> และ <a href="0006-ar2-pacf-and-arima.html#s8">Lesson 6 หัวข้อ 8</a>)</p>
+
+<table>
+<tr><th>โมเดล</th><th>ACF</th><th>PACF</th><th>EACF</th></tr>
+<tr><td>AR(p)</td><td>ค่อย ๆ ลดลง (tails off)</td><td>ตัดหลัง lag p</td><td>สามเหลี่ยมศูนย์เริ่มที่แถว p คอลัมน์ 0</td></tr>
+<tr><td>MA(q)</td><td>ตัดหลัง lag q</td><td>ค่อย ๆ ลดลง</td><td>สามเหลี่ยมศูนย์เริ่มที่แถว 0 คอลัมน์ q</td></tr>
+<tr><td>ARMA(p,q)</td><td>ค่อย ๆ ลดลง</td><td>ค่อย ๆ ลดลง</td><td>สามเหลี่ยมศูนย์เริ่มที่แถว p คอลัมน์ q</td></tr>
+</table>
+
+<p>ตัวอย่างการอ่าน: ถ้า ACF มีแท่งเกินขอบที่ lag 1 และ 2 แล้วหลังจากนั้นอยู่ในขอบ ขณะที่ PACF ค่อย ๆ ลดลง ให้เสนอ MA(2) ถ้า ACF ลดลงทีละครึ่ง 0.5, 0.25, 0.125 และ PACF มีแท่งเดียวที่ lag 1 ให้เสนอ AR(1) ถ้าทั้งสองกราฟค่อย ๆ ลดลง ให้ใช้ EACF หาจุดยอดของสามเหลี่ยม "o" ซึ่งอธิบายไว้ใน <a href="0006-ar2-pacf-and-arima.html#s11">Lesson 6 หัวข้อ 11</a></p>
+
+<!-- ===================================================== -->
+<h2 id="s6">6. สัญญาณของ nonstationarity และการเลือก d</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p15.png" alt="Slide 7 หน้า 15: Sign of Nonstationary" loading="lazy">
+<figcaption>Slide 7 หน้า 15 — Sign of Nonstationary</figcaption>
+</figure>
+
+<p>สัญญาณที่ชัดที่สุดของข้อมูลไม่นิ่งคือ <mark class="src" data-p="15">the sample ACF exhibits a very slow decay across lags</mark> เหตุผลคือข้อมูลไม่นิ่ง <mark class="src" data-p="15">tends to “hang together” and displays “trends.”</mark> ค่าที่อยู่ใกล้กันมีขนาดใกล้กันเสมอ เช่นข้อมูลที่เพิ่มจาก 10 เป็น 100 ค่าช่วงต้นต่ำกว่าค่าเฉลี่ยทั้งหมด ค่าช่วงปลายสูงกว่าค่าเฉลี่ยทั้งหมด ผลคูณของส่วนเบี่ยงเบนที่ห่างกันหลาย lag จึงยังเป็นบวกและ ACF ไม่ลดลง ขั้นตอนตามสไลด์: ถ้ามี trend ชัดและ ACF ลดลงช้ามาก ให้ทำผลต่างครั้งที่หนึ่ง ถ้า ACF ของผลต่าง <mark class="src" data-p="15">resembles that a stationary ARMA process</mark> คือลดลงเร็ว ให้ใช้ d = 1 แล้วใช้ ACF, PACF, EACF ของผลต่างหา p และ q</p>
+
+<div class="calc" id="s6-d">
+<div class="calc-title">อ่านตัวเลขเพื่อเลือก d จากข้อมูลจำลองในหัวข้อ 0</div>
+<ol class="steps">
+<li><div class="st-title">IMA(1,1) ข้อมูลเดิม</div><p>ACF lag 10 = 0.537 ยังเกินขอบ 0.163 มาก แปลว่าลดลงช้า ทำผลต่าง</p></li>
+<li><div class="st-title">IMA(1,1) ผลต่างครั้งที่หนึ่ง</div><p>ACF lag 1 = −0.376, lag 2 = 0.099 อยู่ในขอบตั้งแต่ lag 2 ลดลงเร็ว หยุดที่ d = 1 แล้วอ่านต่อว่า q = 1</p></li>
+<li><div class="st-title">IMA(2,2) ผลต่างครั้งที่หนึ่ง</div><p>ACF lag 10 = 0.471 ยังลดลงช้า ทำผลต่างอีกครั้ง</p></li>
+<li><div class="st-title">IMA(2,2) ผลต่างครั้งที่สอง</div><p>lag 1 = −0.226, lag 2 = 0.284, lag 3 = 0.016 ลดลงเร็ว หยุดที่ d = 2 แล้วอ่านต่อว่า q = 2</p></li>
+</ol>
+</div>
+
+<figure>
+<img src="../assets/slides/ts7-p16.png" alt="Slide 7 หน้า 16: Sign of Nonstationary (ต่อ)" loading="lazy">
+<figcaption>Slide 7 หน้า 16 — Sign of Nonstationary (ต่อ)</figcaption>
+</figure>
+
+<p>ถ้าผลต่างครั้งที่หนึ่งยังลดลงช้า ให้ทำผลต่างครั้งที่สองและใช้ d = 2 สไลด์ย้ำว่า <mark class="src" data-p="16">There should rarely be a need to consider values of d &gt; 2.</mark> และแม้ d = 2 ก็ไม่ค่อยจำเป็น ข้อสุดท้าย ถ้ามีหลักฐานของ heteroscedasticity ให้ <mark class="src" data-p="16">implement it up front before taking any differences.</mark> คือแปลงข้อมูลก่อน แล้วใช้กฎข้างต้นเลือก p, d, q กับข้อมูลที่แปลงแล้ว อาจารย์เตือนในขั้นสรุปว่า "อย่าให้ differencing เยอะเกินไป" (Class 7-1, 46:28) เหตุผลแสดงด้วยตัวเลขได้ดังนี้</p>
+
+<div class="calc" id="s6-over">
+<div class="calc-title">ทำไม differencing เกินทำให้เกิดปัญหา</div>
+<ol class="steps">
+<li><div class="st-title">เริ่มจากข้อมูลที่นิ่งอยู่แล้ว</div><p>ให้ \(X_t=w_t\) เป็น white noise ซึ่งไม่ต้อง diff เลย</p></li>
+<li><div class="st-title">diff โดยไม่จำเป็น</div><p>\(Y_t=X_t-X_{t-1}=w_t-w_{t-1}\) ซึ่งเป็น MA(1) ที่ \(\theta=-1\)</p></li>
+<li><div class="st-title">หา ACF</div><p>\(\gamma_0=Var(w_t-w_{t-1})=\sigma^2+\sigma^2=2\sigma^2\) และ \(\gamma_1=Cov(w_t-w_{t-1},\,w_{t-1}-w_{t-2})=-\sigma^2\) จึงได้ \(\rho_1=-\sigma^2/2\sigma^2=-0.5\)</p></li>
+<li><div class="st-title">ผลที่ตามมา</div><p>ข้อมูลที่ไม่มีโครงสร้างอะไรเลยกลับดูเหมือน MA(1) และ \(|\theta|=1\) ทำให้ไม่ invertible การประมาณค่าจึงมีปัญหา</p></li>
+</ol>
+<div class="answer">ถ้าเห็น ACF ของผลต่างที่ lag 1 ใกล้ −0.5 ให้สงสัยว่า diff เกินไปหนึ่งครั้ง</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s7">7. ADF test</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p17.png" alt="Slide 7 หน้า 17: Nonstationary Checking Tool: adf.test" loading="lazy">
+<figcaption>Slide 7 หน้า 17 — Nonstationary Checking Tool: adf.test</figcaption>
+</figure>
+
+<p>นอกจากดูกราฟด้วยตา ยังใช้การทดสอบทางสถิติได้ ฟังก์ชัน <mark class="src" data-p="17">“adf.test”</mark> ทำ <mark class="src" data-p="17">Augmented Dickey-Fuller Test</mark> สมมติฐานคือ H0: ข้อมูลไม่นิ่ง (มี unit root) และ H1: ข้อมูลนิ่ง ซึ่งตรงกับ <code>alternative = "stationary"</code> ในคำสั่ง อาจารย์ย้ำว่า "อย่าลืมว่า H1 คือนิ่ง ถ้าคุณ reject H0 แสดงว่าอนุกรมเวลาคุณนิ่ง" (Class 7-1, 30:52) ผลในสไลด์ใช้กับ times.txt ได้ Dickey-Fuller = −7.1518 และ <mark class="src" data-p="17">p-value = 0.01</mark> ซึ่งน้อยกว่า 0.05 จึง reject H0 สรุปว่าข้อมูล times.txt นิ่ง ไม่ต้อง diff (d = 0)</p>
+
+<div class="calc" id="s7-df">
+<div class="calc-title">ที่มาของการทดสอบ และตัวเลขในผลลัพธ์</div>
+<ol class="steps">
+<li><div class="st-title">เริ่มจาก AR(1)</div><p>\(X_t=\phi X_{t-1}+w_t\) ลบ \(X_{t-1}\) ทั้งสองข้าง: \(\nabla X_t=(\phi-1)X_{t-1}+w_t=\gamma X_{t-1}+w_t\)</p></li>
+<li><div class="st-title">ตั้งสมมติฐาน</div><p>ถ้า \(\phi=1\) คือ random walk ซึ่งไม่นิ่ง จะได้ \(\gamma=0\) ถ้า \(|\phi|&lt;1\) จะได้ \(\gamma&lt;0\) ข้อมูลนิ่ง จึงทดสอบ H0: \(\gamma=0\) กับ H1: \(\gamma&lt;0\)</p></li>
+<li><div class="st-title">คำว่า Augmented</div><p>เพิ่มพจน์ \(\nabla X_{t-1},\dots,\nabla X_{t-k}\) ในสมการ เพื่อรองรับข้อมูลที่ไม่ใช่ AR(1) จำนวน k คือ Lag order ค่าเริ่มต้นคือ \(\lfloor (n-1)^{1/3}\rfloor\) สำหรับ n = 150 ได้ \(149^{1/3}=5.30\) ปัดลงเป็น 5 ตรงกับ Lag order = 5 ในผลลัพธ์</p></li>
+<li><div class="st-title">อ่านค่าสถิติ</div><p>Dickey-Fuller = −7.1518 ติดลบมาก แปลว่า \(\hat\gamma\) ติดลบชัด ข้อมูลดึงกลับเข้าหาค่าเฉลี่ยแรง จึงนิ่ง</p></li>
+<li><div class="st-title">อ่าน p-value</div><p>ฟังก์ชันนี้ใช้ตารางค่าวิกฤต และแสดงได้ต่ำสุด 0.01 พร้อมคำเตือนว่า p-value จริงน้อยกว่าที่แสดง ค่า 0.01 จึงอ่านว่า p-value ≤ 0.01</p></li>
+</ol>
+<div class="answer">p-value ≤ 0.05: reject H0 ข้อมูลนิ่ง &nbsp; p-value &gt; 0.05: ไม่ reject H0 ยังถือว่าไม่นิ่ง ควร diff</div>
+</div>
+
+<p>ข้อควรระวัง: ADF ตรวจ trend แบบ unit root ได้ดี แต่ไม่ได้ตรวจ non-constant variance โดยตรง จึงยังต้องดูกราฟข้อมูลประกอบเสมอ ฟังก์ชัน <code>adf.test</code> อยู่ใน package tseries (สไลด์เขียนว่า library TSA เพราะ TSA โหลด tseries ให้ด้วย)</p>
+
+<!-- ===================================================== -->
+<h2 id="s8">8. AIC และ BIC</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p18.png" alt="Slide 7 หน้า 18: The Akaike’s Information Criterion (AIC)" loading="lazy">
+<figcaption>Slide 7 หน้า 18 — The Akaike’s Information Criterion (AIC)</figcaption>
+</figure>
+
+<p>AIC ให้เลือกโมเดล ARMA(p, q) ที่ทำให้ \(AIC=-2\ln L+2k\) น้อยที่สุด สไลด์อ้าง Section 2.2 หน้า 53 ของตำรา \(\ln L\) คือ log ของ likelihood ที่ทำให้สูงสุดแล้ว ส่วน k คือจำนวนพารามิเตอร์ในโมเดล สไลด์เขียนว่า k <mark class="src" data-p="18">excluding the white noise variance</mark> และใน ARMA(p, q) ที่ไม่มี intercept <mark class="src" data-p="18">there are k = p + q parameters.</mark></p>
+
+<p>อาจารย์อธิบาย likelihood ด้วยภาษาง่าย ๆ ว่า "โอกาสที่โมเดลนี้จะเกิด" likelihood สูงแปลว่าโมเดลนี้มีแนวโน้มสร้างข้อมูลชุดที่เห็นได้ การ take log เป็นเพียงการบีบตัวเลขที่ใหญ่มาก ลำดับมากน้อยยังเหมือนเดิม (Class 7-1, 32:07–32:55) อาจารย์พูดเพิ่มว่า intercept และความแปรปรวน \(\sigma^2\) ของ white noise ก็เป็นพารามิเตอร์ที่โมเดลประมาณให้ (Class 7-1, 34:16–34:43) ซึ่งตรงกับวิธีนับของ R แต่ต่างจากข้อความในสไลด์ การนับต่างกันทำให้ค่า AIC ต่างกันเป็นค่าคงที่ ลำดับของโมเดลที่มีโครงสร้างพารามิเตอร์เหมือนกันจึงไม่เปลี่ยน</p>
+
+<div class="calc" id="s8-aic">
+<div class="calc-title">คำนวณ AIC ของ ARMA(1,1) จากผลใน R (สไลด์หน้า 39)</div>
+<ol class="steps">
+<li><div class="st-title">ข้อมูลที่มี</div><p>log likelihood = −247.66 (ค่าละเอียด −247.6564) โมเดลมี ar1, ma1, intercept และ \(\sigma^2\)</p></li>
+<li><div class="st-title">หา \(-2\ln L\)</div><p>\(-2(-247.6564)=495.3127\)</p></li>
+<li><div class="st-title">แบบที่ R นับ k = 4</div><p>\(AIC=495.3127+2(4)=503.3127\) ตรงกับ aic = 503.31 ในผลลัพธ์และช่อง [2,2] ของตาราง AIC</p></li>
+<li><div class="st-title">แบบที่สไลด์นับ k = p + q = 2</div><p>\(AIC=495.3127+2(2)=499.3127\) ค่าต่างไป 4 แต่ทุกโมเดลที่มี intercept และ \(\sigma^2\) ถูกหักเท่ากัน</p></li>
+</ol>
+</div>
+
+<figure>
+<img src="../assets/slides/ts7-p19.png" alt="Slide 7 หน้า 19: AIC: ทำไมยิ่งน้อยยิ่งดี" loading="lazy">
+<figcaption>Slide 7 หน้า 19 — AIC: ทำไมยิ่งน้อยยิ่งดี</figcaption>
+</figure>
+
+<p>อาจารย์ถามในคลิปว่า "AIC มากดีหรือน้อยดี" แล้วเฉลยว่าน้อยดี (Class 7-1, 35:09–35:53) เหตุผลตามสไลด์: likelihood คือ <mark class="src" data-p="19">“probability of the data,”</mark> จึงอยากให้สูงที่สุด ซึ่งเท่ากับอยากให้ \(-2\ln L\) ต่ำที่สุด <mark class="src" data-p="19">The smaller AIC, the better the fit.</mark> ส่วน 2k เป็น <mark class="src" data-p="19">penalty</mark> ที่ไม่ให้โมเดลมีพารามิเตอร์มากเกินไป ตามหลัก <mark class="src" data-p="19">Principle of Parsimony</mark> หรือ "ให้มันเท่าที่จำเป็น" เปรียบเหมือนการจัดกระเป๋าเดินทาง ของทุกชิ้นช่วยได้นิดหน่อย แต่ทุกชิ้นมีน้ำหนัก ควรใส่เฉพาะชิ้นที่ช่วยได้มากกว่าน้ำหนักที่เพิ่ม</p>
+
+<div class="box exam">
+<div class="label">อาจารย์เตือน: ดูซอฟต์แวร์ก่อนตีความ</div>
+<p>"ถ้าคุณใช้ SAS หรือบางโปรแกรม มันจะเป็นบวก 2 log likelihood ในกรณีนั้น AIC ยิ่งเยอะยิ่งดี แต่ใน R เป็นลบ 2 log likelihood ฉะนั้น smaller the better" (Class 7-1, 36:54–37:06) ถ้าข้อสอบให้สูตรมา ให้ดูเครื่องหมายหน้า \(\ln L\) ก่อนตัดสินว่ามากหรือน้อยดี</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts7-p20.png" alt="Slide 7 หน้า 20: The Bayesian Information Criterion (BIC)" loading="lazy">
+<figcaption>Slide 7 หน้า 20 — The Bayesian Information Criterion (BIC)</figcaption>
+</figure>
+
+<p>BIC ใช้ \(BIC=-2\ln L+k\ln n\) ส่วนแรกเหมือน AIC ส่วนหลังเปลี่ยนจาก 2k เป็น \(k\ln n\) <mark class="src" data-p="20">Both AIC and BIC require the maximization of a log likelihood function</mark> โดยสมมติว่าข้อมูลแจกแจงปกติ เมื่อ n มากกว่า \(e^2\approx7.39\) ค่า \(\ln n\) มากกว่า 2 BIC จึงลงโทษพารามิเตอร์หนักกว่า AIC และมักเลือกโมเดลที่เล็กกว่า</p>
+
+<div class="calc" id="s8-bic">
+<div class="calc-title">ทำไม AIC เลือก ARMA(2,1) แต่ BIC เลือก ARMA(1,1) ในข้อมูล times.txt (n = 150)</div>
+<ol class="steps">
+<li><div class="st-title">BIC ของ ARMA(1,1)</div><p>\(\ln150=5.0106\) จึงได้ \(BIC=495.3127+4(5.0106)=495.3127+20.0426=515.3553\) ตรงกับช่อง [2,2] ของตาราง BIC</p></li>
+<li><div class="st-title">AIC ลดลงเท่าไรเมื่อเพิ่ม AR อีกหนึ่งตัว</div><p>AIC ของ ARMA(2,1) = 501.2778 ลดลงจาก 503.3127 อยู่ 2.0349 การเพิ่มพารามิเตอร์หนึ่งตัวบวก penalty 2 แปลว่า \(-2\ln L\) ลดลง \(2.0349+2=4.0349\)</p></li>
+<li><div class="st-title">ผลเดียวกันใน BIC</div><p>penalty ของ BIC ต่อพารามิเตอร์คือ 5.0106 จึงเปลี่ยน \(-4.0349+5.0106=+0.9757\) BIC ของ ARMA(2,1) = 515.3553 + 0.9757 = 516.3310 ตรงกับตาราง</p></li>
+<li><div class="st-title">สรุปกติกา</div><p>พารามิเตอร์ใหม่จะคุ้มใน AIC ถ้าทำให้ \(-2\ln L\) ลดลงเกิน 2 และคุ้มใน BIC ถ้าลดลงเกิน \(\ln n\) ครั้งนี้ลดลง 4.03 จึงคุ้มใน AIC แต่ไม่คุ้มใน BIC</p></li>
+</ol>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s9">9. ตัวอย่าง times.txt: ACF, PACF, ตาราง AIC/BIC</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p21.png" alt="Slide 7 หน้า 21: Example: model identification (with R) — Dataset times.txt" loading="lazy">
+<figcaption>Slide 7 หน้า 21 — Example: model identification (with R) — Dataset times.txt</figcaption>
+</figure>
+
+<p>times.txt มีข้อมูล 150 จุด ค่าเฉลี่ย 0.0198 ค่าอยู่ระหว่างประมาณ −6 ถึง 6 กราฟแกว่งรอบศูนย์ตลอด ไม่มี trend และการแกว่งช่วงต้นกับช่วงท้ายกว้างพอกัน จึงไม่ต้องแปลงข้อมูลและไม่ต้อง diff ผล ADF ในหัวข้อ 7 (p-value ≤ 0.01) ยืนยันว่าข้อมูลนิ่ง ลักษณะที่เห็นชัดคือค่าสลับขึ้นลงเกือบทุกจุด ซึ่งเป็นสัญญาณของสหสัมพันธ์เชิงลบที่ lag 1</p>
+
+<figure>
+<img src="../assets/slides/ts7-p22.png" alt="Slide 7 หน้า 22: ACF และ PACF ของ times.txt" loading="lazy">
+<figcaption>Slide 7 หน้า 22 — ACF และ PACF ของ times.txt</figcaption>
+</figure>
+
+<p>ค่าจริงจาก R: ACF lag 1 ถึง 5 คือ −0.771, 0.382, −0.090, −0.077, 0.129 และ PACF lag 1 ถึง 5 คือ −0.771, −0.524, −0.153, −0.135, −0.079 เส้นขอบคือ \(2/\sqrt{150}=0.163\) ACF เกินขอบที่ lag 1 และ 2 จึงอาจเป็น MA(2) PACF เกินขอบที่ lag 1 และ 2 ส่วน lag 3 = −0.153 อยู่ในขอบพอดี จึงอาจเป็น AR(2) อาจารย์อ่านกราฟนี้ว่า "ไม่เคลียร์ เพราะนี่ก็ data จริง" แล้วตั้ง candidate model ไว้ว่า p เป็น 1 หรือ 2 และ q เป็น 1 หรือ 2 (Class 7-1, 37:22–38:11) ACF ที่สลับเครื่องหมาย −0.771 แล้ว +0.382 สอดคล้องกับส่วน AR ที่ φ ติดลบ: ถ้าเป็น AR(1) ที่ φ = −0.771 ค่าที่ lag 2 จะเป็น \((-0.771)^2=0.594\) แต่ค่าจริงคือ 0.382 ซึ่งต่ำกว่า จึงน่าจะมีส่วนอื่นผสม</p>
+
+<figure>
+<img src="../assets/slides/ts7-p23.png" alt="Slide 7 หน้า 23: ตาราง AIC (table1) และ BIC (table2)" loading="lazy">
+<figcaption>Slide 7 หน้า 23 — ตาราง AIC (table1) และ BIC (table2)</figcaption>
+</figure>
+
+<p>ตารางสร้างด้วยลูปซ้อนในหัวข้อ 15 ช่อง [i, j] คือโมเดล ARMA(i − 1, j − 1) อาจารย์ย้ำว่า "แถวคือ p คอลัมน์คือ q" (Class 7-1, 41:34) ช่อง [1,1] คือ ARMA(0,0) หรือ white noise ซึ่งมี AIC = 699.68 สูงที่สุด แปลว่าข้อมูลมีโครงสร้างแน่นอน ช่อง [3,2] คือ p = 2, q = 1</p>
+
+<table>
+<tr><th>อันดับ</th><th>AIC</th><th>โมเดล</th><th>BIC</th><th>โมเดล</th></tr>
+<tr><td>1</td><td>501.2778 [3,2]</td><td>ARMA(2,1)</td><td>515.3553 [2,2]</td><td>ARMA(1,1)</td></tr>
+<tr><td>2</td><td>502.2742 [2,3]</td><td>ARMA(1,2)</td><td>516.3310 [3,2]</td><td>ARMA(2,1)</td></tr>
+<tr><td>3</td><td>502.3499 [3,3]</td><td>ARMA(2,2)</td><td>517.3273 [2,3]</td><td>ARMA(1,2)</td></tr>
+</table>
+
+<p>อาจารย์เลือก AIC สามตัวต่ำสุดคือ ARMA(2,1), ARMA(1,2), ARMA(2,2) แล้วดู BIC พบว่า ARMA(2,1) และ ARMA(1,2) "overlap" กับ AIC ส่วน ARMA(1,1) ต่ำสุดใน BIC แต่ AIC ไม่เลือก (Class 7-1, 43:29–45:23) ผลคือมี candidate จากทั้งสองเกณฑ์รวมสี่ตัว แล้วไปตัดสินด้วยการตรวจโมเดลและผลพยากรณ์ อาจารย์บอกว่า "เวลาวิเคราะห์อนุกรมเวลา เราไม่ได้มีโมเดลชัว ๆ แบบเห็นปุ๊บตอบปั๊บ เราจะมีโมเดลอยู่ประมาณ 2–3 โมเดลในใจ" (Class 7-1, 38:17) ในไฟล์ R_codes อาจารย์เลือก fit ARMA(1,1) ซึ่งเป็นตัวที่ BIC เลือกและมีพารามิเตอร์น้อยที่สุดในกลุ่ม ความต่างของ AIC ระหว่าง ARMA(1,1) กับ ARMA(2,1) มีเพียง 2.03 จึงถือว่าใกล้กัน</p>
+
+<div class="calc" id="s9-read">
+<div class="calc-title">อ่านค่าจากตารางเป็นข้อเท็จจริงที่ตอบข้อสอบได้</div>
+<ol class="steps">
+<li><div class="st-title">AR อย่างเดียวพอไหม</div><p>คอลัมน์ 1 คือ q = 0: AR(1) 563.29, AR(2) 513.28, AR(3) 508.84 ทั้งหมดสูงกว่า ARMA(2,1) ที่ 501.28 การเพิ่ม MA หนึ่งตัวช่วยมาก</p></li>
+<li><div class="st-title">MA อย่างเดียวพอไหม</div><p>แถว 1 คือ p = 0: MA(1) 558.81, MA(2) 518.30, MA(3) 503.93 ต้องใช้ถึง MA(3) จึงใกล้ ARMA ที่มีพารามิเตอร์น้อยกว่า</p></li>
+<li><div class="st-title">ใหญ่ขึ้นแล้วดีขึ้นไหม</div><p>ARMA(3,3) มี AIC 506.34 สูงกว่า ARMA(2,1) แปลว่าพารามิเตอร์ที่เพิ่มไม่คุ้ม penalty</p></li>
+</ol>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s10">10. สรุปขั้นตอนเลือกโมเดล</h2>
+
+<p>สไลด์สี่หน้าต่อจากนี้รวบรวมขั้นตอนของ <mark class="src" data-p="24">the ARIMA model selection phase</mark> เปรียบเหมือนการวินิจฉัยของแพทย์ ขั้นที่ 1 ดูอาการภายนอก ขั้นที่ 2 ตรวจว่าป่วยเรื้อรังไหม ขั้นที่ 3 ตรวจละเอียดเพื่อระบุโรค แล้วจึงได้รายชื่อโรคที่เป็นไปได้สองสามโรคไปตรวจยืนยัน</p>
+
+<h3>Step 1: ดูกราฟและเลือกการแปลง</h3>
+
+<figure>
+<img src="../assets/slides/ts7-p24.png" alt="Slide 7 หน้า 24: Summary: Step 1" loading="lazy">
+<figcaption>Slide 7 หน้า 24 — Summary: Step 1</figcaption>
+</figure>
+
+<p>ขั้นแรกคือ <mark class="src" data-p="24">Plot the data and identify an appropriate transformation if needed.</mark> จากกราฟดูได้ว่ามี trend, seasonality, outlier หรือ nonconstant variance หรือไม่ ผู้วิเคราะห์อาจลองหลายการแปลงแล้วเลือกตัวที่ทำให้การแกว่งคงที่ที่สุด และต้อง <mark class="src" data-p="24">Always implement a transformation before taking any data differences.</mark> ตัวอย่าง electricity ในหัวข้อ 4: กราฟแสดงการแกว่งที่กว้างขึ้นจากราว 40,000 เป็นราว 110,000 จึง take log ก่อน ส่วน times.txt แกว่งกว้างเท่าเดิมตลอด จึงข้ามขั้นนี้ อาจารย์เรียกขั้นนี้ว่า EDA หรือ Exploratory Data Analysis (Class 7-1, 45:50)</p>
+
+<h3>Step 2: ยืนยันว่าต้อง differencing หรือไม่</h3>
+
+<figure>
+<img src="../assets/slides/ts7-p25.png" alt="Slide 7 หน้า 25: Summary: Step 2" loading="lazy">
+<figcaption>Slide 7 หน้า 25 — Summary: Step 2</figcaption>
+</figure>
+
+<p>ขั้นที่สองคำนวณ ACF และ PACF ของข้อมูลเดิมหรือข้อมูลที่แปลงแล้ว <mark class="src" data-p="25">and further confirm the need for differencing.</mark> ถ้า ACF ลดลงช้ามาก ควรทำผลต่างครั้งที่หนึ่ง การทำผลต่างมากกว่านั้นจำเป็นน้อยครั้ง และ <mark class="src" data-p="25">Overdifferencing can create model identifiability problems.</mark> ตามตัวอย่างในหัวข้อ 6 ที่ white noise ที่ถูก diff กลายเป็น MA(1) ที่ θ = −1 ตัวอย่าง IMA(1,1) ในหัวข้อ 0: ACF ที่ lag 10 ยังเป็น 0.537 จึง diff ครั้งที่หนึ่ง แล้ว ACF เหลือ −0.376 ที่ lag 1 และเข้าขอบที่ lag 2 จึงหยุดที่ d = 1</p>
+
+<h3>Step 3: ระบุ p และ q</h3>
+
+<figure>
+<img src="../assets/slides/ts7-p26.png" alt="Slide 7 หน้า 26: Summary: Step 3" loading="lazy">
+<figcaption>Slide 7 หน้า 26 — Summary: Step 3</figcaption>
+</figure>
+
+<p>ขั้นที่สามคำนวณ ACF, PACF และ EACF ของข้อมูลที่แปลงและ diff อย่างเหมาะสมแล้ว เพื่อระบุ p และ q โดยการ <mark class="src" data-p="26">matching the patterns in the sample ACF/PACF/EACF with the theoretical patterns of known models.</mark> ตามตารางในหัวข้อ 5 สไลด์ให้ข้อสังเกตสามข้อ ข้อแรก p และ q มักไม่เกิน 4 ถ้าไม่นับโมเดล seasonal ตาราง AIC/BIC ในไฟล์ R_codes จึงใช้ 0 ถึง 3 ข้อสอง ถ้าข้อมูลน้อยกว่า 50 จุด ระบุโมเดลได้ยาก เพราะเส้นขอบ \(2/\sqrt{n}\) กว้าง เช่น n = 40 ได้ขอบ 0.316 ค่า ACF ขนาด 0.3 จึงยังแยกจากศูนย์ไม่ได้ ข้อสาม BIC และ AIC ใช้ช่วยระบุโมเดลได้ อาจารย์บอกว่าใช้ "โครงคู่" กับกราฟ (Class 7-1, 46:40)</p>
+
+<h3>Remark และขั้นถัดไป</h3>
+
+<figure>
+<img src="../assets/slides/ts7-p27.png" alt="Slide 7 หน้า 27: Summary: Remark และ Next step" loading="lazy">
+<figcaption>Slide 7 หน้า 27 — Summary: Remark และ Next step</figcaption>
+</figure>
+
+<p>สไลด์ยอมรับว่า <mark class="src" data-p="27">It is rare, after going through all of this, that the analyst will be able to identify a single model that is a “clear-cut” choice.</mark> ผลที่ได้มักเป็นกลุ่ม candidate model เล็ก ๆ ขั้นถัดไปคือ parameter estimation และ model diagnostics เมื่อเลือกโมเดลสุดท้าย fit และตรวจแล้ว จึงไปสู่การพยากรณ์ อาจารย์เสริมว่าควรเทียบกับโมเดลประเภทอื่นด้วย "เพราะเราต้องการตัวที่ดีที่สุด" (Class 7-1, 47:14) ตัวอย่าง times.txt จบขั้นนี้ด้วย candidate สี่ตัวคือ ARMA(1,1), ARMA(2,1), ARMA(1,2), ARMA(2,2)</p>
+
+<!-- ===================================================== -->
+<h2 id="s11">11. Estimation: ภาพรวมและปัญหาของ likelihood</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p29.png" alt="Slide 7 หน้า 29: Where are we now?" loading="lazy">
+<figcaption>Slide 7 หน้า 29 — Where are we now?</figcaption>
+</figure>
+
+<p>หน้านี้ทวนขั้นตอนทั้งหมดของการวิเคราะห์อนุกรมเวลา: 1. plot ข้อมูลและหา trend, seasonal, step change, outlier 2. แปลงข้อมูลให้ residual นิ่ง ด้วยการกำจัด trend และ seasonal, differencing หรือ nonlinear transformation เช่น log และ \(\sqrt{\cdot}\) 3. <mark class="src" data-p="29">Fit model to residuals.</mark> 4. พยากรณ์ residual แล้วแปลงกลับทุกขั้นที่ทำไป ขั้นที่ไฮไลต์คือขั้นที่ 3 ซึ่งเป็นเรื่องของส่วนนี้ ตัวอย่างการแปลงกลับ: ถ้าโมเดลทำกับ \(\nabla\log X_t\) และพยากรณ์ได้ \(\widehat{\nabla\log X}_{t+1}=0.02\) ขณะที่ \(X_t=300{,}000\) จะได้ \(\log\hat X_{t+1}=\log 300{,}000+0.02=12.6115+0.02=12.6315\) แปลงกลับด้วย exponential ได้ \(\hat X_{t+1}=e^{12.6315}\approx306{,}061\) หรือเพิ่มขึ้นราว 2%</p>
+
+<figure>
+<img src="../assets/slides/ts7-p30.png" alt="Slide 7 หน้า 30: Estimation: สองวิธีหลัก" loading="lazy">
+<figcaption>Slide 7 หน้า 30 — Estimation: สองวิธีหลัก</figcaption>
+</figure>
+
+<p>เมื่อได้ p, d, q แล้ว ต้องประมาณค่าพารามิเตอร์ \(\phi,\theta,\sigma^2\) มีสองวิธีที่ใช้กันมาก คือ Method of Moments และวิธีที่อิง likelihood เช่น maximum likelihood หรือ pseudo-likelihood สไลด์ตั้ง <mark class="src" data-p="30">Question</mark>: เขียน likelihood ของ \(X_1,\dots,X_n\) ได้ไหม ปัญหาคือข้อมูลอนุกรมเวลาไม่อิสระต่อกัน likelihood จึงไม่ใช่ผลคูณของความหนาแน่นแต่ละจุดเหมือนข้อมูลทั่วไป ต้องใช้ความหนาแน่นร่วมของทั้งชุด ซึ่งมีเมทริกซ์ความแปรปรวนร่วมขนาด n × n วิธีที่อิง likelihood จึง <mark class="src" data-p="30">computationally intensive</mark> และ <mark class="src" data-p="30">Exact likelihoods are difficult to write down &amp; optimize.</mark></p>
+
+<figure>
+<img src="../assets/slides/ts7-p31.png" alt="Slide 7 หน้า 31: Estimation: เขียน likelihood ได้ไหม" loading="lazy">
+<figcaption>Slide 7 หน้า 31 — Estimation: เขียน likelihood ได้ไหม</figcaption>
+</figure>
+
+<p>สไลด์ตอบคำถามแยกตามโมเดล สำหรับ MA(1) ใช้ multivariate linear transformation คือเขียนเวกเตอร์ข้อมูลเป็นเมทริกซ์คูณเวกเตอร์ white noise แล้วใช้สมบัติว่าการแปลงเชิงเส้นของตัวแปรปกติยังเป็นปกติ สำหรับ AR(1) ใช้ Markov structure คือ \(X_t\) ขึ้นกับอดีตผ่าน \(X_{t-1}\) ตัวเดียว likelihood จึงแยกเป็นผลคูณของความหนาแน่นแบบมีเงื่อนไขได้ ถ้าตัดพจน์ของ \(X_1\) ทิ้งจะได้ pseudo-likelihood ข้อเสียคือ <mark class="src" data-p="31">Accuracy of the resulting estimators from approximate likelihoods are not the same as that of the MLE, in finite samples.</mark> เหตุผลเหล่านี้ทำให้หันไปใช้ <mark class="src" data-p="31">method of moments estimators</mark> ซึ่งคำนวณง่ายกว่ามาก</p>
+
+<div class="calc" id="s11-ar1">
+<div class="calc-title">เขียน likelihood ของ AR(1) ด้วย Markov structure และหาค่าที่ดีที่สุดจากข้อมูลสามจุด</div>
+<ol class="steps">
+<li><div class="st-title">แยกความหนาแน่นร่วม</div><p>\(f(x_1,x_2,\dots,x_n)=f(x_1)\,f(x_2\mid x_1)\,f(x_3\mid x_2)\cdots f(x_n\mid x_{n-1})\) ใช้ได้เพราะ AR(1) ขึ้นกับอดีตผ่านค่าก่อนหน้าค่าเดียว</p></li>
+<li><div class="st-title">ความหนาแน่นแบบมีเงื่อนไข</div><p>เมื่อรู้ \(x_{t-1}\) แล้ว \(X_t=\phi x_{t-1}+w_t\) จึงแจกแจง \(N(\phi x_{t-1},\sigma^2)\) ส่วน \(X_1\) แจกแจง \(N(0,\sigma^2/(1-\phi^2))\)</p></li>
+<li><div class="st-title">Pseudo-likelihood</div><p>ตัด \(f(x_1)\) ทิ้ง: \(\ln L_c=-\frac{n-1}{2}\ln(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum_{t=2}^{n}(x_t-\phi x_{t-1})^2\) การทำให้ค่านี้สูงสุดเท่ากับทำให้ผลรวมกำลังสองของ residual ต่ำสุด</p></li>
+<li><div class="st-title">ข้อมูลตัวอย่าง</div><p>\(x=(1.0,\ 0.5,\ -0.2)\) และ \(\sigma^2=1\) ลอง φ = 0.5: residual คือ \(0.5-0.5(1)=0\) และ \(-0.2-0.5(0.5)=-0.45\) ผลรวมกำลังสอง 0.2025 ได้ \(\ln L_c=-\ln(2\pi)-0.2025/2=-1.8379-0.1013=-1.9391\)</p></li>
+<li><div class="st-title">ลอง φ = 0.3</div><p>residual คือ 0.2 และ −0.35 ผลรวมกำลังสอง 0.1625 ได้ \(\ln L_c=-1.9191\) สูงกว่า φ = 0.5</p></li>
+<li><div class="st-title">หาค่าที่ดีที่สุดด้วยสูตร</div><p>อนุพันธ์เทียบ φ เป็นศูนย์เมื่อ \(\hat\phi=\dfrac{\sum x_tx_{t-1}}{\sum x_{t-1}^2}=\dfrac{(0.5)(1)+(-0.2)(0.5)}{1^2+0.5^2}=\dfrac{0.4}{1.25}=0.32\) ซึ่งให้ \(\ln L_c=-1.9189\) สูงที่สุด</p></li>
+</ol>
+<div class="answer">likelihood ทำหน้าที่ให้คะแนนแต่ละค่าของ φ ค่าที่ได้คะแนนสูงสุดคือค่าประมาณ ในตัวอย่างนี้ \(\hat\phi=0.32\)</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s12">12. Method of moments และ Yule-Walker</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p32.png" alt="Slide 7 หน้า 32: Method of Moment" loading="lazy">
+<figcaption>Slide 7 หน้า 32 — Method of Moment</figcaption>
+</figure>
+
+<p>สไลด์อ้าง <mark class="src" data-p="32">Example 3.26</mark> Yule-Walker Estimation for an AR(2) Process หน้า 122 <mark class="src" data-p="32">Terminology</mark>: method of moments (MOM) คือการตั้งค่า moment ของตัวอย่างให้เท่ากับ moment ทางทฤษฎี แล้วแก้สมการหาพารามิเตอร์ <mark class="src" data-p="32">(i.e. We choose parameters for which the moments are equal to the empirical moments.)</mark> ใน AR(p) คือเลือก φ ที่ทำให้ \(\gamma(h)=\hat\gamma(h)\) สำหรับ \(h=0,\dots,p\) เปรียบเหมือนการเดาสูตรอาหารจากการชิม ถ้ารสเค็มและรสหวานของสูตรที่เดาตรงกับอาหารที่ชิม ก็ใช้สูตรนั้น moment คือ "รส" ที่วัดได้จากข้อมูล</p>
+
+<div class="calc" id="s12-ar1">
+<div class="calc-title">MOM ของ AR(1) กับข้อมูล times.txt</div>
+<ol class="steps">
+<li><div class="st-title">ทฤษฎี</div><p>AR(1) \(X_t=\phi X_{t-1}+w_t\) มี \(\rho(1)=\phi\) และ \(\gamma(0)=\sigma^2/(1-\phi^2)\) จึงได้ \(\sigma^2=\gamma(0)(1-\phi^2)\)</p></li>
+<li><div class="st-title">ค่าจากข้อมูล</div><p>R ให้ \(\hat\gamma(0)=6.0495\) และ \(\hat\gamma(1)=-4.6641\) จึงได้ \(\hat\rho(1)=-4.6641/6.0495=-0.7710\)</p></li>
+<li><div class="st-title">ตั้งให้เท่ากัน</div><p>\(\hat\phi=\hat\rho(1)=-0.7710\)</p></li>
+<li><div class="st-title">หา \(\sigma^2\)</div><p>\(\hat\sigma^2=6.0495\,(1-0.7710^2)=6.0495\,(1-0.5944)=6.0495(0.4056)=2.4535\)</p></li>
+<li><div class="st-title">เทียบกับ R</div><p><code>ar.yw(data, order=1)</code> ให้ ar = −0.7710 ตรงกัน ส่วน var.pred = 2.4866 ซึ่งเท่ากับ \(2.4535\times150/148\) เพราะ R ปรับด้วยตัวคูณ \(n/(n-p-1)\)</p></li>
+</ol>
+</div>
+
+<p>สไลด์ยกโมเดลสองตัวที่จะใช้คือ AR(1): \(X_t=\phi X_{t-1}+w_t\) และ AR(2): \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) ตัวอย่าง AR(2) อยู่ในหน้าถัดไป</p>
+
+<figure>
+<img src="../assets/slides/ts7-p33.png" alt="Slide 7 หน้า 33: Y-W estimations: สมการและรูปเมทริกซ์" loading="lazy">
+<figcaption>Slide 7 หน้า 33 — Y-W estimations: สมการและรูปเมทริกซ์</figcaption>
+</figure>
+
+<p>Yule-Walker equations มาจากการคูณ AR(p) ด้วย \(X_{t-h}\) แล้วหาค่าคาดหมาย ได้ \(\gamma(h)=\phi_1\gamma(h-1)+\dots+\phi_p\gamma(h-p)\) สำหรับ h = 1, …, p และเมื่อ h = 0 ได้ \(\sigma_W^2=\gamma(0)-[\phi_1\gamma(1)+\dots+\phi_p\gamma(p)]\) เขียนเป็นเมทริกซ์ได้ \(\Gamma_p\phi=\gamma_p\) โดย \(\Gamma_p\) คือเมทริกซ์ p × p ที่ช่อง (i, j) เป็น \(\gamma(i-j)\), \(\gamma_p=(\gamma(1),\dots,\gamma(p))'\) และ \(\phi=(\phi_1,\dots,\phi_p)'\) Method of moments แทน γ ด้วยค่าจากข้อมูล จึงได้ \(\hat\phi=\hat\Gamma^{-1}\hat\gamma_p\) และ \(\hat\sigma_W^2=\hat\gamma(0)-\hat\gamma_p'\hat\Gamma^{-1}\hat\gamma_p\)</p>
+
+<div class="calc" id="s12-ar2">
+<div class="calc-title">Yule-Walker ของ AR(2) กับข้อมูล times.txt ทีละขั้น</div>
+<ol class="steps">
+<li><div class="st-title">ค่าที่ใช้</div><p>\(\hat\rho(1)=-0.7710\), \(\hat\rho(2)=0.3819\), \(\hat\gamma(0)=6.0495\) หารสมการทั้งระบบด้วย \(\gamma(0)\) จะใช้ ρ แทน γ ได้</p></li>
+<li><div class="st-title">ระบบสมการ</div><p>\(\begin{pmatrix}1&amp;\rho_1\\\rho_1&amp;1\end{pmatrix}\begin{pmatrix}\phi_1\\\phi_2\end{pmatrix}=\begin{pmatrix}\rho_1\\\rho_2\end{pmatrix}\) คือ \(\phi_1+\rho_1\phi_2=\rho_1\) และ \(\rho_1\phi_1+\phi_2=\rho_2\)</p></li>
+<li><div class="st-title">ดีเทอร์มิแนนต์</div><p>\(1-\rho_1^2=1-0.5944=0.4056\)</p></li>
+<li><div class="st-title">แก้หา \(\phi_1\)</div><p>\(\hat\phi_1=\dfrac{\rho_1(1-\rho_2)}{1-\rho_1^2}=\dfrac{-0.7710(0.6181)}{0.4056}=\dfrac{-0.4766}{0.4056}=-1.1751\)</p></li>
+<li><div class="st-title">แก้หา \(\phi_2\)</div><p>\(\hat\phi_2=\dfrac{\rho_2-\rho_1^2}{1-\rho_1^2}=\dfrac{0.3819-0.5944}{0.4056}=\dfrac{-0.2125}{0.4056}=-0.5240\)</p></li>
+<li><div class="st-title">หา \(\sigma^2\)</div><p>\(\hat\sigma^2=\hat\gamma(0)\,[1-\hat\phi_1\hat\rho_1-\hat\phi_2\hat\rho_2]=6.0495\,[1-0.9060+0.2002]=6.0495(0.2942)=1.7797\) R ปรับด้วย 150/147 ได้ 1.8157</p></li>
+<li><div class="st-title">ตรวจ stationarity</div><p>\(\phi_1+\phi_2=-1.699&lt;1\), \(\phi_2-\phi_1=0.651&lt;1\), \(|\phi_2|=0.524&lt;1\) ผ่านทั้งสามข้อ Yule-Walker ของ AR ให้โมเดลที่ stationary เสมอ</p></li>
+</ol>
+<div class="answer">\(\hat\phi_1=-1.1751,\ \hat\phi_2=-0.5240,\ \hat\sigma^2=1.78\) (R: <code>ar.yw(data, order=2, aic=FALSE)</code> ให้ −1.1751, −0.5242, 1.8157)</div>
+</div>
+
+<p>สังเกตว่า \(\hat\phi_2=-0.524\) เท่ากับ PACF ที่ lag 2 ของ times.txt พอดี เพราะ PACF ที่ lag k นิยามว่าเป็นสัมประสิทธิ์ตัวสุดท้ายของ AR(k) ที่ fit ด้วย Yule-Walker (Lesson 6 หัวข้อ 7)</p>
+
+<figure>
+<img src="../assets/slides/ts7-p34.png" alt="Slide 7 หน้า 34: Y-W estimations: ใช้กับโมเดลใดได้ดี" loading="lazy">
+<figcaption>Slide 7 หน้า 34 — Y-W estimations: ใช้กับโมเดลใดได้ดี</figcaption>
+</figure>
+
+<p>สไลด์สรุปสามกรณี Yule-Walker สำหรับ AR(p) คือ regress \(X_t\) บน \(X_{t-1},\dots,X_{t-p}\) คำนวณด้วย Durbin-Levinson algorithm <mark class="src" data-p="34">γ replaced by \(\hat\gamma\)</mark> ซึ่งทำงานดี สำหรับ MA(q) ใช้ Innovations algorithm โดยแทน γ ด้วย \(\hat\gamma\) เช่นกัน ส่วน Yule-Walker สำหรับ ARMA(p,q) เป็น method of moments ที่ <mark class="src" data-p="34">Not efficient</mark> คือได้ค่าประมาณที่แปรปรวนสูงกว่าวิธีอื่น เหตุผลที่ MOM ไม่ดีกับส่วน MA แสดงได้ด้วย MA(1): \(\rho(1)=\theta/(1+\theta^2)\) ถ้าข้อมูลให้ \(\hat\rho(1)=0.4\) ต้องแก้ \(0.4\theta^2-\theta+0.4=0\) ได้ \(\theta=(1\pm\sqrt{1-0.64})/0.8=(1\pm0.6)/0.8\) คือ 2 หรือ 0.5 เลือกตัวที่ invertible คือ 0.5 แต่ถ้า \(\hat\rho(1)=0.6\) ค่าใต้ราก \(1-4(0.36)=-0.44\) ติดลบ ไม่มีคำตอบจริงเลย เพราะ MA(1) มี \(|\rho(1)|\le0.5\) เสมอ MOM จึงอาจล้มเหลวเมื่อค่าจากข้อมูลคลาดเคลื่อน</p>
+
+<!-- ===================================================== -->
+<h2 id="s13">13. Maximum likelihood</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p35.png" alt="Slide 7 หน้า 35: MLE: ภาพรวม" loading="lazy">
+<figcaption>Slide 7 หน้า 35 — MLE: ภาพรวม</figcaption>
+</figure>
+
+<p>การประมาณพารามิเตอร์ของ Box-Jenkins เป็น <mark class="src" data-p="35">quite complicated non-linear estimation problem</mark> จึงควรให้ซอฟต์แวร์คุณภาพดีทำ <mark class="src" data-p="35">Maximum likelihood estimation is generally the preferred technique.</mark> สมการ likelihood ของโมเดลเต็มซับซ้อนจนสไลด์ไม่ได้แสดง คำว่า non-linear มาจากส่วน MA: ใน AR(1) residual \(x_t-\phi x_{t-1}\) เป็นเส้นตรงใน φ แต่ใน MA(1) residual ต้องคำนวณย้อนกลับ \(w_t=x_t-\theta w_{t-1}=x_t-\theta x_{t-1}+\theta^2x_{t-2}-\dots\) ซึ่งเป็นพหุนามกำลังสูงของ θ จึงหาคำตอบด้วยสูตรปิดไม่ได้</p>
+
+<figure>
+<img src="../assets/slides/ts7-p36.png" alt="Slide 7 หน้า 36: MLE: likelihood ของ Gaussian ARMA(p,q)" loading="lazy">
+<figcaption>Slide 7 หน้า 36 — MLE: likelihood ของ Gaussian ARMA(p,q)</figcaption>
+</figure>
+
+<p>ถ้า \(X_1,\dots,X_n\) มาจาก Gaussian ARMA(p,q) ที่ค่าเฉลี่ยเป็นศูนย์ likelihood ของ \(\phi,\theta,\sigma_w^2\) คือความหนาแน่นของเวกเตอร์ \(X=(X_1,\dots,X_n)'\): \(L(\phi,\theta,\sigma_w^2)=\dfrac{1}{(2\pi)^{n/2}|\Gamma_n|^{1/2}}\exp\left(-\tfrac12X'\Gamma_n^{-1}X\right)\) โดย \(|\Gamma_n|\) คือดีเทอร์มิแนนต์ของเมทริกซ์ความแปรปรวนร่วม \(\Gamma_n\) ซึ่งช่อง (i, j) คือ \(\gamma(i-j)\) ที่คำนวณจากพารามิเตอร์ MLE คือค่าที่ทำให้ L สูงสุด สูตรนี้คือสูตรความหนาแน่นของการแจกแจงปกติหลายตัวแปร ซึ่งเมื่อ n = 1 จะกลับเป็น \(\frac{1}{\sqrt{2\pi\sigma^2}}e^{-x^2/2\sigma^2}\) ที่คุ้นเคย</p>
+
+<div class="calc" id="s13-ma1">
+<div class="calc-title">คำนวณ likelihood ของ MA(1) จากข้อมูลสองจุด X = (1, −1), σ² = 1</div>
+<ol class="steps">
+<li><div class="st-title">เมทริกซ์ \(\Gamma_2\) ของ MA(1)</div><p>\(\gamma(0)=\sigma^2(1+\theta^2)\), \(\gamma(1)=\sigma^2\theta\) จึงได้ \(\Gamma_2=\begin{pmatrix}1+\theta^2&amp;\theta\\\theta&amp;1+\theta^2\end{pmatrix}\)</p></li>
+<li><div class="st-title">θ = 0.5</div><p>\(\Gamma_2=\begin{pmatrix}1.25&amp;0.5\\0.5&amp;1.25\end{pmatrix}\), \(|\Gamma_2|=1.5625-0.25=1.3125\)</p></li>
+<li><div class="st-title">ส่วนในเลขชี้กำลัง</div><p>\(\Gamma_2^{-1}=\frac{1}{1.3125}\begin{pmatrix}1.25&amp;-0.5\\-0.5&amp;1.25\end{pmatrix}\) แล้ว \(X'\Gamma_2^{-1}X=\frac{1.25+1.25+2(-0.5)(1)(-1)}{1.3125}=\frac{3.5}{1.3125}=2.6667\)</p></li>
+<li><div class="st-title">แทนในสูตร</div><p>\(L=\dfrac{e^{-2.6667/2}}{2\pi\sqrt{1.3125}}=\dfrac{0.2636}{6.2832(1.1456)}=0.0366\)</p></li>
+<li><div class="st-title">θ = −0.5</div><p>ดีเทอร์มิแนนต์เท่าเดิม แต่ \(X'\Gamma_2^{-1}X=\frac{2.5-1}{1.3125}=1.1429\) ได้ \(L=0.0785\) สูงกว่าเท่าตัว</p></li>
+</ol>
+<div class="answer">ข้อมูลที่สลับเครื่องหมาย (1, −1) สอดคล้องกับ θ ติดลบมากกว่า likelihood จึงให้คะแนน θ = −0.5 สูงกว่า</div>
+</div>
+
+<p>เมื่อ n = 150 เมทริกซ์ \(\Gamma_n\) มีขนาด 150 × 150 การหาค่าผกผันและดีเทอร์มิแนนต์ทุกครั้งที่ลอง θ ใหม่ใช้การคำนวณมาก นี่คือความหมายของ computationally intensive ในสไลด์หน้า 30</p>
+
+<figure>
+<img src="../assets/slides/ts7-p37.png" alt="Slide 7 หน้า 37: MLE: Newton-Raphson" loading="lazy">
+<figcaption>Slide 7 หน้า 37 — MLE: Newton-Raphson</figcaption>
+</figure>
+
+<p>รายละเอียดการหาค่าสูงสุดด้วย Newton-Raphson อยู่ในตำราหน้า 124–128 สไลด์ระบุว่า <mark class="src" data-p="37">(optional)</mark> แนวคิดคือเริ่มจากค่าเริ่มต้น \(\beta_0\) แล้วปรับด้วย \(\beta_{k+1}=\beta_k-\ell'(\beta_k)/\ell''(\beta_k)\) โดย ℓ คือ log-likelihood ตัวอย่างกับข้อมูล AR(1) สามจุดในหัวข้อ 11: \(\ell(\phi)=c-\frac12\sum(x_t-\phi x_{t-1})^2\) มี \(\ell'(\phi)=\sum x_{t-1}(x_t-\phi x_{t-1})=0.4-1.25\phi\) และ \(\ell''(\phi)=-1.25\) เริ่มที่ \(\phi_0=0\) ได้ \(\phi_1=0-\frac{0.4}{-1.25}=0.32\) ถึงคำตอบในก้าวเดียวเพราะ ℓ เป็นพาราโบลา กับโมเดลที่มี MA ต้องวนหลายรอบ เปรียบเหมือนการเดินขึ้นเขาในหมอก ดูความชันและความโค้งตรงที่ยืนแล้วก้าวไปทางที่สูงขึ้น ทำซ้ำจนถึงยอด</p>
+
+<figure>
+<img src="../assets/slides/ts7-p38.png" alt="Slide 7 หน้า 38: MLE: ข้อดีและข้อเสีย" loading="lazy">
+<figcaption>Slide 7 หน้า 38 — MLE: ข้อดีและข้อเสีย</figcaption>
+</figure>
+
+<p>ข้อดีของ MLE: <mark class="src" data-p="38">Efficient (low variance estimates).</mark> สมมติฐาน Gaussian มักสมเหตุสมผล และแม้ \(\{X_t\}\) ไม่ใช่ Gaussian การแจกแจงเชิงเส้นกำกับของค่าประมาณ \((\hat\phi,\hat\theta,\hat\sigma^2)\) ก็เหมือนกรณี Gaussian ข้อเสีย: <mark class="src" data-p="38">Difficult optimization problem.</mark> และต้องเลือกจุดเริ่มต้นที่ดี ซึ่งมักใช้ค่าจากวิธีอื่น เช่น Yule-Walker หรือ conditional sum of squares ฟังก์ชัน <code>arima()</code> ใน R ค่าเริ่มต้นคือ <code>method = "CSS-ML"</code> ใช้ CSS หาจุดเริ่มก่อนแล้วทำ ML ต่อ ถ้าระบุ <code>method = "ML"</code> แบบในสไลด์ จะทำ ML อย่างเดียว ตัวอย่างความต่างของประสิทธิภาพกับ times.txt: MLE ของ ARMA(1,1) ได้ s.e. ของ ar1 เป็น 0.0686 ส่วน Yule-Walker ใช้กับ ARMA ไม่ได้โดยตรงและถูกระบุว่า not efficient</p>
+
+<!-- ===================================================== -->
+<h2 id="s14">14. อ่านผล arima() และตรวจโมเดล</h2>
+
+<figure>
+<img src="../assets/slides/ts7-p39.png" alt="Slide 7 หน้า 39: Example: model estimation (with R)" loading="lazy">
+<figcaption>Slide 7 หน้า 39 — Example: model estimation (with R)</figcaption>
+</figure>
+
+<p>ผลของ <code>arima(x = data, order = c(1, 0, 1), method = "ML")</code> กับ times.txt: ar1 = −0.6169 (s.e. 0.0686), ma1 = −0.7233 (s.e. 0.0543), intercept = 0.0235 (s.e. 0.0179), sigma^2 = 1.57, log likelihood = −247.66 และ aic = 503.31 คำว่า intercept ใน <code>arima()</code> คือค่าเฉลี่ย μ ของ series ไม่ใช่ค่าคงที่ในสมการ R เขียนโมเดลเป็น \((X_t-\mu)=\phi(X_{t-1}-\mu)+w_t+\theta w_{t-1}\)</p>
+
+<div class="calc" id="s14-read">
+<div class="calc-title">อ่านผลลัพธ์ทีละบรรทัดและพยากรณ์</div>
+<ol class="steps">
+<li><div class="st-title">เขียนสมการโมเดล</div><p>\(X_t-0.0235=-0.6169(X_{t-1}-0.0235)+w_t-0.7233\,w_{t-1}\), \(w_t\sim N(0,1.57)\) ถ้าย้ายข้าง ค่าคงที่คือ \(\mu(1-\phi)=0.0235(1.6169)=0.0380\)</p></li>
+<li><div class="st-title">ทดสอบนัยสำคัญด้วย t = coef / s.e.</div><p>ar1: \(-0.6169/0.0686=-8.99\) ma1: \(-0.7233/0.0543=-13.32\) ทั้งสอง \(|t|&gt;2\) จึงมีนัยสำคัญ intercept: \(0.0235/0.0179=1.31\) น้อยกว่า 2 ไม่มีนัยสำคัญ ค่าเฉลี่ยอาจเป็นศูนย์</p></li>
+<li><div class="st-title">ช่วงเชื่อมั่น 95% ของ φ</div><p>\(-0.6169\pm1.96(0.0686)=-0.6169\pm0.1345\) คือ \((-0.7514,\ -0.4824)\) ไม่คลุมศูนย์</p></li>
+<li><div class="st-title">ตรวจ causal และ invertible</div><p>\(|\phi|=0.6169&lt;1\) จึง causal และ \(|\theta|=0.7233&lt;1\) จึง invertible ถ้าเขียนแบบอาจารย์ใน Class 7-2 ที่ใช้ \(w_t-\theta w_{t-1}\) ค่า θ จะเป็น +0.7233</p></li>
+<li><div class="st-title">ตรวจ AIC</div><p>\(-2(-247.6564)+2(4)=503.31\) ตรงกับผล (หัวข้อ 8)</p></li>
+<li><div class="st-title">พยากรณ์หนึ่งก้าว</div><p>ข้อมูลสุดท้าย \(X_{150}=-2.9693\) residual สุดท้าย \(\hat w_{150}=-1.9058\) อนาคต \(w_{151}\) มีค่าคาดหมายศูนย์ จึงได้ \(\hat X_{151}=0.0235+(-0.6169)(-2.9693-0.0235)+(-0.7233)(-1.9058)=0.0235+1.8463+1.3785=3.2483\) R ให้ 3.2480</p></li>
+<li><div class="st-title">พยากรณ์สองก้าว</div><p>ไม่มี residual ที่รู้แล้ว ใช้เฉพาะส่วน AR: \(\hat X_{152}=0.0235+(-0.6169)(3.2483-0.0235)=0.0235-1.9893=-1.9658\) R ให้ −1.9656</p></li>
+<li><div class="st-title">ความคลาดเคลื่อนมาตรฐานของการพยากรณ์</div><p>หนึ่งก้าว: \(\sqrt{1.57}=1.253\) สองก้าว: \(\sigma\sqrt{1+\psi_1^2}\) โดย \(\psi_1=\phi+\theta=-1.3402\) ได้ \(1.253\sqrt{2.7961}=2.095\) ตรงกับ R ที่ 1.2530 และ 2.0952</p></li>
+</ol>
+</div>
+
+<p>หลังประมาณค่าแล้ว ไฟล์ R_codes ตรวจโมเดล (model validation) สองด้าน ด้านแรก residual ควรแจกแจงปกติ ด้านที่สอง residual ไม่ควรมีสหสัมพันธ์เหลืออยู่ เหมือนการตรวจว่ากากกาแฟที่กรองแล้วไม่มีผงกาแฟหลุดออกมา ถ้า residual ยังมีรูปแบบ แปลว่าโมเดลยังดึงโครงสร้างออกไม่หมด อาจารย์บอกว่า "ไม่ว่าคุณจะทำแบบไหน คุณต้องมีการตรวจสอบโมเดลก่อนนำไปใช้" (Class 7-1, 38:37)</p>
+
+<figure>
+<img src="../assets/slides/ts7-r4-resid-normal.png" alt="Histogram และ QQ plot ของ standardized residuals ของ ARMA(1,1)" loading="lazy">
+<figcaption>ภาพจากการรัน R_codes ส่วน Model validation (ไม่ใช่สไลด์)</figcaption>
+</figure>
+
+<p>Standardized residual คือ residual หารด้วย \(\hat\sigma=1.253\) มีค่าตั้งแต่ −2.24 ถึง 3.20 มี 6 จาก 150 ตัวที่เกิน ±2 คิดเป็น 4% ใกล้กับ 5% ที่การแจกแจงปกติคาดไว้ histogram มีรูประฆังรอบศูนย์ และจุดใน QQ plot อยู่ใกล้เส้นตรง ยกเว้นปลายขวาที่ค่า 3.20 <code>shapiro.test</code> ให้ W = 0.989 และ p-value = 0.307 มากกว่า 0.05 จึงไม่ reject H0 ที่ว่า residual แจกแจงปกติ (H0 ของ Shapiro-Wilk คือปกติ ตรงข้ามกับ ADF ที่ H0 คือไม่นิ่ง)</p>
+
+<figure>
+<img src="../assets/slides/ts7-r5-tsdiag.png" alt="ผล tsdiag ของโมเดล ARMA(1,1)" loading="lazy">
+<figcaption>ภาพจากการรัน <code>tsdiag(nat, gof.lag=20)</code> (ไม่ใช่สไลด์)</figcaption>
+</figure>
+
+<p><code>tsdiag</code> ให้กราฟสามแผง แผงบนคือ standardized residual ตามเวลา ไม่มี trend และแกว่งกว้างพอกันตลอด แผงกลางคือ ACF ของ residual ค่า lag 1 ถึง 5 คือ −0.072, 0.007, 0.109, −0.069, 0.116 อยู่ในขอบ 0.163 ทั้งหมด แผงล่างคือ p-value ของ Ljung-Box test ที่ lag 1 ถึง 20 ทุกค่าอยู่เหนือเส้น 0.05 (ต่ำสุด 0.359 ที่ lag 5) H0 ของ Ljung-Box คือ residual ไม่มีสหสัมพันธ์ จึงไม่ reject สรุปว่า ARMA(1,1) ดึงโครงสร้างออกได้หมด ถ้าทดสอบแบบหักองศาอิสระตามจำนวนพารามิเตอร์ (<code>Box.test(resid, lag=10, type="Ljung", fitdf=2)</code>) ได้ \(Q=6.03\), df = 8, p-value = 0.644 ข้อสรุปเหมือนเดิม</p>
+
+<!-- ===================================================== -->
+<h2 id="s15">15. โค้ด R_codes ส่วนที่เหลือ</h2>
+
+<p>ส่วน IMA และ electricity อธิบายไว้ในหัวข้อ 0 และ 4 แล้ว หัวข้อนี้อธิบายส่วนที่เหลือของไฟล์ตามลำดับ</p>
+
+<h3>Model identification และตาราง AIC/BIC</h3>
+<pre><code>data &lt;- read.table("times.txt")
+data &lt;- ts(data)
+par(mfrow=c(2,1))
+acf(data)
+pacf(data)
+
+table1 &lt;- array(0,c(4,4))
+for (i in 1:4) {
+  for (j in 1:4) {
+    aic &lt;- AIC(arima(data, order=c(i-1,0,j-1), method="ML"))
+    table1[i,j] &lt;- aic
+  }
+}
+table2 &lt;- array(0,c(4,4))
+for (i in 1:4) {
+  for (j in 1:4) {
+    bic &lt;- AIC(arima(data, order=c(i-1,0,j-1), method="ML"), k=log(length(data)))
+    table2[i,j] &lt;- bic
+  }
+}</code></pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>read.table("times.txt"); ts(data)</td><td>อ่านไฟล์เป็นตาราง แล้วแปลงเป็น time series 150 จุด</td></tr>
+<tr><td>par(mfrow=c(2,1))</td><td>แบ่งหน้ากราฟเป็น 2 แถว 1 คอลัมน์ ให้ ACF อยู่บน PACF อยู่ล่าง ได้สไลด์หน้า 22</td></tr>
+<tr><td>array(0,c(4,4))</td><td>ตาราง 4 × 4 ที่ทุกช่องเป็นศูนย์ เตรียมไว้ใส่ผล</td></tr>
+<tr><td>for (i in 1:4) for (j in 1:4)</td><td>วนทุกคู่ (i, j) รวม 16 รอบ i เป็นแถว j เป็นคอลัมน์</td></tr>
+<tr><td>order=c(i-1,0,j-1)</td><td>แถว i ใช้ p = i − 1 คอลัมน์ j ใช้ q = j − 1 ลบ 1 เพราะ R นับแถวจาก 1 แต่ p, q เริ่มจาก 0</td></tr>
+<tr><td>AIC(...)</td><td>คำนวณ \(-2\ln L+2k\) โดยนับ k รวม intercept และ \(\sigma^2\)</td></tr>
+<tr><td>AIC(..., k=log(length(data)))</td><td>เปลี่ยนค่าปรับต่อพารามิเตอร์จาก 2 เป็น \(\ln n=\ln150=5.0106\) จึงได้ BIC ชื่ออาร์กิวเมนต์ k ตรงนี้คือค่าปรับต่อพารามิเตอร์ ไม่ใช่จำนวนพารามิเตอร์</td></tr>
+</table>
+<p>อาจารย์ไล่โค้ดนี้ในคลิปว่า "ตอนเริ่มแรก i เป็น 1 j เป็น 1 แสดงว่ามันคือ ARIMA(0,0,0)" และ "ถ้าคอลัมน์ 3 แสดงว่า q เป็น 2" (Class 7-1, 40:15–41:18) ข้อสอบที่ให้ตารางนี้มาจะถามให้แปลงตำแหน่งช่องเป็นโมเดล ช่อง [4,1] คือ AR(3) และช่อง [1,4] คือ MA(3)</p>
+
+<h3>Yule-Walker</h3>
+<pre><code>acf(data, plot=F)
+nat.yw &lt;- ar.yw(data, order=1)
+nat.yw$mean        #mean estimate
+nat.yw$ar          #phi estimate
+nat.yw$var.pred    #error variance estimate
+ar(data, order.max=1, AIC=F, method='yw')</code></pre>
+<pre class="out">&gt; nat.yw$mean
+[1] 0.01981923
+&gt; nat.yw$ar
+[1] -0.7709978
+&gt; nat.yw$var.pred
+[1] 2.486594</pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>acf(data, plot=F)</td><td>พิมพ์ค่า ACF เป็นตัวเลขแทนกราฟ ใช้ดู \(\hat\rho(1)=-0.771\), \(\hat\rho(2)=0.382\)</td></tr>
+<tr><td>ar.yw(data, order=1)</td><td>fit AR(1) ด้วย Yule-Walker คอมเมนต์ในไฟล์บอกว่า Y-W ใช้ได้กับ AR(p) และ MA(q)</td></tr>
+<tr><td>$mean, $ar, $var.pred</td><td>ค่าเฉลี่ย 0.0198, \(\hat\phi=-0.7710\), \(\hat\sigma^2=2.4866\) ตามที่คำนวณมือในหัวข้อ 12</td></tr>
+<tr><td>ar(..., order.max=1, AIC=F, method='yw')</td><td>วิธีที่สองได้ผลเดียวกัน <code>AIC=F</code> สั่งให้ใช้อันดับ 1 ตรง ๆ ไม่ให้เลือกอันดับเองด้วย AIC</td></tr>
+</table>
+
+<h3>MLE และการตรวจโมเดล</h3>
+<pre><code>nat &lt;- arima(data, order=c(1,0,1), method='ML')
+library(TSA)
+par(mfrow=c(1,2))
+hist(rstandard(nat), xlab="Standardised residuals")
+qqnorm(rstandard(nat)); qqline(rstandard(nat))
+shapiro.test(rstandard(nat))
+tsdiag(nat, gof.lag=20)</code></pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>arima(data, order=c(1,0,1), method='ML')</td><td>fit ARMA(1,1) ด้วย maximum likelihood ได้ผลในสไลด์หน้า 39</td></tr>
+<tr><td>rstandard(nat)</td><td>standardized residual ฟังก์ชันนี้มาจาก TSA สำหรับโมเดล arima ใน base R ใช้ <code>residuals(nat)/sqrt(nat$sigma2)</code> แทน</td></tr>
+<tr><td>hist, qqnorm, qqline</td><td>ตรวจความปกติด้วยกราฟ</td></tr>
+<tr><td>shapiro.test</td><td>ตรวจความปกติด้วยการทดสอบ H0: ปกติ ได้ p-value = 0.307</td></tr>
+<tr><td>tsdiag(nat, gof.lag=20)</td><td>สามแผง: residual ตามเวลา, ACF ของ residual, p-value ของ Ljung-Box ถึง lag 20</td></tr>
+</table>
+
+<h3>Aerosol particle size และ global temperature</h3>
+<pre><code>data &lt;- read.table("aero.txt"); data &lt;- ts(data)
+acf(data); acf(diff(data)); pacf(diff(data))
+# ตาราง AIC/BIC ของ diff(data) แบบเดียวกับข้างบน
+eacf(diff(data))
+fit1 &lt;- arima(diff(data), order=c(2,0,0), method='ML')   # ARIMA(2,1,0)
+fit2 &lt;- arima(diff(data), order=c(0,0,1), method='ML')   # ARIMA(0,1,1)
+
+data &lt;- read.table("temp.txt"); data &lt;- ts(data, start=1856)
+dif &lt;- diff(data, 1)
+acf(dif); pacf(dif)
+nat &lt;- arima(dif, order=c(1,0,1), method='ML')</code></pre>
+<p>สองตัวอย่างนี้ใช้ขั้นตอนเดียวกับ times.txt แต่ข้อมูลไม่นิ่ง จึงทำผลต่างก่อนทุกขั้น การ fit <code>arima(diff(data), order=c(2,0,0))</code> เท่ากับ ARIMA(2,1,0) กับข้อมูลเดิม คอมเมนต์ในไฟล์จึงเรียกว่า ARIMA(2,1,0) วิธีที่ตรงกว่าคือ <code>arima(data, order=c(2,1,0))</code> ซึ่งให้ R ทำผลต่างเองและพยากรณ์กลับเป็นหน่วยเดิมได้ ข้อควรสังเกตสองข้อ ข้อแรก บรรทัด <code>plot(new_temperature, ...)</code> ในส่วน aerosol อ้างตัวแปรที่ไม่มีในไฟล์ ต้องเปลี่ยนเป็น <code>plot(data, ...)</code> ข้อที่สอง BIC ในส่วนนี้ใช้ <code>log(length(data))</code> ซึ่งเป็นความยาวข้อมูลก่อน diff เกินจริงไปหนึ่งจุด ผลต่างน้อยมาก ไฟล์ aero.txt และ temp.txt ไม่ได้ให้มา บทเรียนนี้จึงอธิบายเฉพาะโค้ด</p>
+
+<!-- ===================================================== -->
+<h2 id="s16">16. แบบฝึกท้ายบท</h2>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>ARIMA กับ smoothing</span></div>
+<div class="qtext">R fit ARIMA(0,1,1) ได้ ma1 = −0.35 ถ้าใช้ single exponential smoothing ที่เทียบเท่ากัน α ควรเป็นเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ −θ ไม่ใช่ 1 + θ">\(\alpha=0.35\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. α = 1 + θ = 1 − 0.35 = 0.65">\(\alpha=0.65\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ 1 − θ ซึ่งใช้เมื่อเขียน MA ด้วยเครื่องหมายลบ แต่ R ใช้เครื่องหมายบวก">\(\alpha=1.35\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. α ต้องอยู่ระหว่าง 0 กับ 1">\(\alpha=-0.35\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>Box-Cox</span></div>
+<div class="qtext">ในสูตร Box-Cox ถ้า λ = 0 การแปลงที่ใช้คือข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อาจารย์ย้ำว่า λ = 0 ไม่ใช่ x ยกกำลัง 0">\(T(X_t)=X_t^{0}=1\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วยศูนย์ไม่ได้ จึงต้องมีกรณีแยก">\(T(X_t)=(X_t^{0}-1)/0\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. สูตรกำหนดให้ λ = 0 ใช้ ln ซึ่งเป็นลิมิตของสูตรบน">\(T(X_t)=\ln(X_t)\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. square root คือ λ = 0.5">\(T(X_t)=\sqrt{X_t}\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>BoxCox.ar</span></div>
+<div class="qtext">กราฟ BoxCox.ar ให้ λ ที่ดีที่สุด −0.1 และช่วงเชื่อมั่น 95% คือ (−0.4, 0.2) ควรเลือกการแปลงใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ช่วงคลุม 0 และ log ตีความและแปลงกลับง่าย">take log เพราะช่วงเชื่อมั่นคลุม 0</button>
+<button class="opt" data-correct="false" data-note="ผิด. ช่วงไม่คลุม 1 จึงไม่ควรใช้ข้อมูลเดิม">ไม่แปลง เพราะช่วงเชื่อมั่นคลุม 1</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.5 อยู่นอกช่วง (−0.4, 0.2)">square root เพราะ λ เป็นบวก</button>
+<button class="opt" data-correct="false" data-note="ผิด. −1 อยู่นอกช่วง">ส่วนกลับ เพราะ λ ที่ได้ติดลบ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>ADF test</span></div>
+<div class="qtext">adf.test(x, alternative = "stationary") ได้ p-value = 0.32 ควรสรุปอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. H1 คือ stationary การ reject ต้องการ p-value ต่ำกว่า 0.05">reject H0 ข้อมูลนิ่ง ไม่ต้อง diff</button>
+<button class="opt" data-correct="false" data-note="ผิด. H0 ของ ADF คือไม่นิ่ง ไม่ใช่นิ่ง">ไม่ reject H0 ข้อมูลนิ่ง ไม่ต้อง diff</button>
+<button class="opt" data-correct="false" data-note="ผิด. p-value 0.32 มากกว่า 0.05 จึงไม่ reject">reject H0 ข้อมูลไม่นิ่ง ควร diff</button>
+<button class="opt" data-correct="true" data-note="ถูก. H0 คือไม่นิ่ง 0.32 &gt; 0.05 จึงยังถือว่าไม่นิ่ง">ไม่ reject H0 ข้อมูลไม่นิ่ง ควร diff</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>คำนวณ AIC</span></div>
+<div class="qtext">โมเดลหนึ่งมี log likelihood = −100 และนับพารามิเตอร์ได้ k = 3 AIC เท่ากับเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมคูณ −2 กับ log likelihood">AIC = −94</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมบวก penalty 2k">AIC = 200</button>
+<button class="opt" data-correct="true" data-note="ถูก. −2(−100) + 2(3) = 200 + 6 = 206">AIC = 206</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ penalty k แทน 2k">AIC = 203</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>คำนวณ BIC</span></div>
+<div class="qtext">โมเดลเดียวกับข้อ 5 กับข้อมูล n = 100 จุด BIC เท่ากับเท่าใด (ln 100 = 4.605)</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. 200 + 3(4.605) = 200 + 13.82 = 213.82">BIC = 213.82</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ 200 + 4.605 ใช้ k = 1">BIC = 204.61</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ 200 + 2(4.605)">BIC = 209.21</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ 200 + 3(100) ใช้ n แทน ln n">BIC = 500.00</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>อ่านตาราง</span></div>
+<div class="qtext">ตาราง AIC ที่สร้างด้วย order=c(i-1,0,j-1) มีค่าต่ำสุดที่ช่องแถว 3 คอลัมน์ 2 โมเดลที่เลือกคือข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. สลับแถวกับคอลัมน์">ARMA(1,2)</button>
+<button class="opt" data-correct="true" data-note="ถูก. p = 3 − 1 = 2 และ q = 2 − 1 = 1">ARMA(2,1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมลบ 1 จากเลขแถวและคอลัมน์">ARMA(3,2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลบ 1 แล้วสลับแถวกับคอลัมน์">ARMA(2,3)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>Overdifferencing</span></div>
+<div class="qtext">ถ้านำ white noise มาทำผลต่างครั้งที่หนึ่ง ACF ทางทฤษฎีที่ lag 1 ของผลต่างเป็นเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ผลต่างมี w_{t−1} ร่วมกันระหว่างจุดติดกัน จึงไม่เป็นศูนย์">\(\rho_1=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. γ₁ ติดลบ เพราะ w_{t−1} มีเครื่องหมายต่างกัน">\(\rho_1=0.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. γ₀ = 2σ² ไม่ใช่ σ²">\(\rho_1=-1\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. γ₁ = −σ² และ γ₀ = 2σ² จึงได้ −0.5">\(\rho_1=-0.5\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>Yule-Walker</span></div>
+<div class="qtext">fit AR(1) ด้วย Yule-Walker ได้ \(\hat\gamma(0)=10\) และ \(\hat\rho(1)=0.6\) ค่า \(\hat\sigma^2\) (ไม่ปรับตัวคูณ) เท่ากับเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ 1 − ρ แทน 1 − ρ²">\(\hat\sigma^2=4.0\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 10(1 − 0.36) = 6.4">\(\hat\sigma^2=6.4\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ 10 × 0.36 ซึ่งเป็นส่วนที่ AR อธิบายได้">\(\hat\sigma^2=3.6\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารแทนการคูณ">\(\hat\sigma^2=15.6\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>อ่านผล arima</span></div>
+<div class="qtext">ผล arima ให้ intercept = 0.0235 และ s.e. = 0.0179 ข้อใดสรุปถูก</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. t = 1.31 ซึ่ง |t| &lt; 2 และ intercept ใน arima() คือค่าเฉลี่ย">t = 1.31 ไม่มีนัยสำคัญ ค่าเฉลี่ยอาจเป็นศูนย์</button>
+<button class="opt" data-correct="false" data-note="ผิด. intercept ใน arima() คือค่าเฉลี่ย μ ไม่ใช่ค่าคงที่ของสมการ">t = 1.31 ค่าคงที่ในสมการเท่ากับ 0.0235</button>
+<button class="opt" data-correct="false" data-note="ผิด. t คือ coef หาร s.e. ไม่ใช่ s.e. หาร coef">t = 0.76 ไม่มีนัยสำคัญ ค่าเฉลี่ยอาจเป็นศูนย์</button>
+<button class="opt" data-correct="false" data-note="ผิด. 1.31 น้อยกว่า 2">t = 1.31 มีนัยสำคัญ ค่าเฉลี่ยไม่ใช่ศูนย์</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>tsdiag</span></div>
+<div class="qtext">tsdiag ของโมเดลหนึ่งแสดง p-value ของ Ljung-Box ต่ำกว่า 0.05 ตั้งแต่ lag 3 เป็นต้นไป ควรสรุปอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. Ljung-Box ทดสอบสหสัมพันธ์ ไม่ใช่ความปกติ">residual ไม่ปกติ ควร take log ข้อมูล</button>
+<button class="opt" data-correct="false" data-note="ผิด. p-value ต่ำแปลว่า reject H0 ที่ว่าไม่มีสหสัมพันธ์">residual ไม่มีสหสัมพันธ์ โมเดลใช้ได้</button>
+<button class="opt" data-correct="true" data-note="ถูก. reject H0 แปลว่ายังมีโครงสร้างเหลือใน residual">residual ยังมีสหสัมพันธ์ ควรปรับโมเดล</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อมูลนิ่งหรือไม่ดูจาก ADF หรือ ACF ของข้อมูล">ข้อมูลเดิมไม่นิ่ง ควรเพิ่ม d เสมอ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>Double ES</span></div>
+<div class="qtext">ตามสไลด์ double exponential smoothing เทียบเท่ากับ ARIMA แบบใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือคู่ของ single exponential smoothing">ARIMA(0,1,1) with no constant</button>
+<button class="opt" data-correct="false" data-note="ผิด. d ต้องเป็น 2 เพราะมี trend">ARIMA(0,1,2) with no constant</button>
+<button class="opt" data-correct="false" data-note="ผิด. ส่วนที่ใช้คือ MA ไม่ใช่ AR">ARIMA(2,2,0) with no constant</button>
+<button class="opt" data-correct="true" data-note="ถูก. สไลด์หน้า 4 เขียนว่า ARIMA(0,2,2) with no constant">ARIMA(0,2,2) with no constant</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 13</span><span>ลำดับการแปลง</span></div>
+<div class="qtext">ข้อมูลมีทั้ง trend และการแกว่งที่กว้างขึ้นตามเวลา ลำดับใดถูกต้อง</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ผลต่างมีค่าลบได้ จึง log ไม่ได้ และสไลด์ให้แปลงก่อน">diff ก่อน แล้ว take log ของผลต่าง</button>
+<button class="opt" data-correct="false" data-note="ผิด. การแกว่งยังไม่คงที่ ต้องแปลงก่อน">diff สองครั้ง โดยไม่ต้องแปลงข้อมูล</button>
+<button class="opt" data-correct="true" data-note="ถูก. สไลด์หน้า 6, 16, 24 และคำตอบของอาจารย์ใน Class 7-1 นาที 23:11">take log ก่อน แล้ว diff ข้อมูลที่ log แล้ว</button>
+<button class="opt" data-correct="false" data-note="ผิด. log ไม่ได้กำจัด trend ยังต้อง diff">take log อย่างเดียว เพราะแก้ได้ทั้งสองปัญหา</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>เขียนพิสูจน์</span></div>
+<div class="qtext">ให้ ARIMA(0,1,1) เขียนเป็น \(X_t=X_{t-1}+w_t-\theta w_{t-1}\) (เครื่องหมายลบแบบที่อาจารย์ใช้) จงพิสูจน์ว่าการพยากรณ์หนึ่งก้าวเท่ากับ single exponential smoothing และหา α ในรูปของ θ ถ้า θ = 0.3 จงหา α</div>
+<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(X_{t+1}=X_t+w_{t+1}-\theta w_t\)</p>
+<p>\(w_{t+1}=X_{t+1}-\hat X_{t+1}\) แทนลงไป: \(X_{t+1}=X_t+X_{t+1}-\hat X_{t+1}-\theta w_t\) จึงได้ \(\hat X_{t+1}=X_t-\theta w_t\)</p>
+<p>\(w_t=X_t-\hat X_t\): \(\hat X_{t+1}=X_t-\theta(X_t-\hat X_t)=(1-\theta)X_t+\theta\hat X_t\)</p>
+<p>ให้ \(\alpha=1-\theta\) จะได้ \(\theta=1-\alpha\) และ \(\hat X_{t+1}=\alpha X_t+(1-\alpha)\hat X_t\) ซึ่งเป็น single exponential smoothing</p>
+<p>θ = 0.3 ได้ α = 1 − 0.3 = 0.7</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>คำนวณ Yule-Walker</span></div>
+<div class="qtext">ข้อมูลชุดหนึ่งมี \(\hat\rho(1)=0.5\) และ \(\hat\rho(2)=0.1\) จงหา \(\hat\phi_1,\hat\phi_2\) ของ AR(2) ด้วย Yule-Walker และตรวจว่า stationary หรือไม่</div>
+<textarea placeholder="แสดงวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ดีเทอร์มิแนนต์ \(1-\rho_1^2=1-0.25=0.75\)</p>
+<p>\(\hat\phi_1=\rho_1(1-\rho_2)/(1-\rho_1^2)=0.5(0.9)/0.75=0.6\)</p>
+<p>\(\hat\phi_2=(\rho_2-\rho_1^2)/(1-\rho_1^2)=(0.1-0.25)/0.75=-0.2\)</p>
+<p>ตรวจ: \(\phi_1+\phi_2=0.4&lt;1\), \(\phi_2-\phi_1=-0.8&lt;1\), \(|\phi_2|=0.2&lt;1\) จึง stationary</p>
+<p>ตรวจย้อน: \(\rho_1=\phi_1+\phi_2\rho_1=0.6-0.1=0.5\) และ \(\rho_2=\phi_1\rho_1+\phi_2=0.3-0.2=0.1\) ตรงกับข้อมูล</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>อ่านผล R</span></div>
+<div class="qtext">ผล <code>arima(x, order=c(1,0,0))</code> ให้ ar1 = 0.45 (s.e. 0.08), intercept = 10.2 (s.e. 0.5), sigma^2 = 2.1, log likelihood = −180.3 จงเขียนสมการโมเดล หา t ของ ar1 หา AIC ตามวิธีของ R และพยากรณ์ \(X_{n+1}\) ถ้า \(X_n=12\)</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>สมการ: \(X_t-10.2=0.45(X_{t-1}-10.2)+w_t\), \(w_t\sim N(0,2.1)\)</p>
+<p>t ของ ar1: \(0.45/0.08=5.63\) มากกว่า 2 จึงมีนัยสำคัญ</p>
+<p>AIC: พารามิเตอร์คือ ar1, intercept, \(\sigma^2\) รวม k = 3 ได้ \(-2(-180.3)+2(3)=360.6+6=366.6\)</p>
+<p>พยากรณ์: \(\hat X_{n+1}=10.2+0.45(12-10.2)=10.2+0.81=11.01\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 17</span><span>อธิบายขั้นตอน</span></div>
+<div class="qtext">ข้อมูลยอดขายรายเดือน 10 ปี มี trend ขาขึ้นและการแกว่งกว้างขึ้นตามเวลา จงเขียนขั้นตอนเลือก ARIMA ตามสไลด์หน้า 24–27 ให้ครบ พร้อมบอกว่าจะดูอะไรในแต่ละขั้น</div>
+<textarea placeholder="เขียนขั้นตอน"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>1. Plot ข้อมูล เห็นการแกว่งกว้างขึ้น ใช้ BoxCox.ar ถ้าช่วงเชื่อมั่นของ λ คลุม 0 ให้ take log ทำก่อน differencing</p>
+<p>2. ดู ACF ของ log ข้อมูล ถ้าลดลงช้ามาก diff ครั้งที่หนึ่ง ถ้า ACF ของผลต่างยังลดลงช้า diff อีกครั้ง (หายาก) ใช้ ADF ยืนยัน: p-value &lt; 0.05 แปลว่านิ่งแล้ว ระวัง overdifferencing ถ้า ACF lag 1 ใกล้ −0.5</p>
+<p>3. ดู ACF, PACF, EACF ของ \(\nabla\log X_t\) เทียบกับรูปแบบทฤษฎีเพื่อหา p, q (มักไม่เกิน 4) ใช้ตาราง AIC/BIC ช่วย เลือกค่าต่ำ</p>
+<p>4. ได้ candidate สองสามตัว ประมาณค่าด้วย MLE ตรวจ residual (ปกติ, Ljung-Box) แล้วเลือกตัวที่ผ่านและพยากรณ์ดี แปลงผลพยากรณ์กลับด้วย exponential ถ้าข้อมูลรายเดือนยังมี seasonal เหลือ ต้องใช้ SARIMA</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 18</span><span>AIC กับ BIC</span></div>
+<div class="qtext">ข้อมูล n = 200 โมเดล A มี k = 3 และ −2 ln L = 400.0 โมเดล B มี k = 4 และ −2 ln L = 396.5 จงหา AIC และ BIC ของทั้งสอง และอธิบายว่าทำไมสองเกณฑ์เลือกต่างกัน (ln 200 = 5.298)</div>
+<textarea placeholder="แสดงวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>AIC A = 400 + 6 = 406.0 &nbsp; AIC B = 396.5 + 8 = 404.5 AIC เลือก B</p>
+<p>BIC A = 400 + 3(5.298) = 415.89 &nbsp; BIC B = 396.5 + 4(5.298) = 417.69 BIC เลือก A</p>
+<p>พารามิเตอร์ที่เพิ่มทำให้ −2 ln L ลดลง 3.5 ซึ่งมากกว่าค่าปรับ 2 ของ AIC แต่น้อยกว่าค่าปรับ ln 200 = 5.298 ของ BIC</p>
+</div>
+</div>
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>พิสูจน์ว่า ARIMA(0,1,1) เท่ากับ single exponential smoothing และแปลง θ เป็น α ได้ทั้งแบบเครื่องหมายบวกและลบ</li>
+<li>บอกว่า double exponential smoothing คู่กับ ARIMA(0,2,2)</li>
+<li>แทนค่า Box-Cox, อ่านกราฟ BoxCox.ar และอธิบายว่าทำไม log ก่อน diff</li>
+<li>เลือก d จาก ACF, รู้ผลของ overdifferencing และอ่านผล ADF ด้วยสมมติฐานที่ถูก</li>
+<li>คำนวณ AIC, BIC จาก log likelihood และอ่านตาราง AIC/BIC เป็น ARMA(p,q)</li>
+<li>คำนวณ Yule-Walker ของ AR(1), AR(2) ด้วยมือ และอธิบาย likelihood, MLE, Newton-Raphson ได้</li>
+<li>อ่านผล arima(), เขียนสมการ, ทดสอบนัยสำคัญ, พยากรณ์ และตรวจ residual</li>
+</ul>
+</div>
+
+<h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 39 หน้าอยู่ในหัวข้อใด</h2>
+<table>
+<tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
+<tr data-pages="1" class="etc"><td>1</td><td>ปก ARIMA and Exponential Smoothing</td><td>etc — ปก</td></tr>
+<tr data-pages="2-3"><td>2–3</td><td>ARIMA(0,1,1) and Exponential equivalence</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="4"><td>4</td><td>Double Exponential Smoothing</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="5" class="etc"><td>5</td><td>หน้าคั่น Transformation</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="6-8"><td>6–8</td><td>Transformation และ Box-Cox</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="9-12"><td>9–12</td><td>Data: electricity (TSA)</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="13" class="etc"><td>13</td><td>หน้าคั่น Model Identification</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="14"><td>14</td><td>ACF/PACF/EACF</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="15-16"><td>15–16</td><td>Sign of Nonstationary</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
+<tr data-pages="17"><td>17</td><td>Nonstationary Checking Tool (adf.test)</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="18-20"><td>18–20</td><td>AIC และ BIC</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+<tr data-pages="21-23"><td>21–23</td><td>Example: model identification (times.txt)</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+<tr data-pages="24-27"><td>24–27</td><td>Summary: the ARIMA model selection phase</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
+<tr data-pages="28" class="etc"><td>28</td><td>หน้าคั่น Estimation</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="29-31"><td>29–31</td><td>Where are we now? และ Estimation</td><td><a href="#s11">หัวข้อ 11</a></td></tr>
+<tr data-pages="32-34"><td>32–34</td><td>Method of Moment และ Y-W estimations</td><td><a href="#s12">หัวข้อ 12</a></td></tr>
+<tr data-pages="35-38"><td>35–38</td><td>MLE</td><td><a href="#s13">หัวข้อ 13</a></td></tr>
+<tr data-pages="39"><td>39</td><td>Example: model estimation (with R)</td><td><a href="#s14">หัวข้อ 14</a></td></tr>
+</table>
+
+<h3>ไฟล์ R_codes และวิดีโอ</h3>
+<table>
+<tr><th>ส่วน</th><th>สอนที่</th></tr>
+<tr><td>R_codes: IMA(1,1), IMA(2,2), ARIMA(1,1,1)</td><td><a href="#s0">หัวข้อ 0</a></td></tr>
+<tr><td>R_codes: Transformation (electricity)</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr><td>R_codes: Model identification, AIC/BIC, Y-W, MLE, validation, aero, temp</td><td><a href="#s15">หัวข้อ 15</a></td></tr>
+<tr><td>วิดีโอ Class 7-1 (สไลด์ 1–27)</td><td>กล่อง "อาจารย์พูดในคลิป" ทุกหัวข้อ และ <code>video-notes/class-7-1.md</code></td></tr>
+<tr><td>วิดีโอ Class 7-2 (เขียนมือเรื่อง invertibility, ψ/π weights, EACF)</td><td><a href="0006-ar2-pacf-and-arima.html#s11">Lesson 6 หัวข้อ 11</a> และ <a href="../reference/0007-invertible-causal-answer-sheets.html">ใบคำตอบ</a></td></tr>
+</table>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

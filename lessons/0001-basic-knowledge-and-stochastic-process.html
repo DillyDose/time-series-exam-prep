@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Lesson 1: Basic Knowledge — Time Series และ Stochastic Process</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span>Lesson 1 (Lecture 1)</span>
+  <span><a href="0002-performance-evaluation-and-stationarity.html">Lesson 2 →</a></span>
+</nav>
+
+<p class="kicker">SLIDE_1 (TS) — Time Series Analysis · Basic Knowledge · 46 หน้า</p>
+<h1>Time series คืออะไร และทำไมต้องมองเป็น stochastic process</h1>
+
+<div class="box">
+<div class="label">วิธีใช้บทเรียนนี้</div>
+<p>บทนี้แสดงสไลด์ Lecture 1 เกือบทุกหน้าตามลำดับ ใต้แต่ละหน้ามีคำอธิบายเป็นภาษาง่าย ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ กล่อง “ต้องรู้ก่อน” ปูพื้นคณิตศาสตร์ กล่อง “จุดสอบ” สรุปสิ่งที่ต้องทำได้ โจทย์ท้ายสไลด์สองข้อ คือ Example 1.9 และ Homework มีการพิสูจน์เต็มทุกขั้น</p>
+<p>บทนี้ยังไม่ได้รวมสิ่งที่อาจารย์พูดในวิดีโอ Class 1 จะเพิ่มภายหลังพร้อมระบุคลิปและเวลา ถ้าอ่านแล้วติดตรงไหน ถามต่อในแชตได้</p>
+</div>
+
+<div class="box source">
+<div class="label">แหล่งอ่านหลัก</div>
+<p>Shumway &amp; Stoffer, <em>Time Series Analysis and Its Applications</em> สไลด์อ้างหน้า 12 (white noise), หน้า 19 (mean function), หน้า 20 (autocovariance) และหน้า 22 (ACF) ฉบับย่อที่อ่านฟรีคือ <a href="https://swmprats.net/stoffer/tsa4/tsaEZ.pdf" target="_blank" rel="noopener">tsaEZ.pdf</a> อ่านเสริมได้ที่ <a href="https://online.stat.psu.edu/stat510/lesson/1" target="_blank" rel="noopener">Penn State STAT 510 บทที่ 1</a></p>
+</div>
+
+<table>
+<tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
+<tr><td><a href="#s1">1</a></td><td>Time series กับ cross-sectional data</td><td>2–8</td></tr>
+<tr><td><a href="#s2">2</a></td><td>องค์ประกอบของ time series</td><td>10–19</td></tr>
+<tr><td><a href="#s3">3</a></td><td>Decomposition: signal กับ noise</td><td>20–24</td></tr>
+<tr><td><a href="#s4">4</a></td><td>Random variable, E, Var, Cov</td><td>26–29</td></tr>
+<tr><td><a href="#s5">5</a></td><td>Time series คือ stochastic process</td><td>30–34</td></tr>
+<tr><td><a href="#s6">6</a></td><td>Mean function, autocovariance, ACF</td><td>35–37</td></tr>
+<tr><td><a href="#s7">7</a></td><td>White noise</td><td>38–44</td></tr>
+<tr><td><a href="#s8">8</a></td><td>Example 1.9: moving average 3 จุด</td><td>45</td></tr>
+<tr><td><a href="#s9">9</a></td><td>Homework: random walk with drift</td><td>46</td></tr>
+<tr><td><a href="#s10">10</a></td><td>แบบฝึกท้ายบท</td><td>—</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="s1">1. Time series กับ cross-sectional data</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p02.png" alt="Slide 1 หน้า 2: What is time series?" loading="lazy">
+<figcaption>Slide 1 หน้า 2 — What is time series?</figcaption>
+</figure>
+
+<p>สไลด์ให้นิยามสองแบบคู่กัน Time series คือชุดของค่าที่ <mark class="src" data-p="2">ordered</mark> และสังเกต ณ จุดเวลาที่ต่อเนื่องกัน ส่วน cross-sectional คือชุดของค่าที่สังเกต ณ จุดเวลาเดียว โดยเวลาไม่มีความสำคัญ เปรียบเทียบได้กับภาพสองแบบ: time series เหมือนวิดีโอของสิ่งเดียวที่ถ่ายต่อเนื่อง ลำดับของเฟรมคือเนื้อเรื่อง ส่วน cross-sectional เหมือนภาพถ่ายหมู่หนึ่งใบ ทุกคนถูกบันทึกในขณะเดียวกัน และจะเรียงคนซ้ายขวาอย่างไรก็ได้ข้อมูลเท่าเดิม</p>
+
+<figure>
+<img src="../assets/slides/ts1-p03.png" alt="Slide 1 หน้า 3: Time Series VS Cross Sectional data" loading="lazy">
+<figcaption>Slide 1 หน้า 3 — Time Series VS Cross Sectional data</figcaption>
+</figure>
+
+<p>Cross-sectional data ได้จากการสังเกตหลาย subject เช่น บุคคล บริษัท หรือประเทศ <mark class="src" data-p="3">at the same point of time</mark> และโดยปกติมี <mark class="src" data-p="3">more than one variables.</mark> ส่วน time series data ดู <mark class="src" data-p="3">more time points</mark> ซึ่งโดยปกติอย่างน้อย 50 จุด และมี <mark class="src" data-p="3">very few variables</mark> ซึ่งมักมีตัวเดียว และ time series เป็น <mark class="src" data-p="3">dynamic</mark> คือเปลี่ยนไปตามเวลา ตัวอย่าง: รายได้ของ 50 บริษัท ณ สิ้นปี 2025 เป็น cross-sectional ส่วนยอดขายของร้านเดียวที่จดทุกเดือนนาน 6 ปี รวม 72 จุด เป็น time series</p>
+
+<table>
+<tr><th></th><th>Cross-sectional</th><th>Time series</th></tr>
+<tr><td>เก็บเมื่อใด</td><td>จุดเวลาเดียว</td><td>หลายจุดเวลาต่อเนื่อง ปกติอย่างน้อย 50 จุด</td></tr>
+<tr><td>จำนวนตัวแปร</td><td>มากกว่าหนึ่งตัว</td><td>น้อยมาก มักมีตัวเดียว</td></tr>
+<tr><td>สลับลำดับแถวได้หรือไม่</td><td>ได้ ความหมายไม่เปลี่ยน</td><td>ไม่ได้ ลำดับคือข้อมูล</td></tr>
+<tr><td>ลักษณะ</td><td>คงที่ ณ ขณะนั้น</td><td>dynamic เปลี่ยนตามเวลา</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts1-p04.png" alt="Slide 1 หน้า 4: Characteristics of univariate time-series" loading="lazy">
+<figcaption>Slide 1 หน้า 4 — Characteristics of univariate time-series</figcaption>
+</figure>
+
+<p>หน้านี้ให้ลักษณะสามข้อของ univariate time series ข้อแรก time series เป็นชุดของค่าสังเกตที่เก็บ ณ เวลาที่กำหนด โดยปกติมีช่วงห่างเท่ากัน ข้อที่สอง univariate time series เป็นลำดับของการวัดตัวแปรเดียวกันซ้ำตามเวลา คำว่า univariate แปลว่าตัวแปรเดียว ข้อที่สาม time series เป็นลำดับของข้อมูลที่มีการเรียง และ “ordering” นี้โดยทั่วไปหมายถึงเวลา</p>
+
+<figure>
+<img src="../assets/slides/ts1-p05.png" alt="Slide 1 หน้า 5: Characteristics of univariate time-series (ต่อ)" loading="lazy">
+<figcaption>Slide 1 หน้า 5 — Characteristics of univariate time-series (ต่อ)</figcaption>
+</figure>
+
+<p>Time series เป็นชุดข้อมูลตัวเลขที่ห่างเท่ากัน ได้จากการสังเกต response variable ณ <mark class="src" data-p="5">regular time periods.</mark> วิชานี้พิจารณาเฉพาะ time series ที่วัดจากตัวแปรสุ่ม <mark class="src" data-p="5">continuous</mark> ตัวเดียว และห่างเท่ากันใน <mark class="src" data-p="5">discrete</mark> time เช่น ทุกวินาที ชั่วโมง วัน เดือน หรือปี คำว่า continuous หมายถึงค่าที่วัดเป็นทศนิยมได้ เช่น ยอดขาย 78.7 ส่วน discrete time หมายถึงเวลานับเป็นจุด ๆ ได้ <mark class="src" data-p="5">Example</mark> ในสไลด์คือยอดขายรายปี 1995 ถึง 2001: 78.7, 63.5, 89.7, 93.2, 92.1, 90.1, 90.2 ถ้าย้ายค่า 63.5 ไปไว้ปี 2001 เรื่องราวจะเปลี่ยนจากการตกในปี 1996 แล้วฟื้นตัว เป็นการร่วงในปีสุดท้าย ตัวเลขชุดเดิมแต่ความหมายต่างกัน นี่คือเหตุผลที่ลำดับสลับไม่ได้</p>
+
+<figure>
+<img src="../assets/slides/ts1-p06.png" alt="Slide 1 หน้า 6: How is your data structured?" loading="lazy">
+<figcaption>Slide 1 หน้า 6 — How is your data structured?</figcaption>
+</figure>
+
+<p>ตารางข้อมูลทั่วไปมีคอลัมน์ตัวแปรตาม \(Y\) และตัวแปรอิสระ \(X_1,\dots,X_p\) และแต่ละแถวเป็นอิสระต่อกัน ใน time series คอลัมน์แรกคือเวลา และสไลด์กำกับว่า <mark class="src" data-p="6">TIME (DEPENDENCE)</mark> หมายความว่าแต่ละแถวขึ้นกับแถวก่อนหน้า ค่าของวันนี้สัมพันธ์กับค่าของเมื่อวาน ข้อนี้เป็นต้นเหตุของเครื่องมือทั้งหมดในวิชา เพราะวิธีสถิติทั่วไปสมมติว่าข้อมูลเป็นอิสระต่อกัน จึงต้องมีเครื่องมือใหม่ที่วัดความสัมพันธ์ของตัวแปรกับอดีตของตัวเอง คือ autocovariance และ ACF ในหัวข้อ 6</p>
+
+<figure>
+<img src="../assets/slides/ts1-p07.png" alt="Slide 1 หน้า 7: ตัวอย่าง: ดัชนี S&amp;P 500" loading="lazy">
+<figcaption>Slide 1 หน้า 7 — ตัวอย่าง: ดัชนี S&amp;P 500</figcaption>
+</figure>
+
+<p>ดัชนี S&amp;P 500 ตั้งแต่ปี 1960 ถึง 1990 เริ่มที่ประมาณ 55 จุด แกว่งอยู่ระหว่าง 60 ถึง 120 ตลอดปี 1965 ถึง 1980 โดยลดลงชัดเจนช่วงปี 1974 ถึง 1975 แล้วเพิ่มขึ้นเร็วจนถึงประมาณ 350 จุดในปี 1990 ค่าเฉลี่ยของช่วงหลังสูงกว่าช่วงแรกมาก จึงมี trend ขาขึ้น และการแกว่งช่วงปี 1985 ถึง 1990 กว้างกว่าช่วงทศวรรษ 1960 ความแปรปรวนจึงไม่คงที่</p>
+
+<div class="box beginner">
+<div class="label">อ่านกราฟ time series อย่างไร</div>
+<ol>
+<li>แกนนอนคือเวลา แกนตั้งคือค่าที่วัด</li>
+<li>ดูระดับกลางของเส้น: ถ้าเลื่อนขึ้นหรือลงตามเวลา แสดงว่ามี trend</li>
+<li>มองหารูปแบบที่ซ้ำเป็นจังหวะ: ถ้ามี คือ seasonal หรือ cycle</li>
+<li>ดูความกว้างของการแกว่ง: ถ้ากว้างขึ้นหรือแคบลงตามเวลา แสดงว่าความแปรปรวนไม่คงที่</li>
+</ol>
+</div>
+
+<figure>
+<img src="../assets/slides/ts1-p08.png" alt="Slide 1 หน้า 8: Basic objectives of time-series analysis" loading="lazy">
+<figcaption>Slide 1 หน้า 8 — Basic objectives of time-series analysis</figcaption>
+</figure>
+
+<p>การวิเคราะห์ time series มีวัตถุประสงค์พื้นฐานสี่ข้อ ข้อแรกคือ describe บรรยายลักษณะสำคัญของรูปแบบของ series ข้อที่สองคือ explain อธิบายว่าอดีตส่งผลต่ออนาคตอย่างไร หรือ series สองชุด “interact” กันอย่างไร ข้อที่สามคือ forecast พยากรณ์ค่าในอนาคต ข้อที่สี่คือใช้เป็น control standard สำหรับตัวแปรที่วัดคุณภาพของสินค้าในการผลิต เช่น ถ้าค่าที่วัดได้หลุดจากช่วงที่โมเดลคาดไว้ แสดงว่ากระบวนการผลิตผิดปกติ</p>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 1</div>
+<ul>
+<li>นิยามของ time series (ordered, successive points in time) เทียบกับ cross-sectional (fixed point in time)</li>
+<li>Time series: more time points (อย่างน้อย 50), very few variables, dynamic</li>
+<li>ขอบเขตของวิชา: single continuous random variable, equally spaced in discrete time</li>
+<li>วัตถุประสงค์สี่ข้อ: describe, explain, forecast, control standard</li>
+</ul>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>นิยาม</span></div>
+<div class="qtext">ข้อใดเป็น time series ตามนิยามในสไลด์</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. วัดหลายคนในวันเดียว เป็น cross-sectional">ส่วนสูงของนักศึกษา 60 คน วัดวันเดียวกัน</button>
+<button class="opt" data-correct="false" data-note="ผิด. หลายบริษัท ณ จุดเวลาเดียว เป็น cross-sectional">รายได้ของ 50 บริษัท ณ สิ้นปีเดียวกัน</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตัวแปรเดียว วัดซ้ำตามเวลา 72 จุด">ยอดขายของร้านหนึ่ง จดทุกเดือนนาน 6 ปี</button>
+<button class="opt" data-correct="false" data-note="ผิด. หลายคนในการสอบครั้งเดียว เป็น cross-sectional">คะแนนสอบของ 100 คน ในการสอบครั้งเดียว</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. องค์ประกอบของ time series</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p10.png" alt="Slide 1 หน้า 10: Time Series Components" loading="lazy">
+<figcaption>Slide 1 หน้า 10 — Time Series Components</figcaption>
+</figure>
+
+<p>Time series หนึ่งเส้นเกิดจากองค์ประกอบสี่อย่างที่ทำงานพร้อมกัน คือ Trend, Seasonal, Cyclical และ Irregular ตัวอย่าง: ยอดขายของร้านหนึ่งอาจโตขึ้นทุกปี (trend) สูงทุกเดือนธันวาคม (seasonal) ซบเซาเป็นช่วงหลายปีตามภาวะเศรษฐกิจ (cyclical) และขึ้นลงรายวันแบบสุ่ม (irregular) งานของการวิเคราะห์คือแยกองค์ประกอบเหล่านี้ออกจากกัน</p>
+
+<h3>2.1 Trend</h3>
+<figure>
+<img src="../assets/slides/ts1-p11.png" alt="Slide 1 หน้า 11: Trend" loading="lazy">
+<figcaption>Slide 1 หน้า 11 — Trend</figcaption>
+</figure>
+
+<p>Trend หมายถึงโดยเฉลี่ยแล้วค่าที่วัดมีแนวโน้มเพิ่มขึ้นหรือลดลงตามเวลา กราฟแรกเป็น increasing trend: น้ำหนักที่วัด 25 ครั้งเริ่มที่ประมาณ 10.2 และจบที่ประมาณ 10.9 ระหว่างทางมีช่วงที่ลดลง เช่น จาก 10.7 ที่ครั้งที่ 6 เหลือ 10.4 ที่ครั้งที่ 7 แต่ระดับเฉลี่ยสูงขึ้น กราฟที่สองเป็น decreasing trend: จำนวนผู้เสียชีวิตต่อการขับ 100 ล้านไมล์ลดจากประมาณ 5.5 ในปี 1966 เหลือประมาณ 1.7 ในปี 1994 trend เป็นเรื่องของค่าเฉลี่ยระยะยาว การลดลงชั่วคราวระหว่างทางจึงไม่ได้ลบล้าง trend เปรียบได้กับการเดินขึ้นเขาที่มีทางลงสั้น ๆ เป็นช่วง ปลายทางยังสูงกว่าต้นทาง</p>
+
+<h3>2.2 Seasonality</h3>
+<figure>
+<img src="../assets/slides/ts1-p12.png" alt="Slide 1 หน้า 12: Seasonality" loading="lazy">
+<figcaption>Slide 1 หน้า 12 — Seasonality</figcaption>
+</figure>
+
+<p>Seasonality คือรูปแบบสูงต่ำที่ซ้ำอย่างสม่ำเสมอและผูกกับปฏิทิน เช่น ฤดูกาล ไตรมาส เดือน หรือวันในสัปดาห์ ในกราฟ จุดสูงสุดของทุกรอบตรงกับ Summer ของทุกปี ตำแหน่งของยอดจึงทำนายล่วงหน้าได้ และยอดของแต่ละรอบสูงกว่ารอบก่อนหน้า แสดงว่ามี trend ขาขึ้นซ้อนอยู่ด้วย องค์ประกอบหลายอย่างจึงอยู่ในเส้นเดียวกันได้</p>
+
+<figure>
+<img src="../assets/slides/ts1-p13.png" alt="Slide 1 หน้า 13: Seasonality: ตัวอย่าง" loading="lazy">
+<figcaption>Slide 1 หน้า 13 — Seasonality: ตัวอย่าง</figcaption>
+</figure>
+
+<p>Seasonal variation คือความผันผวนระยะสั้นที่เกิดเป็นคาบ สไลด์ให้ <mark class="src" data-p="13">Examples</mark> สองข้อ ข้อแรก <mark class="src" data-p="13">seasonal variation</mark>: ยอดขายเสื้อกันหนาวในฤดูหนาวมากกว่าฤดูร้อนเสมอ ข้อที่สอง ยอดขายเครื่องดื่มเย็นในฤดูร้อนมากกว่าฤดูหนาว ทั้งสองตัวอย่างมีจุดร่วมคือ รอบยาวหนึ่งปีและยอดเกิดในช่วงเดิมของปฏิทินทุกปี</p>
+
+<h3>2.3 Cycle หรือ cyclical variation</h3>
+<figure>
+<img src="../assets/slides/ts1-p14.png" alt="Slide 1 หน้า 14: Cycle / Cyclical Variation" loading="lazy">
+<figcaption>Slide 1 หน้า 14 — Cycle / Cyclical Variation</figcaption>
+</figure>
+
+<p>Cyclical variation คือการเคลื่อนไหวขึ้นหรือลงที่เกิดซ้ำ แต่คาบของรอบยาวกว่าหนึ่งปี กราฟแสดงยอดขายแบตเตอรี่ (พันก้อน) ปี 1991 ถึง 2011 ซึ่งเพิ่มจากประมาณ 44 เป็น 72 เส้นตรงที่พาดขึ้นคือ long-term secular trend ข้อมูลจริงวนรอบเส้นนี้เป็นสี่ระยะ: Prosperity เมื่ออยู่เหนือเส้นและถึงจุดสูงสุด, Recession เมื่อเริ่มลดลง, Depression เมื่ออยู่ใต้เส้นและถึงจุดต่ำสุด และ Recovery เมื่อกลับขึ้น หนึ่งรอบใช้เวลาหลายปีและไม่เกิดในเดือนเดิมของทุกปี จึงเป็น cyclical ไม่ใช่ seasonal</p>
+
+<figure>
+<img src="../assets/slides/ts1-p15.png" alt="Slide 1 หน้า 15: Cycle / Cyclical Variation: ตัวอย่าง" loading="lazy">
+<figcaption>Slide 1 หน้า 15 — Cycle / Cyclical Variation: ตัวอย่าง</figcaption>
+</figure>
+
+<p>Cyclical variation คือการขึ้นและลงของ time series ในช่วงที่ยาวกว่าหนึ่งปี <mark class="src" data-p="15">Examples</mark> ในสไลด์: <mark class="src" data-p="15">Cyclical variation</mark>: แฟชั่นวนกลับมาทุก 3 ปี และของเสียเกิดซ้ำทุก 3 ชั่วโมง ตัวอย่างที่สองมีรอบสั้นกว่าหนึ่งปี จุดที่ทำให้เป็น cycle คือรอบไม่ผูกกับปฏิทิน ของเสียเกิดตามรอบของเครื่องจักร ไม่ใช่ตามฤดูกาล</p>
+
+<table>
+<tr><th></th><th>Seasonal</th><th>Cyclical</th></tr>
+<tr><td>ผูกกับปฏิทิน</td><td>ใช่ เกิดช่วงเดิมทุกปี</td><td>ไม่</td></tr>
+<tr><td>ความยาวรอบ</td><td>คงที่ ไม่เกินหนึ่งปี</td><td>ไม่คงที่ โดยทั่วไปยาวกว่าหนึ่งปี</td></tr>
+<tr><td>ตัวอย่าง</td><td>ยอดขายเครื่องดื่มเย็นสูงทุกฤดูร้อน</td><td>วัฏจักรเศรษฐกิจ รอบละหลายปี</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts1-p16.png" alt="Slide 1 หน้า 16: องค์ประกอบทั้งสี่ในกราฟเดียว" loading="lazy">
+<figcaption>Slide 1 หน้า 16 — องค์ประกอบทั้งสี่ในกราฟเดียว</figcaption>
+</figure>
+
+<p>รูปนี้รวมทุกองค์ประกอบบนแกนเวลา 1 ถึง 13 Trend คือเส้นตรงที่เอียงขึ้นตลอดช่วง Cyclical คือคลื่นยาวที่ต่ำสุดประมาณช่วง 4 ถึง 5 และสูงสุดประมาณช่วง 7 Seasonal คือคลื่นสั้นที่ซ้ำถี่และซ้อนอยู่บนคลื่นยาว Irregular fluctuations คือรอยหยักเล็กที่เหลือ วิธีแยกองค์ประกอบเมื่อเห็นกราฟลักษณะนี้คือดูความยาวของรอบ: รอบยาวที่สุดคือ cyclical รอบสั้นที่ซ้ำสม่ำเสมอคือ seasonal และรอยหยักที่ไม่มีแบบแผนคือ irregular</p>
+
+<h3>2.4 Irregular variations</h3>
+<figure>
+<img src="../assets/slides/ts1-p17.png" alt="Slide 1 หน้า 17: Irregular variations" loading="lazy">
+<figcaption>Slide 1 หน้า 17 — Irregular variations</figcaption>
+</figure>
+
+<p>Irregular variations คือความผันผวนที่มีระยะสั้น ไม่แน่นอน และไม่มีความสม่ำเสมอในรูปแบบการเกิด เกิดจากเหตุการณ์ที่ไม่คาดคิด เช่น <mark class="src" data-p="17">flood, war, earthquake, pandemic, famines</mark> เป็นส่วนที่เหลืออยู่เมื่อนำองค์ประกอบอื่น คือ trend, seasonal และ cyclical ออกแล้ว บางครั้งเรียกว่า <mark class="src" data-p="17">“noise”</mark></p>
+
+<figure>
+<img src="../assets/slides/ts1-p18.png" alt="Slide 1 หน้า 18: Irregular Component" loading="lazy">
+<figcaption>Slide 1 หน้า 18 — Irregular Component</figcaption>
+</figure>
+
+<p>จำนวนผู้ยกเลิกนัดกะทันหันและไม่มาตามนัดใน 30 วัน แกว่งระหว่าง 9 ในวันที่ 13 ถึง 20 ในวันที่ 14 สองวันติดกันต่างกัน 11 เมื่อมองหาแบบแผน ไม่พบทิศขึ้นหรือลง เพราะค่าแรกคือ 18 และค่าสุดท้ายคือ 19 ไม่พบยอดที่ซ้ำทุก 7 วัน และไม่พบคลื่นยาว เมื่อหา trend, seasonal และ cycle ไม่พบ สิ่งที่เห็นคือ irregular component ล้วน</p>
+
+<h3>2.5 Constant และ non-constant variance</h3>
+<figure>
+<img src="../assets/slides/ts1-p19.png" alt="Slide 1 หน้า 19: Constant Variance VS Non-constant Variance" loading="lazy">
+<figcaption>Slide 1 หน้า 19 — Constant Variance VS Non-constant Variance</figcaption>
+</figure>
+
+<p>คำถามของหน้านี้คือความแปรปรวนคงที่ตามเวลาหรือไม่ กราฟแรกเป็นจำนวนผู้โดยสารสายการบินปี 1949 ถึง 1961 ระดับเฉลี่ยเพิ่มจากประมาณ 120 เป็น 450 และระยะจากยอดถึงท้องในแต่ละปีกว้างขึ้นจากประมาณ 40 เป็น 200 จึงเป็น <mark class="src" data-p="19">Non-constant mean</mark> และ <mark class="src" data-p="19">Non-constant variance</mark> กราฟที่สองมี 100 จุดที่แกว่งรอบ 0 ตลอด ช่วงแรกแกว่งแคบประมาณ ±0.1 ช่วงท้ายแกว่งระหว่าง −2 ถึง 1 จึงมี mean คงที่แต่ <mark class="src" data-p="19">Non-constant variance</mark> สองสมบัตินี้แยกจากกัน: mean คือระดับกลางของเส้น ส่วน variance คือความกว้างของการแกว่งรอบระดับกลาง</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>องค์ประกอบ</span></div>
+<div class="qtext">อัตราว่างงานขึ้นลงเป็นรอบ รอบละประมาณ 5 ถึง 7 ปีตามภาวะเศรษฐกิจ และไม่ผูกกับเดือนใด เป็นองค์ประกอบใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. รอบยาวกว่าหนึ่งปีและไม่ผูกกับปฏิทิน">Cyclical เพราะรอบยาวกว่าหนึ่งปี</button>
+<button class="opt" data-correct="false" data-note="ผิด. seasonal ต้องผูกกับปฏิทินและรอบไม่เกินหนึ่งปี">Seasonal เพราะเกิดซ้ำเป็นรอบเสมอ</button>
+<button class="opt" data-correct="false" data-note="ผิด. irregular ไม่มีรูปแบบซ้ำ">Irregular เพราะคาดเดาล่วงหน้าไม่ได้</button>
+<button class="opt" data-correct="false" data-note="ผิด. trend คือทิศทางเฉลี่ยระยะยาว ไม่ใช่การขึ้นลงเป็นรอบ">Trend เพราะเป็นการเคลื่อนไหวระยะยาว</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 2</div>
+<ul>
+<li>นิยามขององค์ประกอบทั้งสี่ และตัวอย่างในสไลด์</li>
+<li>แยก seasonal กับ cyclical: ผูกกับปฏิทินหรือไม่ และความยาวรอบ</li>
+<li>สี่ระยะของ cycle: Prosperity, Recession, Depression, Recovery</li>
+<li>Irregular คือส่วนที่เหลือหลังนำองค์ประกอบอื่นออก เรียกว่า noise</li>
+<li>แยก non-constant mean กับ non-constant variance จากกราฟ</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s3">3. Decomposition: signal กับ noise</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p20.png" alt="Slide 1 หน้า 20: What is time-series decomposition? (basic concept)" loading="lazy">
+<figcaption>Slide 1 หน้า 20 — What is time-series decomposition? (basic concept)</figcaption>
+</figure>
+
+<p>แนวคิดของ decomposition คือ <mark class="src" data-p="20">TIME SERIES</mark> ประกอบด้วย <mark class="src" data-p="20">SIGNAL</mark> และ <mark class="src" data-p="20">NOISE</mark> ส่วน signal คือ <mark class="src" data-p="20">(TREND / SEASONAL/ CYCLE)</mark> ใช้สำหรับ <mark class="src" data-p="20">Forecast extrapolate signal portion of model</mark> คือพยากรณ์โดยยืดส่วนที่มีแบบแผนต่อไปในอนาคต ส่วน noise คือ <mark class="src" data-p="20">(ERROR / REMAINDER IRREGULAR)</mark> ใช้สำหรับ <mark class="src" data-p="20">Confidence interval account for uncertainty</mark> noise พยากรณ์ไม่ได้ แต่ขนาดของมันบอกได้ว่าค่าจริงจะคลาดจากค่าพยากรณ์ได้ประมาณเท่าใด เปรียบได้กับการฟังวิทยุ: signal คือเพลง และ noise คือเสียงซ่า เราทำนายทำนองท่อนต่อไปของเพลงได้ แต่ทำนายเสียงซ่าไม่ได้ ทำได้เพียงบอกว่าดังประมาณเท่าใด</p>
+
+<figure>
+<img src="../assets/slides/ts1-p21.png" alt="Slide 1 หน้า 21: Additive และ Multiplicative" loading="lazy">
+<figcaption>Slide 1 หน้า 21 — Additive และ Multiplicative</figcaption>
+</figure>
+
+<p>Decomposition เขียนเป็นสมการได้สองแบบ โดย \(T\) คือ trend, \(S\) คือ seasonal และ \(E\) คือ error แบบ additive คือ \(Y_t=T_t+S_t+E_t\) และแบบ multiplicative คือ \(Y_t=T_t\times S_t\times E_t\)</p>
+
+<div class="calc">
+<div class="calc-title">ตัวอย่างตัวเลข: additive กับ multiplicative ต่างกันอย่างไร</div>
+<div class="given">Trend ของปีแรกคือ 100 และของปีที่สิบคือ 400 ฤดูร้อนมียอดสูงกว่าปกติ</div>
+<table class="compact">
+<tr><th></th><th>ผลของฤดูร้อน</th><th>ปีแรก</th><th>ปีที่สิบ</th><th>ส่วนที่สูงกว่า trend</th></tr>
+<tr><td>Additive</td><td>\(S=+20\)</td><td>\(100+20=120\)</td><td>\(400+20=420\)</td><td>20 หน่วยทุกปี</td></tr>
+<tr><td>Multiplicative</td><td>\(S=1.2\)</td><td>\(100\times1.2=120\)</td><td>\(400\times1.2=480\)</td><td>20 หน่วยในปีแรก 80 หน่วยในปีที่สิบ</td></tr>
+</table>
+<p>ใน additive ขนาดของ seasonal คงที่ ใน multiplicative ขนาดของ seasonal โตตามระดับของ trend วิธีเลือกจากกราฟ: ถ้าความสูงของยอดประจำฤดูกาลเท่าเดิมทุกปี ใช้ additive ถ้าความสูงของยอดกว้างขึ้นเมื่อระดับสูงขึ้น ใช้ multiplicative</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts1-p22.png" alt="Slide 1 หน้า 22: Example: Airline Passenger Data" loading="lazy">
+<figcaption>Slide 1 หน้า 22 — Example: Airline Passenger Data</figcaption>
+</figure>
+
+<p>ข้อมูลผู้โดยสาร 144 เดือน ช่วงต้นอยู่ที่ประมาณ 110 ถึง 150 และช่วงท้ายอยู่ที่ประมาณ 400 ถึง 620 สไลด์สรุปสามข้อ ข้อแรก <mark class="src" data-p="22">We see a seasonal variation here (somewhat of a cycling pattern)</mark> ข้อที่สอง <mark class="src" data-p="22">We also see that both the overall mean and variation appear to be increasing over time.</mark> ข้อที่สาม <mark class="src" data-p="22">The possible reason for this seasonal variation is that much more people go on vacation during the summer time than in any other season of a year.</mark> เนื่องจาก variation เพิ่มขึ้นตามเวลา ระยะจากยอดถึงท้องในปีแรกประมาณ 40 และในปีท้ายประมาณ 200 ขนาดของ seasonal จึงโตตามระดับ ซึ่งเป็นลักษณะของแบบ multiplicative</p>
+
+<figure>
+<img src="../assets/slides/ts1-p23.png" alt="Slide 1 หน้า 23: Try it: Milk production" loading="lazy">
+<figcaption>Slide 1 หน้า 23 — Try it: Milk production</figcaption>
+</figure>
+
+<p>สไลด์ถามว่า <mark class="src" data-p="23">What are noticeable patterns ?</mark> ข้อมูลการผลิตนมรายเดือนมีรูปแบบสามข้อ ข้อแรก trend ขาขึ้น: ปี 1994 อยู่ที่ประมาณ 1,300 ถึง 1,400 และปี 2006 อยู่ที่ประมาณ 1,600 ถึง 1,750 ข้อที่สอง seasonal: ในแต่ละปีมียอดและท้องที่ตำแหน่งเดิม ซ้ำปีละรอบ ข้อที่สาม ความกว้างของการแกว่งในแต่ละปีใกล้เคียงกัน ประมาณ 150 ถึง 250 ความแปรปรวนจึงค่อนข้างคงที่ ซึ่งเข้ากับแบบ additive</p>
+
+<figure>
+<img src="../assets/slides/ts1-p24.png" alt="Slide 1 หน้า 24: Try it: Global temperature Data" loading="lazy">
+<figcaption>Slide 1 หน้า 24 — Try it: Global temperature Data</figcaption>
+</figure>
+
+<p>คำถามเดียวกัน <mark class="src" data-p="24">What are noticeable patterns ?</mark> กับข้อมูลอุณหภูมิโลกรายปี ช่วงปี 1856 ถึง 1920 ค่าอยู่ระหว่างประมาณ −0.5 ถึง −0.2 และแทบไม่เพิ่ม ช่วงปี 1920 ถึง 1940 เพิ่มขึ้นมาใกล้ 0 ช่วงปี 1940 ถึง 1975 ค่อนข้างราบ และหลังปี 1975 เพิ่มถึงประมาณ 0.4 จึงมี trend ขาขึ้นที่ไม่เป็นเส้นตรง ข้อมูลเป็นรายปี จึงไม่มี seasonal ให้เห็น เพราะ seasonal ต้องมีการวัดหลายครั้งภายในหนึ่งปี ข้อมูลชุดนี้กลับมาเป็นตัวอย่างหลักของข้อมูลที่ไม่ stationary ใน Lesson 3</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>Decomposition</span></div>
+<div class="qtext">ข้อมูลผู้โดยสารสายการบินมียอดฤดูร้อนที่กว้างขึ้นทุกปีตามระดับของผู้โดยสาร ควรใช้ decomposition แบบใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. additive ใช้เมื่อขนาดของ seasonal คงที่">\(Y_t=T_t+S_t+E_t\) เพราะ seasonal คงที่</button>
+<button class="opt" data-correct="false" data-note="ผิด. ทุกแบบต้องมีพจน์ error">\(Y_t=T_t+S_t\) เพราะไม่มี error เลย</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อมูลนี้มี trend ขาขึ้นชัดเจน">\(Y_t=S_t\times E_t\) เพราะไม่มี trend เลย</button>
+<button class="opt" data-correct="true" data-note="ถูก. ขนาดของ seasonal โตตามระดับ">\(Y_t=T_t\times S_t\times E_t\) เพราะ seasonal โต</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 3</div>
+<ul>
+<li>Time series = signal + noise และบทบาทของแต่ละส่วน: forecast กับ confidence interval</li>
+<li>สมการ additive และ multiplicative</li>
+<li>เลือกแบบจากกราฟ: seasonal คงที่ใช้ additive, seasonal โตตามระดับใช้ multiplicative</li>
+<li>บอกรูปแบบที่เห็นในกราฟ: trend, seasonal, variance คงที่หรือไม่</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. Random variable, E, Var และ Cov</h2>
+
+<p>ครึ่งหลังของ Lecture 1 เปลี่ยนจากการดูกราฟเป็นการเขียนโมเดลด้วยคณิตศาสตร์ เครื่องมือที่ใช้คือตัวแปรสุ่มและค่าสรุปสามตัว คือค่าคาดหมาย ความแปรปรวน และ covariance</p>
+
+<figure>
+<img src="../assets/slides/ts1-p26.png" alt="Slide 1 หน้า 26: Random Variable" loading="lazy">
+<figcaption>Slide 1 หน้า 26 — Random Variable</figcaption>
+</figure>
+
+<p>Random variable คือตัวแปรที่รับค่าตัวเลขตามผลลัพธ์สุ่มของการทดลอง สไลด์ระบุว่าตัวแปรสุ่ม X เป็นตัวแปรที่ค่า <mark class="src" data-p="26">can not be predicted with certainty</mark> แต่แปรผันตาม <mark class="src" data-p="26">probability distribution.</mark> ตัวอย่างคือแต้มของลูกเต๋า: ไม่รู้ว่าครั้งหน้าจะได้แต้มใด แต่รู้ว่าแต่ละแต้มมีโอกาส 1 ใน 6 ค่าเฉลี่ยของตัวแปรสุ่มเขียนว่า \(E(X)\) ความแปรปรวนเขียนว่า \(V(X)\) หรือ \(\mathrm{Var}(X)\) และความสัมพันธ์ระหว่างตัวแปรสุ่มสองตัวอธิบายด้วย \(\mathrm{Cov}(X,Y)\)</p>
+
+<table>
+<tr><th>ค่าสรุป</th><th>ความหมาย</th><th>ตัวอย่างลูกเต๋า</th></tr>
+<tr><td>\(E(X)\)</td><td>ค่าเฉลี่ยระยะยาว ถ้าทดลองซ้ำจำนวนมาก</td><td>\((1+2+3+4+5+6)/6=3.5\)</td></tr>
+<tr><td>\(\mathrm{Var}(X)\)</td><td>ขนาดของการแกว่งรอบค่าเฉลี่ย</td><td>\(E(X^2)-3.5^2=15.17-12.25=2.92\)</td></tr>
+<tr><td>\(\mathrm{Cov}(X,Y)\)</td><td>X และ Y เคลื่อนไปด้วยกันเพียงใด บวกคือทางเดียวกัน ลบคือสวนทาง</td><td>ลูกเต๋าสองลูกที่ทอยแยกกันมี Cov เป็น 0</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts1-p27.png" alt="Slide 1 หน้า 27: Univariate random variable: Expectation and Variance" loading="lazy">
+<figcaption>Slide 1 หน้า 27 — Univariate random variable: Expectation and Variance</figcaption>
+</figure>
+
+<p>หน้านี้ให้นิยามของ <mark class="src" data-p="27">Expectation and Variance</mark> สำหรับตัวแปรสุ่มต่อเนื่อง X ที่มี pdf \(f_X(x)\) ค่าเฉลี่ยคือ \(\mu=E(X)=\int_R xf_X(x)\,dx\) และความแปรปรวนคือ \(\mathrm{Var}(X)=E(X-\mu)^2=\int_R(x-\mu)^2f_X(x)\,dx\) เครื่องหมายอินทิกรัลทำหน้าที่เดียวกับการบวกถ่วงน้ำหนักในกรณีลูกเต๋า คือนำแต่ละค่าคูณกับโอกาสของค่านั้นแล้วรวมกัน สไลด์ให้สูตรที่คำนวณง่ายกว่า: \(\mathrm{Var}(X)=E(X^2)-[E(X)]^2\) ซึ่งเป็นสูตรที่ใช้กับลูกเต๋าในตารางข้างบน วิชานี้ไม่ต้องคำนวณอินทิกรัลโดยตรง สิ่งที่ใช้คือกฎของ E และ Var ในหน้า 29</p>
+
+<figure>
+<img src="../assets/slides/ts1-p28.png" alt="Slide 1 หน้า 28: Bi-variate random variables: Covariance and Correlation" loading="lazy">
+<figcaption>Slide 1 หน้า 28 — Bi-variate random variables: Covariance and Correlation</figcaption>
+</figure>
+
+<p>หน้านี้ให้นิยามของ <mark class="src" data-p="28">Covariance and Correlation</mark> สำหรับ X และ Y ที่มีค่าเฉลี่ย \(\mu_X\) และ \(\mu_Y\) covariance คือ \(\mathrm{cov}(X,Y)=E[(X-\mu_X)(Y-\mu_Y)]=E(XY)-E(X)E(Y)\) และ correlation คือ \(\rho=\mathrm{corr}(X,Y)=\mathrm{cov}(X,Y)/(\sigma_X\sigma_Y)\) correlation คือ covariance ที่หารด้วยส่วนเบี่ยงเบนมาตรฐานของทั้งสองตัว จึงไม่มีหน่วยและมีค่าระหว่าง −1 ถึง 1 สไลด์ระบุข้อควรระวัง: ถ้า X และ Y เป็นอิสระต่อกันแล้ว cov(X,Y) = 0 แต่ <mark class="src" data-p="28">(converse is not necessary true )</mark> ตัวอย่างค้าน: ให้ X มีค่า −1, 0, 1 ด้วยโอกาสเท่ากัน และ \(Y=X^2\) จะได้ \(E(X)=0\) และ \(E(XY)=E(X^3)=(-1+0+1)/3=0\) covariance จึงเป็น 0 ทั้งที่ Y ถูกกำหนดจาก X ทั้งหมด covariance วัดเฉพาะความสัมพันธ์เชิงเส้น</p>
+
+<div class="box prereq">
+<div class="label">ต้องรู้ก่อน — กฎหกข้อที่ใช้ตลอดวิชา (a และ b เป็นค่าคงที่)</div>
+<table class="compact">
+<tr><th>ข้อ</th><th>กฎ</th><th>อ่านว่า</th></tr>
+<tr><td>1</td><td>\(E(aX+bY)=aE(X)+bE(Y)\)</td><td>ดึงค่าคงที่ออก และแยกผลบวกได้</td></tr>
+<tr><td>2</td><td>\(\mathrm{Var}(aX)=a^2\mathrm{Var}(X)\)</td><td>ค่าคงที่ออกมาต้องยกกำลังสอง</td></tr>
+<tr><td>3</td><td>\(\mathrm{Var}(X+Y)=\mathrm{Var}(X)+\mathrm{Var}(Y)+2\mathrm{Cov}(X,Y)\)</td><td>ถ้าไม่สัมพันธ์กัน พจน์สุดท้ายเป็น 0</td></tr>
+<tr><td>4</td><td>\(\mathrm{Cov}(X,a)=0\)</td><td>ค่าคงที่ไม่แกว่ง จึงไม่เคลื่อนไปกับสิ่งใด</td></tr>
+<tr><td>5</td><td>\(\mathrm{Cov}(aX,bY)=ab\,\mathrm{Cov}(X,Y)\)</td><td>และกระจายเข้าผลบวกได้ทุกคู่</td></tr>
+<tr><td>6</td><td>\(\mathrm{Cov}(X,X)=\mathrm{Var}(X)\)</td><td>covariance กับตัวเองคือความแปรปรวน</td></tr>
+</table>
+</div>
+
+<figure>
+<img src="../assets/slides/ts1-p29.png" alt="Slide 1 หน้า 29: Review: Properties of Random Variable" loading="lazy">
+<figcaption>Slide 1 หน้า 29 — Review: Properties of Random Variable</figcaption>
+</figure>
+
+<p>สไลด์ให้โจทย์หกข้อโดยเว้นคำตอบไว้ ทุกข้อใช้กฎในตารางข้างบน</p>
+
+<div class="calc" id="s4-review">
+<div class="calc-title">เฉลยหน้า 29 ทั้งหกข้อ</div>
+<ol class="steps">
+<li><div class="st-title">\(E(2X+3Y)\)</div><p>กฎข้อ 1: \(=2E(X)+3E(Y)\)</p></li>
+<li><div class="st-title">\(V(3X)\)</div><p>กฎข้อ 2: \(=3^2V(X)=9V(X)\) คำตอบไม่ใช่ \(3V(X)\)</p></li>
+<li><div class="st-title">\(V(X+Y)\)</div><p>กฎข้อ 3: \(=V(X)+V(Y)+2\mathrm{Cov}(X,Y)\) ถ้า X และ Y เป็นอิสระต่อกัน เหลือ \(V(X)+V(Y)\)</p></li>
+<li><div class="st-title">\(\mathrm{Cov}(2X,3)\)</div><p>3 เป็นค่าคงที่ กฎข้อ 4: \(=0\)</p></li>
+<li><div class="st-title">\(\mathrm{Cov}(2X-3Y,\,2Z)\)</div><p>กระจายทีละคู่: \(\mathrm{Cov}(2X,2Z)+\mathrm{Cov}(-3Y,2Z)=4\mathrm{Cov}(X,Z)-6\mathrm{Cov}(Y,Z)\)</p></li>
+<li><div class="st-title">\(\mathrm{Cov}(2X+3Y,\,2Z-5W)\)</div><p>ก้อนแรกมีสองตัว ก้อนหลังมีสองตัว จึงมี 4 คู่: \((2)(2)\), \((2)(-5)\), \((3)(2)\), \((3)(-5)\)</p>
+\[=4\mathrm{Cov}(X,Z)-10\mathrm{Cov}(X,W)+6\mathrm{Cov}(Y,Z)-15\mathrm{Cov}(Y,W)\]</li>
+</ol>
+<div class="answer">หลักของข้อ 5 และ 6: covariance ของผลบวกสองก้อนได้จากการจับทุกตัวในก้อนแรกคู่กับทุกตัวในก้อนหลัง คูณสัมประสิทธิ์ แล้วบวกกันทั้งหมด เทคนิคนี้เป็นเครื่องมือหลักของหัวข้อ 8 และ 9</div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>กฎของ Var</span></div>
+<div class="qtext">X และ Y เป็นอิสระต่อกัน โดย \(V(X)=4\) และ \(V(Y)=1\) ค่า \(V(2X-3Y)\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ค่าคงที่ต้องยกกำลังสอง และความแปรปรวนบวกกันเสมอ">\(2(4)-3(1)=5\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 2² × 4 + (−3)² × 1 = 16 + 9">\(4(4)+9(1)=25\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. (−3)² เป็นบวก จึงต้องบวก">\(4(4)-9(1)=7\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าคงที่ต้องยกกำลังสอง">\(2(4)+3(1)=11\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>Covariance</span></div>
+<div class="qtext">ข้อความ “cov(X,Y) = 0 ดังนั้น X และ Y เป็นอิสระต่อกัน” ถูกหรือผิด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อิสระต่อกันให้ cov = 0 แต่กลับกันไม่จำเป็น">ถูก เพราะ cov เป็นศูนย์คืออิสระเสมอ</button>
+<button class="opt" data-correct="false" data-note="ผิด. ชนิดของตัวแปรไม่เกี่ยว">ถูก เฉพาะเมื่อตัวแปรเป็นแบบต่อเนื่อง</button>
+<button class="opt" data-correct="false" data-note="ผิด. cov ติดลบได้ และเหตุผลนี้ไม่เกี่ยว">ผิด เพราะ cov ต้องไม่ติดลบอยู่แล้ว</button>
+<button class="opt" data-correct="true" data-note="ถูก. สไลด์ระบุว่า converse is not necessary true">ผิด เพราะบทกลับไม่จำเป็นต้องจริง</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s5">5. Time series คือ stochastic process</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p30.png" alt="Slide 1 หน้า 30: Time Series and Stochastic process" loading="lazy">
+<figcaption>Slide 1 หน้า 30 — Time Series and Stochastic process</figcaption>
+</figure>
+
+<p>หน้านี้ตอบคำถามว่าทำไมต้องรู้เรื่องตัวแปรสุ่ม ลำดับของตัวแปรสุ่ม \(\{X_t:t=1,2,3,\dots,n\}\) หรือเขียนสั้นว่า \(X_t\) เรียกว่า <mark class="src" data-p="30">stochastic process</mark> เป็นกลุ่มของตัวแปรสุ่มที่มีเวลา t เป็นดัชนี: \(X_1\) คือค่าของ process ณ เวลา 1, \(X_2\) ณ เวลา 2 ไปจนถึง \(X_n\) แนวคิดสำคัญคือ ค่าที่เห็นในข้อมูลแต่ละจุดเป็นเพียงค่าเดียวที่สุ่มออกมาจากตัวแปรสุ่มของเวลานั้น เปรียบได้กับการทอยลูกเต๋า n ลูกเรียงกัน ลูกละเวลา ข้อมูลที่ได้คือแต้มที่ออกหนึ่งชุด ถ้าทอยใหม่ทั้งหมดจะได้อีกชุดที่ต่างออกไป ข้อมูลจริงมีเพียงชุดเดียว เพราะเวลาย้อนกลับไม่ได้</p>
+
+<figure>
+<img src="../assets/slides/ts1-p31.png" alt="Slide 1 หน้า 31: Why do we need to know the random variable?" loading="lazy">
+<figcaption>Slide 1 หน้า 31 — Why do we need to know the random variable?</figcaption>
+</figure>
+
+<p>ข้อมูล time series มีความสัมพันธ์กันเองเกือบทุกครั้ง เรียกว่า <mark class="src" data-p="31">autocorrelated.</mark> ในกราฟ S&amp;P 500 ทุกจุดบนเส้นเป็น \(X_t\) คนละตัว ค่าของปี 1983 ใกล้กับค่าของปี 1982 มากกว่าค่าของปี 1965 ค่าที่อยู่ติดกันจึงสัมพันธ์กัน สไลด์บอกสองทางเลือก: อาจต้องการ exploit ความสัมพันธ์นั้น คือใช้พยากรณ์ หรืออย่างน้อยต้อง cope กับมัน เพราะวิธีสถิติที่สมมติว่าข้อมูลเป็นอิสระต่อกันจะให้ผลผิดถ้ามองข้ามความสัมพันธ์นี้</p>
+
+<figure>
+<img src="../assets/slides/ts1-p32.png" alt="Slide 1 หน้า 32: Time Series and Stochastic Process: การแจกแจงตามเวลา" loading="lazy">
+<figcaption>Slide 1 หน้า 32 — Time Series and Stochastic Process: การแจกแจงตามเวลา</figcaption>
+</figure>
+
+<p>ภาพนี้แสดงว่าตัวแปรสุ่มที่เรียงตามเวลามีลักษณะอย่างไร จุดเริ่มต้น \(V_0\) เป็นค่าที่รู้แน่นอน ทุกเวลาถัดไป ค่าที่เป็นไปได้กระจายเป็นการแจกแจง (ในภาพเป็น Log-Normal probability distribution) ศูนย์กลางของการแจกแจงเลื่อนขึ้นตาม trend หรือ drift และภาพระบุว่า variance grows linearly with the forecasted horizon ยิ่งมองไปข้างหน้าไกล การแจกแจงยิ่งกว้าง ความไม่แน่นอนยิ่งมาก ลักษณะนี้ปรากฏอีกครั้งในหัวข้อ 9 ซึ่ง random walk มีความแปรปรวน \(t\sigma_w^2\) ที่โตเป็นเส้นตรงตามเวลา</p>
+
+<figure>
+<img src="../assets/slides/ts1-p33.png" alt="Slide 1 หน้า 33: Time Series and Stochastic Process: joint distribution" loading="lazy">
+<figcaption>Slide 1 หน้า 33 — Time Series and Stochastic Process: joint distribution</figcaption>
+</figure>
+
+<p>โมเดลความน่าจะเป็นที่สมบูรณ์ของ \(\{X_t\}\) ต้องระบุ joint distribution ของเวกเตอร์สุ่ม \((X_1,\dots,X_n)\) สำหรับทุก n คือระบุ \(P(X_1\le x_1,X_2\le x_2,\dots,X_n\le x_n)\) สำหรับทุกค่า x และทุก n หมายความว่าต้องรู้โอกาสของทุกเส้นทางที่เป็นไปได้ของข้อมูลทั้งชุด ซึ่งมีข้อมูลมากเกินกว่าจะระบุได้ในทางปฏิบัติ</p>
+
+<figure>
+<img src="../assets/slides/ts1-p34.png" alt="Slide 1 หน้า 34: Time Series and Stochastic Process: first and second moments" loading="lazy">
+<figcaption>Slide 1 หน้า 34 — Time Series and Stochastic Process: first and second moments</figcaption>
+</figure>
+
+<p>ทางออกคือระบุเฉพาะส่วนที่สำคัญ วิชานี้ระบุเฉพาะ first และ second-ordered moments คือค่าคาดหมายในรูป \(E(X_t)\) และ \(E(X_tX_{t-k})\) สไลด์ให้เหตุผลว่า สารสนเทศสำคัญส่วนใหญ่ของ time series process อยู่ใน moment สองอันดับแรกนี้ หรือกล่าวอีกแบบคืออยู่ใน means, variances และ covariances moment อันดับหนึ่งคือค่าเฉลี่ย ส่วน moment อันดับสองให้ความแปรปรวนเมื่อ \(k=0\) และ covariance เมื่อ \(k\ge1\) หัวข้อถัดไปตั้งชื่อให้ปริมาณเหล่านี้</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>Stochastic process</span></div>
+<div class="qtext">วิชานี้ระบุโมเดลของ \(\{X_t\}\) ด้วยสิ่งใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. first and second-ordered moments ตามสไลด์หน้า 34">\(E(X_t)\) และ \(E(X_tX_{t-k})\) เท่านั้น</button>
+<button class="opt" data-correct="false" data-note="ผิด. joint distribution เต็มคือโมเดลสมบูรณ์ แต่วิชานี้ไม่ได้ระบุถึงระดับนั้น">joint distribution ของทุกเวกเตอร์สุ่ม</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าสังเกตคือข้อมูล ไม่ใช่การระบุโมเดล">ค่าสังเกตหนึ่งค่าของแต่ละเวลา t</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้เฉพาะ moment อันดับหนึ่งและสอง">moment อันดับสามและอันดับสี่เท่านั้น</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s6">6. Mean function, autocovariance และ ACF</h2>
+
+<p>สามนิยามนี้คือ moment อันดับหนึ่งและสองที่เขียนเป็นฟังก์ชันของเวลา ใช้ในทุกบทของวิชา</p>
+
+<figure>
+<img src="../assets/slides/ts1-p35.png" alt="Slide 1 หน้า 35: Mean function (Shumway หน้า 19)" loading="lazy">
+<figcaption>Slide 1 หน้า 35 — Mean function (Shumway หน้า 19)</figcaption>
+</figure>
+
+<p>Mean function คือ \(\mu_t=E(X_t)=\int_{-\infty}^{\infty}xf_t(x)\,dx\) สำหรับ \(t=1,2,\dots\) เป็นค่าเฉลี่ยทางทฤษฎีของ series ณ เวลา t ตัวห้อย t มีไว้เพราะแต่ละเวลาอาจมีค่าเฉลี่ยไม่เท่ากัน เช่น ข้อมูลที่มี trend ขาขึ้นมี \(\mu_t\) ที่เพิ่มตามเวลา ส่วนข้อมูลที่แกว่งรอบระดับเดิมมี \(\mu_t\) คงที่</p>
+
+<figure>
+<img src="../assets/slides/ts1-p36.png" alt="Slide 1 หน้า 36: Autocovariance function (Shumway หน้า 20)" loading="lazy">
+<figcaption>Slide 1 หน้า 36 — Autocovariance function (Shumway หน้า 20)</figcaption>
+</figure>
+
+<p>Autocovariance function นิยามเป็น second moment product: \(\gamma_{t,s}=\gamma_X(s,t)=E[(X_t-\mu_t)(X_s-\mu_s)]=\mathrm{cov}(X_t,X_s)=E(X_tX_s)-E(X_t)E(X_s)\) เป็น covariance ตามหัวข้อ 4 แต่วัดระหว่างตัวแปรตัวเดียวกันที่สองเวลา คำว่า auto หมายถึงกับตัวเอง ถ้า \(t=s\) จะได้ \(\gamma_{t,t}=\mathrm{Var}(X_t)\) ตามกฎข้อ 6 ค่า \(\gamma_{t,s}\) ที่เป็นบวกหมายความว่า เมื่อค่าที่เวลา s สูงกว่าค่าเฉลี่ย ค่าที่เวลา t มีแนวโน้มสูงกว่าค่าเฉลี่ยด้วย</p>
+
+<figure>
+<img src="../assets/slides/ts1-p37.png" alt="Slide 1 หน้า 37: Autocorrelation function, ACF (Shumway หน้า 22)" loading="lazy">
+<figcaption>Slide 1 หน้า 37 — Autocorrelation function, ACF (Shumway หน้า 22)</figcaption>
+</figure>
+
+<p>Autocorrelation function คือ \(\rho_{t,s}=\mathrm{corr}(X_t,X_s)=\dfrac{\gamma_{t,s}}{\sqrt{\gamma_{t,t}\,\gamma_{s,s}}}\) เป็น autocovariance ที่หารด้วยส่วนเบี่ยงเบนมาตรฐานของทั้งสองเวลา จึงมีค่าระหว่าง −1 ถึง 1 และเทียบข้าม series ได้ สไลด์ให้การตีความสามระดับ: ค่าใกล้ ±1 แสดง strong linear dependence ระหว่าง \(X_t\) กับ \(X_s\) ค่าใกล้ 0 แสดง weak linear dependence และค่าเท่ากับ 0 แสดงว่า \(X_t\) กับ \(X_s\) uncorrelated</p>
+
+<div class="calc">
+<div class="calc-title">ตัวอย่างอุ่นเครื่อง: \(X_t=5+w_t\) โดย \(w_t\) มีค่าเฉลี่ย 0 ความแปรปรวน 4 และเป็นอิสระต่อกันทุกเวลา</div>
+<ol class="steps">
+<li><div class="st-title">Mean function</div><p>\(\mu_t=E(5)+E(w_t)=5+0=5\) เท่ากันทุกเวลา</p></li>
+<li><div class="st-title">Variance</div><p>\(\gamma_{t,t}=\mathrm{Var}(5+w_t)=\mathrm{Var}(w_t)=4\) การบวกค่าคงที่ไม่เปลี่ยนการแกว่ง</p></li>
+<li><div class="st-title">Autocovariance เมื่อ \(t\ne s\)</div><p>\(\mathrm{cov}(5+w_t,5+w_s)=\mathrm{cov}(w_t,w_s)=0\) เพราะเป็นอิสระต่อกัน</p></li>
+<li><div class="st-title">ACF</div><p>เมื่อ \(t\ne s\): \(\rho_{t,s}=0/\sqrt{4\cdot4}=0\) และเมื่อ \(t=s\): \(\rho_{t,t}=4/4=1\)</p></li>
+</ol>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>ACF</span></div>
+<div class="qtext">ให้ \(\gamma_{3,5}=2\), \(\gamma_{3,3}=4\) และ \(\gamma_{5,5}=9\) ค่า \(\rho_{3,5}\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ตัวหารต้องถอดรากที่สอง">\(2/(4\cdot9)=0.056\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือรากของผลคูณ ไม่ใช่ผลบวก">\(2/(4+9)=0.154\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ในรากต้องเป็นผลคูณ ไม่ใช่ผลบวก">\(2/\sqrt{4+9}=0.555\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 2 ÷ √36 = 2 ÷ 6">\(2/\sqrt{4\cdot9}=0.333\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 4 ถึง 6</div>
+<ul>
+<li>ใช้กฎหกข้อของ E, Var และ Cov ได้คล่อง โดยเฉพาะ \(\mathrm{Var}(aX)=a^2\mathrm{Var}(X)\) และการกระจาย Cov ทีละคู่</li>
+<li>cov = 0 ไม่ได้หมายความว่าอิสระต่อกัน</li>
+<li>นิยามของ stochastic process และเหตุผลที่ใช้เฉพาะ first และ second moments</li>
+<li>เขียนนิยามของ \(\mu_t\), \(\gamma_{t,s}\) และ \(\rho_{t,s}\) ได้ และคำนวณ \(\rho\) จาก \(\gamma\) ได้</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s7">7. White noise</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p38.png" alt="Slide 1 หน้า 38: White Noise (Shumway หน้า 12)" loading="lazy">
+<figcaption>Slide 1 หน้า 38 — White Noise (Shumway หน้า 12)</figcaption>
+</figure>
+
+<p>White noise คือกลุ่มของตัวแปรสุ่มที่ <mark class="src" data-p="38">uncorrelated</mark> เขียนว่า \(w_t\) มีค่าเฉลี่ย 0 และความแปรปรวน \(\sigma_w^2\) เขียนย่อว่า \(w_t\sim wn(0,\sigma_w^2)\) กราฟตัวอย่างแกว่งขึ้นลงถี่รอบค่ากลางเดียวตลอดช่วง ความกว้างเท่าเดิมตั้งแต่ต้นจนจบ และไม่มีช่วงที่ค่าเกาะกลุ่มสูงหรือต่ำติดกันนาน ค่าก่อนหน้าไม่บอกอะไรเกี่ยวกับค่าถัดไป นี่คือความหมายของ uncorrelated ในกราฟ ชื่อ white noise มาจากแสงสีขาวซึ่งมีทุกความถี่ผสมกันเท่า ๆ กัน เสียงที่มีสมบัติเดียวกันคือเสียงซ่าของวิทยุที่ไม่ได้จูนคลื่น</p>
+
+<figure>
+<img src="../assets/slides/ts1-p39.png" alt="Slide 1 หน้า 39: White Noise: นิยามแบบ iid" loading="lazy">
+<figcaption>Slide 1 หน้า 39 — White Noise: นิยามแบบ iid</figcaption>
+</figure>
+
+<p>หน้านี้ให้นิยามที่เข้มขึ้น Stochastic process \(\{w_t:t=1,2,\dots\}\) เรียกว่า white noise process ถ้าเป็นลำดับของตัวแปรสุ่มที่ <mark class="src" data-p="39">independent and identically distributed (iid)</mark> โดย \(E(w_t)=0\), \(\mathrm{Var}(w_t)=\sigma_w^2\) และ \(\sigma_w^2\) เป็นค่าคงที่ <mark class="src" data-p="39">( free of t )</mark> คำว่า independent เข้มกว่า uncorrelated เพราะหมายถึงไม่มีความสัมพันธ์รูปแบบใดเลย ไม่เฉพาะเชิงเส้น ส่วน identically distributed หมายถึงทุกเวลามาจากการแจกแจงเดียวกัน และ free of t หมายถึงค่าไม่เปลี่ยนตามเวลา</p>
+
+<figure>
+<img src="../assets/slides/ts1-p40.png" alt="Slide 1 หน้า 40: White Noise: สัญกรณ์" loading="lazy">
+<figcaption>Slide 1 หน้า 40 — White Noise: สัญกรณ์</figcaption>
+</figure>
+
+<p>White noise แบบ iid เขียนว่า \(w_t\sim iid(0,\sigma_w^2)\) การแจกแจงเป็นแบบใดก็ได้ที่มีค่าเฉลี่ย 0 และความแปรปรวนคงที่ ตัวอย่างในสไลด์: ถ้าเป็น Normal เขียนว่า \(w_t\sim iid\,N(0,\sigma_w^2)\) ซึ่งเรียกว่า Gaussian white noise และถ้าเป็น t-distribution ที่ df = 3 เขียนว่า \(w_t\sim iid\,t_{df=3}\) บทต่อ ๆ ไปใช้ Gaussian white noise เป็นหลัก</p>
+
+<figure>
+<img src="../assets/slides/ts1-p41.png" alt="Slide 1 หน้า 41: Gaussian white noise สองชุด" loading="lazy">
+<figcaption>Slide 1 หน้า 41 — Gaussian white noise สองชุด</figcaption>
+</figure>
+
+<p>กราฟบนเป็น Gaussian white noise ที่ \(\sigma_w^2=1\) และกราฟล่างที่ \(\sigma_w^2=36\) ทั้งสองมีรูปแบบเดียวกัน ต่างกันที่สเกล เมื่อ \(\sigma_w^2=1\) ส่วนเบี่ยงเบนมาตรฐานคือ 1 ค่าส่วนใหญ่อยู่ระหว่าง −2 ถึง 2 เมื่อ \(\sigma_w^2=36\) ส่วนเบี่ยงเบนมาตรฐานคือ 6 ค่าส่วนใหญ่อยู่ระหว่าง −12 ถึง 12 ความแปรปรวนเปลี่ยนเฉพาะความกว้างของการแกว่ง ไม่ได้สร้างแบบแผนใหม่</p>
+
+<div class="box beginner">
+<div class="label">ตรวจจากกราฟว่าข้อมูลคล้าย white noise หรือไม่</div>
+<ol>
+<li>ระดับกลางอยู่ที่ 0 ตลอด ไม่มี trend</li>
+<li>ความกว้างของการแกว่งคงที่</li>
+<li>ไม่มีรอบที่ซ้ำ</li>
+<li>ไม่มีช่วงที่ค่าติดกันสูงหรือต่ำต่อเนื่อง</li>
+</ol>
+<p>ข้อ 4 ตรวจด้วยตัวเลขได้ด้วย correlogram ใน Lesson 3</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts1-p42.png" alt="Slide 1 หน้า 42: White Noise: Autocovariance function" loading="lazy">
+<figcaption>Slide 1 หน้า 42 — White Noise: Autocovariance function</figcaption>
+</figure>
+
+<p>หน้านี้หา autocovariance ของ white noise โดยแยกสองกรณี เมื่อ \(t=s\) ได้ \(\mathrm{cov}(w_t,w_t)=\mathrm{Var}(w_t)=\sigma_w^2\) ตามกฎข้อ 6 เมื่อ \(t\ne s\) ตัวแปรทั้งสองเป็นอิสระต่อกัน จึงได้ \(\mathrm{cov}(w_t,w_s)=0\) สรุปได้ว่า \(\gamma_{t,s}=\sigma_w^2\) เมื่อ \(|t-s|=0\) และ \(\gamma_{t,s}=0\) เมื่อ \(|t-s|\ne0\)</p>
+
+<figure>
+<img src="../assets/slides/ts1-p43.png" alt="Slide 1 หน้า 43: White Noise: Autocorrelation function" loading="lazy">
+<figcaption>Slide 1 หน้า 43 — White Noise: Autocorrelation function</figcaption>
+</figure>
+
+<p>แทนผลจากหน้าก่อนลงในสูตร \(\rho_{t,s}=\gamma_{t,s}/\sqrt{\gamma_{t,t}\gamma_{s,s}}\) ตัวหารคือ \(\sqrt{\sigma_w^2\cdot\sigma_w^2}=\sigma_w^2\) ทั้งสองกรณี เมื่อ \(t=s\) ได้ \(\rho=\sigma_w^2/\sigma_w^2=1\) และเมื่อ \(t\ne s\) ได้ \(\rho=0\) white noise จึงสัมพันธ์กับตัวเองที่เวลาเดียวกันเต็มที่ และไม่สัมพันธ์กับเวลาอื่นเลย</p>
+
+<div class="answer">White noise: \(E(w_t)=0\), \(\gamma_{t,s}=\sigma_w^2\) เมื่อ \(t=s\) และ 0 เมื่อ \(t\ne s\), \(\rho_{t,s}=1\) เมื่อ \(t=s\) และ 0 เมื่อ \(t\ne s\) กฎย่อที่ใช้ในทุกการพิสูจน์: \(\mathrm{cov}(w_i,w_j)\) เท่ากับ \(\sigma_w^2\) เมื่อเป็นตัวเดียวกัน และเท่ากับ 0 เมื่อเป็นคนละตัว</div>
+
+<figure>
+<img src="../assets/slides/ts1-p44.png" alt="Slide 1 หน้า 44: White Noise: บทบาทในการสร้างโมเดล" loading="lazy">
+<figcaption>Slide 1 หน้า 44 — White Noise: บทบาทในการสร้างโมเดล</figcaption>
+</figure>
+
+<p>White noise process โดยตัวเองค่อนข้าง <mark class="src" data-p="44">uninteresting</mark> สำหรับการสร้างโมเดลให้ข้อมูลจริง แต่มีบทบาทสำคัญในการวิเคราะห์ Time series process มี variation สองชนิด ชนิดแรกคือ systematic variation ที่ต้องการจับและสร้างเป็นโมเดล เช่น trend และ seasonal components ชนิดที่สองคือ random variation ซึ่งเป็น noise พื้นหลังของ process เป้าหมายคือดึงส่วน systematic ออกมาใส่ในโมเดล ถ้าทำได้ดีพอ ส่วนที่ “left over” ควรเป็น random variation ที่เป็น white noise ข้อนี้เป็นเกณฑ์ตรวจโมเดลตลอดวิชา: ถ้า residual ยังมีแบบแผน แสดงว่าโมเดลยังดึงส่วน systematic ออกไม่หมด</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>White noise</span></div>
+<div class="qtext">ข้อใดไม่ใช่สมบัติของ white noise \(w_t\sim iid(0,\sigma_w^2)\)</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้เป็นสมบัติของ white noise">\(E(w_t)=0\) ทุกเวลา t</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้เป็นสมบัติของ white noise">\(\rho_{t,s}=0\) เมื่อ \(t\ne s\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ความแปรปรวนของ white noise คงที่ ไม่โตตาม t ข้อนี้เป็นสมบัติของ random walk">\(\mathrm{Var}(w_t)=t\sigma_w^2\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้เป็นสมบัติของ white noise">\(\sigma_w^2\) ไม่ขึ้นกับ t</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s8">8. Example 1.9: moving average 3 จุด</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p45.png" alt="Slide 1 หน้า 45: Example 1.9" loading="lazy">
+<figcaption>Slide 1 หน้า 45 — Example 1.9</figcaption>
+</figure>
+
+<p>โจทย์ให้หา mean function, autocovariance และ autocorrelation ของโมเดล \(X_t=\tfrac13(w_{t-1}+w_t+w_{t+1})\) โดย \(w_t\) เป็น white noise ที่มีความแปรปรวน \(\sigma_w^2\) โมเดลนี้เฉลี่ย white noise สามค่าที่อยู่ติดกัน คือค่าก่อนหน้า ค่าปัจจุบัน และค่าถัดไป</p>
+
+<div class="box prereq">
+<div class="label">เทคนิคหลัก — นับ w ที่ตรงกัน</div>
+<p>เมื่อหา covariance ของผลรวมของ w สองก้อน ให้ทำสี่ขั้น</p>
+<ol>
+<li>เขียนว่าแต่ละก้อนมี w ตัวใด พร้อมสัมประสิทธิ์</li>
+<li>หา w ที่ปรากฏในทั้งสองก้อน</li>
+<li>คูณสัมประสิทธิ์ของตัวนั้นจากสองก้อน แล้วคูณด้วย \(\sigma_w^2\)</li>
+<li>บวกผลของทุกตัวที่ตรงกัน</li>
+</ol>
+<p>เหตุผล: เมื่อกระจาย covariance ทีละคู่ตามหัวข้อ 4 คู่ที่เป็น w คนละตัวให้ 0 ทั้งหมด เหลือเฉพาะคู่ที่เป็นตัวเดียวกัน</p>
+</div>
+
+<div class="calc" id="s8-calc">
+<div class="calc-title">พิสูจน์ Example 1.9</div>
+<ol class="steps">
+<li><div class="st-title">Mean function</div>
+\[E(X_t)=\tfrac13\,[E(w_{t-1})+E(w_t)+E(w_{t+1})]=\tfrac13\,[0+0+0]=0\]
+<p>\(\mu_t=0\) ทุกเวลา</p></li>
+<li><div class="st-title">เขียนสมาชิกของแต่ละก้อน</div>
+<p>\(X_t\) ใช้ \(w_{t-1},w_t,w_{t+1}\) และ \(X_{t+h}\) ใช้ \(w_{t+h-1},w_{t+h},w_{t+h+1}\) สัมประสิทธิ์ของทุกตัวคือ \(\tfrac13\) ดังนั้นแต่ละตัวที่ตรงกันให้ \(\tfrac13\cdot\tfrac13\sigma_w^2=\tfrac19\sigma_w^2\)</p></li>
+<li><div class="st-title">นับตัวที่ตรงกันในแต่ละ h</div>
+<table class="compact">
+<tr><th>h</th><th>ก้อนของ \(X_t\)</th><th>ก้อนของ \(X_{t+h}\)</th><th>จำนวนที่ตรงกัน</th><th>\(\gamma(t,t+h)\)</th></tr>
+<tr><td>0</td><td>t−1, t, t+1</td><td>t−1, t, t+1</td><td>3</td><td>\(\tfrac39\sigma_w^2\)</td></tr>
+<tr><td>1</td><td>t−1, t, t+1</td><td>t, t+1, t+2</td><td>2</td><td>\(\tfrac29\sigma_w^2\)</td></tr>
+<tr><td>2</td><td>t−1, t, t+1</td><td>t+1, t+2, t+3</td><td>1</td><td>\(\tfrac19\sigma_w^2\)</td></tr>
+<tr><td>3</td><td>t−1, t, t+1</td><td>t+2, t+3, t+4</td><td>0</td><td>0</td></tr>
+</table>
+<p>ค่า h ที่ติดลบให้ผลเท่ากับค่าบวก เพราะ covariance สมมาตร</p></li>
+<li><div class="st-title">Autocovariance</div>
+\[\gamma(t,t+h)=\begin{cases}\tfrac39\sigma_w^2, &amp; h=0\\[2pt] \tfrac29\sigma_w^2, &amp; |h|=1\\[2pt] \tfrac19\sigma_w^2, &amp; |h|=2\\[2pt] 0, &amp; |h|\ge3\end{cases}\]</li>
+<li><div class="st-title">Autocorrelation</div>
+<p>ตัวหารคือ \(\sqrt{\tfrac39\sigma_w^2\cdot\tfrac39\sigma_w^2}=\tfrac39\sigma_w^2\)</p>
+\[\rho(0)=1,\qquad \rho(\pm1)=\frac{2/9}{3/9}=\frac23,\qquad \rho(\pm2)=\frac{1/9}{3/9}=\frac13,\qquad \rho(h)=0\ \text{เมื่อ }|h|\ge3\]</li>
+</ol>
+<div class="answer">ค่าที่ห่างกันหนึ่งช่วงใช้ w ร่วมกัน 2 ใน 3 ตัว จึงมี correlation 2/3 ค่าที่ห่างกันสองช่วงใช้ร่วมกัน 1 ตัว จึงได้ 1/3 ค่าที่ห่างกันสามช่วงขึ้นไปไม่มี w ร่วมกัน จึงได้ 0</div>
+<p>ผลทั้งหมดไม่ขึ้นกับ t: \(\mu_t\) คงที่ และ \(\gamma\) ขึ้นกับระยะห่าง h เท่านั้น สมบัตินี้คือ stationarity ซึ่งนิยามอย่างเป็นทางการใน Lesson 2 โมเดลนี้เป็นกรณีหนึ่งของ moving average ที่ศึกษาใน Lesson 5 และ ACF ที่ตัดเป็นศูนย์หลัง lag 2 เป็นลักษณะของโมเดลตระกูลนั้น</p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s9">9. Homework: random walk with drift</h2>
+
+<figure>
+<img src="../assets/slides/ts1-p46.png" alt="Slide 1 หน้า 46: Homework" loading="lazy">
+<figcaption>Slide 1 หน้า 46 — Homework</figcaption>
+</figure>
+
+<p>โจทย์ให้หา mean function, autocovariance และ autocorrelation ของ \(X_t=\delta+X_{t-1}+w_t\) สำหรับ \(t=1,2,\dots\) โดย \(X_0=0\) และ \(w_t\) เป็น white noise ที่มีความแปรปรวน \(\sigma_w^2\) โมเดลนี้เรียกว่า random walk with drift ค่าปัจจุบันเท่ากับค่าก่อนหน้า บวกค่าคงที่ \(\delta\) บวกแรงกระแทกสุ่ม เปรียบได้กับคนเดินที่ก้าวไปข้างหน้าก้าวละ \(\delta\) และเซซ้ายขวาแบบสุ่มทุกก้าว ตำแหน่งปัจจุบันคือผลรวมของทุกก้าวที่ผ่านมา การเซแต่ละครั้งจึงสะสมถาวร</p>
+
+<div class="calc" id="s9-calc">
+<div class="calc-title">พิสูจน์ Homework</div>
+<ol class="steps">
+<li><div class="st-title">คลี่สมการให้เหลือเฉพาะ w</div>
+<p>โมเดลอ้างถึง \(X_{t-1}\) ซึ่งเป็นตัวแปรสุ่มเอง จึงแทนค่าย้อนกลับจนถึง \(X_0=0\)</p>
+<p>\(X_1=\delta+X_0+w_1=\delta+w_1\)</p>
+<p>\(X_2=\delta+X_1+w_2=2\delta+w_1+w_2\)</p>
+<p>\(X_3=\delta+X_2+w_3=3\delta+w_1+w_2+w_3\)</p>
+\[X_t=t\delta+\sum_{j=1}^{t}w_j\]</li>
+<li><div class="st-title">Mean function</div>
+\[E(X_t)=t\delta+\sum_{j=1}^{t}E(w_j)=t\delta\]
+<p>ค่าเฉลี่ยเป็นเส้นตรงที่มีความชัน \(\delta\) จึงขึ้นกับ t</p></li>
+<li><div class="st-title">Autocovariance เมื่อ \(h\ge0\)</div>
+<p>ค่าคงที่ \(t\delta\) ไม่มีผลต่อ covariance ก้อนของ \(X_t\) มี \(w_1,\dots,w_t\) และก้อนของ \(X_{t+h}\) มี \(w_1,\dots,w_{t+h}\) ตัวที่ตรงกันมี t ตัว สัมประสิทธิ์เป็น 1 ทุกตัว</p>
+\[\gamma(t,t+h)=t\,\sigma_w^2\]
+<p>รูปทั่วไปคือ \(\gamma(s,t)=\min(s,t)\,\sigma_w^2\)</p></li>
+<li><div class="st-title">Variance</div>
+<p>เมื่อ \(h=0\): \(\mathrm{Var}(X_t)=t\sigma_w^2\) ความแปรปรวนโตเป็นเส้นตรงตามเวลา</p></li>
+<li><div class="st-title">Autocorrelation</div>
+\[\rho(t,t+h)=\frac{t\sigma_w^2}{\sqrt{t\sigma_w^2\cdot(t+h)\sigma_w^2}}=\frac{t}{\sqrt{t(t+h)}}=\sqrt{\frac{t}{t+h}}\]</li>
+</ol>
+<div class="answer">Random walk with drift: \(\mu_t=t\delta\), \(\gamma(t,t+h)=t\sigma_w^2\), \(\rho(t,t+h)=\sqrt{t/(t+h)}\) ทุกค่าขึ้นกับ t โมเดลนี้จึงไม่ stationary</div>
+<p>ตัวอย่างตัวเลขเมื่อ \(h=1\): ที่ \(t=4\) ได้ \(\rho=\sqrt{4/5}=0.894\) และที่ \(t=100\) ได้ \(\sqrt{100/101}=0.995\) ยิ่งเวลาผ่านไปนาน ค่าที่อยู่ติดกันยิ่งสัมพันธ์กันสูง เพราะทั้งสองค่ามีแรงกระแทกสะสมชุดเดียวกันเกือบทั้งหมด</p>
+</div>
+
+<table>
+<tr><th></th><th>Example 1.9</th><th>Homework</th></tr>
+<tr><td>โมเดล</td><td>\(X_t=\tfrac13(w_{t-1}+w_t+w_{t+1})\)</td><td>\(X_t=\delta+X_{t-1}+w_t\)</td></tr>
+<tr><td>Mean</td><td>0 คงที่</td><td>\(t\delta\) ขึ้นกับ t</td></tr>
+<tr><td>Variance</td><td>\(\tfrac13\sigma_w^2\) คงที่</td><td>\(t\sigma_w^2\) โตตาม t</td></tr>
+<tr><td>Autocovariance</td><td>ขึ้นกับ h เท่านั้น</td><td>ขึ้นกับ t</td></tr>
+<tr><td>ผลของแรงกระแทกหนึ่งครั้ง</td><td>อยู่สามช่วงเวลาแล้วหมด</td><td>สะสมถาวร</td></tr>
+<tr><td>Stationary</td><td>ใช่</td><td>ไม่</td></tr>
+</table>
+<p>สองโจทย์นี้ใช้เทคนิคเดียวกัน แต่ให้ผลตรงข้ามกัน และเป็นตัวอย่างคู่เปรียบเทียบของเรื่อง stationarity ใน Lesson 2</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>เปรียบเทียบ</span></div>
+<div class="qtext">ความต่างที่สำคัญที่สุดระหว่างผลของ Example 1.9 กับ Homework คือข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. สลับกัน Example 1.9 มี mean เป็น 0 และ Homework มี mean เป็น tδ">Example 1.9 มี mean เป็น \(t\delta\) ส่วน Homework มี mean เป็น 0</button>
+<button class="opt" data-correct="true" data-note="ถูก. ข้อนี้คือสิ่งที่แยก stationary ออกจากไม่ stationary">γ ของ Example 1.9 ขึ้นกับ h เท่านั้น ส่วนของ Homework ขึ้นกับ t</button>
+<button class="opt" data-correct="false" data-note="ผิด. γ ของ Homework ขึ้นกับ t">γ ของทั้งสองโจทย์ขึ้นกับ h เท่านั้น ต่างกันที่ค่าคงที่ตัวคูณ</button>
+<button class="opt" data-correct="false" data-note="ผิด. ความแปรปรวนที่เวลา t ใดก็ตามเป็น tσ² ซึ่งมีค่าจำกัด">Homework หา ACF ไม่ได้ เพราะความแปรปรวนเป็นอนันต์ทุกเวลา</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 7 ถึง 9</div>
+<ul>
+<li>นิยามของ white noise สองแบบ: uncorrelated และ iid และสัญกรณ์ \(wn(0,\sigma_w^2)\), \(iid\,N(0,\sigma_w^2)\)</li>
+<li>พิสูจน์ autocovariance และ ACF ของ white noise ได้</li>
+<li>อธิบายบทบาทของ white noise: ส่วนที่เหลือหลังดึง systematic variation ออก</li>
+<li>หา mean, autocovariance และ ACF ของโมเดลที่เขียนด้วย w ได้ด้วยเทคนิคนับ w ที่ตรงกัน</li>
+<li>คลี่โมเดลที่อ้างถึง \(X_{t-1}\) ให้เหลือเฉพาะ w ก่อนคำนวณ</li>
+<li>ตัดสินได้ว่าผลขึ้นกับ t หรือไม่</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s10">10. แบบฝึกท้ายบท</h2>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>องค์ประกอบ</span></div>
+<div class="qtext">ข้อมูลรายปี 40 ปี มีระดับเฉลี่ยเพิ่มขึ้นต่อเนื่อง ข้อใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ข้อมูลรายปีไม่แสดง seasonal เพราะมีค่าเดียวต่อปี">มี trend และมองเห็น seasonal ได้</button>
+<button class="opt" data-correct="false" data-note="ผิด. ระดับเฉลี่ยที่เพิ่มขึ้นคือ trend">ไม่มี trend แต่มองเห็น seasonal ได้</button>
+<button class="opt" data-correct="true" data-note="ถูก. seasonal ต้องมีการวัดหลายครั้งภายในหนึ่งปี">มี trend แต่มองไม่เห็น seasonal</button>
+<button class="opt" data-correct="false" data-note="ผิด. ระดับเฉลี่ยที่เพิ่มขึ้นคือ trend">ไม่มี trend และมองไม่เห็น seasonal</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>Covariance</span></div>
+<div class="qtext">\(\mathrm{Cov}(3X+2Y,\,4Z)\) เท่ากับข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ต้องคูณสัมประสิทธิ์ของแต่ละคู่ ไม่ใช่บวก">\(7\,\mathrm{Cov}(X,Z)+6\,\mathrm{Cov}(Y,Z)\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คู่ที่สองคือ 2 × 4 = 8">\(12\,\mathrm{Cov}(X,Z)+6\,\mathrm{Cov}(Y,Z)\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คู่แรกคือ 3 × 4 = 12">\(7\,\mathrm{Cov}(X,Z)+8\,\mathrm{Cov}(Y,Z)\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 3 × 4 = 12 และ 2 × 4 = 8">\(12\,\mathrm{Cov}(X,Z)+8\,\mathrm{Cov}(Y,Z)\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>Random walk</span></div>
+<div class="qtext">Random walk \(X_t=X_{t-1}+w_t\) โดย \(X_0=0\) และ \(\sigma_w^2=1\) ค่า \(\rho(9,16)\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. √(9/16) = 3/4">\(\rho=0.750\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 9/16 ต้องถอดรากที่สอง">\(\rho=0.563\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. สูตรคือ √(t/(t+h)) ไม่ใช่ √(h/(t+h))">\(\rho=0.661\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่านี้คือ √(16/9) กลับเศษส่วน และ ρ เกิน 1 ไม่ได้">\(\rho=1.333\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<p>ข้อต่อไปนี้ให้เขียนคำตอบเองก่อน แล้วจึงเปิดเฉลย</p>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>เขียนพิสูจน์</span></div>
+<div class="qtext">ให้ \(X_t=w_t+0.5w_{t-1}\) โดย \(w_t\sim wn(0,\sigma_w^2)\) จงหา \(\gamma(0)\), \(\gamma(1)\), \(\gamma(2)\) และ \(\rho(1)\)</div>
+<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(X_t\) มี \(w_t\) (สัมประสิทธิ์ 1) และ \(w_{t-1}\) (0.5) ส่วน \(X_{t+1}\) มี \(w_{t+1}\) (1) และ \(w_t\) (0.5)</p>
+<p>\(\gamma(0)=(1\cdot1+0.5\cdot0.5)\sigma_w^2=1.25\sigma_w^2\)</p>
+<p>\(\gamma(1)\): ตัวที่ตรงกันคือ \(w_t\) ได้ \((1)(0.5)\sigma_w^2=0.5\sigma_w^2\)</p>
+<p>\(\gamma(2)=0\) เพราะไม่มีตัวที่ตรงกัน และ \(\rho(1)=0.5/1.25=0.4\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>เขียนพิสูจน์</span></div>
+<div class="qtext">จงหา mean function, autocovariance และ autocorrelation ของ \(X_t=\delta+X_{t-1}+w_t\) โดย \(X_0=0\)</div>
+<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>คลี่สมการ: \(X_t=t\delta+\sum_{j=1}^{t}w_j\)</p>
+<p>\(E(X_t)=t\delta\)</p>
+<p>\(\gamma(t,t+h)=t\sigma_w^2\) เมื่อ \(h\ge0\) เพราะมี w ที่ตรงกัน t ตัว</p>
+<p>\(\rho(t,t+h)=t\sigma_w^2/\sqrt{t\sigma_w^2(t+h)\sigma_w^2}=\sqrt{t/(t+h)}\)</p>
+<p>ทุกค่าขึ้นกับ t จึงไม่ stationary</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>อ่านกราฟ</span></div>
+<div class="qtext">กราฟยอดขายรายเดือน 8 ปี มีระดับเฉลี่ยเพิ่มขึ้นต่อเนื่อง มียอดสูงสุดทุกเดือนธันวาคม และความสูงของยอดเดือนธันวาคมเหนือระดับเฉลี่ยกว้างขึ้นทุกปี จงระบุองค์ประกอบที่เห็นและแบบของ decomposition ที่เหมาะสม พร้อมเหตุผล</div>
+<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>Trend ขาขึ้น เพราะระดับเฉลี่ยเพิ่มขึ้น</p>
+<p>Seasonal เพราะยอดเกิดซ้ำทุกเดือนธันวาคม ผูกกับปฏิทิน รอบ 12 เดือน</p>
+<p>ความแปรปรวนไม่คงที่ เพราะความสูงของยอดโตตามระดับ</p>
+<p>ใช้ multiplicative \(Y_t=T_t\times S_t\times E_t\) เพราะขนาดของ seasonal โตตาม trend เช่นเดียวกับ Airline Passenger Data</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>อธิบาย</span></div>
+<div class="qtext">จงอธิบายว่าทำไม white noise จึงสำคัญต่อการสร้างโมเดล ทั้งที่สไลด์ระบุว่า uninteresting สำหรับข้อมูลจริง</div>
+<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>Time series มี variation สองชนิด คือ systematic variation เช่น trend และ seasonal กับ random variation ซึ่งเป็น noise พื้นหลัง</p>
+<p>เป้าหมายคือดึงส่วน systematic ออกมาใส่ในโมเดล ถ้าทำได้ดีพอ ส่วนที่เหลือควรเป็น random variation ที่เป็น white noise</p>
+<p>White noise จึงเป็นส่วนประกอบพื้นฐานของโมเดลอื่น และเป็นเกณฑ์ตรวจว่าโมเดลดึงแบบแผนออกหมดหรือยัง</p>
+</div>
+</div>
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>แยก time series จาก cross-sectional data และบอกวัตถุประสงค์สี่ข้อของการวิเคราะห์</li>
+<li>ชี้ trend, seasonal, cyclical, irregular และความแปรปรวนที่ไม่คงที่จากกราฟ</li>
+<li>เลือก additive หรือ multiplicative decomposition</li>
+<li>ใช้กฎของ E, Var และ Cov ทั้งหกข้อ</li>
+<li>เขียนนิยามของ \(\mu_t\), \(\gamma_{t,s}\), \(\rho_{t,s}\) และ white noise</li>
+<li>หา mean, autocovariance และ ACF ของโมเดลใหม่ด้วยการคลี่สมการและนับ w ที่ตรงกัน</li>
+</ul>
+<p>บทถัดไป: <a href="0002-performance-evaluation-and-stationarity.html">Lesson 2 — Performance evaluation และ stationarity</a></p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 46 หน้าอยู่ในหัวข้อใด</h2>
+<table>
+<tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
+<tr data-pages="1" class="etc"><td>1</td><td>ปก Basic Knowledge</td><td>etc — ปก</td></tr>
+<tr data-pages="2-8"><td>2–8</td><td>นิยาม time series, cross-sectional, ลักษณะ univariate, โครงสร้างข้อมูล, S&amp;P 500, objectives</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="9" class="etc"><td>9</td><td>หน้าคั่น Time-series components</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="10-19"><td>10–19</td><td>Trend, Seasonality, Cycle, Irregular, Constant และ Non-constant variance</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="20-24"><td>20–24</td><td>Decomposition, Airline passengers, Milk production, Global temperature</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="25" class="etc"><td>25</td><td>หน้าคั่น Time Series and Stochastic Process</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="26-29"><td>26–29</td><td>Random variable, Expectation, Variance, Covariance, Review</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="30-34"><td>30–34</td><td>Stochastic process, autocorrelated, joint distribution, first and second moments</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="35-37"><td>35–37</td><td>Mean function, autocovariance, ACF</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
+<tr data-pages="38-44"><td>38–44</td><td>White noise</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="45"><td>45</td><td>Example 1.9</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+<tr data-pages="46"><td>46</td><td>Homework</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+</table>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Lesson 4: Smoothing Methods และ Decomposition Models</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span><a href="0003-estimation-correlogram-and-detrending.html">← Lesson 3</a> · Lesson 4 (Lecture 4)</span>
+  <span><a href="0005-ma-and-ar-models.html">Lesson 5 →</a></span>
+</nav>
+
+<p class="kicker">Slide_4 (2025) — Time Series Analysis · Smoothing Methods + Decomposition Models · 58 หน้า</p>
+<h1>Moving average, exponential smoothing และ decomposition</h1>
+
+<div class="box">
+<div class="label">วิธีใช้บทเรียนนี้</div>
+<p>บทนี้แสดงสไลด์ Lecture 4 เกือบทุกหน้าตามลำดับ พร้อมคำอธิบายใต้แต่ละหน้า ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ บทนี้ใช้ข้อมูลจริงห้าชุด คือ CPALL, Sales, Singapore, German inflation และ Australian beer ตารางตัวเลขทุกตารางในสไลด์มีการคำนวณซ้ำทีละขั้นให้ตรงกับสไลด์ และผลจาก R ทุกชุดมีตารางอธิบายแต่ละส่วน</p>
+<p>บทนี้ยังไม่ได้รวมสิ่งที่อาจารย์พูดในวิดีโอ Class 4 จะเพิ่มภายหลังพร้อมระบุคลิปและเวลา โค้ด R ที่ประยุกต์วิธีในบทนี้กับข้อมูล XBOX อยู่ใน <a href="0005-ma-and-ar-models.html#s14">Lesson 5 หัวข้อ 14</a></p>
+</div>
+
+<div class="box source">
+<div class="label">แหล่งอ่านหลัก</div>
+<p>Hyndman &amp; Athanasopoulos, <em>Forecasting: Principles and Practice</em> <a href="https://otexts.com/fpp3/expsmooth.html" target="_blank" rel="noopener">บทที่ 8 Exponential smoothing</a> (simple, Holt, Holt-Winters, ETS) และ <a href="https://otexts.com/fpp3/classical-decomposition.html" target="_blank" rel="noopener">บทที่ 3.4 Classical decomposition</a></p>
+</div>
+
+<table>
+<tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
+<tr><td><a href="#s1">1</a></td><td>เทคนิคพยากรณ์ และ moving average</td><td>2–5</td></tr>
+<tr><td><a href="#s2">2</a></td><td>ข้อมูล CPALL และ simple moving average</td><td>6–10</td></tr>
+<tr><td><a href="#s3">3</a></td><td>Exponential moving average และการเทียบกับ SMA</td><td>11–14</td></tr>
+<tr><td><a href="#s4">4</a></td><td>ชนิดของ exponential smoothing และสัญกรณ์ ETS</td><td>16–20</td></tr>
+<tr><td><a href="#s5">5</a></td><td>Holt’s exponential smoothing</td><td>21–29</td></tr>
+<tr><td><a href="#s6">6</a></td><td>Holt กับข้อมูล Sales ใน Excel และ R</td><td>30–32</td></tr>
+<tr><td><a href="#s7">7</a></td><td>ข้อมูล Singapore และ German inflation</td><td>33–35</td></tr>
+<tr><td><a href="#s8">8</a></td><td>Holt-Winters exponential smoothing</td><td>36–44</td></tr>
+<tr><td><a href="#s9">9</a></td><td>Decomposition models</td><td>47–54</td></tr>
+<tr><td><a href="#s10">10</a></td><td>Centered moving average และ regression de-trending</td><td>55–58</td></tr>
+<tr><td><a href="#s11">11</a></td><td>แบบฝึกท้ายบท</td><td>—</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="s1">1. เทคนิคพยากรณ์ และ moving average</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p02.png" alt="Slide 4 หน้า 2: Forecasting techniques: Type 1 Linear Models" loading="lazy">
+<figcaption>Slide 4 หน้า 2 — Forecasting techniques: Type 1 Linear Models</figcaption>
+</figure>
+
+<p>สไลด์แบ่งเทคนิคพยากรณ์เป็นสองตระกูล ตระกูลแรกคือ Linear Models มีสี่วิธี ได้แก่ Regression, Exponential smoothing, ARIMA และ Seasonal decomposition ข้อดีที่สไลด์ใส่สีไว้คือ <mark class="src" data-p="2">Popular / More function / Easy to understand and communicate</mark> วิชานี้อยู่ในตระกูลนี้ทั้งหมด บทนี้ครอบคลุม exponential smoothing และ seasonal decomposition ส่วน ARIMA เริ่มที่ Lesson 5</p>
+
+<figure>
+<img src="../assets/slides/ts4-p03.png" alt="Slide 4 หน้า 3: Forecasting techniques: Type 2 Non-Linear Models" loading="lazy">
+<figcaption>Slide 4 หน้า 3 — Forecasting techniques: Type 2 Non-Linear Models</figcaption>
+</figure>
+
+<p>ตระกูลที่สองคือ Non-Linear Models ได้แก่ Neural Network, SVM และ Clustering ข้อดีที่สไลด์ใส่สีไว้คือ <mark class="src" data-p="3">Developed from machine learning / (may be) more accurate than linear model</mark> คำว่า may be ในวงเล็บหมายความว่าไม่ได้แม่นกว่าเสมอ ตระกูลนี้ไม่อยู่ในขอบเขตของวิชา</p>
+
+<figure>
+<img src="../assets/slides/ts4-p04.png" alt="Slide 4 หน้า 4: Moving Average" loading="lazy">
+<figcaption>Slide 4 หน้า 4 — Moving Average</figcaption>
+</figure>
+
+<p>ข้อมูลจริงมักมองเห็น trend ได้ยากเพราะมี random fluctuations การกำจัด bumps หรือ noise ช่วย “smooth” ข้อมูล สรุปข้อมูล และเผย long term trend วิธีหนึ่งคือ <mark class="src" data-p="4">Moving Means (or Moving Averages).</mark> Moving means คำนวณง่าย แต่ข้อมูลทุกค่ามีส่วนในค่าเฉลี่ย ค่าสุดโต่งเพียงค่าเดียวจึงทำให้ moving mean แกว่งมากได้ เรื่องการเลือก order สไลด์ระบุว่าวิธีที่ได้ผลที่สุดคือให้ order เท่ากับจำนวนช่วงใน seasonal cycle: ข้อมูลรายเดือนใช้ 12 รายฤดูใช้ 4 รายวันใช้ 7 และวันทำการใช้ 5 เหตุผลคือ เมื่อเฉลี่ย 12 เดือนติดกัน ทุกเดือนของปีถูกนับหนึ่งครั้งพอดี ผลของฤดูกาลจึงหักล้างกัน เหลือเฉพาะ trend</p>
+
+<figure>
+<img src="../assets/slides/ts4-p05.png" alt="Slide 4 หน้า 5: Moving Average (ต่อ)" loading="lazy">
+<figcaption>Slide 4 หน้า 5 — Moving Average (ต่อ)</figcaption>
+</figure>
+
+<p>Moving average เป็น trend following indicator ที่ใช้มากที่สุด มันไม่ได้ทำนายทิศทางของค่า แต่ทำให้ข้อมูลเรียบขึ้น และกรอง “noise” ออก ทำให้มองเห็น trend ง่ายขึ้น Moving average ที่นิยมที่สุดสองแบบคือ SMA และ EMA เปรียบได้กับการมองภาพจากระยะไกล: รายละเอียดเล็กที่สั่นไหวหายไป เหลือรูปทรงหลัก</p>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. ข้อมูล CPALL และ simple moving average</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p06.png" alt="Slide 4 หน้า 6: Dataset 1: CPALL rate of return" loading="lazy">
+<figcaption>Slide 4 หน้า 6 — Dataset 1: CPALL rate of return</figcaption>
+</figure>
+
+<p>ข้อมูลชุดแรกคือ rate of return รายวัน 80 วันของหุ้น CPALL ค่าแกว่งระหว่างประมาณ −3 ถึง 4.8 รอบ 0 ตั้งแต่ต้นจนจบ ไม่มีทิศขึ้นหรือลง และไม่มีรอบที่ซ้ำ สไลด์เรียกลักษณะนี้ว่า Horizontal Time-series</p>
+
+<figure>
+<img src="../assets/slides/ts4-p07.png" alt="Slide 4 หน้า 7: Dataset 1: Time-series model" loading="lazy">
+<figcaption>Slide 4 หน้า 7 — Dataset 1: Time-series model</figcaption>
+</figure>
+
+<p>โมเดลที่ตรงกับข้อมูลลักษณะนี้คือ \(X_t=\mu+\varepsilon_t\) โดย \(\varepsilon_1,\varepsilon_2,\dots\) เป็นอิสระต่อกันทางสถิติ และ \(\varepsilon_t\) มีการแจกแจงปกติที่มีค่าเฉลี่ย 0 และความแปรปรวน \(\sigma^2\) โมเดลนี้คือค่าเฉลี่ยคงที่บวก noise ไม่มี trend และไม่มี seasonal สิ่งเดียวที่ต้องประมาณคือระดับ \(\mu\) ซึ่ง SMA และ EMA ทำได้</p>
+
+<figure>
+<img src="../assets/slides/ts4-p08.png" alt="Slide 4 หน้า 8: Simple Moving Average (SMA)" loading="lazy">
+<figcaption>Slide 4 หน้า 8 — Simple Moving Average (SMA)</figcaption>
+</figure>
+
+<p>SMA คือค่าเฉลี่ยของข้อมูล k ค่าล่าสุด สไลด์ให้ <mark class="src" data-p="8">Example: k=3</mark> ว่า \(F_4=(X_4+X_3+X_2)/3\) คือค่าของเวลา 4 ได้จากการเฉลี่ยค่าของเวลา 2, 3 และ 4 เมื่อเวลาเลื่อนไปหนึ่งช่วง หน้าต่างของการเฉลี่ยก็เลื่อนตาม ค่าใหม่เข้ามาหนึ่งค่าและค่าเก่าที่สุดหลุดออกหนึ่งค่า จึงเรียกว่า moving สูตรทั่วไปในสไลด์เขียนตัวเศษถึง \(X_{t-k}\) ซึ่งมี k+1 พจน์ แต่ตัวอย่างและตารางในหน้าถัดไปใช้ k พจน์ คือ \(X_t\) ถึง \(X_{t-k+1}\) บทเรียนนี้ใช้ตามตัวอย่างและตาราง</p>
+
+<figure>
+<img src="../assets/slides/ts4-p09.png" alt="Slide 4 หน้า 9: SMA ของ CPALL ที่ k = 3 และ k = 5" loading="lazy">
+<figcaption>Slide 4 หน้า 9 — SMA ของ CPALL ที่ k = 3 และ k = 5</figcaption>
+</figure>
+
+<p>ค่าของ CPALL วันที่ 1 ถึง 15 คือ 1.08, −1.6, −0.54, 0, −0.55, 0.55, 1.64, 0, −0.54, 1.08, 0, −1.07, −1.08, 0, 0.55 คอลัมน์ k = 3 เริ่มมีค่าที่วันที่ 3 คือ −0.3533 และคอลัมน์ k = 5 เริ่มที่วันที่ 5 คือ −0.322 เพราะต้องมีข้อมูลครบ k ค่าก่อน ในกราฟ ข้อมูลเดิมแกว่งระหว่าง −3 ถึง 5 เส้น k = 3 แกว่งแคบลงเหลือประมาณ −1.5 ถึง 2.8 และเส้น k = 5 แคบกว่า คือประมาณ −1.5 ถึง 1.8 ค่า k ยิ่งมาก เส้นยิ่งเรียบ แต่ตามการเปลี่ยนแปลงช้าลง ช่วงท้ายของกราฟ เส้นทั้งสองเป็นเส้นราบ ซึ่งคือค่าพยากรณ์อนาคตของ SMA ที่เท่ากับค่าเฉลี่ยล่าสุดตลอดไป SMA จึงพยากรณ์ trend ไม่ได้</p>
+
+<div class="calc" id="s2-calc">
+<div class="calc-title">คำนวณตาราง SMA ซ้ำ</div>
+<ol class="steps">
+<li><div class="st-title">k = 3 วันที่ 3</div><p>\((-0.54+(-1.6)+1.08)/3=-1.06/3=-0.3533\)</p></li>
+<li><div class="st-title">k = 3 วันที่ 4</div><p>\((0+(-0.54)+(-1.6))/3=-2.14/3=-0.7133\)</p></li>
+<li><div class="st-title">k = 3 วันที่ 7</div><p>\((1.64+0.55+(-0.55))/3=1.64/3=0.5467\)</p></li>
+<li><div class="st-title">k = 5 วันที่ 5</div><p>\((-0.55+0+(-0.54)+(-1.6)+1.08)/5=-1.61/5=-0.322\)</p></li>
+<li><div class="st-title">k = 5 วันที่ 10</div><p>\((1.08+(-0.54)+0+1.64+0.55)/5=2.73/5=0.546\)</p></li>
+</ol>
+<p>ทุกค่าตรงกับตารางในสไลด์ วิธีคิดเร็ว: SMA ของวันถัดไปเท่ากับค่าเดิม บวกด้วยค่าใหม่ที่เข้า ลบค่าเก่าที่หลุด หารด้วย k เช่น วันที่ 4 ได้ \(-0.3533+(0-1.08)/3=-0.7133\)</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p10.png" alt="Slide 4 หน้า 10: SMA: ใช้เมื่อใด" loading="lazy">
+<figcaption>Slide 4 หน้า 10 — SMA: ใช้เมื่อใด</figcaption>
+</figure>
+
+<p>SMA เหมาะกับ horizontal data และการพยากรณ์ระยะสั้น ค่า k ตั้งแต่ 2 ถึง 5 เหมาะกับกรณีส่วนใหญ่ ถ้าข้อมูลมี variation สูง ใช้ k สูงเพื่อให้เรียบขึ้น ถ้าข้อมูลมี variation ต่ำ ใช้ k ต่ำ ถ้าใช้ k สูงเกินไป จะกำจัดทุกอย่างรวมทั้ง seasonal effects ซึ่งเรียบเกินไป การเลือก k จึงเป็นการแลกระหว่างความเรียบกับความไวต่อการเปลี่ยนแปลง</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>SMA</span></div>
+<div class="qtext">ข้อมูลสี่วันคือ 6, 9, 3, 12 ค่า SMA ที่ k = 3 ของวันที่ 4 คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 6 คือค่าเฉลี่ยของสามวันแรก ไม่ใช่สามวันล่าสุด">\(F_4=6.0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 7.5 คือค่าเฉลี่ยของทั้งสี่วัน">\(F_4=7.5\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. (12 + 3 + 9) / 3 = 8">\(F_4=8.0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ต้องหารด้วย k = 3">\(F_4=12.0\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s3">3. Exponential moving average และการเทียบกับ SMA</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p11.png" alt="Slide 4 หน้า 11: Exponential Moving Average (EMA)" loading="lazy">
+<figcaption>Slide 4 หน้า 11 — Exponential Moving Average (EMA)</figcaption>
+</figure>
+
+<p>SMA ให้น้ำหนัก 1/k เท่ากันกับทุกค่าในหน้าต่าง และค่าที่หลุดจากหน้าต่างได้น้ำหนัก 0 ทันที EMA ให้น้ำหนักลดลงทีละน้อยตามความเก่าของข้อมูล: \(F_{t+1}=\alpha X_t+\alpha(1-\alpha)X_{t-1}+\alpha(1-\alpha)^2X_{t-2}+\dots\) เมื่อดึง \((1-\alpha)\) ออกจากพจน์ที่สองเป็นต้นไป ส่วนที่อยู่ในวงเล็บคือ \(F_t\) จึงได้รูปสั้น \(F_{t+1}=\alpha X_t+(1-\alpha)F_t\) โดย \(0&lt;\alpha&lt;1\) รูปสั้นนี้บอกว่าค่าพยากรณ์ใหม่เป็นค่าเฉลี่ยถ่วงน้ำหนักระหว่างค่าจริงล่าสุดกับค่าพยากรณ์เดิม สูตรอ้างถึงค่าของตัวเองในเวลาก่อนหน้า จึงต้องมีค่าเริ่มต้น \(F_1\)</p>
+
+<div class="calc">
+<div class="calc-title">น้ำหนักของแต่ละค่าเมื่อ α = 0.2</div>
+<table class="compact">
+<tr><th>ค่า</th><th>\(X_t\)</th><th>\(X_{t-1}\)</th><th>\(X_{t-2}\)</th><th>\(X_{t-3}\)</th></tr>
+<tr><th>น้ำหนัก</th><td>0.2</td><td>\(0.2(0.8)=0.16\)</td><td>\(0.2(0.8)^2=0.128\)</td><td>\(0.2(0.8)^3=0.1024\)</td></tr>
+</table>
+<p>น้ำหนักรวมของทุกค่าคือ \(\alpha\sum_{j\ge0}(1-\alpha)^j=\alpha\cdot\dfrac{1}{1-(1-\alpha)}=1\) จึงเป็นค่าเฉลี่ยถ่วงน้ำหนักที่ถูกต้อง ค่าที่ใหม่กว่าได้น้ำหนักมากกว่า และค่าเก่าไม่หายทันที แต่ลดลง 20% ทุกช่วงเวลา ชื่อ exponential มาจากการลดลงแบบนี้ ค่า α ที่ใหญ่ทำให้ตามข้อมูลใหม่เร็ว ค่า α ที่เล็กทำให้เรียบ</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p12.png" alt="Slide 4 หน้า 12: EMA ของ CPALL ที่ α = 0.2" loading="lazy">
+<figcaption>Slide 4 หน้า 12 — EMA ของ CPALL ที่ α = 0.2</figcaption>
+</figure>
+
+<p>คอลัมน์ α = 0.2 เริ่มที่ \(F_1=-0.3533333\) ซึ่งเป็นค่าเดียวกับ SMA ที่ k = 3 ของวันที่ 3 ในหน้า 9 คือใช้ค่าเฉลี่ยของสามวันแรกเป็นค่าเริ่มต้น เส้น EMA ในกราฟแกว่งแคบประมาณ −1 ถึง 1.1 เทียบกับข้อมูลเดิมที่แกว่งระหว่าง −3 ถึง 5 และเรียบกว่า SMA ที่ k = 5 เพราะ α = 0.2 ให้น้ำหนักกับค่าล่าสุดเพียง 20%</p>
+
+<div class="calc" id="s3-calc">
+<div class="calc-title">คำนวณคอลัมน์ α = 0.2 ซ้ำ ด้วย \(F_{t+1}=0.2X_t+0.8F_t\)</div>
+<ol class="steps">
+<li><div class="st-title">\(F_2\)</div><p>\(0.2(1.08)+0.8(-0.353333)=0.216-0.282667=-0.0667\)</p></li>
+<li><div class="st-title">\(F_3\)</div><p>\(0.2(-1.6)+0.8(-0.0667)=-0.32-0.0533=-0.3733\)</p></li>
+<li><div class="st-title">\(F_4\)</div><p>\(0.2(-0.54)+0.8(-0.3733)=-0.108-0.2987=-0.4067\)</p></li>
+<li><div class="st-title">\(F_5\)</div><p>\(0.2(0)+0.8(-0.4067)=-0.3253\)</p></li>
+</ol>
+<p>ค่าในตารางของสไลด์คือ −0.067, −0.373, −0.407 และ −0.325 ตรงกันทุกค่า ในตารางนี้ค่าในแถวของวัน t คือค่าพยากรณ์ของวัน t ที่คำนวณจากข้อมูลถึงวัน t−1</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p13.png" alt="Slide 4 หน้า 13: EMA: ใช้เมื่อใด" loading="lazy">
+<figcaption>Slide 4 หน้า 13 — EMA: ใช้เมื่อใด</figcaption>
+</figure>
+
+<p>EMA เหมาะกับ horizontal data และการพยากรณ์ระยะสั้นเช่นเดียวกับ SMA โดยปกติใช้ค่า \(0.1\le\alpha\le0.2\) และ EMA ให้น้ำหนักกับค่าล่าสุดมากกว่า หัวเรื่องของสไลด์หน้านี้พิมพ์ว่า Exponential moving Average (SMA) ซึ่งหมายถึง EMA</p>
+
+<figure>
+<img src="../assets/slides/ts4-p14.png" alt="Slide 4 หน้า 14: เทียบ SMA กับ EMA บนข้อมูล CPALL" loading="lazy">
+<figcaption>Slide 4 หน้า 14 — เทียบ SMA กับ EMA บนข้อมูล CPALL</figcaption>
+</figure>
+
+<p>ข้อมูล 80 วันถูกแบ่งเป็น 65 วันแรกสำหรับ self-validation คือวัดบนข้อมูลที่ใช้สร้าง และ 15 วันท้ายสำหรับ cross-validation คือวัดบนข้อมูลใหม่ ผลของ SMA: RMSE เปลี่ยนจาก 1.221 เป็น 1.663 และ MAE จาก 0.953 เป็น 1.586 คือแย่ลงเมื่อพบข้อมูลใหม่ ผลของ EMA: RMSE เปลี่ยนจาก 1.633 เป็น 0.738 และ MAE จาก 1.299 เป็น 0.543 คือดีขึ้น การเปรียบเทียบต้องดูคอลัมน์ cross-validation เพราะเป้าหมายคือพยากรณ์อนาคต EMA มี RMSE 0.738 ซึ่งน้อยกว่า 1.663 ของ SMA จึงทำงานได้ดีกว่ากับข้อมูลชุดนี้ ในคอลัมน์ self-validation SMA ดูดีกว่า ซึ่งเป็นตัวอย่างของหลักใน Lesson 2: ผลบนข้อมูลที่ใช้สร้างโมเดลไม่ใช่ตัวตัดสิน</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>EMA</span></div>
+<div class="qtext">EMA ที่ α = 0.3 มี \(X_t=60\) และ \(F_t=50\) ค่า \(F_{t+1}\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. 0.3 × 60 + 0.7 × 50 = 18 + 35">\(0.3(60)+0.7(50)=53\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. α คูณกับค่าจริง ไม่ใช่ค่าพยากรณ์เดิม">\(0.7(60)+0.3(50)=57\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. น้ำหนักต้องรวมกันเป็น 1">\(0.3(60)+0.3(50)=33\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้เป็นค่าเฉลี่ยธรรมดา ไม่ได้ใช้ α">\(0.5(60)+0.5(50)=55\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>เปรียบเทียบ</span></div>
+<div class="qtext">จากตารางหน้า 14 ควรเลือกวิธีใดสำหรับ CPALL และเพราะเหตุใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. self-validation วัดบนข้อมูลที่ใช้สร้าง ไม่ใช่ตัวตัดสิน">SMA เพราะ self-validation RMSE ต่ำกว่า</button>
+<button class="opt" data-correct="false" data-note="ผิด. MAE ต่ำกว่า RMSE เป็นเรื่องปกติของทุกวิธี">SMA เพราะ MAE ต่ำกว่า RMSE ในทุกช่อง</button>
+<button class="opt" data-correct="false" data-note="ผิด. error ที่สูงกว่าไม่ใช่เหตุผลให้เลือก">EMA เพราะ self-validation RMSE สูงกว่า</button>
+<button class="opt" data-correct="true" data-note="ถูก. cross-validation RMSE 0.738 น้อยกว่า 1.663">EMA เพราะ cross-validation RMSE ต่ำกว่า</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 1 ถึง 3</div>
+<ul>
+<li>การเลือก order ของ moving average ตามจำนวนช่วงใน seasonal cycle</li>
+<li>คำนวณ SMA และ EMA จากตารางได้</li>
+<li>SMA และ EMA เหมาะกับ horizontal data และการพยากรณ์ระยะสั้น</li>
+<li>ค่าที่แนะนำ: k ตั้งแต่ 2 ถึง 5 และ α ตั้งแต่ 0.1 ถึง 0.2</li>
+<li>เทียบวิธีด้วย cross-validation error ไม่ใช่ self-validation</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. ชนิดของ exponential smoothing และสัญกรณ์ ETS</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p16.png" alt="Slide 4 หน้า 16: Type of exponential smoothing" loading="lazy">
+<figcaption>Slide 4 หน้า 16 — Type of exponential smoothing</figcaption>
+</figure>
+
+<p>Exponential smoothing มีสามชนิด Simple exponential smoothing ใช้กับ series ที่ไม่มี trend และไม่มี seasonality ซึ่งคือ EMA ในหัวข้อ 3 และ R เรียกว่า ETS(A,N,N) Holt’s exponential smoothing ใช้กับ series ที่มี trend แต่ไม่มี seasonality และ Winter’s exponential smoothing ใช้กับ series ที่มีทั้ง trend และ seasonality สไลด์ระบุข้อดีของวิธีตระกูลนี้ว่า cheap to compute คือใช้การคำนวณน้อย</p>
+
+<div class="box prereq">
+<div class="label">ต้องรู้ก่อน — สัญกรณ์ ETS(Error, Trend, Seasonality)</div>
+<p>ตัวอักษรสามตัวเรียงตามลำดับ ตัวแรกคือรูปแบบของ error ตัวที่สองคือ trend และตัวที่สามคือ seasonality</p>
+<table class="compact">
+<tr><th>ตัวอักษร</th><th>ความหมาย</th></tr>
+<tr><td>N</td><td>none ไม่มี</td></tr>
+<tr><td>A</td><td>additive แบบบวก</td></tr>
+<tr><td>M</td><td>multiplicative แบบคูณ</td></tr>
+<tr><td>Ad, Md</td><td>additive damped และ multiplicative damped คือ trend ที่ค่อย ๆ ชะลอ</td></tr>
+<tr><td>Z</td><td>ให้ R เลือกอัตโนมัติ</td></tr>
+</table>
+<p>ตัวอย่าง: ETS(A,N,N) คือ error แบบบวก ไม่มี trend ไม่มี seasonality และ ETS(A,A,N) คือ error แบบบวก trend แบบบวก ไม่มี seasonality ซึ่งคือ Holt แบบ additive</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p17.png" alt="Slide 4 หน้า 17: Dataset 2: Monthly Sales" loading="lazy">
+<figcaption>Slide 4 หน้า 17 — Dataset 2: Monthly Sales</figcaption>
+</figure>
+
+<p>ข้อมูลชุดที่สองคือยอดขายรายเดือน 16 เดือน เดือนที่ 1 ประมาณ 14,000 เดือนที่ 5 ประมาณ 43,000 เพิ่มเร็วช่วงเดือนที่ 6 ถึง 8 จาก 65,000 เป็น 157,000 เดือนที่ 11 ถึง 234,000 ลดลงเล็กน้อยในเดือนที่ 12 เหลือ 216,000 แล้วเพิ่มต่อจนจบที่ประมาณ 275,000 สไลด์สรุปว่ามี increasing trend และไม่มี seasonal</p>
+
+<figure>
+<img src="../assets/slides/ts4-p18.png" alt="Slide 4 หน้า 18: Dataset 2: Time-series model" loading="lazy">
+<figcaption>Slide 4 หน้า 18 — Dataset 2: Time-series model</figcaption>
+</figure>
+
+<p>โมเดลของข้อมูลชุดนี้คือ \(X_t=a+bt+\varepsilon_t\) โดย a เป็น level parameter และ b เป็น linear trend parameter ส่วน \(\varepsilon_t\) เป็นอิสระต่อกันและมีการแจกแจงปกติที่มีค่าเฉลี่ย 0 และความแปรปรวน \(\sigma^2\) เมื่อเทียบกับโมเดลของ CPALL ระดับคงที่ \(\mu\) ถูกแทนด้วยเส้นตรง \(a+bt\) ถ้าใช้ EMA กับข้อมูลนี้ ค่าพยากรณ์จะต่ำกว่าค่าจริงตลอด เพราะ EMA เฉลี่ยจากค่าในอดีตซึ่งต่ำกว่าปัจจุบันเสมอเมื่อข้อมูลมี trend ขาขึ้น จึงต้องมีส่วนที่ติดตาม trend เพิ่ม ซึ่งคือวิธีของ Holt</p>
+
+<figure>
+<img src="../assets/slides/ts4-p19.png" alt="Slide 4 หน้า 19: รูปแบบของ trend และ seasonality สิบสองแบบ" loading="lazy">
+<figcaption>Slide 4 หน้า 19 — รูปแบบของ trend และ seasonality สิบสองแบบ</figcaption>
+</figure>
+
+<p>ตารางนี้จับคู่รูปร่างของกราฟกับชื่อของโมเดล แนวหนึ่งคือชนิดของ trend: No Trend เป็นระดับราบ Additive Trend เป็นเส้นตรงเอียงขึ้น (Upward Linear) Multiplicative Trend เป็นเส้นโค้งที่ชันขึ้นเรื่อย ๆ (Upward Exponential) และ Polynomial Trend เป็นเส้นโค้งอันดับสาม อีกแนวหนึ่งคือชนิดของ seasonality: No seasonality, Additive ซึ่งคลื่นสูงเท่ากันทุกรอบ และ Multiplicative ซึ่งคลื่นสูงขึ้นตามระดับของ trend วิธีจัดกราฟใหม่ลงตาราง: ดูเส้นกลางเพื่อเลือกชนิดของ trend ดูว่ามีคลื่นซ้ำหรือไม่ แล้วดูว่าความสูงของคลื่นคงที่หรือโตตามเส้นกลาง</p>
+
+<figure>
+<img src="../assets/slides/ts4-p20.png" alt="Slide 4 หน้า 20: Type of (basic) time series model" loading="lazy">
+<figcaption>Slide 4 หน้า 20 — Type of (basic) time series model</figcaption>
+</figure>
+
+<p>โมเดลพื้นฐานมีสองแบบ แบบ additive คือ \(Y_t=\text{Level}+\text{Trend}+\text{Seasonality}+\text{Noise}\) และแบบ multiplicative คือ \(Y_t=\text{Level}\times\text{Trend}\times\text{Seasonality}\times\text{Noise}\) เป็นแนวคิดเดียวกับ decomposition ใน Lesson 1 โดยแยก level ออกจาก trend ให้ชัด Level คือระดับปัจจุบันของข้อมูล และ trend คืออัตราการเปลี่ยนของระดับนั้น</p>
+
+<!-- ===================================================== -->
+<h2 id="s5">5. Holt’s exponential smoothing</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p21.png" alt="Slide 4 หน้า 21: Holt’s Exponential Smoothing" loading="lazy">
+<figcaption>Slide 4 หน้า 21 — Holt’s Exponential Smoothing</figcaption>
+</figure>
+
+<p>วิธีของ Holt เรียกอีกชื่อว่า double exponential smoothing ใช้จับ trend component โดยมองว่า series มี level \(L_t\) มี trend \(T_t\) และมี noise ซึ่งพยากรณ์ไม่ได้ วิธีนี้มีสมการปรับค่าสองสมการ สมการหนึ่งสำหรับ level และอีกสมการสำหรับ trend โดย \(0&lt;\alpha,\beta&lt;1\) เปรียบได้กับการติดตามรถที่กำลังวิ่ง: level คือตำแหน่งปัจจุบัน และ trend คือความเร็ว การพยากรณ์ตำแหน่งถัดไปใช้ทั้งสองค่า และทั้งสองค่าถูกปรับทุกครั้งที่ได้ข้อมูลใหม่</p>
+
+<figure>
+<img src="../assets/slides/ts4-p22.png" alt="Slide 4 หน้า 22: Holt: สมการพยากรณ์แบบ additive trend" loading="lazy">
+<figcaption>Slide 4 หน้า 22 — Holt: สมการพยากรณ์แบบ additive trend</figcaption>
+</figure>
+
+<p>ค่าพยากรณ์ k ช่วงเวลาข้างหน้าคือ \(F_{t+k}=L_t+k\,T_t\) คือเริ่มจาก level ปัจจุบัน แล้วเดินต่อด้วย trend ปัจจุบันจำนวน k ก้าว ค่าพยากรณ์จึงเป็นเส้นตรงที่ต่อจากจุดล่าสุด ตัวอย่าง: \(L_t=200\) และ \(T_t=5\) ได้ค่าพยากรณ์ของ 1, 2 และ 3 ช่วงข้างหน้าเป็น 205, 210 และ 215</p>
+
+<figure>
+<img src="../assets/slides/ts4-p23.png" alt="Slide 4 หน้า 23: Holt: สมการปรับ level" loading="lazy">
+<figcaption>Slide 4 หน้า 23 — Holt: สมการปรับ level</figcaption>
+</figure>
+
+<p>สมการแรกคือ \(L_t=\alpha Y_t+(1-\alpha)(L_{t-1}+T_{t-1})\) สไลด์อธิบายว่าคล้าย simple exponential smoothing แต่ปรับ level ก่อนหน้าด้วยการบวก trend วงเล็บ \(L_{t-1}+T_{t-1}\) คือตำแหน่งที่คาดไว้ถ้าเดินต่อตาม trend เดิม ซึ่งเท่ากับค่าพยากรณ์ \(F_t\) สมการจึงผสมค่าจริง \(Y_t\) กับค่าที่คาดไว้ โดย α ควบคุมความเร็วของการปรับ level</p>
+
+<figure>
+<img src="../assets/slides/ts4-p24.png" alt="Slide 4 หน้า 24: Holt: สมการปรับ trend" loading="lazy">
+<figcaption>Slide 4 หน้า 24 — Holt: สมการปรับ trend</figcaption>
+</figure>
+
+<p>สมการที่สองคือ \(T_t=\beta(L_t-L_{t-1})+(1-\beta)T_{t-1}\) สไลด์อธิบายว่าปรับ trend ก่อนหน้าโดยใช้ผลต่างระหว่าง level สองค่าล่าสุด \(L_t-L_{t-1}\) คือความชันที่เพิ่งวัดได้ สมการจึงผสมความชันใหม่กับความชันเดิม โดย β ควบคุมความเร็วของการปรับ trend โครงสร้างของสมการเหมือน EMA ทุกประการ ต่างกันที่สิ่งที่ถูกปรับเรียบคือความชัน ไม่ใช่ระดับ</p>
+
+<table>
+<tr><th></th><th>สมการ (additive trend)</th><th>อ่านว่า</th></tr>
+<tr><td>Forecast</td><td>\(F_{t+k}=L_t+k\,T_t\)</td><td>ระดับปัจจุบัน บวก k ก้าวของ trend</td></tr>
+<tr><td>Level</td><td>\(L_t=\alpha Y_t+(1-\alpha)(L_{t-1}+T_{t-1})\)</td><td>ผสมค่าจริงกับค่าที่คาดไว้</td></tr>
+<tr><td>Trend</td><td>\(T_t=\beta(L_t-L_{t-1})+(1-\beta)T_{t-1}\)</td><td>ผสมความชันใหม่กับความชันเดิม</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts4-p25.png" alt="Slide 4 หน้า 25: Holt: multiplicative trend" loading="lazy">
+<figcaption>Slide 4 หน้า 25 — Holt: multiplicative trend</figcaption>
+</figure>
+
+<p>ในแบบ multiplicative trend ค่าพยากรณ์คือ \(F_{t+k}=L_t\times T_t^{\,k}\) ในที่นี้ \(T_t\) เป็นอัตราการเติบโต เช่น 1.05 หมายถึงโต 5% ต่อช่วงเวลา ไม่ใช่จำนวนที่เพิ่มขึ้น จึงใช้การคูณแทนการบวก และยกกำลัง k แทนการคูณด้วย k ตัวอย่าง: \(L_t=100\) และ \(T_t=1.1\) ได้ค่าพยากรณ์ 110, 121 และ 133.1 ซึ่งเพิ่มขึ้นครั้งละมากขึ้น เป็นเส้นโค้งแบบ exponential</p>
+
+<figure>
+<img src="../assets/slides/ts4-p26.png" alt="Slide 4 หน้า 26: Holt: สมการปรับค่าแบบ multiplicative trend" loading="lazy">
+<figcaption>Slide 4 หน้า 26 — Holt: สมการปรับค่าแบบ multiplicative trend</figcaption>
+</figure>
+
+<p>สมการปรับค่าเปลี่ยนตามไปด้วย: \(L_t=\alpha Y_t+(1-\alpha)(L_{t-1}\times T_{t-1})\) และ \(T_t=\beta\left(\dfrac{L_t}{L_{t-1}}\right)+(1-\beta)T_{t-1}\) จุดที่เปลี่ยนจากแบบ additive มีสองจุด คือการบวก trend กลายเป็นการคูณ และผลต่างของ level กลายเป็นอัตราส่วนของ level</p>
+
+<figure>
+<img src="../assets/slides/ts4-p27.png" alt="Slide 4 หน้า 27: What about error term? Additive error" loading="lazy">
+<figcaption>Slide 4 หน้า 27 — What about error term? Additive error</figcaption>
+</figure>
+
+<p>ในกรณี additive error สมมติว่า error มีขนาดคงที่ ไม่ขึ้นกับ level และ trend ปัจจุบันของ series ใน R เขียนว่า ETS(A,?,?) โดยตัวแรกคือ error แบบ additive สมการคือ \(y_{t+1}=L_t+T_t+e_t\) สำหรับ additive trend และ \(y_{t+1}=(L_t\times T_t)+e_t\) สำหรับ multiplicative trend</p>
+
+<figure>
+<img src="../assets/slides/ts4-p28.png" alt="Slide 4 หน้า 28: What about error term? Multiplicative error" loading="lazy">
+<figcaption>Slide 4 หน้า 28 — What about error term? Multiplicative error</figcaption>
+</figure>
+
+<p>ในหลายกรณีสมเหตุสมผลกว่าที่ขนาดของ error จะโตขึ้นเมื่อระดับของ series สูงขึ้น จึงใช้ multiplicative error ใน R เขียนว่า ETS(M,?,?) สมการคือ \(y_{t+1}=(L_t+T_t)\times(1+e_t)\) และ \(y_{t+1}=(L_t\times T_t)\times(1+e_t)\) ในแบบนี้ \(e_t=0.1\) หมายถึงคลาดเคลื่อน 10% ที่ระดับ 100 คือ 10 หน่วย และที่ระดับ 10,000 คือ 1,000 หน่วย</p>
+
+<table>
+<tr><th>สมการ</th><th>R</th><th>Error</th><th>Trend</th></tr>
+<tr><td>\(y_{t+1}=L_t+T_t+e_t\)</td><td>ETS(A,A,N)</td><td>additive</td><td>additive</td></tr>
+<tr><td>\(y_{t+1}=(L_t\times T_t)+e_t\)</td><td>ETS(A,M,N)</td><td>additive</td><td>multiplicative</td></tr>
+<tr><td>\(y_{t+1}=(L_t+T_t)\times(1+e_t)\)</td><td>ETS(M,A,N)</td><td>multiplicative</td><td>additive</td></tr>
+<tr><td>\(y_{t+1}=(L_t\times T_t)\times(1+e_t)\)</td><td>ETS(M,M,N)</td><td>multiplicative</td><td>multiplicative</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts4-p29.png" alt="Slide 4 หน้า 29: รูปทรงของค่าพยากรณ์ตามชนิดของ trend และ seasonality" loading="lazy">
+<figcaption>Slide 4 หน้า 29 — รูปทรงของค่าพยากรณ์ตามชนิดของ trend และ seasonality</figcaption>
+</figure>
+
+<p>ตารางนี้แสดงรูปทรงของค่าพยากรณ์ 120 ช่วงเวลาของแต่ละโมเดล บนแกนตั้ง 0 ถึง 12,000 เมื่อไม่มี trend ค่าพยากรณ์เป็นเส้นราบที่ 5,000 แบบ additive เป็นเส้นตรงจากประมาณ 1,000 ถึง 12,000 แบบ multiplicative เป็นเส้นโค้งที่ชันขึ้นเรื่อย ๆ แบบ damped additive เพิ่มเร็วแล้วค่อย ๆ ราบลงเข้าหาประมาณ 10,000 แบบ damped multiplicative เป็นรูป S ที่ราบลงที่ประมาณ 10,000 และแบบ parabolic เป็นเส้นโค้งพาราโบลา คอลัมน์ของ seasonality เพิ่มคลื่นซ้อนบนเส้นเหล่านี้ โดยคลื่นแบบ multiplicative สูงขึ้นตามเส้นกลาง คำว่า damped หมายถึง trend ที่ถูกหน่วงให้ความชันลดลงเรื่อย ๆ ไม่เพิ่มไปไม่สิ้นสุด</p>
+
+<!-- ===================================================== -->
+<h2 id="s6">6. Holt กับข้อมูล Sales ใน Excel และ R</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p30.png" alt="Slide 4 หน้า 30: Holt ใน Excel: Sales dataset" loading="lazy">
+<figcaption>Slide 4 หน้า 30 — Holt ใน Excel: Sales dataset</figcaption>
+</figure>
+
+<p>ตาราง Excel ใช้ α = 0.5 และ β = 0.5 และต้องมีค่าเริ่มต้นของ level และ trend คือ \(L_0=9000\) และ \(T_0=5000\) แถวสุดท้ายที่ t = 17 มีเฉพาะค่าพยากรณ์ 287,245.2618 ซึ่งเป็นการพยากรณ์เดือนที่ยังไม่เกิด</p>
+
+<div class="calc" id="s6-calc">
+<div class="calc-title">คำนวณตาราง Holt สองแถวแรกด้วยมือ (α = β = 0.5)</div>
+<div class="given">\(L_0=9000\), \(T_0=5000\), \(y_1=13931\), \(y_2=19315\)</div>
+<ol class="steps">
+<li><div class="st-title">Forecast ของ t = 1</div><p>\(F_1=L_0+T_0=9000+5000=14000\)</p></li>
+<li><div class="st-title">Level ของ t = 1</div><p>\(L_1=0.5(13931)+0.5(9000+5000)=6965.5+7000=13965.5\)</p></li>
+<li><div class="st-title">Trend ของ t = 1</div><p>\(T_1=0.5(13965.5-9000)+0.5(5000)=2482.75+2500=4982.75\)</p></li>
+<li><div class="st-title">Forecast ของ t = 2</div><p>\(F_2=L_1+T_1=13965.5+4982.75=18948.25\)</p></li>
+<li><div class="st-title">Level ของ t = 2</div><p>\(L_2=0.5(19315)+0.5(18948.25)=9657.5+9474.125=19131.625\)</p></li>
+<li><div class="st-title">Trend ของ t = 2</div><p>\(T_2=0.5(19131.625-13965.5)+0.5(4982.75)=2583.0625+2491.375=5074.4375\)</p></li>
+<li><div class="st-title">ท้ายตาราง</div><p>\(L_{16}=277285.0123\) และ \(T_{16}=9960.2495\) จึงได้ \(F_{17}=277285.01+9960.25=287245.26\) และค่าพยากรณ์ 3 เดือนข้างหน้าคือ \(F_{19}=L_{16}+3T_{16}=277285.01+29880.75=307165.76\)</p></li>
+</ol>
+<p>ทุกค่าตรงกับตารางในสไลด์ ลำดับในแต่ละแถวคือ forecast, level, trend เพราะ level ต้องใช้ค่าของแถวก่อน และ trend ต้องใช้ level ที่เพิ่งคำนวณ และเนื่องจาก \(L_{t-1}+T_{t-1}=F_t\) สมการ level เขียนย่อได้ว่า \(L_t=\alpha Y_t+(1-\alpha)F_t\)</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p31.png" alt="Slide 4 หน้า 31: Holt ใน R: องค์ประกอบของ Sales" loading="lazy">
+<figcaption>Slide 4 หน้า 31 — Holt ใน R: องค์ประกอบของ Sales</figcaption>
+</figure>
+
+<p>R แยกผลของ Holt เป็นสามส่วน ส่วน observed คือยอดขายจริงจากประมาณ 14,000 ถึง 275,000 ส่วน level คือเส้นเรียบของระดับ ซึ่งไม่มีรอยสะดุดที่เดือนที่ 12 เหมือนข้อมูลจริง ส่วน slope คือ \(T_t\) ของแต่ละเวลา: ใกล้ 0 ช่วงต้น สูงสุดประมาณ 47,000 ที่ t ประมาณ 8 ซึ่งเป็นช่วงที่ยอดขายเพิ่มเร็ว ลดเหลือประมาณ 22,000 ที่ t = 10 ลงเกือบ 0 ที่ t = 13 เมื่อยอดขายชะลอ แล้วกลับมาประมาณ 12,000 ถึง 15,000 ตอนท้าย ส่วน slope ตอบคำถามว่าขณะนั้นข้อมูลเพิ่มเร็วเพียงใด ค่าพยากรณ์ของช่วงถัดไปเท่ากับ level ปัจจุบันบวก slope ปัจจุบัน จึงประมาณได้จากค่าปลายสุดของสองส่วนนี้</p>
+
+<figure>
+<img src="../assets/slides/ts4-p32.png" alt="Slide 4 หน้า 32: ผลของ ets() กับ Sales และโจทย์ Holt รายไตรมาส" loading="lazy">
+<figcaption>Slide 4 หน้า 32 — ผลของ ets() กับ Sales และโจทย์ Holt รายไตรมาส</figcaption>
+</figure>
+
+<p>หน้านี้มีสองส่วน ส่วนแรกคือผลจาก R เมื่อให้ <code>ets()</code> เลือกโมเดลให้ข้อมูล Sales โดยอัตโนมัติ ส่วนที่สองคือภาพ Excel ของโจทย์ฝึก Holt กับข้อมูลรายไตรมาส</p>
+
+<pre class="out" data-p="32"><code>&gt; bestmodel &lt;- ets(data, model="ZZZ")
+&gt; bestmodel
+ETS(M,M,N)
+  Smoothing parameters:
+    alpha = 0.9464
+    beta  = 0.4598
+  Initial states:
+    l = 10223.7114
+    b = 1.3362
+  sigma:  0.1427
+     AIC     AICc      BIC
+359.2966 362.9330 362.3870</code></pre>
+<table class="codeexp compact">
+<tr><th>ส่วนของผล</th><th>ความหมาย</th></tr>
+<tr><td>model="ZZZ"</td><td>ให้ R เลือก error, trend และ seasonality เองทั้งสามตัว โดยเลือกโมเดลที่ AIC ต่ำสุด</td></tr>
+<tr><td>ETS(M,M,N)</td><td>R เลือก multiplicative error, multiplicative trend และไม่มี seasonality</td></tr>
+<tr><td>alpha = 0.9464</td><td>ใกล้ 1 level จึงตามค่าจริงล่าสุดเกือบทั้งหมด</td></tr>
+<tr><td>beta = 0.4598</td><td>trend ปรับตัวปานกลาง</td></tr>
+<tr><td>l = 10223.7114
+b = 1.3362</td><td>ค่าเริ่มต้นของ level และ trend ที่ R ประมาณ ค่า b = 1.3362 เป็นอัตราการเติบโต คือโต 33.62% ต่อเดือน เพราะ trend เป็นแบบคูณ</td></tr>
+<tr><td>sigma: 0.1427</td><td>ส่วนเบี่ยงเบนมาตรฐานของ error แบบคูณ ประมาณ 14.3% ของระดับ</td></tr>
+<tr><td>AIC, AICc, BIC</td><td>เกณฑ์เปรียบเทียบโมเดลบนข้อมูลชุดเดียวกัน ค่ายิ่งต่ำยิ่งดี</td></tr>
+</table>
+<p>ตรวจความสมเหตุสมผล: ค่าพยากรณ์ของเดือนแรกคือ \(F_1=L_0\times T_0=10223.71\times1.3362=13661\) ค่าจริงคือ 13,931 คลาดเคลื่อน 270 หรือ 1.9% ซึ่งอยู่ภายในขนาดของ sigma โจทย์ Excel ในส่วนที่สองให้ข้อมูลรายไตรมาสตั้งแต่ Q1-2002 ถึง Q4-2004 คือ 155, 180, 260, 560, 160, 185, 270, 600, 165, 190, 280, 635 พร้อม α = 0.2 และให้ใช้ Holt พยากรณ์อีก 4 ไตรมาส ข้อมูลนี้มี seasonal ชัดเจน เพราะ Q4 สูงสุดทุกปี คือ 560, 600 และ 635 วิธีของ Holt ซึ่งไม่มีส่วน seasonal จะพยากรณ์ Q4 ต่ำเกินทุกปี ข้อมูลลักษณะนี้ต้องใช้ Holt-Winters ในหัวข้อ 8</p>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Holt</span></div>
+<div class="qtext">Holt แบบ additive ที่ α = β = 0.5 มี \(L_{t-1}=100\), \(T_{t-1}=10\) และ \(Y_t=120\) ค่า \(L_t\) และ \(T_t\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ต้องบวก trend เข้าไปใน level ก่อนหน้า: 0.5(120) + 0.5(110)">\(L_t=110\) และ \(T_t=10.0\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. L = 60 + 55 = 115 และ T = 0.5(15) + 0.5(10) = 12.5">\(L_t=115\) และ \(T_t=12.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. L ถูก แต่ T ต้องผสมกับ trend เดิมด้วย β">\(L_t=115\) และ \(T_t=15.0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. L ต้องผสมค่าจริงกับค่าที่คาดไว้ ไม่ใช่ใช้ค่าจริงทั้งหมด">\(L_t=120\) และ \(T_t=15.0\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>ETS</span></div>
+<div class="qtext">ETS(M,A,N) หมายถึงโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ตัวอักษรเรียงเป็น Error, Trend, Seasonality">error คูณ, trend บวก, ไม่มี seasonal</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัวแรกคือ error ซึ่งเป็น M">error บวก, trend คูณ, ไม่มี seasonal</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัวที่สองคือ trend ซึ่งเป็น A ไม่ใช่ N">error คูณ, ไม่มี trend, seasonal บวก</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัวที่สามคือ N คือไม่มี seasonal">error คูณ, trend บวก, seasonal คูณ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 4 ถึง 6</div>
+<ul>
+<li>สามชนิดของ exponential smoothing และเงื่อนไขการใช้: simple, Holt, Winter</li>
+<li>อ่านและเขียนสัญกรณ์ ETS ได้</li>
+<li>สมการของ Holt ทั้งแบบ additive และ multiplicative trend</li>
+<li>คำนวณตาราง Holt ด้วยมือ ตามลำดับ forecast, level, trend</li>
+<li>ความต่างระหว่าง additive error กับ multiplicative error</li>
+<li>อ่านผลของ <code>ets()</code>: alpha, beta, initial states, sigma, AIC</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s7">7. ข้อมูล Singapore และ German inflation</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p33.png" alt="Slide 4 หน้า 33: Dataset 3: Singapore Labor Force" loading="lazy">
+<figcaption>Slide 4 หน้า 33 — Dataset 3: Singapore Labor Force</figcaption>
+</figure>
+
+<p>ข้อมูลชุดที่สามคือ labor force participation rate รายปี 28 ปี ค่าเพิ่มจากประมาณ 70% ในปี 1980 เกือบเป็นเส้นตรงถึงประมาณ 83.5% ในปี 2007 สไลด์กำกับว่า (can’t exceed 100) อัตรานี้มีเพดานที่ 100% ถ้าใช้ trend เส้นตรงหรือ trend แบบคูณพยากรณ์ไปไกล ค่าจะเกิน 100 ได้ ข้อมูลลักษณะนี้จึงเหมาะกับ damped trend ในหน้า 29 ซึ่งความชันลดลงเรื่อย ๆ และข้อมูลรายปีไม่มี seasonal</p>
+
+<figure>
+<img src="../assets/slides/ts4-p34.png" alt="Slide 4 หน้า 34: Dataset 4: Germany monthly inflation rate" loading="lazy">
+<figcaption>Slide 4 หน้า 34 — Dataset 4: Germany monthly inflation rate</figcaption>
+</figure>
+
+<p>ข้อมูลชุดที่สี่คืออัตราเงินเฟ้อรายเดือนของเยอรมนี 118 เดือน ตั้งแต่ Jan 2008 ถึง Oct 2017 ค่าแกว่งระหว่างประมาณ −1.0 ถึง 0.85 รอบค่าประมาณ 0.1 ตลอด 10 ปี สไลด์สรุปสามข้อ คือ No trend, Seasonal is present และ Stable variance วิธีของ Holt จับ seasonal ไม่ได้ จึงต้องใช้โมเดลที่มีสมการของ seasonal</p>
+
+<figure>
+<img src="../assets/slides/ts4-p35.png" alt="Slide 4 หน้า 35: German inflation: ตารางรายเดือนและ decomposition" loading="lazy">
+<figcaption>Slide 4 หน้า 35 — German inflation: ตารางรายเดือนและ decomposition</figcaption>
+</figure>
+
+<p>เมื่ออ่านตารางตามคอลัมน์ของเดือน เดือน Jan ติดลบทุกปี คือ −0.31, −0.51, −0.60, −0.20, −0.10, −0.48, −0.56, −1.03, −0.84, −0.64 ส่วนเดือน Feb เป็นบวกทุกปี ระหว่าง 0.41 ถึง 0.85 ค่าที่ขึ้นลงตามเดือนเดิมทุกปีเป็นหลักฐานของ seasonal จากตัวเลขโดยตรง ในกราฟ decomposition ส่วน trend แกว่งเพียง 0 ถึงประมาณ 0.2 จึงแทบไม่มี trend ส่วน seasonal ซ้ำรูปเดิมทุกปีในช่วงประมาณ −0.6 ถึง 0.4 ซึ่งกว้างที่สุด seasonal จึงเป็นส่วนหลักของข้อมูลนี้ และส่วน random อยู่ระหว่างประมาณ −0.4 ถึง 0.4 โดยไม่มีแบบแผน</p>
+
+<!-- ===================================================== -->
+<h2 id="s8">8. Holt-Winters exponential smoothing</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p36.png" alt="Slide 4 หน้า 36: Holt-Winter’s exponential smoothing: Time-series model" loading="lazy">
+<figcaption>Slide 4 หน้า 36 — Holt-Winter’s exponential smoothing: Time-series model</figcaption>
+</figure>
+
+<p>โมเดลคือ \(X_t=(a+bt)c_t+\varepsilon_t\) โดย a เป็น level parameter, b เป็น linear trend parameter และ \(c_t\) เป็น seasonal parameter ส่วน \(\varepsilon_t\) เป็นอิสระต่อกันและมีการแจกแจงปกติ เมื่อเทียบกับโมเดลของ Holt มีตัวคูณ \(c_t\) เพิ่มเข้ามาเพื่อยกหรือกดระดับตามฤดูกาล</p>
+
+<figure>
+<img src="../assets/slides/ts4-p37.png" alt="Slide 4 หน้า 37: ที่มาของชื่อ Holt-Winters" loading="lazy">
+<figcaption>Slide 4 หน้า 37 — ที่มาของชื่อ Holt-Winters</figcaption>
+</figure>
+
+<p><mark class="src" data-p="37">Charles C. Holt</mark> (21 May 1921 – 13 December 2010) เป็นศาสตราจารย์ที่ Department of Management, McCombs School of Business, University of Texas at Austin เป็นที่รู้จักจากผลงานด้าน exponential smoothing ของตนเองและของ <mark class="src" data-p="37">his student, Peter Winters</mark> สไลด์สรุปความสัมพันธ์ของสองวิธี: <mark class="src" data-p="37">Winter took the idea of Holt and added the Seasonal component. That’s it</mark> วิธีของ Holt มีสองสมการ คือ level และ trend ส่วน Holt-Winters มีสามสมการ โดยเพิ่ม seasonal</p>
+
+<figure>
+<img src="../assets/slides/ts4-p38.png" alt="Slide 4 หน้า 38: Holt-Winters: สมการพยากรณ์" loading="lazy">
+<figcaption>Slide 4 หน้า 38 — Holt-Winters: สมการพยากรณ์</figcaption>
+</figure>
+
+<p>Series มี level \(L_t\), trend \(T_t\), seasonality \(S_t\) ที่มี M seasons เช่น M = 12 สำหรับข้อมูลรายเดือน และ noise ค่าพยากรณ์มีสองแบบ แบบ additive seasonality คือ \(F_{t+k}=L_t+kT_t+S_{t+k-M}\) และแบบ multiplicative seasonality คือ \(F_{t+k}=(L_t+kT_t)\times S_{t+k-M}\) ทั้งสองแบบใช้ additive trend ตัว \(S_{t+k-M}\) คือค่า seasonal ของฤดูกาลเดียวกันในรอบที่แล้ว เช่น เมื่อพยากรณ์เดือนธันวาคมของปีหน้า ใช้ค่า seasonal ของเดือนธันวาคมล่าสุด ตัวอย่าง: \(L_t=200\), \(T_t=5\), \(k=2\) และค่า seasonal ของฤดูนั้นคือ −15 ในแบบ additive ได้ \(200+2(5)-15=195\)</p>
+
+<figure>
+<img src="../assets/slides/ts4-p39.png" alt="Slide 4 หน้า 39: Updating components: Additive Seasonality" loading="lazy">
+<figcaption>Slide 4 หน้า 39 — Updating components: Additive Seasonality</figcaption>
+</figure>
+
+<p>สำหรับ additive trend และ additive seasonality มีสามสมการ และต้องรู้ alpha, beta, gamma สมการ level คือ \(L_t=\alpha(Y_t-S_{t-M})+(1-\alpha)(L_{t-1}+T_{t-1})\) ใช้ \(Y_t-S_{t-M}\) ซึ่งเป็นค่าจริงที่ถอดผลของฤดูกาลออกแล้ว สมการ trend คือ \(T_t=\beta(L_t-L_{t-1})+(1-\beta)T_{t-1}\) เหมือนของ Holt สมการ seasonal คือ \(S_t=\gamma(Y_t-L_t)+(1-\gamma)S_{t-M}\) ผสมส่วนที่ค่าจริงเกินจาก level ปัจจุบัน กับค่า seasonal ของฤดูกาลเดียวกันในรอบก่อน</p>
+
+<figure>
+<img src="../assets/slides/ts4-p40.png" alt="Slide 4 หน้า 40: Updating components: Multiplicative Seasonality" loading="lazy">
+<figcaption>Slide 4 หน้า 40 — Updating components: Multiplicative Seasonality</figcaption>
+</figure>
+
+<p>สำหรับ additive trend และ multiplicative seasonality การลบเปลี่ยนเป็นการหารสองจุด สมการ level คือ \(L_t=\alpha\left(\dfrac{Y_t}{S_{t-M}}\right)+(1-\alpha)(L_{t-1}+T_{t-1})\) และสมการ seasonal คือ \(S_t=\gamma\left(\dfrac{Y_t}{L_t}\right)+(1-\gamma)S_{t-M}\) ส่วนสมการ trend เหมือนเดิม ในแบบนี้ seasonal เป็นอัตราส่วน เช่น 1.2 หมายถึงสูงกว่าระดับ 20%</p>
+
+<table>
+<tr><th></th><th>Additive seasonality</th><th>Multiplicative seasonality</th></tr>
+<tr><td>Forecast</td><td>\(L_t+kT_t+S_{t+k-M}\)</td><td>\((L_t+kT_t)\times S_{t+k-M}\)</td></tr>
+<tr><td>Level</td><td>\(\alpha(Y_t-S_{t-M})+(1-\alpha)(L_{t-1}+T_{t-1})\)</td><td>\(\alpha(Y_t/S_{t-M})+(1-\alpha)(L_{t-1}+T_{t-1})\)</td></tr>
+<tr><td>Trend</td><td colspan="2">\(\beta(L_t-L_{t-1})+(1-\beta)T_{t-1}\)</td></tr>
+<tr><td>Seasonal</td><td>\(\gamma(Y_t-L_t)+(1-\gamma)S_{t-M}\)</td><td>\(\gamma(Y_t/L_t)+(1-\gamma)S_{t-M}\)</td></tr>
+<tr><td>ค่า seasonal เป็น</td><td>จำนวนที่บวกหรือลบ เฉลี่ยเป็น 0</td><td>อัตราส่วน เฉลี่ยเป็น 1</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts4-p41.png" alt="Slide 4 หน้า 41: พารามิเตอร์สามตัว" loading="lazy">
+<figcaption>Slide 4 หน้า 41 — พารามิเตอร์สามตัว</figcaption>
+</figure>
+
+<p>พารามิเตอร์แต่ละตัวคู่กับองค์ประกอบหนึ่งตัว: α คู่กับ LEVEL, β คู่กับ TREND และ γ คู่กับ SEASONALITY ทั้งสามอยู่ระหว่าง 0 ถึง 1 ค่าที่ใกล้ 1 หมายความว่าองค์ประกอบนั้นปรับตามข้อมูลล่าสุดเร็ว ค่าที่ใกล้ 0 หมายความว่าแทบไม่เปลี่ยนจากค่าเดิม</p>
+
+<figure>
+<img src="../assets/slides/ts4-p42.png" alt="Slide 4 หน้า 42: ผลของ ets() กับ German inflation" loading="lazy">
+<figcaption>Slide 4 หน้า 42 — ผลของ ets() กับ German inflation</figcaption>
+</figure>
+
+<p>เมื่อให้ <code>ets()</code> เลือกโมเดลให้ German inflation โดยไม่ระบุ model แล้วพยากรณ์ต่ออีก 5 ปี R เลือก ETS(A,N,A) กราฟแสดงข้อมูลจริงปี 2008 ถึง 2017 ตามด้วยค่าพยากรณ์ปี 2018 ถึง 2022 ซึ่งซ้ำลวดลาย 12 เดือนเดิมทุกปีรอบระดับคงที่ประมาณ 0.1 เพราะไม่มี trend และ seasonal ไม่เปลี่ยน แถบรอบค่าพยากรณ์คือ prediction interval ที่ 80% และ 95% กว้างประมาณ ±0.3 ถึง ±0.45 ตรงกับแนวคิดใน Lesson 1 ที่ noise ใช้สร้างช่วงของความไม่แน่นอน</p>
+
+<pre class="out" data-p="42"><code>ETS(A,N,A)
+Call:
+ ets(y = germaninfl)
+  Smoothing parameters:
+    alpha = 1e-04
+    gamma = 1e-04
+  Initial states:
+    l = 0.1021
+    s = 0.2741 -0.0868 -0.1336 -0.1038 -0.0377 0.2009
+        -0.0085 -0.0111 -0.2365 0.323 0.4503 -0.6303
+  sigma:  0.2145
+     AIC     AICc      BIC
+214.7276 219.4335 256.2878</code></pre>
+<table class="codeexp compact">
+<tr><th>ส่วนของผล</th><th>ความหมาย</th></tr>
+<tr><td>ETS(A,N,A)</td><td>error แบบบวก ไม่มี trend และ seasonal แบบบวก ตรงกับคำบรรยายข้อมูลในหน้า 34: No trend, Seasonal is present, Stable variance</td></tr>
+<tr><td>ไม่มี beta</td><td>เพราะโมเดลไม่มีสมการ trend</td></tr>
+<tr><td>alpha = 1e-04
+gamma = 1e-04</td><td>เท่ากับ 0.0001 ใกล้ 0 มาก level และ seasonal จึงแทบไม่เปลี่ยนตลอด 10 ปี</td></tr>
+<tr><td>l = 0.1021</td><td>ระดับเฉลี่ยของอัตราเงินเฟ้อประมาณ 0.10</td></tr>
+<tr><td>s = 12 ค่า</td><td>ค่า seasonal ของ 12 เดือน รวมกันได้ 0 ตามลักษณะของแบบ additive R พิมพ์เรียงจากเดือนล่าสุดย้อนหลัง ค่าสุดท้าย −0.6303 จึงเป็นของ Jan, 0.4503 ของ Feb และ 0.323 ของ Mar ตรงกับตารางหน้า 35 ที่ Jan ติดลบและ Feb เป็นบวกทุกปี</td></tr>
+<tr><td>sigma: 0.2145</td><td>ส่วนเบี่ยงเบนมาตรฐานของ error ประมาณ 0.21</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts4-p43.png" alt="Slide 4 หน้า 43: Summary of Exponential Smoothing using ets()" loading="lazy">
+<figcaption>Slide 4 หน้า 43 — Summary of Exponential Smoothing using ets()</figcaption>
+</figure>
+
+<p>ตารางนี้สรุปรหัสของอาร์กิวเมนต์ model ใน <code>ets()</code> ตัวแรกเป็น Z คือให้ R เลือกชนิดของ error ตัวที่สองคือ trend และตัวที่สามคือ seasonality</p>
+
+<table>
+<tr><th>Trend</th><th>No seasonality</th><th>Additive seasonality</th><th>Multiplicative seasonality</th></tr>
+<tr><td>None</td><td>ZNN</td><td>ZNA</td><td>ZNM</td></tr>
+<tr><td>Additive</td><td>ZAN</td><td>ZAA</td><td>ZAM</td></tr>
+<tr><td>Multiplicative</td><td>ZMN</td><td>ZMA</td><td>ZMM</td></tr>
+<tr><td>Additive damped</td><td>ZAdN</td><td>ZAdA</td><td>ZAdM</td></tr>
+<tr><td>Multiplicative damped</td><td>ZMdN</td><td>ZMdA</td><td>ZMdM</td></tr>
+</table>
+<p>ตัวอย่างการใช้: simple exponential smoothing คือ ZNN, Holt แบบ additive คือ ZAN และ Holt-Winters ที่มี additive trend กับ multiplicative seasonality คือ ZAM</p>
+
+<figure>
+<img src="../assets/slides/ts4-p44.png" alt="Slide 4 หน้า 44: Holt-Winters ใน Excel: ข้อมูลรายเดือน" loading="lazy">
+<figcaption>Slide 4 หน้า 44 — Holt-Winters ใน Excel: ข้อมูลรายเดือน</figcaption>
+</figure>
+
+<p>ตัวอย่าง Excel ใช้ข้อมูลจำนวนบ้านที่ขายได้รายเดือน โดย M = 12, β = 0.1, γ = 0.1 และ multiplicative seasonality ค่าเริ่มต้นของ seasonal ทั้ง 12 เดือนได้จากค่าของแต่ละเดือนในปีแรกหารด้วยค่าเฉลี่ยของทั้งปี เช่น April ได้ 0.98744 และ June ได้ 1.27623 ซึ่งหมายถึงขายได้มากกว่าค่าเฉลี่ย 27.6% ค่าเริ่มต้นของ level คือ \(L_{13}=Y_{13}/S_1\) ซึ่งอยู่ที่หนึ่งปีบวกหนึ่งช่วงเวลา</p>
+
+<div class="calc" id="s8-calc">
+<div class="calc-title">คำนวณตาราง Holt-Winters หน้า 44 ซ้ำ</div>
+<ol class="steps">
+<li><div class="st-title">Trend ของช่วงที่ 14</div><p>\(T_{14}=\beta(L_{14}-L_{13})+(1-\beta)T_{13}=0.1(283627-254819)+0.9(37247)=2880.8+33522.3=36403.1\)</p></li>
+<li><div class="st-title">Forecast ของช่วงที่ 17 (April)</div><p>\(F_{17}=(L_{16}+T_{16})\times S_4=(309554+35355.4)\times0.98744=344909.4\times0.98744=340577\)</p></li>
+</ol>
+<p>ค่าในตารางของสไลด์คือ 340,575 ส่วนต่าง 2 หน่วยมาจากการปัดเศษของค่าที่อ่านจากตาราง ขั้นที่ 2 รวม level กับ trend เป็นระดับที่คาดว่าจะถึง แล้วคูณด้วยค่า seasonal ของเดือนเดียวกันในปีก่อน เดือน April มีค่า 0.987 ซึ่งต่ำกว่าค่าเฉลี่ยเล็กน้อย จึงดึงค่าพยากรณ์ลงเล็กน้อย</p>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>Holt-Winters</span></div>
+<div class="qtext">Holt-Winters แบบ additive seasonality มี \(L_t=200\), \(T_t=5\) และค่า seasonal ของฤดูกาลเป้าหมายคือ −15 ค่าพยากรณ์ 2 ช่วงข้างหน้าคือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. k = 2 ต้องคูณ trend ด้วย 2">\(200+5-15=190\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. แบบ additive ใช้การบวกค่า seasonal ไม่ใช่การคูณ">\((200+10)\times(-15)=-3150\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. L + kT + S = 200 + 10 − 15">\(200+2(5)-15=195\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่า seasonal เป็น −15 จึงต้องลบ">\(200+2(5)+15=225\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>ets()</span></div>
+<div class="qtext"><code>ets()</code> ให้ผล ETS(A,N,A) โดย alpha = 1e-04 และ gamma = 1e-04 ข้อใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ตัวที่สองเป็น N คือไม่มี trend">มี trend แบบบวก และ seasonal ปรับเร็วมาก</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัวที่สามเป็น A คือมี seasonal แบบบวก">ไม่มี seasonal และ level ปรับตามข้อมูลทันที</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัวแรกเป็น A คือ error แบบบวก">error แบบคูณ และ seasonal เฉลี่ยเป็นหนึ่ง</button>
+<button class="opt" data-correct="true" data-note="ถูก. N คือไม่มี trend และค่าที่ใกล้ 0 หมายถึงแทบไม่ปรับ">ไม่มี trend และ level กับ seasonal แทบคงที่</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 7 และ 8</div>
+<ul>
+<li>เลือกวิธีตามลักษณะข้อมูล: horizontal ใช้ simple, มี trend ใช้ Holt, มี trend และ seasonal ใช้ Holt-Winters, มีเพดานใช้ damped trend</li>
+<li>สมการของ Holt-Winters ทั้งแบบ additive และ multiplicative seasonality</li>
+<li>α คู่กับ level, β คู่กับ trend, γ คู่กับ seasonality</li>
+<li>\(S_{t+k-M}\) คือค่า seasonal ของฤดูกาลเดียวกันในรอบก่อน</li>
+<li>อ่านผล <code>ets()</code> และตารางรหัส model เช่น ZAN, ZAM</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s9">9. Decomposition models</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p47.png" alt="Slide 4 หน้า 47: Decomposition Models" loading="lazy">
+<figcaption>Slide 4 หน้า 47 — Decomposition Models</figcaption>
+</figure>
+
+<p>Decomposition ใช้บรรยาย trend และ seasonal factors ของ time series Decomposition ที่ละเอียดกว่าอาจรวม long-run cycles, holiday effects และ day of week effects ในที่นี้พิจารณาเฉพาะ trend และ seasonal วัตถุประสงค์หลักข้อหนึ่งคือ <mark class="src" data-p="47">estimate seasonal effects</mark> เพื่อสร้าง seasonally adjusted values ซึ่งคือค่าที่นำผลของฤดูกาลออกแล้ว ทำให้มองเห็น trend ชัดขึ้น ตัวอย่าง: ยอดขายเดือนธันวาคมสูงกว่าเดือนพฤศจิกายนทุกปี ค่าดิบจึงบอกไม่ได้ว่าธุรกิจดีขึ้นจริงหรือเป็นเพียงผลของฤดูกาล ค่า seasonally adjusted ตอบคำถามนี้ได้</p>
+
+<figure>
+<img src="../assets/slides/ts4-p48.png" alt="Slide 4 หน้า 48: Basic Structures" loading="lazy">
+<figcaption>Slide 4 หน้า 48 — Basic Structures</figcaption>
+</figure>
+
+<p>โครงสร้างพื้นฐานมีสองแบบ แบบ additive คือ \(X_t=\text{Trend}+\text{Seasonal}+\text{Random}\) และแบบ multiplicative คือ \(X_t=\text{Trend}\times\text{Seasonal}\times\text{Random}\) แบบ additive เหมาะเมื่อ seasonal variation ค่อนข้างคงที่ตามเวลา แบบ multiplicative เหมาะเมื่อ seasonal variation เพิ่มขึ้นตามเวลา ข้อความสีในสไลด์ระบุการปรับค่า: <mark class="src" data-p="48">The seasonal effects are usually adjusted so that they average to 0 for an additive decomposition or they average to 1 for a multiplicative decomposition.</mark> เหตุผลคือ ค่า seasonal ต้องบอกเฉพาะการเบี่ยงจากระดับปกติ ถ้าค่าเฉลี่ยของ seasonal ไม่เป็น 0 (หรือ 1) ส่วนเกินนั้นควรอยู่ใน trend</p>
+
+<figure>
+<img src="../assets/slides/ts4-p49.png" alt="Slide 4 หน้า 49: Basic Steps in Decomposition: Step 1 และ 2" loading="lazy">
+<figcaption>Slide 4 หน้า 49 — Basic Steps in Decomposition: Step 1 และ 2</figcaption>
+</figure>
+
+<p>Step 1 คือประมาณ trend ซึ่งทำได้สองแนวทาง แนวทางแรกใช้ smoothing เช่น moving averages ซึ่งไม่มีสมการบรรยาย trend แนวทางที่สองสร้างโมเดลของ trend ด้วย regression equation Step 2 คือ “de-trend” series สำหรับ additive decomposition ทำโดยลบค่า trend ออกจาก series สำหรับ multiplicative decomposition ทำโดยหาร series ด้วยค่า trend</p>
+
+<figure>
+<img src="../assets/slides/ts4-p50.png" alt="Slide 4 หน้า 50: Basic Steps in Decomposition: Step 3 และ 4" loading="lazy">
+<figcaption>Slide 4 หน้า 50 — Basic Steps in Decomposition: Step 3 และ 4</figcaption>
+</figure>
+
+<p>Step 3 คือประมาณ seasonal factors จาก series ที่ de-trend แล้ว ข้อมูลรายเดือนต้องประมาณผลของแต่ละเดือน รวม 12 ค่า ข้อมูลรายไตรมาสต้องประมาณผลของแต่ละไตรมาส รวม 4 ค่า วิธีที่ง่ายที่สุดคือเฉลี่ยค่า de-trended ของฤดูกาลเดียวกัน Step 4 คือหา random component สำหรับแบบ additive ใช้ random = series − trend − seasonal และสำหรับแบบ multiplicative ใช้ random = series ÷ (trend × seasonal)</p>
+
+<table>
+<tr><th>ขั้น</th><th>Additive</th><th>Multiplicative</th></tr>
+<tr><td>1. ประมาณ trend</td><td colspan="2">moving averages หรือ regression</td></tr>
+<tr><td>2. De-trend</td><td>series − trend</td><td>series ÷ trend</td></tr>
+<tr><td>3. Seasonal</td><td colspan="2">เฉลี่ยค่า de-trended ของฤดูกาลเดียวกัน</td></tr>
+<tr><td>ปรับ seasonal</td><td>ให้เฉลี่ยเป็น 0</td><td>ให้เฉลี่ยเป็น 1</td></tr>
+<tr><td>4. Random</td><td>series − trend − seasonal</td><td>series ÷ (trend × seasonal)</td></tr>
+</table>
+
+<figure>
+<img src="../assets/slides/ts4-p51.png" alt="Slide 4 หน้า 51: Dataset: Australian Beer Production" loading="lazy">
+<figcaption>Slide 4 หน้า 51 — Dataset: Australian Beer Production</figcaption>
+</figure>
+
+<p>ข้อมูลชุดที่ห้าคือการผลิตเบียร์ของออสเตรเลียรายไตรมาส 72 ไตรมาส เริ่มปี 1956 รวม 18 ปี ค่าต่ำสุดประมาณ 213 ในช่วงแรก และสูงสุดประมาณ 525 ในช่วงท้าย ทุก 4 ไตรมาสมียอดหนึ่งครั้งที่ไตรมาส 4 เช่น 308.4, 320.4 และ 313.4 ในปีแรก ๆ และมีท้องที่ไตรมาส 2 ข้อมูลจึงมี trend ขาขึ้นและ seasonal ที่มีรอบ 4 ระยะจากยอดถึงท้องกว้างขึ้นจากประมาณ 95 เป็นประมาณ 140 จึงค่อนไปทางแบบ multiplicative</p>
+
+<figure>
+<img src="../assets/slides/ts4-p52.png" alt="Slide 4 หน้า 52: Decomposition ของ beer: additive และ multiplicative" loading="lazy">
+<figcaption>Slide 4 หน้า 52 — Decomposition ของ beer: additive และ multiplicative</figcaption>
+</figure>
+
+<p>R แสดงสี่ส่วนสำหรับแต่ละแบบ ส่วน observed คือข้อมูลจริง ส่วน trend เป็นเส้นเรียบจากประมาณ 255 ถึง 450 และเหมือนกันทั้งสองแบบ เพราะมาจาก centered moving average ชุดเดียวกัน ส่วน seasonal ซ้ำรูปเดิมทุกปี ในแบบ additive มีหน่วยเป็นจำนวน อยู่ระหว่างประมาณ −40 ถึง 57 ในแบบ multiplicative เป็นอัตราส่วน อยู่ระหว่างประมาณ 0.88 ถึง 1.18 ส่วน random ในแบบ additive แกว่งประมาณ ±20 และในแบบ multiplicative แกว่งรอบ 1 ระหว่างประมาณ 0.96 ถึง 1.05</p>
+
+<div class="box beginner">
+<div class="label">อ่านกราฟ decomposition อย่างไร</div>
+<ol>
+<li>ดูหน่วยของส่วน seasonal: ถ้าแกว่งรอบ 0 และติดลบได้ เป็น additive ถ้าแกว่งรอบ 1 เป็น multiplicative</li>
+<li>ดูความกว้างของแต่ละส่วน: ส่วนที่กว้างมีอิทธิพลต่อข้อมูลมาก</li>
+<li>ส่วน random ควรไม่มีแบบแผน ถ้ายังเห็นรอบที่ซ้ำหรือ trend แสดงว่าแยกไม่หมด</li>
+<li>ส่วน trend ไม่มีค่าที่ต้นและปลาย เพราะ centered moving average ต้องใช้ข้อมูลทั้งสองข้าง</li>
+</ol>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p53.png" alt="Slide 4 หน้า 53: R-outputs (for additive model)" loading="lazy">
+<figcaption>Slide 4 หน้า 53 — R-outputs (for additive model)</figcaption>
+</figure>
+
+<p>ผลตัวเลขของแบบ additive: <code>$seasonal</code> ของทุกปีเท่ากัน คือ Qtr1 = 7.896, Qtr2 = −40.679, Qtr3 = −24.651, Qtr4 = 57.433 ส่วน <code>$trend</code> ของปีแรกเป็น NA ที่ Qtr1 และ Qtr2 แล้วเป็น 255.3250 ที่ Qtr3 และ 254.4125 ที่ Qtr4 และ <code>$random</code> ของปีแรกคือ −3.774 ที่ Qtr3 และ −3.446 ที่ Qtr4 ค่า seasonal ของ Qtr4 ที่ 57.433 หมายความว่าไตรมาส 4 ผลิตมากกว่า trend ประมาณ 57 หน่วย</p>
+
+<figure>
+<img src="../assets/slides/ts4-p54.png" alt="Slide 4 หน้า 54: R-outputs (for Multiplicative model)" loading="lazy">
+<figcaption>Slide 4 หน้า 54 — R-outputs (for Multiplicative model)</figcaption>
+</figure>
+
+<p>ผลตัวเลขของแบบ multiplicative: <code>$seasonal</code> คือ 1.0238, 0.8754, 0.9233, 1.1775 ส่วน <code>$trend</code> เหมือนแบบ additive ทุกค่า และ <code>$random</code> ของปีแรกคือ 0.9625 ที่ Qtr3 และ 1.0295 ที่ Qtr4 ค่า seasonal ของ Qtr4 ที่ 1.1775 หมายความว่าไตรมาส 4 ผลิตมากกว่า trend 17.75% และค่า 0.8754 ของ Qtr2 หมายความว่าต่ำกว่า trend 12.46%</p>
+
+<div class="calc" id="s9-calc">
+<div class="calc-title">ตรวจผลของ R ด้วยมือ</div>
+<div class="given">ข้อมูล beer หกค่าแรก: 284.4, 212.8, 226.9, 308.4, 262, 227.9</div>
+<ol class="steps">
+<li><div class="st-title">Seasonal แบบ additive เฉลี่ยเป็น 0</div><p>\((7.896-40.679-24.651+57.433)/4=-0.001/4\approx0\)</p></li>
+<li><div class="st-title">Seasonal แบบ multiplicative เฉลี่ยเป็น 1</div><p>\((1.0238+0.8754+0.9233+1.1775)/4=4.0000/4=1\) เป็นค่าเฉลี่ยที่เท่ากับ 1 ไม่ใช่ผลคูณ</p></li>
+<li><div class="st-title">Random แบบ additive ของปีแรก Qtr3</div><p>series − trend − seasonal \(=226.9-255.325-(-24.651)=-3.774\)</p></li>
+<li><div class="st-title">Random แบบ multiplicative ของปีแรก Qtr3</div><p>series ÷ (trend × seasonal) \(=226.9/(255.325\times0.9233)=226.9/235.74=0.9625\)</p></li>
+</ol>
+<p>ทุกค่าตรงกับผลของ R</p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s10">10. Centered moving average และ regression de-trending</h2>
+
+<figure>
+<img src="../assets/slides/ts4-p55.png" alt="Slide 4 หน้า 55: How the trend values were created" loading="lazy">
+<figcaption>Slide 4 หน้า 55 — How the trend values were created</figcaption>
+</figure>
+
+<p>ค่า trend ในหน้า 53 และ 54 ได้จาก “centered” moving averages ที่มี span 4 เพราะหนึ่งปีมี 4 ไตรมาส สำหรับเวลา 3 คำนวณค่าเฉลี่ยของเวลา 1 ถึง 4 คือ \(\tfrac14(x_1+x_2+x_3+x_4)\) และค่าเฉลี่ยของเวลา 2 ถึง 5 คือ \(\tfrac14(x_2+x_3+x_4+x_5)\) แล้วเฉลี่ยสองค่านี้อีกครั้ง เหตุผลของการเฉลี่ยสองชั้น: ค่าเฉลี่ยของ 4 จุดตั้งแต่เวลา 1 ถึง 4 มีจุดกึ่งกลางที่เวลา 2.5 ซึ่งไม่ใช่เวลาที่มีข้อมูล ค่าเฉลี่ยของเวลา 2 ถึง 5 มีจุดกึ่งกลางที่ 3.5 เมื่อเฉลี่ยสองค่านี้ จุดกึ่งกลางคือ \((2.5+3.5)/2=3\) ตรงกับเวลา 3 พอดี</p>
+
+<figure>
+<img src="../assets/slides/ts4-p56.png" alt="Slide 4 หน้า 56: น้ำหนักของ centered moving average" loading="lazy">
+<figcaption>Slide 4 หน้า 56 — น้ำหนักของ centered moving average</figcaption>
+</figure>
+
+<p>เมื่อกระจาย \(\tfrac12\left[\tfrac14(x_1+x_2+x_3+x_4)+\tfrac14(x_2+x_3+x_4+x_5)\right]\) ค่า \(x_1\) และ \(x_5\) อยู่ในวงเล็บเดียว จึงได้น้ำหนัก \(\tfrac12\cdot\tfrac14=\tfrac18\) ส่วน \(x_2,x_3,x_4\) อยู่ในทั้งสองวงเล็บ จึงได้ \(\tfrac18+\tfrac18=\tfrac14\) สูตรทั่วไปสำหรับข้อมูลรายไตรมาสคือ \(\tfrac18x_{t-2}+\tfrac14x_{t-1}+\tfrac14x_t+\tfrac14x_{t+1}+\tfrac18x_{t+2}\) และสำหรับข้อมูลรายเดือนคือ \(\tfrac1{24}x_{t-6}+\sum_{j=-5}^{5}\tfrac1{12}x_{t+j}+\tfrac1{24}x_{t+6}\) ซึ่งใช้หลักเดียวกันกับ span 12</p>
+
+<div class="calc" id="s10-calc">
+<div class="calc-title">คำนวณ trend ของ beer ที่ t = 3 และ t = 4</div>
+<div class="given">\(x_1,\dots,x_6=284.4,\ 212.8,\ 226.9,\ 308.4,\ 262,\ 227.9\)</div>
+<ol class="steps">
+<li><div class="st-title">t = 3</div><p>\(\tfrac18(284.4)+\tfrac14(212.8)+\tfrac14(226.9)+\tfrac14(308.4)+\tfrac18(262)=35.55+53.2+56.725+77.1+32.75=255.325\)</p></li>
+<li><div class="st-title">t = 4</div><p>\(\tfrac18(212.8)+\tfrac14(226.9+308.4+262)+\tfrac18(227.9)=26.6+199.325+28.4875=254.4125\)</p></li>
+<li><div class="st-title">ทำไม t = 1 และ t = 2 เป็น NA</div><p>สูตรต้องใช้ \(x_{t-2}\) ที่ t = 1 และ 2 ไม่มีข้อมูลก่อนหน้าเพียงพอ ปลายของ series เป็น NA สองค่าด้วยเหตุผลเดียวกัน</p></li>
+</ol>
+<div class="answer">ได้ 255.3250 และ 254.4125 ตรงกับ <code>$trend</code> ของ R</div>
+<p>น้ำหนักรวมคือ \(\tfrac18+3(\tfrac14)+\tfrac18=1\) และทุกไตรมาสได้น้ำหนักรวมเท่ากันที่ \(\tfrac14\) เพราะ \(x_{t-2}\) และ \(x_{t+2}\) เป็นไตรมาสเดียวกันของสองปี ผลของ seasonal จึงหักล้างกัน เหลือเฉพาะ trend</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p57.png" alt="Slide 4 หน้า 57: Regression method for de-trending: ตาราง" loading="lazy">
+<figcaption>Slide 4 หน้า 57 — Regression method for de-trending: ตาราง</figcaption>
+</figure>
+
+<p>อีกแนวทางของ Step 1 คือใช้ regression คอลัมน์ Trend ในตารางเพิ่มขึ้นครั้งละ 2.914 เท่ากันทุกแถว คือ 226.435, 229.3489, 232.2629 เส้น trend จึงเป็น \(\widehat{\text{Trend}}_t=223.521+2.914t\) จากนั้นทำแบบ multiplicative ครบสี่ขั้น</p>
+
+<div class="calc" id="s10-reg">
+<div class="calc-title">คำนวณตาราง regression de-trending แบบ multiplicative</div>
+<ol class="steps">
+<li><div class="st-title">Step 1: Trend</div><p>t = 1: \(223.521+2.914(1)=226.435\) และ t = 2: \(223.521+2.914(2)=229.349\)</p></li>
+<li><div class="st-title">Step 2: Detrend = Beer ÷ Trend</div><p>t = 1: \(284.4/226.435=1.2560\), t = 2: \(212.8/229.3489=0.9278\), t = 4: \(308.4/235.1768=1.3114\)</p></li>
+<li><div class="st-title">Step 3: Seasonal</div><p>เฉลี่ยค่า Detrend ของไตรมาสเดียวกันทั้ง 18 ปี ได้ Q1 = 1.0304, Q2 = 0.8727, Q3 = 0.9234, Q4 = 1.1736</p></li>
+<li><div class="st-title">Multi Decompose = Trend × Seasonal</div><p>t = 1: \(226.435\times1.03038849=233.316\), t = 2: \(229.3489\times0.87273156=200.160\), t = 4: \(235.1768\times1.17362224=276.009\)</p></li>
+<li><div class="st-title">Step 4: Random</div><p>t = 1: \(284.4/233.316=1.219\) ไตรมาสนั้นผลิตมากกว่าที่ trend และ seasonal อธิบายได้ประมาณ 22%</p></li>
+</ol>
+<p>ค่า seasonal จากวิธีนี้ (1.0304, 0.8727, 0.9234, 1.1736) ใกล้กับค่าจาก centered moving average ในหน้า 54 (1.0238, 0.8754, 0.9233, 1.1775) แต่ไม่เท่ากัน เพราะ trend ที่ใช้ต่างกัน</p>
+</div>
+
+<figure>
+<img src="../assets/slides/ts4-p58.png" alt="Slide 4 หน้า 58: Regression method for de-trending: กราฟ" loading="lazy">
+<figcaption>Slide 4 หน้า 58 — Regression method for de-trending: กราฟ</figcaption>
+</figure>
+
+<p>กราฟแรกแสดงเส้น trend จาก regression ซึ่งเป็นเส้นตรงเส้นเดียวจากประมาณ 226 ถึง 445 ผ่านกลางข้อมูล กราฟที่สองแสดงค่า Multi Decompose คือ trend × seasonal ซึ่งทับกับข้อมูลจริงเกือบตลอด 72 ไตรมาส และต่อไปถึงจุดที่ 76 ซึ่งเป็นค่าพยากรณ์ 4 ไตรมาสข้างหน้า ค่าพยากรณ์ได้จากการต่อเส้นตรงของ trend แล้วคูณด้วยค่า seasonal ของไตรมาสนั้น ข้อนี้เป็นจุดต่างของ regression เทียบกับ centered moving average: regression มีสมการของ trend จึงพยากรณ์อนาคตได้ และไม่มี NA ที่ต้นและปลาย</p>
+
+<table>
+<tr><th></th><th>Centered moving average</th><th>Regression</th></tr>
+<tr><td>มีสมการของ trend</td><td>ไม่มี</td><td>มี</td></tr>
+<tr><td>ค่า trend ที่ต้นและปลาย</td><td>เป็น NA</td><td>มีครบ</td></tr>
+<tr><td>ต่อ trend ไปอนาคต</td><td>ทำโดยตรงไม่ได้</td><td>ทำได้</td></tr>
+<tr><td>รูปของ trend</td><td>ปรับตามข้อมูล โค้งได้</td><td>ตามรูปของสมการ เช่น เส้นตรง</td></tr>
+<tr><td>ใน R</td><td><code>decompose()</code></td><td><code>lm()</code> แล้วคำนวณต่อ</td></tr>
+</table>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>Decomposition</span></div>
+<div class="qtext">ค่า seasonal ของ decomposition แบบ multiplicative ถูกปรับให้เป็นอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. เฉลี่ยเป็น 0 เป็นของแบบ additive">ค่าเฉลี่ยของทุกฤดูกาลเท่ากับ 0</button>
+<button class="opt" data-correct="true" data-note="ถูก. average to 1 for a multiplicative decomposition">ค่าเฉลี่ยของทุกฤดูกาลเท่ากับ 1</button>
+<button class="opt" data-correct="false" data-note="ผิด. สไลด์ระบุค่าเฉลี่ย ไม่ใช่ผลคูณ">ผลคูณของทุกฤดูกาลเท่ากับ 1</button>
+<button class="opt" data-correct="false" data-note="ผิด. สไลด์ระบุค่าเฉลี่ยเท่ากับ 1 ผลรวมจึงเท่ากับจำนวนฤดูกาล">ผลรวมของทุกฤดูกาลเท่ากับ 1</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>Centered MA</span></div>
+<div class="qtext">Centered moving average ของข้อมูลรายไตรมาสให้น้ำหนักกับ \(x_{t-2}\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 1/4 เป็นน้ำหนักของสามค่ากลาง">\(1/4\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 1/5 คือค่าเฉลี่ยธรรมดาของ 5 จุด">\(1/5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 1/24 เป็นน้ำหนักของปลายทั้งสองในข้อมูลรายเดือน">\(1/24\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. อยู่ในวงเล็บเดียว จึงได้ 1/2 × 1/4">\(1/8\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box exam">
+<div class="label">จุดสอบ — หัวข้อ 9 และ 10</div>
+<ul>
+<li>วัตถุประสงค์ของ decomposition และความหมายของ seasonally adjusted value</li>
+<li>สี่ขั้นตอนของ decomposition ทั้งแบบ additive และ multiplicative</li>
+<li>Seasonal เฉลี่ยเป็น 0 ในแบบ additive และเฉลี่ยเป็น 1 ในแบบ multiplicative</li>
+<li>คำนวณ centered moving average ด้วยน้ำหนัก 1/8, 1/4, 1/4, 1/4, 1/8 และอธิบายที่มา</li>
+<li>คำนวณ random component จาก series, trend และ seasonal</li>
+<li>ความต่างระหว่าง trend จาก moving average กับจาก regression</li>
+</ul>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s11">11. แบบฝึกท้ายบท</h2>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>เลือกวิธี</span></div>
+<div class="qtext">ข้อมูลยอดขายรายเดือนมี trend ขาขึ้น และยอดของเดือนธันวาคมสูงกว่าระดับปกติในสัดส่วนที่ใกล้เคียงกันทุกปี ควรใช้ model ใดใน <code>ets()</code></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ZNN คือ simple exponential smoothing ไม่มี trend และ seasonal">ZNN</button>
+<button class="opt" data-correct="false" data-note="ผิด. ZAN คือ Holt ไม่มี seasonal">ZAN</button>
+<button class="opt" data-correct="true" data-note="ถูก. additive trend กับ multiplicative seasonality เพราะยอดสูงเป็นสัดส่วนของระดับ">ZAM</button>
+<button class="opt" data-correct="false" data-note="ผิด. ZNA ไม่มี trend">ZNA</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>Moving average</span></div>
+<div class="qtext">ควรใช้ moving average ที่ order เท่าใดเพื่อปรับเรียบข้อมูลรายเดือนที่มี seasonal รายปี</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 4 ใช้กับข้อมูลรายไตรมาส">order 4</button>
+<button class="opt" data-correct="false" data-note="ผิด. 7 ใช้กับข้อมูลรายวัน">order 7</button>
+<button class="opt" data-correct="false" data-note="ผิด. 5 ใช้กับข้อมูลวันทำการ">order 5</button>
+<button class="opt" data-correct="true" data-note="ถูก. order เท่ากับจำนวนช่วงใน seasonal cycle">order 12</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>Decomposition</span></div>
+<div class="qtext">ใน decomposition แบบ additive ไตรมาสหนึ่งมี series = 230, trend = 250 และ seasonal = −25 ค่า random คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. 230 − 250 − (−25) = 5">\(230-250+25=5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลบค่า seasonal ที่เป็นลบ ต้องได้บวก">\(230-250-25=-45\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้เป็นสูตรของแบบ multiplicative">\(230/(250\times-25)=-0.04\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ต้องลบ trend ไม่ใช่บวก">\(230+250-25=455\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<p>ข้อต่อไปนี้ให้เขียนคำตอบเองก่อน แล้วจึงเปิดเฉลย</p>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>คำนวณ</span></div>
+<div class="qtext">ข้อมูลคือ 10, 14, 12, 16 จงหา (ก) SMA ที่ k = 3 ของเวลา 3 และ 4 (ข) EMA ที่ α = 0.5 โดย \(F_1=10\) จนถึง \(F_5\)</div>
+<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) เวลา 3: \((12+14+10)/3=12\) และเวลา 4: \((16+12+14)/3=14\)</p>
+<p>(ข) \(F_2=0.5(10)+0.5(10)=10\)</p>
+<p>\(F_3=0.5(14)+0.5(10)=12\)</p>
+<p>\(F_4=0.5(12)+0.5(12)=12\)</p>
+<p>\(F_5=0.5(16)+0.5(12)=14\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>คำนวณ</span></div>
+<div class="qtext">Holt แบบ additive ที่ α = 0.2 และ β = 0.5 มี \(L_0=100\), \(T_0=10\), \(y_1=115\) และ \(y_2=118\) จงหา \(F_1\), \(L_1\), \(T_1\), \(F_2\), \(L_2\), \(T_2\) และค่าพยากรณ์ของเวลา 4</div>
+<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(F_1=100+10=110\)</p>
+<p>\(L_1=0.2(115)+0.8(110)=23+88=111\) และ \(T_1=0.5(111-100)+0.5(10)=5.5+5=10.5\)</p>
+<p>\(F_2=111+10.5=121.5\)</p>
+<p>\(L_2=0.2(118)+0.8(121.5)=23.6+97.2=120.8\) และ \(T_2=0.5(120.8-111)+0.5(10.5)=4.9+5.25=10.15\)</p>
+<p>\(F_4=L_2+2T_2=120.8+20.3=141.1\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>คำนวณ</span></div>
+<div class="qtext">ข้อมูลรายไตรมาสคือ 100, 80, 90, 130, 104, 84 จงหา centered moving average ที่ t = 3 และ t = 4</div>
+<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>t = 3: \(\tfrac18(100)+\tfrac14(80+90+130)+\tfrac18(104)=12.5+75+13=100.5\)</p>
+<p>t = 4: \(\tfrac18(80)+\tfrac14(90+130+104)+\tfrac18(84)=10+81+10.5=101.5\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>อธิบาย</span></div>
+<div class="qtext">จงเขียนสี่ขั้นตอนของ decomposition แบบ multiplicative และบอกว่าค่า seasonal ถูกปรับอย่างไร</div>
+<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>Step 1: ประมาณ trend ด้วย moving averages หรือ regression</p>
+<p>Step 2: de-trend โดยหาร series ด้วย trend</p>
+<p>Step 3: ประมาณ seasonal factors โดยเฉลี่ยค่า de-trended ของฤดูกาลเดียวกัน</p>
+<p>Step 4: random = series ÷ (trend × seasonal)</p>
+<p>ค่า seasonal ถูกปรับให้เฉลี่ยเป็น 1</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 17</span><span>อ่านผล</span></div>
+<div class="qtext"><code>ets()</code> ให้ผล ETS(M,M,N) โดย alpha = 0.9464, beta = 0.4598, l = 10223.7114 และ b = 1.3362 จงอธิบายแต่ละค่า และหาค่าพยากรณ์ของช่วงแรก</div>
+<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ETS(M,M,N): error แบบคูณ trend แบบคูณ ไม่มี seasonality</p>
+<p>alpha ใกล้ 1: level ตามค่าจริงล่าสุดเกือบทั้งหมด และ beta 0.46: trend ปรับตัวปานกลาง</p>
+<p>l คือ level เริ่มต้น และ b คืออัตราการเติบโตเริ่มต้น 1.3362 เท่าต่อช่วง</p>
+<p>ค่าพยากรณ์ของช่วงแรก: \(10223.71\times1.3362=13661\)</p>
+</div>
+</div>
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>คำนวณ SMA, EMA, Holt และ Holt-Winters ด้วยมือจากตาราง</li>
+<li>เลือกวิธี smoothing ตามลักษณะของข้อมูล และอ่านสัญกรณ์ ETS</li>
+<li>อ่านผลของ <code>ets()</code> และตาราง self-validation กับ cross-validation</li>
+<li>ทำ decomposition สี่ขั้นตอนทั้งแบบ additive และ multiplicative</li>
+<li>คำนวณ centered moving average และอธิบายน้ำหนัก 1/8 กับ 1/4</li>
+</ul>
+<p>บทถัดไป: <a href="0005-ma-and-ar-models.html">Lesson 5 — โมเดล MA และ AR</a></p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 58 หน้าอยู่ในหัวข้อใด</h2>
+<table>
+<tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
+<tr data-pages="1" class="etc"><td>1</td><td>ปก Smoothing Methods</td><td>etc — ปก</td></tr>
+<tr data-pages="2-5"><td>2–5</td><td>Forecasting techniques และ Moving Average</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="6-10"><td>6–10</td><td>CPALL และ Simple Moving Average</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="11-14"><td>11–14</td><td>Exponential Moving Average และการเทียบกับ SMA</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="15" class="etc"><td>15</td><td>หน้าคั่น Advance Exponential Smoothing</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="16-20"><td>16–20</td><td>Type of exponential smoothing, Sales dataset, รูปแบบ trend และ seasonality</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="21-29"><td>21–29</td><td>Holt’s Exponential Smoothing และ error term</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="30-32"><td>30–32</td><td>Holt กับ Sales ใน Excel และ R</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
+<tr data-pages="33-35"><td>33–35</td><td>Singapore Labor Force และ Germany inflation</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="36-44"><td>36–44</td><td>Holt-Winters exponential smoothing</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+<tr data-pages="45" class="etc"><td>45</td><td>ลิงก์วิดีโอ YouTube เสริม</td><td>etc — ลิงก์อ้างอิง</td></tr>
+<tr data-pages="46" class="etc"><td>46</td><td>หน้าคั่น Decomposition Models</td><td>etc — หน้าคั่น</td></tr>
+<tr data-pages="47-54"><td>47–54</td><td>Decomposition models และ Australian Beer</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+<tr data-pages="55-58"><td>55–58</td><td>Centered moving average และ regression de-trending</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
+</table>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+/* Shared stylesheet for Data Visualization lessons & reference sheets. Tufte-ish: quiet, serif, generous margins. */
+
+:root {
+  --bg: #ffffff;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a45;
+  --rule: #ddd8cc;
+  --accent: #a5502c;
+  --accent-soft: #f2e6da;
+  --good: #2f6d3e;
+  --good-bg: #e9f3ea;
+  --bad: #a5342c;
+  --bad-bg: #f8eae8;
+  --code-bg: #f1efe6;
+  --max-width: 720px;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--bg); }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "iowan old style", "Palatino Linotype", Palatino, Georgia, "Noto Serif Thai", serif;
+  font-size: 19px;
+  line-height: 1.55;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 6rem;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0 0 0.3em;
+}
+
+.kicker {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin: 0 0 0.6em;
+}
+
+h2 {
+  font-size: 1.35rem;
+  margin: 2.4em 0 0.6em;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--rule);
+}
+
+h3 {
+  font-size: 1.08rem;
+  margin: 1.6em 0 0.5em;
+}
+
+p { margin: 0.9em 0; }
+
+a { color: var(--accent); text-decoration-color: var(--rule); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--accent); }
+
+ul, ol { padding-left: 1.3em; }
+li { margin: 0.35em 0; }
+
+strong { font-weight: 700; }
+
+em.term { font-style: italic; color: var(--accent); }
+
+code, pre, .mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+code {
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--code-bg);
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+pre code { background: none; padding: 0; }
+
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.2em 1.2em;
+  border-left: 3px solid var(--rule);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 2.5em 0;
+}
+
+/* --- Nav / breadcrumbs --- */
+.lesson-nav {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  color: var(--ink-soft);
+  margin-bottom: 2.5em;
+}
+.lesson-nav a { color: var(--ink-soft); }
+
+/* --- Callout boxes --- */
+.box {
+  border: 1px solid var(--rule);
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.1em 1.3em;
+  margin: 1.4em 0;
+}
+.box.source {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.box.win {
+  border-left: 4px solid var(--accent);
+}
+.box .label {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: var(--accent);
+  margin-bottom: 0.5em;
+  font-weight: 700;
+}
+
+/* --- Mechanism box: why / what-if / connects-to, forces transfer over recall --- */
+.box.mech {
+  border-left: 4px solid var(--good);
+  background: #fff;
+}
+.box.mech .label { color: var(--good); }
+.box.mech dl { margin: 0; }
+.box.mech dt {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  color: var(--good);
+  font-weight: 700;
+  margin: 1em 0 0.3em;
+}
+.box.mech dt:first-child { margin-top: 0; }
+.box.mech dd { margin: 0 0 0.2em; }
+
+/* --- Figures --- */
+figure { margin: 1.5em 0; }
+figure img, figure svg { width: 100%; height: auto; display: block; border-radius: 6px; border: 1px solid var(--rule); }
+figcaption {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 0.5em;
+  text-align: center;
+}
+
+/* --- Tables --- */
+table { border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: 0.92em; }
+th, td { text-align: left; padding: 0.45em 0.7em; border-bottom: 1px solid var(--rule); }
+th { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+
+/* --- Quiz component --- */
+.quiz {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 1.2em 1.4em;
+  margin: 1.4em 0;
+  background: #fff;
+}
+.quiz .qhead {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  margin-bottom: 0.6em;
+  display: flex;
+  justify-content: space-between;
+}
+.quiz .qtext { font-weight: 600; margin-bottom: 0.8em; }
+.quiz .options { display: flex; flex-direction: column; gap: 0.5em; }
+.quiz .opt {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.95rem;
+  text-align: left;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 0.6em 0.9em;
+  cursor: pointer;
+  color: var(--ink);
+}
+.quiz .opt:hover { border-color: var(--accent); }
+.quiz .opt.correct { background: var(--good-bg); border-color: var(--good); }
+.quiz .opt.wrong { background: var(--bad-bg); border-color: var(--bad); }
+.quiz .opt:disabled { cursor: default; }
+.quiz .feedback {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.88rem;
+  margin-top: 0.8em;
+  padding-top: 0.7em;
+  border-top: 1px dashed var(--rule);
+  display: none;
+}
+.quiz .feedback.show { display: block; }
+.quiz .feedback.good { color: var(--good); }
+.quiz .feedback.bad { color: var(--bad); }
+
+.quiz.free .answer-reveal {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.88rem;
+  margin-top: 0.8em;
+}
+.quiz.free .reveal-btn {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 0.45em 0.9em;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+.quiz.free textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.95rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.6em;
+  margin-bottom: 0.6em;
+  resize: vertical;
+  min-height: 3.2em;
+}
+.quiz.free .model-answer {
+  display: none;
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 0.7em 0.9em;
+  margin-top: 0.6em;
+}
+.quiz.free .model-answer.show { display: block; }
+
+.quiz-score {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: right;
+  margin-top: -0.5em;
+}
+
+/* --- Math (KaTeX) --- */
+.katex { font-size: 1.05em; }
+.katex-display { margin: 0.9em 0; overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; }
+
+/* --- Step-by-step worked calculation --- */
+.calc {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 1em 1.3em 0.6em;
+  margin: 1.6em 0;
+  background: #fff;
+}
+.calc > .calc-title {
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.6em;
+}
+.calc .given {
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 0.5em 1em;
+  margin: 0.4em 0 0.8em;
+  font-size: 0.95em;
+}
+ol.steps { list-style: none; counter-reset: st; padding: 0; margin: 0.6em 0; }
+ol.steps > li {
+  counter-increment: st;
+  position: relative;
+  padding: 0.1em 0 0.9em 2.6em;
+  margin: 0;
+}
+ol.steps > li::before {
+  content: counter(st);
+  position: absolute;
+  left: 0; top: 0.15em;
+  width: 1.85em; height: 1.85em;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.85em;
+}
+ol.steps > li > .st-title { font-weight: 700; margin-bottom: 0.15em; }
+ol.steps > li p { margin: 0.3em 0; }
+.answer {
+  background: var(--good-bg);
+  border-left: 4px solid var(--good);
+  border-radius: 4px;
+  padding: 0.5em 1em;
+  margin: 0.6em 0 0.8em;
+}
+.answer .katex-display { margin: 0.4em 0; }
+.plain-thai {
+  font-size: 0.93em;
+  color: var(--ink-soft);
+  border-left: 3px solid var(--rule);
+  padding-left: 0.9em;
+  margin: 0.6em 0;
+}
+.plain-thai::before {
+  content: "อ่านเป็นภาษาคน: ";
+  font-weight: 700;
+  color: var(--ink);
+}
+.box.beginner {
+  border-left: 4px solid #2b5fa5;
+  background: #fff;
+}
+.box.beginner .label { color: #2b5fa5; }
+.eqtable td, .eqtable th { vertical-align: middle; }
+
+/* Compact tables (calculation tables inside .calc / worked examples) */
+table.compact { font-size: 0.85em; }
+table.compact th, table.compact td { padding: 0.3em 0.55em; }
+
+/* Verbatim instructor emphasis (slide text the lecturer coloured) */
+mark.src { background: #fff1a8; color: inherit; padding: 0 0.12em; border-radius: 2px; }
+.box.exam { border-left: 4px solid #c0392b; background: #fff; }
+.box.exam .label { color: #c0392b; }
+.box.exam ul { margin: 0.3em 0 0; }
+.box.prereq { border-left: 4px solid #7a5cc7; background: #fff; }
+.box.prereq .label { color: #7a5cc7; }
+table.codeexp td:first-child { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85em; white-space: pre-wrap; }
+
+/* Verbatim slide text (collapsible, for checking exam wording) */
+details.srctext { border: 1px solid var(--rule); border-radius: 8px; padding: 0.5em 1em; margin: 1.4em 0; background: #fff; font-size: 0.85em; }
+details.srctext summary { cursor: pointer; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.85rem; color: var(--ink-soft); }
+details.srctext .srcpage { white-space: pre-wrap; border-top: 1px dashed var(--rule); padding: 0.5em 0; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; line-height: 1.45; }
+details.srctext .srcp { font-weight: 700; color: var(--accent); }
+
+/* Keep math case intact inside uppercase titles (γ must not become Γ) */
+.calc > .calc-title .katex, .box .label .katex, .kicker .katex { text-transform: none; }
+.calc > .calc-title { text-transform: none; letter-spacing: 0.02em; font-size: 0.8rem; }
+
+/* Code templates: the part of a command that changes with the question */
+mark.chg { background: #dcebff; color: inherit; padding: 0 0.12em; border-radius: 2px; }
+pre.out { background: #fff; border: 1px solid var(--rule); }
+table.fix td:first-child { width: 34%; }
+@page { margin: 14mm 13mm; }
+@media print { body { font-size: 10.5pt; max-width: none; padding: 0; } .lesson-nav { display: none; } h2 { break-after: avoid; } h3 { break-after: avoid; } pre, tr, .box, .calc { break-inside: avoid; } }
+
+/* Open-book answer guide */
+.tpl { background: var(--good-bg); border-left: 4px solid var(--good); border-radius: 4px; padding: 0.5em 1em; margin: 0.7em 0; }
+.tpl::before { content: "แม่แบบคำตอบ"; display: block; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--good); margin-bottom: 0.2em; }
+.tpl u { text-decoration: none; border-bottom: 1.5px solid var(--ink); padding: 0 0.4em; font-style: italic; }
+.eg { border-left: 3px solid var(--rule); padding-left: 0.9em; margin: 0.7em 0; color: var(--ink-soft); font-size: 0.95em; }
+.eg::before { content: "ตัวอย่างคำตอบ: "; font-weight: 700; color: var(--ink); }
+@media print { .tpl, .eg, figure { break-inside: avoid; } figure img { max-height: 85mm; width: auto; max-width: 100%; margin: 0 auto; } }
+
+/* Copy-ready proof block */
+.copy { border: 2px solid var(--good); border-radius: 8px; padding: 0.8em 1.2em 0.4em; margin: 1.2em 0; background: #fff; }
+.copy::before { content: "คำตอบที่ลอกได้"; display: block; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--good); margin-bottom: 0.3em; }
+.copy p { margin: 0.45em 0; }
+.copy .katex-display { margin: 0.5em 0; }
+@media print { .copy { break-inside: auto; } .copy p, .copy .katex-display { break-inside: avoid; } }
+
+/* Answer sheets: one question type per card */
+.sheet { border: 2px solid var(--ink); border-radius: 8px; padding: 0.9em 1.2em 0.5em; margin: 1.6em 0; background: #fff; }
+.sheet > h2 { border: none; margin: 0 0 0.4em; padding: 0; font-size: 1.15rem; }
+.sheet .q { background: var(--accent-soft); border-radius: 6px; padding: 0.45em 0.9em; margin: 0.5em 0; }
+.sheet .q::before { content: "โจทย์แบบนี้: "; font-weight: 700; }
+.sheet .ans { border-left: 4px solid var(--good); padding: 0.1em 0 0.1em 1em; margin: 0.7em 0; }
+.sheet .ans::before { content: "ลอกตามนี้"; display: block; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--good); }
+.sheet .ans p { margin: 0.4em 0; }
+.sheet .ans .katex-display { margin: 0.45em 0; }
+.sheet .swap { font-size: 0.9em; }
+.sheet .swap::before { content: "ปรับตามโจทย์"; display: block; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.75rem; font-weight: 700; color: #1558d6; margin-top: 0.6em; }
+.sheet .swap table { margin: 0.3em 0 0.6em; }
+@media print { .sheet { break-inside: avoid; } }
+
+/* Keep math case intact inside uppercase table headers (w_t must not become W_T) */
+th .katex { text-transform: none; letter-spacing: 0; }

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>Guide: ตอบข้อสอบ Lecture 7 จากผลที่โจทย์ให้มา</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span>Reference 5C</span>
+  <span><a href="../lessons/0007-arima-identification-and-estimation.html">← Lesson 5</a> · <a href="0006-ar1-ma1-causal-invertible-proofs.html">Proof guide AR(1)/MA(1)</a></span>
+</nav>
+
+<p class="kicker">Lecture 7 — Open book</p>
+<h1>Guide ตอบข้อสอบจากผลที่โจทย์ให้มา</h1>
+
+<div class="box">
+<div class="label">วิธีใช้</div>
+<p>ดูว่าโจทย์ให้อะไรมา แล้วเปิดหัวข้อตามตารางข้างล่าง แต่ละหัวข้อมีสี่ส่วน คือ ดูอะไร เกณฑ์ตัดสิน แม่แบบคำตอบ และตัวอย่างคำตอบ ในแม่แบบ ส่วนที่<u style="border-bottom:1.5px solid #1a1a1a;padding:0 0.4em;font-style:italic">ขีดเส้นใต้</u>คือส่วนที่เติมด้วยค่าจากโจทย์</p>
+<p>คำตอบที่ครบมีสามส่วนเสมอ คือ สิ่งที่เห็นในผล (อ้างตัวเลข) ข้อสรุป และสิ่งที่ทำต่อ</p>
+</div>
+
+<table>
+<tr><th>โจทย์ให้มา</th><th>มักถามว่า</th><th>เปิดหัวข้อ</th></tr>
+<tr><td>กราฟข้อมูลตามเวลา</td><td>ต้องแปลงหรือ differencing หรือไม่</td><td><a href="#a">A</a></td></tr>
+<tr><td>กราฟ Log Likelihood กับ λ</td><td>ควรแปลงแบบใด</td><td><a href="#b">B</a></td></tr>
+<tr><td>กราฟ ACF กราฟเดียว หรือ ACF ก่อนและหลัง diff</td><td>stationary หรือไม่ d เท่าใด</td><td><a href="#c">C</a></td></tr>
+<tr><td>ผล Augmented Dickey-Fuller Test</td><td>stationary หรือไม่</td><td><a href="#d">D</a></td></tr>
+<tr><td>กราฟ ACF คู่กับ PACF</td><td>p และ q เท่าใด โมเดลใด</td><td><a href="#e">E</a></td></tr>
+<tr><td>ตารางตัวเลข 4×4 (table1, table2)</td><td>โมเดลใดดีที่สุด</td><td><a href="#f">F</a></td></tr>
+<tr><td>ผลที่มี Coefficients, s.e., sigma^2</td><td>เขียนสมการ สัมประสิทธิ์ใดมีนัยสำคัญ หาค่าที่ขาด</td><td><a href="#g">G</a></td></tr>
+<tr><td>ค่า ACF หรือ autocovariance เป็นตัวเลข</td><td>ประมาณ φ ด้วย Yule-Walker</td><td><a href="#h">H</a></td></tr>
+<tr><td>กราฟ residual, QQ plot, Shapiro, Ljung-Box</td><td>โมเดลผ่านหรือไม่</td><td><a href="#i">I</a></td></tr>
+<tr><td>ผลหลายอย่างรวมกัน</td><td>โมเดลนี้ดีหรือไม่ ถ้าไม่ดีทำอย่างไร</td><td><a href="#j">J</a></td></tr>
+<tr><td>ค่า θ หรือ α</td><td>แปลงระหว่าง ARIMA กับ exponential smoothing หรือให้พิสูจน์</td><td><a href="#k">K</a></td></tr>
+<tr><td>ไม่ให้ผล ถามให้อธิบาย</td><td>ทำไม อย่างไร ต่างกันอย่างไร</td><td><a href="#l">L</a></td></tr>
+<tr><td>ไม่แน่ใจสัญลักษณ์หรือทิศของ p-value</td><td></td><td><a href="#n">N</a></td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="a">A. โจทย์ให้กราฟข้อมูลตามเวลา</h2>
+<h3>ดูอะไร</h3>
+<ol>
+<li>ระดับของข้อมูล: แกว่งรอบค่าเดิม หรือเลื่อนขึ้นลงตามเวลา</li>
+<li>ความกว้างของการแกว่ง: เท่ากันตลอด หรือโตขึ้นตามเวลา ให้อ่านค่าต่ำสุดและสูงสุดช่วงต้นกับช่วงปลายจากแกนตั้ง</li>
+<li>รูปแบบที่ซ้ำเป็นรอบ: มีหรือไม่</li>
+</ol>
+<h3>เกณฑ์ตัดสิน</h3>
+<table class="fix">
+<tr><th>เห็น</th><th>สรุป</th><th>ทำต่อ</th></tr>
+<tr><td>ระดับคงที่ ความกว้างคงที่</td><td>stationary</td><td>ไม่แปลง ไม่ differencing ใช้ d = 0</td></tr>
+<tr><td>ระดับเลื่อนขึ้นหรือลง</td><td>มี trend ไม่ stationary</td><td>ทำ differencing</td></tr>
+<tr><td>ความกว้างโตขึ้นเมื่อระดับสูงขึ้น</td><td>ความแปรปรวนไม่คงที่</td><td>แปลงข้อมูลก่อน เช่น log แล้วจึง differencing</td></tr>
+<tr><td>ขึ้นลงซ้ำทุกช่วงเท่า ๆ กัน</td><td>มี seasonality</td><td>ระบุในคำตอบ</td></tr>
+</table>
+<div class="tpl">กราฟแสดงว่าข้อมูล<u>มี trend ขาขึ้น / แกว่งรอบระดับเดิม</u> และความกว้างของการแกว่ง<u>โตขึ้นจาก ... เป็น ... / คงที่</u> ข้อมูลจึง<u>ไม่เป็น / เป็น</u> stationary ขั้นต่อไปคือ<u>แปลงด้วย log แล้วทำ differencing / ไม่ต้องทำอะไร</u></div>
+<div class="eg">electricity: ข้อมูลเพิ่มจากประมาณ 150,000 เป็น 400,000 จึงมี trend ขาขึ้น ความกว้างของการแกว่งโตจากราว 40,000 เป็นราว 110,000 ความแปรปรวนจึงไม่คงที่ ข้อมูลไม่เป็น stationary ต้องแปลงข้อมูลก่อน แล้วจึงทำ differencing</div>
+<div class="eg">times.txt: ข้อมูลแกว่งรอบศูนย์ระหว่างประมาณ −6 ถึง 6 ตลอด 150 ช่วงเวลา ไม่มี trend และความกว้างคงที่ จึงไม่ต้องแปลงและไม่ต้อง differencing ใช้ d = 0</div>
+
+<!-- ===================================================== -->
+<h2 id="b">B. โจทย์ให้กราฟ Log Likelihood กับ λ (ผล BoxCox.ar)</h2>
+<figure>
+<img src="../assets/slides/ts7-p10.png" alt="ผล BoxCox.ar ของ electricity">
+<figcaption>Slide 7 หน้า 10</figcaption>
+</figure>
+<p>เส้นโค้งสูงสุดที่ λ ประมาณ −0.1 และช่วง 95% อยู่ระหว่างประมาณ −0.4 ถึง 0.2 ค่า 0 อยู่ในช่วงนี้ ส่วนค่า 1 อยู่นอกช่วง ข้อมูลจึงสนับสนุนการแปลง log และไม่สนับสนุนการคงข้อมูลไว้ตามเดิม</p>
+<h3>ดูอะไร</h3>
+<ol>
+<li>ค่า λ บนแกนนอนที่เส้นโค้งสูงที่สุด</li>
+<li>ขอบซ้ายและขอบขวาของช่วง 95% บนแกนนอน</li>
+<li>ช่วงนั้นครอบคลุมค่าใดใน 0, 0.5, 1</li>
+</ol>
+<h3>เกณฑ์ตัดสิน</h3>
+<table>
+<tr><th>ช่วง 95% ครอบคลุม</th><th>การแปลง</th></tr>
+<tr><td>0</td><td>log</td></tr>
+<tr><td>0.5</td><td>รากที่สอง</td></tr>
+<tr><td>1</td><td>ไม่ต้องแปลง</td></tr>
+<tr><td>−1</td><td>ส่วนกลับ</td></tr>
+</table>
+<div class="tpl">ค่า λ ที่ให้ log-likelihood สูงสุดคือประมาณ<u>...</u> ช่วงความเชื่อมั่น 95% คือ<u>...</u> ถึง<u>...</u> ซึ่งครอบคลุมค่า<u>0</u> จึงใช้การแปลง<u>log</u> และทำการแปลงนี้ก่อน differencing</div>
+
+<!-- ===================================================== -->
+<h2 id="c">C. โจทย์ให้กราฟ ACF เพื่อถามเรื่อง stationary หรือค่า d</h2>
+<figure>
+<img src="../assets/slides/ts7-r1-ima11.png" alt="ACF ก่อนและหลัง differencing ของ IMA(1,1)">
+<figcaption>ผลการรัน R_codes ส่วน IMA(1,1): ข้อมูลเดิมและผลต่างครั้งที่ 1</figcaption>
+</figure>
+<p>ACF ของข้อมูลเดิมคือ 0.93, 0.90, 0.85, 0.80 และยังเป็น 0.54 ที่ lag 10 แท่งสูงต่อเนื่องและเตี้ยลงทีละน้อย นี่คือการลดลงช้า ข้อมูลไม่เป็น stationary ส่วน ACF ของผลต่างครั้งที่ 1 คือ −0.38 ที่ lag 1 แล้วเป็น 0.10 และ 0.01 ซึ่งอยู่ในเส้นประ ±0.16 นี่คือการลดลงเร็ว ผลต่างครั้งที่ 1 เป็น stationary จึงได้ d = 1</p>
+<h3>ดูอะไร</h3>
+<p>นับว่าแท่ง ACF ใช้กี่ lag จึงเข้าไปอยู่ในเส้นประ</p>
+<h3>เกณฑ์ตัดสิน</h3>
+<table class="fix">
+<tr><th>เห็น</th><th>สรุป</th><th>d</th></tr>
+<tr><td>ACF ข้อมูลเดิมเข้าเส้นประภายใน 2 ถึง 3 lag</td><td>stationary</td><td>0</td></tr>
+<tr><td>ACF ข้อมูลเดิมสูงต่อเนื่องเกิน 10 lag แต่ ACF ของผลต่างครั้งที่ 1 เข้าเส้นประเร็ว</td><td>ต้อง differencing หนึ่งครั้ง</td><td>1</td></tr>
+<tr><td>ACF ของผลต่างครั้งที่ 1 ยังสูงต่อเนื่อง แต่ ACF ของผลต่างครั้งที่ 2 เข้าเส้นประเร็ว</td><td>ต้อง differencing สองครั้ง</td><td>2</td></tr>
+<tr><td>ACF ของผลต่างสูงซ้ำที่ lag 12, 24, 36 (หรือ 1.0, 2.0, 3.0 ถ้าแกนเป็นปี)</td><td>trend หมดแล้ว แต่ยังมี seasonality</td><td>ระบุว่า seasonal เหลืออยู่</td></tr>
+</table>
+<p>เหตุผลของ d = 1 กับ d = 2: ทำครั้งเดียวพอเมื่อข้อมูลเปลี่ยนระดับด้วยอัตราคงที่ เช่น 10, 12, 14, 16 ได้ผลต่าง 2, 2, 2 ต้องทำสองครั้งเมื่ออัตราการเปลี่ยนเองก็เปลี่ยน เช่น 10, 12, 15, 19, 24 ได้ผลต่าง 2, 3, 4, 5 ซึ่งยังมี trend ทำอีกครั้งได้ 1, 1, 1</p>
+<div class="tpl">ACF ของ<u>ข้อมูลเดิม</u>ลดลงช้ามาก โดยมีค่า<u>...</u> ที่ lag 1 และยังเป็น<u>...</u> ที่ lag<u>...</u> ซึ่งเป็นสัญญาณของ nonstationarity จึงทำผลต่างครั้งที่ 1 ACF ของผลต่างครั้งที่ 1 ลดลงเร็ว โดยเข้าเส้นประตั้งแต่ lag<u>...</u> จึงใช้ d =<u>1</u> และหา p, q จาก ACF และ PACF ของผลต่างครั้งที่ 1</div>
+
+<!-- ===================================================== -->
+<h2 id="d">D. โจทย์ให้ผล Augmented Dickey-Fuller Test</h2>
+<pre class="out"><code>Dickey-Fuller = -7.1518, Lag order = 5, p-value = 0.01
+alternative hypothesis: stationary</code></pre>
+<h3>ดูอะไร</h3>
+<p>ดู p-value ค่าเดียว ค่า Dickey-Fuller และ Lag order ไม่ใช้ตัดสิน</p>
+<h3>เกณฑ์ตัดสิน</h3>
+<table>
+<tr><th>p-value</th><th>สรุป</th><th>ทำต่อ</th></tr>
+<tr><td>น้อยกว่า 0.05</td><td>ปฏิเสธ H₀ ข้อมูลเป็น stationary</td><td>ไม่ต้อง differencing เพิ่ม</td></tr>
+<tr><td>ตั้งแต่ 0.05 ขึ้นไป</td><td>ไม่ปฏิเสธ H₀ ไม่มีหลักฐานว่า stationary</td><td>ทำ differencing แล้วทดสอบใหม่</td></tr>
+</table>
+<p>H₀: ข้อมูลไม่เป็น stationary และ H₁: ข้อมูลเป็น stationary</p>
+<div class="tpl">สมมติฐานหลักคือข้อมูลไม่เป็น stationary ค่า p-value =<u>0.01</u> ซึ่ง<u>น้อยกว่า</u> 0.05 จึง<u>ปฏิเสธ</u>สมมติฐานหลัก สรุปว่าข้อมูล<u>เป็น</u> stationary จึง<u>ไม่ต้องทำ differencing</u></div>
+
+<!-- ===================================================== -->
+<h2 id="e">E. โจทย์ให้กราฟ ACF คู่กับ PACF เพื่อถามโมเดล</h2>
+<figure>
+<img src="../assets/slides/ts7-p22.png" alt="ACF และ PACF ของ times.txt">
+<figcaption>Slide 7 หน้า 22</figcaption>
+</figure>
+<p>ACF เกินเส้นประ ±0.163 ที่ lag 1 (−0.771) และ lag 2 (0.382) แล้วเข้าเส้นประตั้งแต่ lag 3 ส่วน PACF เกินเส้นประที่ lag 1 (−0.771) และ lag 2 (−0.524) แล้วเข้าเส้นประ รูปแบบนี้อ่านได้สามแบบ คือ MA(2) จาก ACF, AR(2) จาก PACF หรือ ARMA ถ้ามองว่าทั้งสองกราฟค่อย ๆ ลดลง จึงต้องใช้ AIC และ BIC ตัดสิน</p>
+<h3>ดูอะไร</h3>
+<ol>
+<li>ตรวจก่อนว่า ACF ลดลงเร็ว ถ้าลดลงช้าให้กลับไปหัวข้อ C</li>
+<li>นับจำนวนแท่งที่เกินเส้นประใน ACF ก่อนจะเข้าเส้นประ</li>
+<li>นับแบบเดียวกันใน PACF</li>
+<li>ดูว่าแต่ละกราฟตัดทันที (cuts off) หรือค่อย ๆ ลดลง (tails off)</li>
+</ol>
+<p>ถ้ากราฟ ACF เริ่มที่ lag 0 แท่งแรกจะสูงเท่ากับ 1 เสมอ ไม่ต้องนับ</p>
+<h3>เกณฑ์ตัดสิน</h3>
+<table>
+<tr><th>ACF</th><th>PACF</th><th>โมเดล</th></tr>
+<tr><td>cuts off หลัง lag q</td><td>tails off</td><td>MA(q)</td></tr>
+<tr><td>tails off</td><td>cuts off หลัง lag p</td><td>AR(p)</td></tr>
+<tr><td>tails off</td><td>tails off</td><td>ARMA(p,q) ใช้ AIC/BIC หรือ EACF</td></tr>
+<tr><td>ไม่มีแท่งเกินเส้นประ</td><td>ไม่มีแท่งเกินเส้นประ</td><td>white noise</td></tr>
+</table>
+<p>ถ้ากราฟมาจากผลต่างครั้งที่ 1 ให้เติม d = 1 ในคำตอบ เช่น MA(1) ของผลต่างคือ ARIMA(0,1,1)</p>
+<div class="tpl">ACF มีนัยสำคัญที่ lag<u>...</u> แล้ว<u>ตัดทันที / ค่อย ๆ ลดลง</u> ส่วน PACF มีนัยสำคัญที่ lag<u>...</u> แล้ว<u>ตัดทันที / ค่อย ๆ ลดลง</u> รูปแบบนี้ตรงกับ<u>MA(q) / AR(p) / ARMA</u> โมเดลที่เสนอคือ<u>ARIMA(p,d,q)</u></div>
+
+<!-- ===================================================== -->
+<h2 id="f">F. โจทย์ให้ตาราง AIC และ BIC</h2>
+<pre class="out"><code>&gt; table1                                   &gt; table2
+         [,1]     [,2]     [,3]     [,4]            [,1]     [,2]     [,3]     [,4]
+[1,] 699.6773 558.8091 518.3046 503.9312   [1,] 705.6985 567.8410 530.3471 518.9843
+[2,] 563.2884 503.3127 502.2742 503.7573   [2,] 572.3203 515.3553 517.3273 521.8211
+[3,] 513.2769 501.2778 502.3499 504.3320   [3,] 525.3195 516.3310 520.4137 525.4065
+[4,] 508.8412 502.6837 504.3389 506.3401   [4,] 523.8944 520.7475 525.4133 530.4252</code></pre>
+<h3>ดูอะไร</h3>
+<ol>
+<li>หาค่าต่ำสุดของแต่ละตาราง</li>
+<li>อ่านเลขแถวและเลขคอลัมน์ แล้วลบ 1 จากทั้งคู่ แถวให้ p และคอลัมน์ให้ q</li>
+<li>ดูช่องที่ค่าใกล้ค่าต่ำสุด</li>
+</ol>
+<table>
+<tr><th>ตำแหน่ง</th><th>โมเดล</th></tr>
+<tr><td>แถวที่ 1</td><td>MA ล้วน: [1,2] MA(1), [1,3] MA(2), [1,4] MA(3)</td></tr>
+<tr><td>คอลัมน์ที่ 1</td><td>AR ล้วน: [2,1] AR(1), [3,1] AR(2), [4,1] AR(3)</td></tr>
+<tr><td>[1,1]</td><td>white noise</td></tr>
+<tr><td>[2,2], [3,2], [2,3]</td><td>ARMA(1,1), ARMA(2,1), ARMA(1,2)</td></tr>
+</table>
+<h3>เกณฑ์ตัดสิน</h3>
+<ul>
+<li>ค่ายิ่งต่ำยิ่งดี ทั้ง AIC และ BIC</li>
+<li>ถ้าสองตารางเลือกต่างกัน ให้รายงานทั้งคู่ BIC มักเลือกโมเดลเล็กกว่า เพราะ penalty ต่อพารามิเตอร์คือ ln n ซึ่งมากกว่า 2 เมื่อ n ตั้งแต่ 8 ขึ้นไป</li>
+<li>ถ้าค่าต่างกันเล็กน้อย เลือกโมเดลที่มีพารามิเตอร์น้อยกว่า ตาม Principle of Parsimony</li>
+</ul>
+<div class="tpl">AIC ต่ำสุดคือ<u>...</u> ที่ช่อง [<u>i</u>,<u>j</u>] ซึ่งคือ ARMA(<u>i−1</u>,<u>j−1</u>) BIC ต่ำสุดคือ<u>...</u> ที่ช่อง [<u>i</u>,<u>j</u>] ซึ่งคือ ARMA(<u>...</u>) โมเดลที่เลือกคือ<u>...</u> เพราะ<u>มีค่าต่ำสุดทั้งสองเกณฑ์ / BIC ต่ำสุดและใช้พารามิเตอร์น้อยกว่า โดย AIC สูงกว่าค่าต่ำสุดเพียง ...</u></div>
+<div class="eg">AIC ต่ำสุดคือ 501.28 ที่ช่อง [3,2] ซึ่งคือ ARMA(2,1) BIC ต่ำสุดคือ 515.36 ที่ช่อง [2,2] ซึ่งคือ ARMA(1,1) สองเกณฑ์เลือกต่างกันเพราะ BIC ลงโทษจำนวนพารามิเตอร์หนักกว่า โมเดลที่เลือกคือ ARMA(1,1) เพราะ BIC ต่ำสุด ใช้พารามิเตอร์น้อยกว่าหนึ่งตัว และ AIC สูงกว่าค่าต่ำสุดเพียง 2.03</div>
+
+<!-- ===================================================== -->
+<h2 id="g">G. โจทย์ให้ผลที่มี Coefficients, s.e., sigma^2</h2>
+<pre class="out"><code>arima(x = data, order = c(1, 0, 1), method = "ML")
+Coefficients:
+          ar1      ma1  intercept
+      -0.6169  -0.7233     0.0235
+s.e.   0.0686   0.0543     0.0179
+sigma^2 estimated as 1.57:  log likelihood = -247.66,  aic = 503.31</code></pre>
+
+<h3>G1. ถามว่าเป็นโมเดลอะไร</h3>
+<p>อ่านจาก <code>order = c(p, d, q)</code> ตัวอย่างนี้คือ p = 1, d = 0, q = 1 คือ ARIMA(1,0,1) หรือ ARMA(1,1) ถ้าบรรทัดแรกเป็น <code>arima(x = diff(data), order = c(2, 0, 0))</code> คำตอบคือ ARIMA(2,1,0) ของข้อมูลเดิม</p>
+
+<h3>G2. ถามให้เขียนสมการ</h3>
+<table>
+<tr><th>ค่าใน R</th><th>สัญลักษณ์</th><th>ตำแหน่งในสมการ</th></tr>
+<tr><td>ar1, ar2</td><td>\(\phi_1,\phi_2\)</td><td>คูณกับ \(X_{t-1},X_{t-2}\)</td></tr>
+<tr><td>ma1, ma2</td><td>\(\theta_1,\theta_2\)</td><td>คูณกับ \(w_{t-1},w_{t-2}\)</td></tr>
+<tr><td>intercept</td><td>\(\mu\)</td><td>ลบออกจาก X ทุกตัว</td></tr>
+<tr><td>sigma^2</td><td>\(\sigma_w^2\)</td><td>ความแปรปรวนของ \(w_t\)</td></tr>
+</table>
+<table>
+<tr><th>โมเดล</th><th>รูปที่ใช้เขียน</th></tr>
+<tr><td>AR(1)</td><td>\((X_t-\mu)=\phi(X_{t-1}-\mu)+w_t\)</td></tr>
+<tr><td>AR(2)</td><td>\((X_t-\mu)=\phi_1(X_{t-1}-\mu)+\phi_2(X_{t-2}-\mu)+w_t\)</td></tr>
+<tr><td>MA(1)</td><td>\(X_t=\mu+w_t+\theta w_{t-1}\)</td></tr>
+<tr><td>MA(2)</td><td>\(X_t=\mu+w_t+\theta_1w_{t-1}+\theta_2w_{t-2}\)</td></tr>
+<tr><td>ARMA(1,1)</td><td>\((X_t-\mu)=\phi(X_{t-1}-\mu)+w_t+\theta w_{t-1}\)</td></tr>
+<tr><td>ARIMA(0,1,1)</td><td>\(X_t-X_{t-1}=w_t+\theta w_{t-1}\)</td></tr>
+<tr><td>ARIMA(1,1,1)</td><td>\(\nabla X_t=\phi\nabla X_{t-1}+w_t+\theta w_{t-1}\) โดย \(\nabla X_t=X_t-X_{t-1}\)</td></tr>
+</table>
+<p>แทนค่าโดยคงเครื่องหมายตามที่ R พิมพ์ ค่าลบให้เขียนเป็นลบ เมื่อ d ตั้งแต่ 1 ขึ้นไปจะไม่มี intercept</p>
+<div class="eg">\((X_t-0.0235)=-0.6169\,(X_{t-1}-0.0235)+w_t-0.7233\,w_{t-1}\) โดย \(w_t\) เป็น white noise ที่มีความแปรปรวน 1.57</div>
+
+<h3>G3. ถามว่าสัมประสิทธิ์ใดมีนัยสำคัญ</h3>
+<p>นำค่าประมาณหารด้วย s.e. ที่อยู่ใต้ค่านั้น ถ้าค่าสัมบูรณ์มากกว่า 2 ถือว่ามีนัยสำคัญที่ระดับ 0.05</p>
+<div class="tpl">ค่า<u>ar1</u> ÷ s.e. =<u>−0.6169</u> ÷<u>0.0686</u> =<u>−8.99</u> ค่าสัมบูรณ์<u>มากกว่า</u> 2 จึง<u>มีนัยสำคัญ</u> ช่วงความเชื่อมั่น 95% คือ<u>−0.6169</u> ± 1.96 ×<u>0.0686</u> ได้<u>−0.751</u> ถึง<u>−0.482</u> ซึ่ง<u>ไม่ครอบคลุม</u>ศูนย์</div>
+<div class="eg">ar1: −8.99 มีนัยสำคัญ ma1: −0.7233 ÷ 0.0543 = −13.32 มีนัยสำคัญ intercept: 0.0235 ÷ 0.0179 = 1.31 ไม่มีนัยสำคัญ ค่าเฉลี่ยของข้อมูลจึงไม่ต่างจากศูนย์</div>
+<p>ถ้ามีพจน์ที่ไม่มีนัยสำคัญ ให้ตอบว่าควรตัดพจน์นั้นออกแล้ว fit โมเดลที่เล็กลง</p>
+
+<h3>G4. ถามให้หาค่าที่ขาด</h3>
+<table class="compact">
+<tr><th>ต้องการ</th><th>สูตร</th><th>ตัวอย่าง</th></tr>
+<tr><td>AIC</td><td>−2 × log likelihood + 2k</td><td>−2(−247.66) + 2(4) = 503.32</td></tr>
+<tr><td>BIC</td><td>−2 × log likelihood + k × ln n</td><td>495.32 + 4(5.011) = 515.36</td></tr>
+<tr><td>BIC จาก AIC</td><td>AIC + k × (ln n − 2)</td><td>503.31 + 4(3.011) = 515.35</td></tr>
+<tr><td>log likelihood จาก AIC</td><td>(2k − AIC) ÷ 2</td><td>(8 − 503.31) ÷ 2 = −247.66</td></tr>
+<tr><td>s.e. จากผลหาร</td><td>ค่าประมาณ ÷ ผลหาร</td><td>−0.6169 ÷ −8.99 = 0.0686</td></tr>
+</table>
+<p>ค่า k: R นับ p + q บวก 1 ถ้ามี intercept บวก 1 สำหรับ sigma^2 ตัวอย่างนี้ได้ 4 ส่วนนิยามในสไลด์หน้า 18 ไม่นับความแปรปรวนของ white noise และให้ k = p + q เมื่อไม่มี intercept ถ้าโจทย์ให้ k มา ใช้ค่าที่โจทย์ให้ ถ้าไม่ให้ ระบุในคำตอบว่านับอย่างไร</p>
+<p>ค่า ln n ที่ใช้บ่อย: ln 50 = 3.912, ln 100 = 4.605, ln 150 = 5.011, ln 200 = 5.298</p>
+
+<h3>G5. ถามให้เทียบสองโมเดล</h3>
+<div class="tpl">โมเดล<u>A</u> มี aic =<u>...</u> และโมเดล<u>B</u> มี aic =<u>...</u> โมเดล<u>...</u> มี aic ต่ำกว่า และสัมประสิทธิ์ทุกตัว<u>มีนัยสำคัญ / ...</u> จึงเลือกโมเดล<u>...</u></div>
+
+<!-- ===================================================== -->
+<h2 id="h">H. โจทย์ให้ค่า ACF หรือ autocovariance เพื่อประมาณด้วย Yule-Walker</h2>
+<h3>ดูอะไร</h3>
+<p>ดูว่าโจทย์ให้ \(\hat\rho\) (ค่า ACF) หรือ \(\hat\gamma\) (autocovariance) ถ้าให้ \(\hat\gamma\) ให้หารด้วย \(\hat\gamma(0)\) ก่อน: \(\hat\rho(h)=\hat\gamma(h)/\hat\gamma(0)\)</p>
+<table>
+<tr><th>โมเดล</th><th>สูตร</th></tr>
+<tr><td>AR(1)</td><td>\(\hat\phi=\hat\rho(1)\)</td></tr>
+<tr><td>AR(1) ความแปรปรวน</td><td>\(\hat\sigma_W^2=\hat\gamma(0)\,(1-\hat\phi^2)\)</td></tr>
+<tr><td>AR(2)</td><td>\(\hat\phi_2=\dfrac{\hat\rho(2)-\hat\rho(1)^2}{1-\hat\rho(1)^2}\) และ \(\hat\phi_1=\dfrac{\hat\rho(1)\,(1-\hat\rho(2))}{1-\hat\rho(1)^2}\)</td></tr>
+<tr><td>AR(2) ความแปรปรวน</td><td>\(\hat\sigma_W^2=\hat\gamma(0)\,[1-\hat\phi_1\hat\rho(1)-\hat\phi_2\hat\rho(2)]\)</td></tr>
+</table>
+<p>ที่มาของสูตร: คูณสมการ AR ด้วย \(X_{t-h}\) แล้วหาค่าคาดหมาย ได้ \(\gamma(h)=\phi_1\gamma(h-1)+\dots+\phi_p\gamma(h-p)\) จากนั้นแทน \(\gamma\) ด้วยค่าจากตัวอย่าง</p>
+<div class="eg">ให้ \(\hat\rho(1)=-0.771\), \(\hat\rho(2)=0.382\), \(\hat\gamma(0)=6.05\) AR(1): \(\hat\phi=-0.771\) และ \(\hat\sigma_W^2=6.05(1-0.594)=2.45\) AR(2): \(\hat\phi_2=(0.382-0.594)/0.406=-0.524\) และ \(\hat\phi_1=(-0.771)(0.618)/0.406=-1.175\)</div>
+<p>ตรวจคำตอบ AR(2) ได้โดยแทนกลับ: \(\hat\phi_1+\hat\phi_2\hat\rho(1)\) ต้องเท่ากับ \(\hat\rho(1)\) ในที่นี้ −1.175 + (−0.524)(−0.771) = −0.771</p>
+<p>ข้อเท็จจริงที่ใช้ตอบต่อ: PACF ที่ lag 1 เท่ากับ \(\hat\rho(1)\) และ PACF ที่ lag 2 เท่ากับ \(\hat\phi_2\) ของ AR(2)</p>
+
+<!-- ===================================================== -->
+<h2 id="i">I. โจทย์ให้ผลการตรวจ residual</h2>
+<figure>
+<img src="../assets/slides/ts7-r5-tsdiag.png" alt="ผล tsdiag ของ ARMA(1,1)">
+<figcaption>ผล tsdiag ของ ARMA(1,1) กับ times.txt</figcaption>
+</figure>
+<p>Standardized residuals อยู่ระหว่าง −2.24 ถึง 3.20 และแกว่งรอบศูนย์โดยไม่มีรูปแบบ ACF ของ residual ที่ lag 1 ถึง 6 มีค่าสูงสุด 0.116 ซึ่งอยู่ในเส้นประ ±0.163 ทุกแท่ง ค่า p-value ของ Ljung-Box ต่ำสุดคือ 0.36 และทุกค่ามากกว่า 0.05 residual จึงมีลักษณะเหมือน white noise โมเดลผ่านการตรวจสอบ</p>
+<h3>ดูอะไรและเกณฑ์ตัดสิน</h3>
+<table class="fix">
+<tr><th>ผลที่ให้มา</th><th>ผ่านเมื่อ</th><th>ถ้าไม่ผ่าน หมายความว่า</th></tr>
+<tr><td>กราฟ Standardized Residuals</td><td>แกว่งรอบศูนย์ ไม่มีรูปแบบ ส่วนใหญ่อยู่ระหว่าง −2 ถึง 2</td><td>ยังมีรูปแบบเหลือ หรือความแปรปรวนไม่คงที่ หรือมี outliers</td></tr>
+<tr><td>กราฟ ACF of Residuals</td><td>ทุกแท่งตั้งแต่ lag 1 อยู่ในเส้นประ</td><td>residual ยังสัมพันธ์กัน โมเดลเล็กไป</td></tr>
+<tr><td>p values for Ljung-Box statistic</td><td>ทุกจุดอยู่เหนือเส้นประ 0.05</td><td>residual ยังมี autocorrelation โมเดลเล็กไป</td></tr>
+<tr><td>Histogram</td><td>รูประฆัง สมมาตรรอบศูนย์</td><td>residual ไม่เป็นปกติ</td></tr>
+<tr><td>Normal Q-Q Plot</td><td>จุดเรียงใกล้เส้นตรง</td><td>residual ไม่เป็นปกติ</td></tr>
+<tr><td>Shapiro-Wilk</td><td>p-value มากกว่า 0.05</td><td>residual ไม่เป็นปกติ</td></tr>
+</table>
+<p>H₀ ของ Shapiro-Wilk: residual มีการแจกแจงปกติ และ H₀ ของ Ljung-Box: residual ไม่มี autocorrelation ทั้งสองการทดสอบต้องการ p-value ที่สูง</p>
+<div class="tpl">ACF ของ residual<u>อยู่ในเส้นประทุก lag / เกินเส้นประที่ lag ...</u> และ p-value ของ Ljung-Box<u>มากกว่า 0.05 ทุก lag / น้อยกว่า 0.05 ที่ lag ...</u> residual จึง<u>ไม่มี / ยังมี</u> autocorrelation การทดสอบ Shapiro-Wilk ให้ p-value =<u>...</u> ซึ่ง<u>มากกว่า</u> 0.05 จึง<u>ไม่ปฏิเสธ</u>ว่า residual มีการแจกแจงปกติ สรุปว่า residual<u>มีลักษณะเหมือน white noise โมเดลใช้ได้ / ยังไม่เป็น white noise โมเดลยังไม่เพียงพอ</u></div>
+
+<!-- ===================================================== -->
+<h2 id="j">J. โจทย์ถามว่าโมเดลนี้ดีหรือไม่ และถ้าไม่ดีต้องทำอย่างไร</h2>
+<p>“โมเดลดี” หมายถึงโมเดลอธิบายรูปแบบในข้อมูลได้หมด ส่วนที่เหลือคือ residual เป็น white noise ตรวจ 4 ข้อ</p>
+<table class="fix">
+<tr><th>ตรวจ</th><th>ผ่านเมื่อ</th><th>ถ้าไม่ผ่าน ให้ตอบว่า</th></tr>
+<tr><td>1. residual ไม่มี autocorrelation (หัวข้อ I)</td><td>Ljung-Box p-value มากกว่า 0.05 และ ACF ของ residual อยู่ในเส้นประ</td><td>โมเดลเล็กไป เพิ่ม p หรือ q แล้วตรวจใหม่ ถ้า ACF ของ residual ลดลงช้า ให้เพิ่ม d</td></tr>
+<tr><td>2. residual เป็นปกติ (หัวข้อ I)</td><td>Shapiro p-value มากกว่า 0.05, QQ plot ใกล้เส้นตรง</td><td>ตรวจ outliers และพิจารณาแปลงข้อมูล</td></tr>
+<tr><td>3. สัมประสิทธิ์มีนัยสำคัญ (หัวข้อ G3)</td><td>ค่าประมาณ ÷ s.e. มีค่าสัมบูรณ์มากกว่า 2</td><td>โมเดลใหญ่ไป ตัดพจน์ที่ไม่มีนัยสำคัญออก</td></tr>
+<tr><td>4. AIC/BIC ต่ำ (หัวข้อ F)</td><td>ต่ำสุดหรือใกล้ต่ำสุด</td><td>เปลี่ยนไปใช้โมเดลที่ค่าต่ำกว่า</td></tr>
+</table>
+<p>ข้อ 1 สำคัญที่สุด โมเดลที่ไม่ผ่านข้อ 1 ถือว่ายังอธิบายข้อมูลไม่ครบ หลังแก้ทุกครั้งต้อง fit ใหม่และตรวจซ้ำ</p>
+<div class="tpl">โมเดล<u>ARIMA(p,d,q)</u><u>เหมาะสม / ยังไม่เหมาะสม</u> เพราะ (1) residual<u>ไม่มี / มี</u> autocorrelation: Ljung-Box p-value<u>...</u> (2) residual<u>เป็น / ไม่เป็น</u>ปกติ: Shapiro p-value =<u>...</u> (3) สัมประสิทธิ์<u>ทุกตัวมีนัยสำคัญ / ... ไม่มีนัยสำคัญ</u> (4) AIC =<u>...</u> ซึ่ง<u>ต่ำสุด / ใกล้ต่ำสุด</u> ขั้นต่อไปคือ<u>ใช้โมเดลนี้พยากรณ์ / เพิ่ม q เป็น ... แล้วตรวจใหม่</u></div>
+<div class="eg">โมเดลที่ดี: ARMA(1,1) ของ times.txt เหมาะสม เพราะ Ljung-Box p-value อยู่ระหว่าง 0.36 ถึง 0.97 ทุก lag, Shapiro p-value = 0.307, ar1 และ ma1 มีผลหาร −8.99 และ −13.32, BIC ต่ำสุดในตาราง</div>
+<div class="eg">โมเดลที่ไม่ดี: MA(1) ของ times.txt ยังไม่เหมาะสม เพราะ ACF ของ residual เป็น −0.486 ที่ lag 1 และ 0.337 ที่ lag 2 เกินเส้นประ ±0.163 และ Ljung-Box ที่ lag 10 ให้ p-value = 2.6e-09 น้อยกว่า 0.05 residual ยังมี autocorrelation จึงควรเพิ่มส่วน AR เป็น ARMA(1,1) แล้วตรวจใหม่</div>
+
+<!-- ===================================================== -->
+<h2 id="k">K. โจทย์เรื่อง ARIMA กับ exponential smoothing</h2>
+<table>
+<tr><th>ให้มา</th><th>หา</th><th>สูตร</th></tr>
+<tr><td>θ ของ ARIMA(0,1,1)</td><td>α</td><td>α = 1 + θ</td></tr>
+<tr><td>α</td><td>θ</td><td>θ = α − 1</td></tr>
+<tr><td>θ, \(X_t\), \(\hat X_t\)</td><td>\(\hat X_{t+1}\)</td><td>\((1+\theta)X_t-\theta\hat X_t\)</td></tr>
+<tr><td>α, \(X_t\), \(\hat X_t\)</td><td>\(\hat X_{t+1}\)</td><td>\(\alpha X_t+(1-\alpha)\hat X_t\)</td></tr>
+</table>
+<div class="eg">θ = −0.7 ได้ α = 0.3 ถ้า \(X_t=60\) และ \(\hat X_t=50\) ได้ \(\hat X_{t+1}=0.3(60)+0.7(50)=53\)</div>
+<table>
+<tr><th>วิธี smoothing</th><th>ใช้เมื่อ</th><th>เทียบเท่า</th></tr>
+<tr><td>Simple exponential smoothing</td><td>ไม่มี trend ไม่มี seasonality</td><td>ARIMA(0,1,1)</td></tr>
+<tr><td>Double exponential smoothing</td><td>มี trend ไม่มี seasonality</td><td>ARIMA(0,2,2) ไม่มีค่าคงที่</td></tr>
+</table>
+<h3>ถ้าให้พิสูจน์</h3>
+<ol>
+<li>โมเดล: \(X_t-X_{t-1}=w_t+\theta w_{t-1}\) จึงได้ \(X_t=X_{t-1}+w_t+\theta w_{t-1}\)</li>
+<li>ที่เวลา t + 1: \(X_{t+1}=X_t+w_{t+1}+\theta w_t\)</li>
+<li>เนื่องจาก \(w_{t+1}=X_{t+1}-\hat X_{t+1}\) แทนลงไปได้ \(\hat X_{t+1}=X_t+\theta w_t\)</li>
+<li>เนื่องจาก \(w_t=X_t-\hat X_t\) ได้ \(\hat X_{t+1}=X_t+\theta(X_t-\hat X_t)=(1+\theta)X_t-\theta\hat X_t\)</li>
+<li>ให้ \(\alpha=1+\theta\) จึงได้ \(-\theta=1-\alpha\) และ \(\hat X_{t+1}=\alpha X_t+(1-\alpha)\hat X_t\)</li>
+</ol>
+
+<!-- ===================================================== -->
+<h2 id="l">L. คำถามให้อธิบาย</h2>
+<table class="fix">
+<tr><th>คำถาม</th><th>คำตอบ</th></tr>
+<tr><td>ขั้นตอนเลือกโมเดล ARIMA มีอะไรบ้าง</td><td>Step 1: plot ข้อมูลและหาการแปลงที่เหมาะสมถ้าจำเป็น Step 2: ดู sample ACF และ PACF เพื่อยืนยันว่าต้อง differencing หรือไม่ Step 3: ดู sample ACF, PACF, EACF ของข้อมูลที่แปลงและ differencing แล้ว เพื่อหา p และ q โดยใช้ AIC และ BIC ช่วย จากนั้นทำ parameter estimation และ model diagnostics</td></tr>
+<tr><td>ทำไมต้องแปลงก่อน differencing</td><td>การแปลงแก้ความแปรปรวนไม่คงที่ และสไลด์กำหนดเป็น first step ส่วน differencing แก้ trend นอกจากนี้ log ใช้กับค่าบวกเท่านั้น แต่ผลต่างมีค่าลบได้</td></tr>
+<tr><td>ทำไม ACF ที่ลดลงช้าแสดงว่าไม่ stationary</td><td>ข้อมูลที่มี trend มีค่าที่อยู่ใกล้กันในระดับเดียวกัน สไลด์ใช้คำว่า “hang together” ความสัมพันธ์จึงยังสูงแม้ห่างกันหลาย lag</td></tr>
+<tr><td>ทำไมไม่ differencing เผื่อไว้</td><td>Overdifferencing ทำให้เกิดปัญหา model identifiability และแทบไม่จำเป็นต้องใช้ d มากกว่า 2</td></tr>
+<tr><td>AIC และ BIC ต่างกันอย่างไร</td><td>AIC = −2 ln L + 2k และ BIC = −2 ln L + k ln n พจน์แรกเหมือนกัน BIC มี penalty ต่อพารามิเตอร์มากกว่า จึงมักเลือกโมเดลเล็กกว่า ทั้งสองยิ่งต่ำยิ่งดี และสมมติ normality</td></tr>
+<tr><td>พจน์ 2k มีไว้ทำอะไร</td><td>เป็น penalty ไม่ให้โมเดลมีพารามิเตอร์มากเกินไป ตาม Principle of Parsimony</td></tr>
+<tr><td>Method of moments คืออะไร</td><td>การตั้ง sample moments ให้เท่ากับ population moments แล้วแก้สมการหาพารามิเตอร์ สำหรับ AR(p) คือเลือก φ ที่ทำให้ γ(h) = γ̂(h) สำหรับ h = 0 ถึง p ซึ่งได้สมการ Yule-Walker</td></tr>
+<tr><td>MOM กับ MLE ต่างกันอย่างไร</td><td>MOM คำนวณง่าย แต่ not efficient สำหรับ ARMA(p,q) ส่วน MLE efficient คือความแปรปรวนต่ำ แต่เป็น difficult optimization problem และต้องเลือกจุดเริ่มต้นที่ดี</td></tr>
+<tr><td>ข้อดีของ MLE</td><td>Efficient (low variance estimates) สมมติฐาน Gaussian มักสมเหตุสมผล และแม้ข้อมูลไม่ใช่ Gaussian การแจกแจงเชิงเส้นกำกับของค่าประมาณก็เหมือนกรณี Gaussian</td></tr>
+<tr><td>ข้อเสียของ MLE</td><td>Difficult optimization problem และ need to choose a good starting point ซึ่งมักใช้ตัวประมาณอื่น</td></tr>
+<tr><td>ทำไม likelihood ของ time series เขียนยาก</td><td>ข้อมูลแต่ละค่าไม่อิสระต่อกัน ต้องใช้ความหนาแน่นร่วมของทั้งเวกเตอร์ซึ่งมีเมทริกซ์ \(\Gamma_n\) สไลด์ระบุว่า exact likelihoods are difficult to write down and optimize</td></tr>
+<tr><td>Yule-Walker ใช้กับโมเดลใด</td><td>AR(p) ใช้ Durbin-Levinson algorithm, MA(q) ใช้ Innovations algorithm โดยแทน γ ด้วย γ̂ ส่วน ARMA(p,q) ใช้ได้แต่ not efficient</td></tr>
+<tr><td>ได้โมเดลตัวเลือกหลายตัว ผิดหรือไม่</td><td>ไม่ผิด สไลด์หน้า 27 ระบุว่าน้อยครั้งที่จะได้โมเดลเดียวแบบ clear-cut มักได้โมเดลตัวเลือกจำนวนไม่มาก แล้วตัดสินด้วย estimation และ diagnostics</td></tr>
+<tr><td>Box-Cox คืออะไร</td><td>การแปลงยกกำลัง \(T(X_t)=(X_t^\lambda-1)/\lambda\) เมื่อ λ ≠ 0 และ \(\ln X_t\) เมื่อ λ = 0 ใช้ทำให้ความแปรปรวนคงที่ ค่า λ เลือกจากข้อมูลด้วย likelihood</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="m">M. ตัวอย่างข้อสอบเต็ม พร้อมคำตอบ</h2>
+<p>โจทย์ให้ผลของ times.txt ทั้งหมด คือ กราฟข้อมูล ผล adf.test กราฟ ACF/PACF ตาราง AIC/BIC ผล arima และผลตรวจ residual แล้วถามว่าโมเดลใดเหมาะสม</p>
+<div class="calc">
+<div class="calc-title">คำตอบเรียงตามขั้น</div>
+<ol class="steps">
+<li><div class="st-title">การแปลง</div><p>ข้อมูลแกว่งรอบศูนย์ระหว่างประมาณ −6 ถึง 6 ด้วยความกว้างคงที่ จึงไม่ต้องแปลง</p></li>
+<li><div class="st-title">ค่า d</div><p>ACF ลดลงเร็ว โดยเข้าเส้นประตั้งแต่ lag 3 และ adf.test ให้ p-value = 0.01 น้อยกว่า 0.05 ข้อมูลเป็น stationary จึงใช้ d = 0</p></li>
+<li><div class="st-title">ค่า p และ q</div><p>ACF มีนัยสำคัญที่ lag 1 และ 2 PACF มีนัยสำคัญที่ lag 1 และ 2 โมเดลตัวเลือกคือ MA(2), AR(2) และ ARMA ตาราง AIC ให้ 518.30, 513.28 และ 503.31 สำหรับ ARMA(1,1) AIC ต่ำสุดคือ ARMA(2,1) ที่ 501.28 และ BIC ต่ำสุดคือ ARMA(1,1) ที่ 515.36 เลือก ARMA(1,1) ตาม Principle of Parsimony</p></li>
+<li><div class="st-title">ค่าประมาณ</div><p>\((X_t-0.0235)=-0.6169(X_{t-1}-0.0235)+w_t-0.7233w_{t-1}\) โดย \(\hat\sigma_w^2=1.57\) ar1 และ ma1 มีนัยสำคัญ (−8.99 และ −13.32) ส่วน intercept ไม่มีนัยสำคัญ (1.31)</p></li>
+<li><div class="st-title">การตรวจสอบ</div><p>Ljung-Box ให้ p-value มากกว่า 0.05 ทุก lag และ Shapiro-Wilk ให้ p-value = 0.307 residual มีลักษณะเหมือน white noise</p></li>
+</ol>
+<div class="answer">สรุป: ARIMA(1,0,1) เหมาะสมกับข้อมูลชุดนี้</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="n">N. ตารางเปิดดูเร็ว</h2>
+<h3>ทิศของ p-value</h3>
+<table>
+<tr><th>การทดสอบ</th><th>H₀</th><th>p-value น้อยกว่า 0.05</th><th>p-value ตั้งแต่ 0.05</th></tr>
+<tr><td>Augmented Dickey-Fuller</td><td>ไม่ stationary</td><td>stationary ไม่ต้อง diff</td><td>ยังไม่ stationary ต้อง diff</td></tr>
+<tr><td>Shapiro-Wilk</td><td>residual เป็นปกติ</td><td>ไม่เป็นปกติ</td><td>เป็นปกติ ผ่าน</td></tr>
+<tr><td>Ljung-Box</td><td>residual ไม่มี autocorrelation</td><td>ยังมี autocorrelation โมเดลไม่พอ</td><td>ไม่มี ผ่าน</td></tr>
+</table>
+<h3>สัญลักษณ์</h3>
+<table class="compact">
+<tr><th>สัญลักษณ์</th><th>อ่านว่า</th><th>ความหมาย</th><th>ใน R</th></tr>
+<tr><td>\(X_t\)</td><td>เอ็กซ์ ที</td><td>ค่าข้อมูลที่เวลา t</td><td>data</td></tr>
+<tr><td>\(w_t\)</td><td>ดับเบิลยู ที</td><td>white noise ส่วนสุ่มที่พยากรณ์ไม่ได้</td><td>residuals</td></tr>
+<tr><td>\(\phi\)</td><td>ฟาย</td><td>สัมประสิทธิ์ AR</td><td>ar1, ar2</td></tr>
+<tr><td>\(\theta\)</td><td>ทีตา</td><td>สัมประสิทธิ์ MA</td><td>ma1, ma2</td></tr>
+<tr><td>\(\mu\)</td><td>มิว</td><td>ค่าเฉลี่ย</td><td>intercept</td></tr>
+<tr><td>\(\sigma_w^2\)</td><td>ซิกมากำลังสอง</td><td>ความแปรปรวนของ white noise</td><td>sigma^2</td></tr>
+<tr><td>p, d, q</td><td></td><td>อันดับ AR, จำนวนครั้ง differencing, อันดับ MA</td><td>order = c(p, d, q)</td></tr>
+<tr><td>\(\gamma(h)\)</td><td>แกมมา</td><td>autocovariance ที่ lag h และ \(\gamma(0)\) คือความแปรปรวน</td><td></td></tr>
+<tr><td>\(\rho(h)\)</td><td>โร</td><td>autocorrelation ที่ lag h เท่ากับ \(\gamma(h)/\gamma(0)\)</td><td>ความสูงของแท่ง ACF</td></tr>
+<tr><td>หมวก เช่น \(\hat\phi\)</td><td>แฮต</td><td>ค่าที่ประมาณจากข้อมูล</td><td></td></tr>
+<tr><td>\(\nabla X_t\)</td><td>นาบลา</td><td>\(X_t-X_{t-1}\)</td><td>diff(data)</td></tr>
+<tr><td>\(\alpha\)</td><td>อัลฟา</td><td>น้ำหนักใน exponential smoothing</td><td>1 + ma1</td></tr>
+<tr><td>\(\lambda\)</td><td>แลมบ์ดา</td><td>เลขชี้กำลังของ Box-Cox</td><td></td></tr>
+<tr><td>\(\ln L\)</td><td>ลอน แอล</td><td>log ของ likelihood ที่สูงสุด</td><td>log likelihood</td></tr>
+<tr><td>k, n</td><td></td><td>จำนวนพารามิเตอร์, จำนวนข้อมูล</td><td></td></tr>
+</table>
+<h3>ค่าที่ใช้บ่อย</h3>
+<table class="compact">
+<tr><th>n</th><th>50</th><th>100</th><th>150</th><th>200</th><th>400</th></tr>
+<tr><th>เส้นประ \(\pm2/\sqrt n\)</th><td>±0.283</td><td>±0.200</td><td>±0.163</td><td>±0.141</td><td>±0.100</td></tr>
+<tr><th>ln n</th><td>3.912</td><td>4.605</td><td>5.011</td><td>5.298</td><td>5.991</td></tr>
+</table>
+
+</body>
+</html>

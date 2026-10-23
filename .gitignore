@@ -1,0 +1,14 @@
+.DS_Store
+.claude/
+
+# instructor source material — copyrighted, not for publishing
+*.pdf
+!pdf/*.pdf
+lecture-*/
+
+# internal planning docs and raw class recordings, not reading material
+MISSION.md
+NOTES.md
+RESOURCES.md
+learning-records/
+video-notes/

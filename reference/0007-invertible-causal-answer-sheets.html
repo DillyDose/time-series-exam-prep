@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ใบคำตอบ: Invertible และ Causal</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span>Reference 7</span>
+  <span><a href="0006-ar1-ma1-causal-invertible-proofs.html">ฉบับมีคำอธิบาย</a></span>
+</nav>
+
+<p class="kicker">Open book — ใบคำตอบ ตามวิธีอาจารย์ (Class 7-2)</p>
+<h1>ใบคำตอบ: Invertible และ Causal</h1>
+
+<div class="box">
+<div class="label">วิธีใช้ 3 ขั้น</div>
+<ol>
+<li>อ่านโจทย์ แล้วหาใบที่ตรงจากตารางข้างล่าง</li>
+<li>ลอกส่วน “ลอกตามนี้” ทั้งหมด</li>
+<li>เปลี่ยนเฉพาะ<mark class="chg">ตัวเลขสีน้ำเงิน</mark>ตามตาราง “ปรับตามโจทย์” ที่อยู่ใต้คำตอบ</li>
+</ol>
+<p>ถ้าโจทย์ใช้ตัวอักษรอื่น เช่น \(Y_t\) หรือ \(\varepsilon_t\) ให้เปลี่ยนตัวอักษรตามโจทย์</p>
+</div>
+
+<table>
+<tr><th>โจทย์มีคำว่า</th><th>ใบที่</th></tr>
+<tr><td>Define / What is invertibility, causality</td><td><a href="#a1">1</a></td></tr>
+<tr><td>Show / Prove that MA(1) is invertible (มีตัว θ ไม่มีตัวเลข)</td><td><a href="#a2">2</a> ถ้าโจทย์เขียน \(-\theta\), <a href="#a3">3</a> ถ้าโจทย์เขียน \(+\theta\)</td></tr>
+<tr><td>Show / Prove that AR(1) is causal (มีตัว φ ไม่มีตัวเลข)</td><td><a href="#a4">4</a> หรือ <a href="#a5">5</a></td></tr>
+<tr><td>Is AR(1) invertible? / Is MA(1) causal?</td><td><a href="#a6">6</a></td></tr>
+<tr><td>AR(1) มีตัวเลข เช่น \(X_t=0.3X_{t-1}+w_t\)</td><td><a href="#a7">7</a></td></tr>
+<tr><td>MA(1) มีตัวเลข เช่น \(X_t=w_t+0.5w_{t-1}\)</td><td><a href="#a8">8</a></td></tr>
+<tr><td>มี \(X_{t-2}\) หรือ \(w_{t-2}\) (อันดับ 2)</td><td><a href="#a9">9</a> ถ้ารากเป็นจำนวนจริง, <a href="#a10">10</a> ถ้า \(b^2-4ac&lt;0\)</td></tr>
+<tr><td>มีทั้ง \(X_{t-1}\) และ \(w_{t-1}\) (ARMA) ถาม causal และ invertible</td><td><a href="#a11">11</a></td></tr>
+<tr><td>ARMA(2,2) ที่ถามว่าเป็นโมเดลอะไรจริง ๆ / redundancy</td><td><a href="#a12">12</a></td></tr>
+<tr><td>Write as MA(∞) / find ψ-weights</td><td><a href="#a13">13</a></td></tr>
+<tr><td>Write as AR(∞) / find π-weights</td><td><a href="#a14">14</a></td></tr>
+<tr><td>Why do we need invertibility? / สองโมเดลให้ ACF เท่ากัน</td><td><a href="#a15">15</a></td></tr>
+</table>
+
+<!-- 1 -->
+<div class="sheet" id="a1">
+<h2>ใบที่ 1 — นิยาม</h2>
+<div class="q">Define invertibility and causality.</div>
+<div class="ans">
+<p><strong>Invertibility:</strong> \(X_t\) is invertible if it can be written as AR(∞), a meaningful process (MA(q) → AR(∞)):</p>
+\[w_t=\pi(B)X_t,\qquad \pi(B)=\frac{\Phi(B)}{\theta(B)}\]
+<p>For an MA(q) to be invertible, we need the roots of \(\theta(B)=1+\theta_1B+\theta_2B^2+\dots+\theta_qB^q\) to all exceed 1 in absolute value (or modulus).</p>
+<p><strong>Causality:</strong> \(X_t\) is causal if it can be written as MA(∞) (AR(p) → MA(∞)):</p>
+\[X_t=\psi(B)w_t,\qquad \psi(B)=\frac{\theta(B)}{\Phi(B)}\]
+<p>For an AR(p) to be causal, we need the roots of \(\Phi(B)=1-\phi_1B-\phi_2B^2-\dots-\phi_pB^p\) to all exceed 1 in absolute value (or modulus).</p>
+</div>
+<div class="swap"><table><tr><td>ถามแค่อย่างเดียว</td><td>ลอกเฉพาะครึ่งที่ถาม</td></tr></table></div>
+</div>
+
+<!-- 2 -->
+<div class="sheet" id="a2">
+<h2>ใบที่ 2 — พิสูจน์ MA(1) invertible (โจทย์เขียน \(-\theta\))</h2>
+<div class="q">Show that the MA(1) process \(X_t=w_t-\theta w_{t-1}\) is invertible when \(|\theta|&lt;1\).</div>
+<div class="ans">
+<p>MA(1): \(X_t=w_t-\theta w_{t-1}\)</p>
+\[w_t=X_t+\theta w_{t-1}\]
+<p>Since \(w_{t-1}=X_{t-1}+\theta w_{t-2}\),</p>
+\[w_t=X_t+\theta\,[X_{t-1}+\theta w_{t-2}]=X_t+\theta X_{t-1}+\theta^2w_{t-2}\]
+<p>Since \(w_{t-2}=X_{t-2}+\theta w_{t-3}\),</p>
+\[w_t=X_t+\theta X_{t-1}+\theta^2X_{t-2}+\theta^3w_{t-3}\]
+<p>Continuing,</p>
+\[w_t=X_t+\theta X_{t-1}+\theta^2X_{t-2}+\theta^3X_{t-3}+\dots=\sum_{j=0}^{\infty}\theta^jX_{t-j}\qquad\text{AR}(\infty)\]
+\[\sum_{j=1}^{\infty}\theta^j&lt;\infty\ \text{(converge) if and only if } -1&lt;\theta&lt;1.\]
+<p>Therefore MA(1) can be written as AR(∞), so it is invertible, if and only if \(|\theta|&lt;1\).</p>
+</div>
+<div class="swap"><table><tr><td>นี่คือแบบที่อาจารย์เขียนในวิดีโอ (นาที 7:00–12:00)</td><td>ไม่ต้องเปลี่ยนอะไร</td></tr></table></div>
+</div>
+
+<!-- 3 -->
+<div class="sheet" id="a3">
+<h2>ใบที่ 3 — พิสูจน์ MA(1) invertible (โจทย์เขียน \(+\theta\))</h2>
+<div class="q">Show that the MA(1) process \(X_t=w_t+\theta w_{t-1}\) is invertible when \(|\theta|&lt;1\).</div>
+<div class="ans">
+<p>MA(1): \(X_t=w_t+\theta w_{t-1}\)</p>
+\[w_t=X_t-\theta w_{t-1}\]
+<p>Since \(w_{t-1}=X_{t-1}-\theta w_{t-2}\),</p>
+\[w_t=X_t-\theta\,[X_{t-1}-\theta w_{t-2}]=X_t-\theta X_{t-1}+\theta^2w_{t-2}\]
+<p>Since \(w_{t-2}=X_{t-2}-\theta w_{t-3}\),</p>
+\[w_t=X_t-\theta X_{t-1}+\theta^2X_{t-2}-\theta^3w_{t-3}\]
+<p>Continuing,</p>
+\[w_t=X_t-\theta X_{t-1}+\theta^2X_{t-2}-\theta^3X_{t-3}+\dots=\sum_{j=0}^{\infty}(-\theta)^jX_{t-j}\qquad\text{AR}(\infty)\]
+\[\sum_{j=1}^{\infty}(-\theta)^j&lt;\infty\ \text{(converge) if and only if } -1&lt;\theta&lt;1.\]
+<p>Therefore MA(1) can be written as AR(∞), so it is invertible, if and only if \(|\theta|&lt;1\).</p>
+</div>
+<div class="swap"><table><tr><td>ต่างจากใบที่ 2 ตรงไหน</td><td>เครื่องหมายสลับ บวก ลบ บวก ลบ เพราะย้ายข้างแล้วได้ \(-\theta\)</td></tr></table></div>
+</div>
+
+<!-- 4 -->
+<div class="sheet" id="a4">
+<h2>ใบที่ 4 — พิสูจน์ AR(1) causal ด้วยทฤษฎีบท</h2>
+<div class="q">Show that the AR(1) process \(X_t=\phi X_{t-1}+w_t\) is causal when \(|\phi|&lt;1\).</div>
+<div class="ans">
+<p>AR(1): \(X_t=\phi X_{t-1}+w_t\)</p>
+\[X_t-\phi X_{t-1}=w_t\ \Rightarrow\ (1-\phi B)X_t=w_t,\qquad \Phi(B)=1-\phi B\]
+<p>For an AR(p) to be causal, we need the roots of \(\Phi(B)\) to all exceed 1 in absolute value.</p>
+\[\Phi(x)=1-\phi x=0\ \Rightarrow\ x=\frac1\phi\]
+\[|x|=\left|\frac1\phi\right|&gt;1\quad\text{if and only if}\quad|\phi|&lt;1\]
+<p>Therefore AR(1) is causal if and only if \(|\phi|&lt;1\).</p>
+</div>
+<div class="swap"><table><tr><td>โจทย์ให้ write as MA(∞) หรือ show directly ด้วย</td><td>ใช้ใบที่ 5 แทน หรือลอกต่อท้าย</td></tr></table></div>
+</div>
+
+<!-- 5 -->
+<div class="sheet" id="a5">
+<h2>ใบที่ 5 — พิสูจน์ AR(1) causal ด้วยการแทนค่าซ้ำ (เขียนเป็น MA(∞))</h2>
+<div class="q">Show that AR(1) \(X_t=\phi X_{t-1}+w_t\) can be written as MA(∞) when \(|\phi|&lt;1\).</div>
+<div class="ans">
+<p>AR(1): \(X_t=\phi X_{t-1}+w_t\)</p>
+<p>Since \(X_{t-1}=\phi X_{t-2}+w_{t-1}\),</p>
+\[X_t=\phi\,[\phi X_{t-2}+w_{t-1}]+w_t=\phi^2X_{t-2}+\phi w_{t-1}+w_t\]
+<p>Since \(X_{t-2}=\phi X_{t-3}+w_{t-2}\),</p>
+\[X_t=\phi^3X_{t-3}+\phi^2w_{t-2}+\phi w_{t-1}+w_t\]
+<p>Continuing,</p>
+\[X_t=w_t+\phi w_{t-1}+\phi^2w_{t-2}+\phi^3w_{t-3}+\dots=\sum_{j=0}^{\infty}\phi^jw_{t-j}\qquad\text{MA}(\infty)\]
+\[\sum_{j=1}^{\infty}\phi^j&lt;\infty\ \text{(converge) if and only if } -1&lt;\phi&lt;1.\]
+<p>Therefore AR(1) can be written as MA(∞), so it is causal, if and only if \(|\phi|&lt;1\).</p>
+</div>
+<div class="swap"><table><tr><td>ใบนี้ใช้วิธีเดียวกับที่อาจารย์ทำกับ MA(1)</td><td>อาจารย์ไม่ได้เขียน AR(1) แบบนี้ในวิดีโอ แต่ขั้นตอนเหมือนกันทุกบรรทัด</td></tr></table></div>
+</div>
+
+<!-- 6 -->
+<div class="sheet" id="a6">
+<h2>ใบที่ 6 — AR(1) invertible ไหม / MA(1) causal ไหม</h2>
+<div class="q">Is AR(1) invertible? Is MA(1) causal?</div>
+<div class="ans">
+<p><strong>AR(1) is always invertible.</strong> \(X_t=\phi X_{t-1}+w_t\) gives \(w_t=X_t-\phi X_{t-1}\), which is already an AR form (\(\theta(B)=1\), no MA part to check). No condition on \(\phi\) is needed.</p>
+<p><strong>MA(1) is always causal.</strong> \(X_t=w_t+\theta w_{t-1}\) is already an MA form (\(\Phi(B)=1\), no AR part to check). No condition on \(\theta\) is needed.</p>
+</div>
+<div class="swap"><table><tr><td>ถามแค่อย่างเดียว</td><td>ลอกเฉพาะย่อหน้าที่ถาม</td></tr></table></div>
+</div>
+
+<!-- 7 -->
+<div class="sheet" id="a7">
+<h2>ใบที่ 7 — AR(1) มีตัวเลข</h2>
+<div class="q">Is \(X_t=\textcolor{#1558d6}{0.3}X_{t-1}+w_t\) causal? Write it as MA(∞).</div>
+<div class="ans">
+<p>AR(1) with \(\phi=\textcolor{#1558d6}{0.3}\).</p>
+\[(1-\textcolor{#1558d6}{0.3}B)X_t=w_t,\qquad \Phi(B)=1-\textcolor{#1558d6}{0.3}B\]
+\[\Phi(x)=1-\textcolor{#1558d6}{0.3}x=0\ \Rightarrow\ |x|=\left|\frac{1}{\textcolor{#1558d6}{0.3}}\right|=\textcolor{#1558d6}{3.33}\ \textcolor{#1558d6}{&gt;}\ 1\]
+<p><mark class="chg">Causal</mark>.</p>
+<p>MA(∞): \(X_t=\sum_{j=0}^{\infty}(\textcolor{#1558d6}{0.3})^jw_{t-j}=w_t+\textcolor{#1558d6}{0.3}w_{t-1}+\textcolor{#1558d6}{0.09}w_{t-2}+\textcolor{#1558d6}{0.027}w_{t-3}+\dots\)</p>
+<p>AR(1) is always invertible.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>0.3</td><td>ตัวเลขหน้า \(X_{t-1}\) พร้อมเครื่องหมาย ถ้าโจทย์เป็น \(-0.5X_{t-1}\) ให้ใช้ \(\phi=-0.5\) และ \(\Phi(B)=1+0.5B\)</td></tr>
+<tr><td>3.33</td><td>1 ÷ ค่าสัมบูรณ์ของ φ</td></tr>
+<tr><td>&gt; และ Causal</td><td>ถ้าผลหารไม่เกิน 1 (คือ |φ| ≥ 1) เปลี่ยนเป็น ≤ และ Not causal แล้วไม่ต้องเขียนบรรทัด MA(∞)</td></tr>
+<tr><td>0.09, 0.027</td><td>φ², φ³ ถ้า φ ติดลบ เครื่องหมายจะสลับ</td></tr>
+</table></div>
+</div>
+
+<!-- 8 -->
+<div class="sheet" id="a8">
+<h2>ใบที่ 8 — MA(1) มีตัวเลข</h2>
+<div class="q">Is \(X_t=w_t+\textcolor{#1558d6}{0.5}w_{t-1}\) invertible? Write it as AR(∞).</div>
+<div class="ans">
+<p>MA(1) with \(\theta=\textcolor{#1558d6}{0.5}\).</p>
+\[X_t=(1+\textcolor{#1558d6}{0.5}B)w_t,\qquad \theta(B)=1+\textcolor{#1558d6}{0.5}B\]
+\[\theta(x)=1+\textcolor{#1558d6}{0.5}x=0\ \Rightarrow\ |x|=\left|\frac{1}{\textcolor{#1558d6}{0.5}}\right|=\textcolor{#1558d6}{2}\ \textcolor{#1558d6}{&gt;}\ 1\]
+<p><mark class="chg">Invertible</mark>.</p>
+<p>AR(∞): \(w_t=\sum_{j=0}^{\infty}(-\textcolor{#1558d6}{0.5})^jX_{t-j}=X_t-\textcolor{#1558d6}{0.5}X_{t-1}+\textcolor{#1558d6}{0.25}X_{t-2}-\textcolor{#1558d6}{0.125}X_{t-3}+\dots\)</p>
+<p>MA(1) is always causal.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>0.5</td><td>ตัวเลขหน้า \(w_{t-1}\) พร้อมเครื่องหมาย ถ้าโจทย์เป็น \(-0.8w_{t-1}\) ให้ใช้ \(\theta(B)=1-0.8B\)</td></tr>
+<tr><td>2</td><td>1 ÷ ค่าสัมบูรณ์ของตัวเลขนั้น</td></tr>
+<tr><td>&gt; และ Invertible</td><td>ถ้าผลหารไม่เกิน 1 เปลี่ยนเป็น ≤ และ Not invertible แล้วไม่ต้องเขียนบรรทัด AR(∞)</td></tr>
+<tr><td>บรรทัด AR(∞)</td><td>สัมประสิทธิ์ของ \(X_{t-j}\) คือ (−ตัวเลขนั้น) ยกกำลัง j ถ้าโจทย์เป็น \(-0.8w_{t-1}\) จะได้ \(X_t+0.8X_{t-1}+0.64X_{t-2}+\dots\) บวกทุกพจน์</td></tr>
+</table></div>
+</div>
+
+<!-- 9 -->
+<div class="sheet" id="a9">
+<h2>ใบที่ 9 — อันดับ 2 รากเป็นจำนวนจริง</h2>
+<div class="q">Is \(X_t=w_t\textcolor{#1558d6}{-1.3}w_{t-1}\textcolor{#1558d6}{+0.4}w_{t-2}\) invertible?</div>
+<div class="ans">
+\[X_t=(1\textcolor{#1558d6}{-1.3}B\textcolor{#1558d6}{+0.4}B^2)\,w_t,\qquad \theta(B)=1\textcolor{#1558d6}{-1.3}B\textcolor{#1558d6}{+0.4}B^2\]
+\[\theta(x)=1\textcolor{#1558d6}{-1.3}x\textcolor{#1558d6}{+0.4}x^2\qquad(a=\textcolor{#1558d6}{0.4},\ b=\textcolor{#1558d6}{-1.3},\ c=1)\]
+\[b^2-4ac=(\textcolor{#1558d6}{-1.3})^2-4(\textcolor{#1558d6}{0.4})(1)=\textcolor{#1558d6}{0.09}&gt;0\]
+\[x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}=\frac{\textcolor{#1558d6}{1.3}\pm\textcolor{#1558d6}{0.3}}{\textcolor{#1558d6}{0.8}}=\textcolor{#1558d6}{2},\ \textcolor{#1558d6}{1.25}\]
+<p>Both roots <mark class="chg">exceed 1</mark> in absolute value, so the process is <mark class="chg">invertible</mark>.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>a, b, c</td><td>a คือตัวเลขหน้า \(x^2\), b คือตัวเลขหน้า \(x\), c คือ 1 เสมอ</td></tr>
+<tr><td>0.09</td><td>\(b^2-4a\) ถ้าติดลบ ไปใบที่ 10</td></tr>
+<tr><td>1.3, 0.3, 0.8</td><td>\(-b\), รากที่สองของบรรทัดก่อน, \(2a\)</td></tr>
+<tr><td>exceed 1 และ invertible</td><td>ดูค่าสัมบูรณ์ของรากทั้งสอง ถ้ามีรากใดไม่เกิน 1 เขียน “One root does not exceed 1 in absolute value, so the process is not invertible.”</td></tr>
+<tr><td>โจทย์เป็น AR(2) เช่น \(X_t=0.5X_{t-1}+0.24X_{t-2}+w_t\)</td><td>ย้ายข้างก่อน: \((1-0.5B-0.24B^2)X_t=w_t\) ใช้ \(\Phi\) แทน \(\theta\) ทุกที่ (\(a=-0.24,\ b=-0.5\)) ได้ \(b^2-4ac=1.21\), ราก \(-3.33\) และ \(1.25\) ค่าสัมบูรณ์เกิน 1 ทั้งคู่ สรุปว่า causal</td></tr>
+</table></div>
+</div>
+
+<!-- 10 -->
+<div class="sheet" id="a10">
+<h2>ใบที่ 10 — อันดับ 2 รากเป็นจำนวนเชิงซ้อน (\(b^2-4ac&lt;0\))</h2>
+<div class="q">Is \(X_t=w_t\textcolor{#1558d6}{-0.3}w_{t-1}\textcolor{#1558d6}{+1.2}w_{t-2}\) invertible?</div>
+<div class="ans">
+\[\theta(x)=1\textcolor{#1558d6}{-0.3}x\textcolor{#1558d6}{+1.2}x^2\qquad(a=\textcolor{#1558d6}{1.2},\ b=\textcolor{#1558d6}{-0.3},\ c=1)\]
+\[D=b^2-4ac=(\textcolor{#1558d6}{-0.3})^2-4(\textcolor{#1558d6}{1.2})(1)=\textcolor{#1558d6}{-4.71}&lt;0\]
+<p>The roots are complex:</p>
+\[x=\frac{-b}{2a}\pm\frac{i\sqrt{|D|}}{2a}=\frac{\textcolor{#1558d6}{0.3}}{\textcolor{#1558d6}{2.4}}\pm\frac{i\sqrt{\textcolor{#1558d6}{4.71}}}{\textcolor{#1558d6}{2.4}}=\textcolor{#1558d6}{0.125}\pm\textcolor{#1558d6}{0.904}\,i\]
+\[\text{modulus}=\sqrt{\textcolor{#1558d6}{0.125}^2+\textcolor{#1558d6}{0.904}^2}=\textcolor{#1558d6}{0.913}\ \textcolor{#1558d6}{&lt;}\ 1\]
+<p>The roots <mark class="chg">do not exceed</mark> 1 in modulus, so the process is <mark class="chg">not invertible</mark>.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>0.125</td><td>\(-b\div2a\)</td></tr>
+<tr><td>0.904</td><td>\(\sqrt{|D|}\div2a\)</td></tr>
+<tr><td>0.913</td><td>รากที่สองของ (ตัวแรกยกกำลังสอง + ตัวที่สองยกกำลังสอง)</td></tr>
+<tr><td>&lt;, do not exceed, not invertible</td><td>ถ้า modulus มากกว่า 1 เปลี่ยนเป็น &gt;, exceed, invertible</td></tr>
+<tr><td>โจทย์เป็นฝั่ง AR</td><td>ใช้ \(\Phi\) แทน \(\theta\) และ causal แทน invertible</td></tr>
+</table></div>
+</div>
+
+<!-- 11 -->
+<div class="sheet" id="a11">
+<h2>ใบที่ 11 — ARMA ถามทั้ง causal และ invertible</h2>
+<div class="q">Is \(X_t=\textcolor{#1558d6}{0.5}X_{t-1}+w_t\textcolor{#1558d6}{-0.3}w_{t-1}\textcolor{#1558d6}{+1.2}w_{t-2}\) causal and invertible?</div>
+<div class="ans">
+<p>ARMA(<mark class="chg">1</mark>,<mark class="chg">2</mark>):</p>
+\[(1-\textcolor{#1558d6}{0.5}B)X_t=(1\textcolor{#1558d6}{-0.3}B\textcolor{#1558d6}{+1.2}B^2)\,w_t\]
+<p>• Causality: \(\Phi(x)=1-\textcolor{#1558d6}{0.5}x=0\ \Rightarrow\ x=\textcolor{#1558d6}{2}\ \textcolor{#1558d6}{&gt;}\ 1\). <mark class="chg">Causal</mark>.</p>
+<p>• Invertibility: \(\theta(x)=1\textcolor{#1558d6}{-0.3}x\textcolor{#1558d6}{+1.2}x^2\) → ลอกต่อจากใบที่ 8, 9 หรือ 10 ตามอันดับของฝั่ง MA</p>
+<p>Conclusion: the process is <mark class="chg">causal but not invertible</mark>.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>ฝั่งซ้าย</td><td>ย้ายพจน์ X ทั้งหมดไปทางซ้าย เครื่องหมายกลับ: \(+0.5X_{t-1}\) กลายเป็น \(-0.5B\)</td></tr>
+<tr><td>ฝั่งขวา</td><td>พจน์ w เครื่องหมายคงเดิม</td></tr>
+<tr><td>อันดับ ARMA(p,q)</td><td>p คือ lag สูงสุดของ X, q คือ lag สูงสุดของ w</td></tr>
+<tr><td>Conclusion</td><td>เลือกจาก: causal and invertible / causal but not invertible / invertible but not causal / neither</td></tr>
+<tr><td>ARMA(1,1) เช่น \(X_t=0.9X_{t-1}+w_t+0.5w_{t-1}\)</td><td>\((1-0.9B)X_t=(1+0.5B)w_t\); \(x=1/0.9=1.11&gt;1\) causal; \(|x|=1/0.5=2&gt;1\) invertible</td></tr>
+</table></div>
+</div>
+
+<!-- 12 -->
+<div class="sheet" id="a12">
+<h2>ใบที่ 12 — Parameter redundancy (Ex 3.7)</h2>
+<div class="q">\(X_t=0.4X_{t-1}+0.45X_{t-2}+w_t+w_{t-1}+0.25w_{t-2}\). Is it ARMA(2,2)? Is it causal and invertible?</div>
+<div class="ans">
+\[(1-0.4B-0.45B^2)\,X_t=(1+B+0.25B^2)\,w_t\]
+<p>Factor both sides:</p>
+\[(1+0.5B)(1-0.9B)\,X_t=(1+0.5B)(1+0.5B)\,w_t\]
+<p>The common factor \((1+0.5B)\) cancels (parameter redundancy):</p>
+\[(1-0.9B)\,X_t=(1+0.5B)\,w_t\]
+<p>So the model is ARMA(1,1), not ARMA(2,2): \(X_t=0.9X_{t-1}+w_t+0.5w_{t-1}\).</p>
+<p>• \(\Phi(x)=1-0.9x=0\ \Rightarrow\ x=1/0.9=1.11&gt;1\). Causal.</p>
+<p>• \(\theta(x)=1+0.5x=0\ \Rightarrow\ x=-2,\ |x|=2&gt;1\). Invertible.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ถ้าโจทย์ให้ตัวเลขอื่น</th><th>วิธีแยกตัวประกอบ</th></tr>
+<tr><td>หารากของแต่ละฝั่ง</td><td>ใช้สูตรกำลังสองแบบใบที่ 9 กับ \(\Phi(x)\) และ \(\theta(x)\)</td></tr>
+<tr><td>เขียนตัวประกอบ</td><td>ราก \(r\) ให้ตัวประกอบ \((1-B/r)\) เช่น ราก −2 ให้ \((1+0.5B)\) และราก 1.11 ให้ \((1-0.9B)\)</td></tr>
+<tr><td>ตัดตัวร่วม</td><td>รากที่เหมือนกันทั้งสองฝั่งคือตัวประกอบร่วม ตัดออก แล้วตรวจ causal และ invertible จากที่เหลือ</td></tr>
+<tr><td>ไม่มีรากร่วม</td><td>เขียน “There is no common factor, so the model is ARMA(2,2).” แล้วตรวจรากทั้งสองฝั่งตามใบที่ 9</td></tr>
+</table></div>
+</div>
+
+<!-- 13 -->
+<div class="sheet" id="a13">
+<h2>ใบที่ 13 — เขียน ARMA(1,1) เป็น MA(∞) (หา ψ)</h2>
+<div class="q">Write \((1-\textcolor{#1558d6}{0.9}B)X_t=(1+\textcolor{#1558d6}{0.5}B)w_t\) as MA(∞). / Find the ψ-weights.</div>
+<div class="ans">
+\[\psi(z)=\frac{\theta(z)}{\Phi(z)}=\frac{1+\textcolor{#1558d6}{0.5}z}{1-\textcolor{#1558d6}{0.9}z}=(1+\textcolor{#1558d6}{0.5}z)(1-\textcolor{#1558d6}{0.9}z)^{-1}\]
+<p>Power series: \((1-\textcolor{#1558d6}{0.9}z)^{-1}=1+\textcolor{#1558d6}{0.9}z+\textcolor{#1558d6}{0.9}^2z^2+\textcolor{#1558d6}{0.9}^3z^3+\dots\)</p>
+\[\psi(z)=(1+\textcolor{#1558d6}{0.5}z)(1+\textcolor{#1558d6}{0.9}z+\textcolor{#1558d6}{0.9}^2z^2+\dots)\]
+\[=1+\textcolor{#1558d6}{1.4}z+(\textcolor{#1558d6}{1.4})(\textcolor{#1558d6}{0.9})z^2+(\textcolor{#1558d6}{1.4})(\textcolor{#1558d6}{0.9})^2z^3+\dots\]
+\[X_t=\psi(B)w_t=w_t+\sum_{j=1}^{\infty}\textcolor{#1558d6}{1.4}\,(\textcolor{#1558d6}{0.9})^{j-1}\,w_{t-j}\qquad\text{MA}(\infty)\]
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>0.9</td><td>φ: ตัวเลขหน้า \(X_{t-1}\) ในโจทย์</td></tr>
+<tr><td>0.5</td><td>θ: ตัวเลขหน้า \(w_{t-1}\) ในโจทย์ พร้อมเครื่องหมาย</td></tr>
+<tr><td>1.4</td><td>φ + θ เช่น φ = 0.9, θ = −0.3 ได้ 0.6</td></tr>
+<tr><td>สูตรทั่วไป</td><td>\(X_t=w_t+\sum_{j=1}^{\infty}(\phi+\theta)\,\phi^{j-1}w_{t-j}\)</td></tr>
+</table></div>
+</div>
+
+<!-- 14 -->
+<div class="sheet" id="a14">
+<h2>ใบที่ 14 — เขียน ARMA(1,1) เป็น AR(∞) (หา π)</h2>
+<div class="q">Write \((1-\textcolor{#1558d6}{0.9}B)X_t=(1+\textcolor{#1558d6}{0.5}B)w_t\) as AR(∞). / Find the π-weights.</div>
+<div class="ans">
+\[\pi(z)=\frac{\Phi(z)}{\theta(z)}=(1-\textcolor{#1558d6}{0.9}z)(1+\textcolor{#1558d6}{0.5}z)^{-1}\]
+<p>Power series: \((1+\textcolor{#1558d6}{0.5}z)^{-1}=1-\textcolor{#1558d6}{0.5}z+\textcolor{#1558d6}{0.5}^2z^2-\textcolor{#1558d6}{0.5}^3z^3+\dots\)</p>
+\[\pi(z)=(1-\textcolor{#1558d6}{0.9}z)(1-\textcolor{#1558d6}{0.5}z+\textcolor{#1558d6}{0.5}^2z^2-\dots)\]
+\[=1-\textcolor{#1558d6}{1.4}z+(\textcolor{#1558d6}{1.4})(\textcolor{#1558d6}{0.5})z^2-(\textcolor{#1558d6}{1.4})(\textcolor{#1558d6}{0.5})^2z^3+\dots\]
+\[w_t=\pi(B)X_t=X_t-\textcolor{#1558d6}{1.4}\sum_{j=1}^{\infty}(-\textcolor{#1558d6}{0.5})^{j-1}X_{t-j}\qquad\text{AR}(\infty)\]
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>0.9, 0.5, 1.4</td><td>φ, θ, และ φ + θ เหมือนใบที่ 13</td></tr>
+<tr><td>สูตรทั่วไป</td><td>\(w_t=X_t-\sum_{j=1}^{\infty}(\phi+\theta)\,(-\theta)^{j-1}X_{t-j}\)</td></tr>
+<tr><td>เครื่องหมายหน้า 1.4</td><td>คูณกระจายได้ลบ ตรงกับตำรา Shumway Example 3.7 แต่ในวิดีโอนาที 60:00 กระดาษของอาจารย์เขียนเป็นบวก ให้ตรวจกับวิดีโอช่วง 59:30–60:30 ก่อนสอบ</td></tr>
+</table></div>
+</div>
+
+<!-- 15 -->
+<div class="sheet" id="a15">
+<h2>ใบที่ 15 — ทำไมต้องมี invertibility</h2>
+<div class="q">\(X_t=w_t+\textcolor{#1558d6}{\tfrac15}w_{t-1}\) and \(X_t=w_t+\textcolor{#1558d6}{5}w_{t-1}\). Compare their ACF. Which one do we choose and why?</div>
+<div class="ans">
+<p>For MA(1), \(\rho(1)=\dfrac{\theta}{1+\theta^2}\).</p>
+\[\theta=\textcolor{#1558d6}{\tfrac15}:\ \rho(1)=\frac{\textcolor{#1558d6}{0.2}}{1+\textcolor{#1558d6}{0.04}}=\textcolor{#1558d6}{0.1923}\qquad\qquad \theta=\textcolor{#1558d6}{5}:\ \rho(1)=\frac{\textcolor{#1558d6}{5}}{1+\textcolor{#1558d6}{25}}=\textcolor{#1558d6}{0.1923}\]
+<p>Both models have the same ACF, so the data cannot tell them apart.</p>
+<p>We choose \(X_t=w_t+\textcolor{#1558d6}{\tfrac15}w_{t-1}\) because \(|\theta|=\textcolor{#1558d6}{0.2}&lt;1\): it is invertible, i.e. it can be written as AR(∞) (MA(q) → AR(∞)). The model with \(\theta=\textcolor{#1558d6}{5}\) is not invertible.</p>
+</div>
+<div class="swap"><table>
+<tr><th>ตัวที่เปลี่ยน</th><th>วิธีหา</th></tr>
+<tr><td>คู่ของ θ</td><td>สองค่าเป็นส่วนกลับกันเสมอ เช่น 0.5 กับ 2 ได้ \(\rho(1)=0.4\) ทั้งคู่</td></tr>
+<tr><td>ตัวที่เลือก</td><td>ตัวที่ค่าสัมบูรณ์น้อยกว่า 1</td></tr>
+</table></div>
+</div>
+
+</body>
+</html>
