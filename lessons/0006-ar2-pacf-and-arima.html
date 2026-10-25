@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 6: Model for Stationary Time Series (Part 2) — AR(2), PACF, ARIMA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 6: AR(2), PACF และ ARIMA</title>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -16,1044 +17,868 @@
   <span><a href="0007-arima-identification-and-estimation.html">Lesson 7 →</a></span>
 </nav>
 
-<p class="kicker">Slide_6 — Time Series Analysis · Model for Stationary Time Series (Part 2) · 55 หน้า + ARMA_properties 10 หน้า + R_codes</p>
-<h1>AR(2), partial autocorrelation และ ARIMA</h1>
+<p class="kicker">Slide 6 — Model for Stationary Time Series (Part 2) · 55 หน้า · คลิป Class 6 (2:09:07)</p>
+<h1>AR(2), PACF และ ARIMA(p,d,q)</h1>
 
 <div class="box">
-<div class="label">วิธีใช้บทเรียนนี้</div>
-<p>บทนี้แสดงสไลด์ Lecture 6 เกือบทุกหน้าตามลำดับ และรวมเอกสาร ARMA_properties ซึ่งเป็นใบงานประกอบ ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ สไลด์หลายหน้าให้โจทย์โดยไม่มีเฉลย คือ Exercise หน้า 25–26, Examples หน้า 51 และ Exercises ในใบงาน บทเรียนนี้ทำให้ครบทุกข้อ โค้ดจากไฟล์ R_codes มีคำอธิบายและค่าที่รันจริง</p>
-<p>บทนี้ยังไม่ได้รวมสิ่งที่อาจารย์พูดในวิดีโอ Class 6 ยกเว้นเฉลย Exercises ของใบงาน ซึ่งมาจากกระดาษที่อาจารย์เขียนในวิดีโอ Class 7-2 และระบุเวลาไว้</p>
+<div class="label">บทนี้ตอบคำถามอะไร</div>
+<p>Lesson 5 จบที่ปัญหาหนึ่ง: ACF บอก q ของ MA ได้ แต่บอก p ของ AR ไม่ได้ เพราะ ACF ของ AR ทุกอันดับค่อย ๆ ลดลงเหมือนกัน และ AR ใช้ได้กับข้อมูลนิ่งเท่านั้น บทนี้แก้สองปัญหานั้นตามลำดับที่อาจารย์สอน</p>
+<ol>
+<li><b>AR(2)</b>: φ ใช้ค่าอะไรก็ได้หรือไม่ → เงื่อนไขสามข้อ (สามเหลี่ยม) ที่มาจากรากของ Φ(x)</li>
+<li><b>PACF</b>: เครื่องมือหา p ของ AR โดยตัดผลของ lag ที่อยู่ตรงกลางออก → AR(p) มี PACF ตัดหลัง lag p</li>
+<li><b>ตาราง ACF/PACF</b>: AR ตัดที่ PACF, MA ตัดที่ ACF, ARMA ไม่ตัดทั้งคู่ (ใช้ EACF หรือ auto.arima)</li>
+<li><b>ARIMA(p,d,q)</b>: เติม differencing d ครั้ง ให้ใช้กับข้อมูลที่มี trend ได้ \(\Phi(B)(1-B)^dX_t=\theta(B)w_t\)</li>
+<li><b>กับดัก</b>: สมการที่ดูเหมือน AR(2) หรือ ARMA(2,2) แต่แยกตัวประกอบแล้วได้ \((1-B)\) จึงเป็น ARIMA</li>
+</ol>
 </div>
 
-<div class="box source">
-<div class="label">แหล่งอ่านหลัก</div>
-<p>Shumway &amp; Stoffer บทที่ 3 สไลด์อ้าง Example 3.7–3.10 หน้า 96–100 (AR(2)), หน้า 106–108 (PACF), หน้า 121 (Yule-Walker) และ Definition 3.11 หน้า 141 (ARIMA) เรื่องเงื่อนไข stationary ของ AR(2) และ EACF สไลด์อ้าง Cryer &amp; Chan, <em>Time Series Analysis with Applications in R</em> (2008) อ่านเสริมเรื่อง PACF ได้ที่ <a href="https://online.stat.psu.edu/stat510/lesson/2/2.2" target="_blank" rel="noopener">Penn State STAT 510 บทที่ 2.2</a></p>
+<div class="box exam">
+<div class="label">สิ่งที่อาจารย์พูดถึงข้อสอบ</div>
+<ul>
+<li><b>ต้องแยกตัวประกอบหรือหารากสมการกำลังสองเป็น</b> "เคยออกข้อสอบ ... ผมเคยออกเป็น x กำลังสาม คนที่ทำได้จาก 40 คนเหลือ 2 คน ผมก็เลยคิดว่าเอากำลังสองก็พอ" (Class 6, 1:24:42–1:25:07)</li>
+<li><b>กับดัก "ดูเหมือน AR(2) แต่ไม่ใช่"</b> ต้องเช็คเงื่อนไขสามข้อก่อน "คุณอาจจะโดนหลอก" (Class 6, 1:18:29, 1:52:56–1:58:37)</li>
+<li><b>ข้อสอบเก่า: quadratic trend ทำไมต้อง diff สองครั้ง</b> "จงพรูฟว่าทำไมมันไม่ stationary" (Class 6, 1:46:36–1:47:12)</li>
+<li><b>ρ̂(h) ต้องคำนวณเป็น แต่ φ̂_hh ไม่ออก</b> "คุณดู output ให้เป็นก็พอ" สูตร Durbin–Levinson "ผมจะไม่ออกสอบ เอาให้คุณเข้าใจคอนเซ็ปต์" (Class 6, 0:54:23, 1:14:44)</li>
+<li>ข้อสอบเก่าให้กราฟ ACF หรือ scatter plot มาให้ดูว่าเป็นโมเดลอะไร "MA ... ไม่ค่อยจะมีใครทำผิดหรอก ... ที่จะยากคือมัน mix กัน" (Class 6, 0:18:23, 1:10:37)</li>
+<li>ควิซหน้า "ผมอาจจะโชว์แบบเนี้ย [กราฟ IMA] แล้วคุณทายว่ามันเป็นแบบไหน" ไม่ออก d = 3 (Class 6, 2:06:13)</li>
+<li>ข้อสอบมีสองภาค: concept และภาคปฏิบัติกับข้อมูลจริงที่ใช้ auto.arima (Class 6, 1:13:23) ปีหลัง ๆ เน้น application มากกว่าทฤษฎี (Class 6, 0:32:54)</li>
+</ul>
 </div>
 
 <table>
 <tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
-<tr><td><a href="#s1">1</a></td><td>ทบทวน MA, AR, stationarity และ ARMA</td><td>2–8</td></tr>
-<tr><td><a href="#s2">2</a></td><td>AR(2): โมเดล characteristic equation และเงื่อนไข stationary</td><td>9–15</td></tr>
-<tr><td><a href="#s3">3</a></td><td>AR(2): ACF และ Yule-Walker equations</td><td>16–19</td></tr>
-<tr><td><a href="#s4">4</a></td><td>ตัวอย่าง AR(2), AR(p) และการเทียบกับ MA(q)</td><td>20–24</td></tr>
-<tr><td><a href="#s5">5</a></td><td>Exercise สองข้อ พร้อมเฉลย</td><td>25–26</td></tr>
-<tr><td><a href="#s6">6</a></td><td>PACF: แนวคิด</td><td>28–33</td></tr>
-<tr><td><a href="#s7">7</a></td><td>PACF: นิยามและ Durbin-Levinson</td><td>34–37</td></tr>
-<tr><td><a href="#s8">8</a></td><td>PACF ของ AR และ MA</td><td>38–43</td></tr>
-<tr><td><a href="#s9">9</a></td><td>ARIMA model</td><td>45–51</td></tr>
-<tr><td><a href="#s10">10</a></td><td>IMA(1,1) และ IMA(2,2)</td><td>52–55</td></tr>
-<tr><td><a href="#s11">11</a></td><td>ใบงาน ARMA_properties</td><td>ใบงานหน้า 1–9</td></tr>
-<tr><td><a href="#s12">12</a></td><td>โค้ด R_codes ทั้งไฟล์</td><td>—</td></tr>
-<tr><td><a href="#s13">13</a></td><td>แบบฝึกท้ายบท</td><td>—</td></tr>
+<tr><td><a href="#s1">1</a></td><td>ทบทวน MA, AR และ ARMA</td><td>2–8</td></tr>
+<tr><td><a href="#s2">2</a></td><td>AR(2): characteristic polynomial และเงื่อนไขความนิ่ง</td><td>9–15</td></tr>
+<tr><td><a href="#s3">3</a></td><td>ACF ของ AR(2): Yule-Walker และสี่ตัวอย่าง</td><td>16–21</td></tr>
+<tr><td><a href="#s4">4</a></td><td>AR(p) และการเทียบกับ MA(q)</td><td>22–24</td></tr>
+<tr><td><a href="#s5">5</a></td><td>Exercise ท้ายส่วน AR</td><td>25–26</td></tr>
+<tr><td><a href="#s6">6</a></td><td>PACF: แนวคิด partial correlation</td><td>27–31</td></tr>
+<tr><td><a href="#s7">7</a></td><td>PACF ของอนุกรมเวลา: นิยาม φ_hh</td><td>32–37</td></tr>
+<tr><td><a href="#s8">8</a></td><td>PACF ของ AR และ MA และตารางสรุป</td><td>38–43</td></tr>
+<tr><td><a href="#s9">9</a></td><td>ARMA ผสม และ EACF</td><td>— (R_codes)</td></tr>
+<tr><td><a href="#s10">10</a></td><td>ARIMA(p,d,q)</td><td>44–50</td></tr>
+<tr><td><a href="#s11">11</a></td><td>Examples: ดูเหมือน AR(2)/ARMA(2,2) แต่ไม่ใช่</td><td>51</td></tr>
+<tr><td><a href="#s12">12</a></td><td>IMA(1,1) และ IMA(2,2)</td><td>52–55</td></tr>
+<tr><td><a href="#s13">13</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
-<h2 id="s1">1. ทบทวน MA, AR, stationarity และ ARMA</h2>
+<h2 id="s1">1. ทบทวน MA, AR และ ARMA</h2>
 
 <figure>
-<img src="../assets/slides/ts6-p02.png" alt="Slide 6 หน้า 2: Review: Moving Average Model" loading="lazy">
-<figcaption>Slide 6 หน้า 2 — Review: Moving Average Model</figcaption>
+<img src="../assets/slides/ts6-p02.png" alt="Slide 6 หน้า 2: Review: MA(q), X_t = θ(B)w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 2 — Review: MA(q), X_t = θ(B)w_t</figcaption>
 </figure>
 
-<p>MA(q) นิยามด้วย \(X_t=\sum_{j=1}^{q}\theta_jw_{t-j}+w_t\) หรือ \(X_t=\) <mark class="src" data-p="2">θ(B)</mark> \(w_t\) โดย \(w_t\) มีการแจกแจง \(N(0,\sigma^2)\) ค่าปัจจุบันเป็นผลรวมของ white noise ปัจจุบันและย้อนหลัง q ช่วง รายละเอียดและการพิสูจน์อยู่ใน <a href="0005-ma-and-ar-models.html#s3">Lesson 5 หัวข้อ 3 ถึง 7</a></p>
+<p>MA(q) เขียนเป็น \(X_t=\theta(B)w_t\) โดย <mark class="src" data-p="2">𝜽(𝑩)</mark> คือ \(1+\theta_1B+\dots+\theta_qB^q\) จาก Lesson 5 ค่า \(X_t\) เป็นผลรวมของ shock ปัจจุบันกับย้อนหลัง q ช่วง ACF จึงเป็นศูนย์หลัง lag q อาจารย์ทวนตัวอย่าง MA(1) ที่ θ = −0.9: \(\rho_1=-0.9/1.81=-0.497\) และ lag 2 เป็นต้นไปเป็นศูนย์ (Class 6, 0:16:28–0:17:50)</p>
 
 <figure>
-<img src="../assets/slides/ts6-p03.png" alt="Slide 6 หน้า 3: Review: Autoregressive model" loading="lazy">
-<figcaption>Slide 6 หน้า 3 — Review: Autoregressive model</figcaption>
+<img src="../assets/slides/ts6-p03.png" alt="Slide 6 หน้า 3: Review: AR(p), Φ(B)X_t = w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 3 — Review: AR(p), Φ(B)X_t = w_t</figcaption>
 </figure>
 
-<p>AR(p) นิยามด้วย \(X_t=\sum_{j=1}^{p}\phi_jX_{t-j}+w_t\) หรือ <mark class="src" data-p="3">Φ(B)</mark> \(X_t=w_t\) ค่าปัจจุบันเป็นผลรวมถ่วงน้ำหนักของค่าของตัวเองย้อนหลัง p ช่วง บวก white noise ของเวลาปัจจุบัน</p>
+<p>AR(p) เขียนเป็น \(\Phi(B)X_t=w_t\) โดย \(\Phi(B)=1-\phi_1B-\dots-\phi_pB^p\) ต่างจาก MA ตรงที่ตัวแปรที่อยู่ด้านขวาของสมการเดิมคือ X ย้อนหลังซึ่งเป็นตัวแปรสุ่ม ไม่ใช่ shock ที่อิสระกัน</p>
 
 <figure>
-<img src="../assets/slides/ts6-p04.png" alt="Slide 6 หน้า 4: Review: Autoregressive model (ต่อ)" loading="lazy">
-<figcaption>Slide 6 หน้า 4 — Review: Autoregressive model (ต่อ)</figcaption>
+<img src="../assets/slides/ts6-p04.png" alt="Slide 6 หน้า 4: Review: ปัญหาของ autoregression" loading="lazy">
+<figcaption>Slide 6 หน้า 4 — Review: ปัญหาของ autoregression</figcaption>
 </figure>
 
-<p>ใน autoregression สมมติฐานพื้นฐานเรื่อง independence ของ error terms ไม่เป็นจริงได้ง่าย เพราะตัวแปรอธิบาย <mark class="src" data-p="4">(right-hand side of equation)</mark> มีความสัมพันธ์กันเองโดยธรรมชาติ ตัวแปรอธิบายคือ \(X_{t-1},X_{t-2},\dots\) ซึ่งเป็นค่าของ series เดียวกันต่างเวลา จึงสัมพันธ์กัน ข้อที่สอง การตัดสินว่าต้องใช้ค่าในอดีตของ \(X_t\) กี่ค่า ไม่ตรงไปตรงมาเสมอ ข้อนี้คือปัญหาการเลือกอันดับ p ซึ่งเครื่องมือที่ใช้แก้คือ PACF ในหัวข้อ 6 ถึง 8</p>
+<p>สไลด์ชี้ปัญหาสองข้อ ข้อแรก ตัวแปรด้าน <mark class="src" data-p="4">(right-handside of equation)</mark> คือ \(X_{t-1},X_{t-2},\dots\) สัมพันธ์กันเอง เช่น AR(1) ที่ φ = 0.9 มี \(X_{t-1}\) กับ \(X_{t-2}\) สัมพันธ์กันถึง 0.9 สมมุติฐานของ regression ทั่วไปจึงใช้ไม่ได้ตรง ๆ ข้อสอง การเลือกว่าจะใส่ X ย้อนหลังกี่ตัว (p) ไม่ง่าย ปัญหาข้อสองนี้คือเหตุผลที่ต้องมี PACF ในหัวข้อ 6–8</p>
 
 <figure>
-<img src="../assets/slides/ts6-p05.png" alt="Slide 6 หน้า 5: Review: Stationary Condition ของ AR(p)" loading="lazy">
-<figcaption>Slide 6 หน้า 5 — Review: Stationary Condition ของ AR(p)</figcaption>
+<img src="../assets/slides/ts6-p05.png" alt="Slide 6 หน้า 5: Review: Stationary condition ของ AR(p)" loading="lazy">
+<figcaption>Slide 6 หน้า 5 — Review: Stationary condition ของ AR(p)</figcaption>
 </figure>
 
-<p>หน้านี้ทวน theorem จาก Lesson 5: ถ้า \(X_t\sim AR(p)\) แล้ว \(X_t\) เป็น stationary ก็ต่อเมื่อ modulus ของรากทุกตัวของ characteristic polynomial มากกว่าหนึ่ง คือ \(|\beta_i|&gt;1\) ทุก i หรือเทียบเท่ากับ \(|\alpha_i|&lt;1\) ทุก i สไลด์สรุปเป็นข้อความสีแดง: <mark class="src" data-p="5">All the roots of characteristic polynomial exceed 1 in absolute value (or in modulus if the roots are complex)</mark> ประโยคนี้เป็นรูปที่ใช้ตลอดบทนี้และ Lesson 7</p>
+<p>ทฤษฎีบทจาก Lesson 5: AR(p) นิ่งก็ต่อเมื่อรากของ characteristic polynomial ทุกตัวมีค่าสัมบูรณ์เกิน 1 หรือ modulus เกิน 1 ถ้าเป็นจำนวนเชิงซ้อน ตัวอย่างที่ใช้ซ้ำทั้งบท: \(\Phi(x)=1-1.1x+0.3x^2=(1-0.5x)(1-0.6x)\) มีราก 2 และ 1.667 เกิน 1 ทั้งคู่ จึงนิ่ง</p>
 
 <figure>
-<img src="../assets/slides/ts6-p06.png" alt="Slide 6 หน้า 6: Review: AR(1) process" loading="lazy">
-<figcaption>Slide 6 หน้า 6 — Review: AR(1) process</figcaption>
+<img src="../assets/slides/ts6-p06.png" alt="Slide 6 หน้า 6: Review: AR(1) นิ่งก็ต่อเมื่อ −1 < φ < 1" loading="lazy">
+<figcaption>Slide 6 หน้า 6 — Review: AR(1) นิ่งก็ต่อเมื่อ −1 < φ < 1</figcaption>
 </figure>
 
-<p>AR(1) \(X_t=\phi X_{t-1}+w_t\) เป็น stationary ก็ต่อเมื่อ \(|\phi|&lt;1\) คือ \(-1&lt;\phi&lt;1\) ถ้า \(|\phi|&gt;1\) ไม่ stationary ข้อนี้เป็นกรณีพิเศษของ theorem: \(\Phi(x)=1-\phi x\) มีรากเดียวคือ \(x=1/\phi\) และ \(|1/\phi|&gt;1\) เท่ากับ \(|\phi|&lt;1\)</p>
+<p>สำหรับ AR(1) ราก \(1/\phi\) เกิน 1 เมื่อ \(|\phi|&lt;1\) อาจารย์บอกว่า "ฟีไม่สามารถเป็นเลขอะไรอิสระได้ ... เวลาคุณรันในโปรแกรม R หรือ Python ฟีที่มันให้มาจะอยู่ในช่วงนี้ ... ถ้ามันเกินช่วงนี้ ... มันจะไม่ converge" (Class 6, 1:16:22–1:17:04) ตัวอย่าง φ = 1.2: เริ่มที่ \(X_0=1\) ไม่มี shock จะได้ 1.2, 1.44, 1.73, 2.07 โตขึ้นเรื่อย ๆ ไม่กลับมาที่ค่าเฉลี่ย ส่วน φ = 0.8 ได้ 0.8, 0.64, 0.51 ค่อย ๆ กลับสู่ศูนย์ นี่คือความหมายเชิงภาพของความนิ่ง</p>
 
 <figure>
-<img src="../assets/slides/ts6-p07.png" alt="Slide 6 หน้า 7: ARMA model (at first glance): นิยาม" loading="lazy">
-<figcaption>Slide 6 หน้า 7 — ARMA model (at first glance): นิยาม</figcaption>
+<img src="../assets/slides/ts6-p07.png" alt="Slide 6 หน้า 7: ARMA model (at first glance): Φ(B)X_t = θ(B)w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 7 — ARMA model (at first glance): Φ(B)X_t = θ(B)w_t</figcaption>
 </figure>
 
-<p>ARMA process ที่มีอันดับ p และ q นิยามด้วย \(X_t=\sum_{j=1}^{p}\phi_jX_{t-j}+\sum_{j=1}^{q}\theta_jw_{t-j}+w_t\) และในรูป lag operator คือ \(\Phi(B)X_t=\theta(B)w_t\) สไลด์กำกับหัวเรื่องว่า <mark class="src" data-p="7">(at first glance)</mark> โมเดลนี้รวมส่วน AR ไว้ทางซ้ายและส่วน MA ไว้ทางขวา ตัวอย่าง ARMA(1,1): \(X_t=\phi X_{t-1}+w_t+\theta w_{t-1}\) เขียนเป็น \((1-\phi B)X_t=(1+\theta B)w_t\) ในสมการของสไลด์ พจน์สุดท้ายพิมพ์เป็น \(w_j\) ซึ่งหมายถึง \(w_t\)</p>
+<p>ARMA(p,q) รวมสองส่วน: \(X_t=\sum\phi_jX_{t-j}+\sum\theta_jw_{t-j}+w_t\) หรือ \(\Phi(B)X_t=\theta(B)w_t\) ARMA(p,0) คือ AR(p) และ ARMA(0,q) คือ MA(q) (Class 6, 1:27:57) ตัวอย่าง: \(X_t=0.6X_{t-1}+w_t+0.8w_{t-1}\) คือ \((1-0.6B)X_t=(1+0.8B)w_t\) เป็น ARMA(1,1) ซึ่งเป็นโมเดลที่ใช้ใน EACF หัวข้อ 9</p>
 
 <figure>
-<img src="../assets/slides/ts6-p08.png" alt="Slide 6 หน้า 8: ARMA model (at first glance): การใช้" loading="lazy">
-<figcaption>Slide 6 หน้า 8 — ARMA model (at first glance): การใช้</figcaption>
+<img src="../assets/slides/ts6-p08.png" alt="Slide 6 หน้า 8: ARMA ใช้ได้กับข้อมูลนิ่งเท่านั้น และขยายเป็น ARIMA" loading="lazy">
+<figcaption>Slide 6 หน้า 8 — ARMA ใช้ได้กับข้อมูลนิ่งเท่านั้น และขยายเป็น ARIMA</figcaption>
 </figure>
 
-<p>AR models ใช้ร่วมกับ MA models ได้อย่างมีประสิทธิภาพ แต่ใช้ได้เฉพาะเมื่อข้อมูล stationary โมเดลตระกูลนี้ขยายไปยัง non-stationary series ได้โดยยอมให้ทำ differencing กับข้อมูล ซึ่งเรียกว่า autoregressive integrated moving average (ARIMA) models หน้านี้จึงเป็นแผนที่ของบท: หัวข้อ 2 ถึง 8 ศึกษาโมเดล stationary ให้ครบ และหัวข้อ 9 ถึง 10 เพิ่ม differencing</p>
+<p>ARMA ใช้ได้เมื่อข้อมูลนิ่งเท่านั้น คือไม่มี trend ไม่มี seasonal และ variance คงที่ (Class 6, 1:28:32) ข้อมูลจริงที่ไม่นิ่งที่เจอบ่อยมีสองแบบ แบบแรกมี trend "เจอบ่อยมาก" ซึ่งแก้ด้วย differencing กลายเป็น ARIMA ในหัวข้อ 10 แบบที่สองแกว่งไม่เท่ากัน ซึ่งต้องใช้ log หรือโมเดล variance (ARCH/GARCH) ที่จะเรียนทีหลัง (Class 6, 1:30:01–1:31:15)</p>
 
 <!-- ===================================================== -->
-<h2 id="s2">2. AR(2): โมเดล characteristic equation และเงื่อนไข stationary</h2>
+<h2 id="s2">2. AR(2): characteristic polynomial และเงื่อนไขความนิ่ง</h2>
 
 <figure>
-<img src="../assets/slides/ts6-p09.png" alt="Slide 6 หน้า 9: AR(2) process (example 3.7–3.10, page 96–100)" loading="lazy">
-<figcaption>Slide 6 หน้า 9 — AR(2) process (example 3.7–3.10, page 96–100)</figcaption>
+<img src="../assets/slides/ts6-p09.png" alt="Slide 6 หน้า 9: AR(2): X_t = φ₁X(t−1) + φ₂X(t−2) + w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 9 — AR(2): X_t = φ₁X(t−1) + φ₂X(t−2) + w_t</figcaption>
 </figure>
 
-<p>ให้ \(w_t\) เป็น zero mean white noise ที่มีความแปรปรวน \(\sigma^2\) AR(2) คือ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) ค่าปัจจุบันเป็น weighted linear combination ของค่าจากช่วงเวลาก่อนหน้า <mark class="src" data-p="9">two</mark> ช่วง บวก random innovation ของเวลาปัจจุบัน เมื่อเทียบกับ AR(1) ซึ่งจำเฉพาะเมื่อวาน AR(2) จำทั้งเมื่อวานและเมื่อวานซืน การมีสองค่าทำให้โมเดลสร้างพฤติกรรมแบบแกว่งเป็นคลื่นได้ เช่น ถ้า \(\phi_2\) ติดลบ ค่าที่สูงเมื่อสองวันก่อนจะดึงค่าวันนี้ลง</p>
+<p>AR(2) คือ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) ค่าปัจจุบันเป็นผลรวมถ่วงน้ำหนักของสองค่าก่อนหน้าบวก shock ใหม่ ตัวอย่างความหมาย: ถ้า φ₁ = 1.1 และ φ₂ = −0.3 ค่าวันนี้ตามเมื่อวานไปแรง (1.1) แต่ถูกดึงกลับด้วยค่าเมื่อวานซืน (−0.3) ผลรวม 1.1 − 0.3 = 0.8 &lt; 1 อนุกรมจึงกลับสู่ค่าเฉลี่ยได้</p>
 
 <figure>
-<img src="../assets/slides/ts6-p10.png" alt="Slide 6 หน้า 10: AR(2): สมมติฐาน" loading="lazy">
-<figcaption>Slide 6 หน้า 10 — AR(2): สมมติฐาน</figcaption>
+<img src="../assets/slides/ts6-p10.png" alt="Slide 6 หน้า 10: AR(2): สมมุติฐาน และความนิ่งที่ต้องมีเงื่อนไข" loading="lazy">
+<figcaption>Slide 6 หน้า 10 — AR(2): สมมุติฐาน และความนิ่งที่ต้องมีเงื่อนไข</figcaption>
 </figure>
 
-<p>ยังคงสมมติว่า \(E(X_t)=0\) ถ้าค่าเฉลี่ย \(\mu\) ไม่เป็นศูนย์ ให้แทน \(X_t\) ด้วย \(X_t-\mu\) ทุกเวลา และยังสมมติว่า \(w_t\) เป็นอิสระจาก \(X_{t-k}\) สำหรับทุก \(k=1,2,\dots\) เช่นเดียวกับ AR(1) ที่ต้องมีเงื่อนไขจึงจะ stationary AR(2) ก็ต้องมี สไลด์ระบุว่าเรื่อง stationarity ของ AR(2) และ AR อันดับสูงเป็นทฤษฎีมาก จึงเน้นเฉพาะจุดพื้นฐาน</p>
+<p>สมมุติฐานเหมือน AR(1): mean เป็นศูนย์ (ถ้าไม่ใช่ให้ใช้ \(X_t-\mu\)) และ \(w_t\) อิสระจาก \(X_{t-k}\) ทุก k ≥ 1 สไลด์ยอมรับว่าเรื่องความนิ่งของ AR(2) ขึ้นไป <i>becomes very theoretical</i> และเลือกสอนเฉพาะจุดสำคัญ อาจารย์ก็ทำเช่นเดียวกัน คือสอนสั้น ๆ เฉพาะเงื่อนไขสามเหลี่ยม (Class 6, 1:15:23–1:26:44)</p>
 
 <figure>
-<img src="../assets/slides/ts6-p11.png" alt="Slide 6 หน้า 11: AR(2): รูป backshift" loading="lazy">
-<figcaption>Slide 6 หน้า 11 — AR(2): รูป backshift</figcaption>
+<img src="../assets/slides/ts6-p11.png" alt="Slide 6 หน้า 11: เขียน AR(2) ด้วย B ได้ Φ(B)" loading="lazy">
+<figcaption>Slide 6 หน้า 11 — เขียน AR(2) ด้วย B ได้ Φ(B)</figcaption>
 </figure>
 
-<p>เขียน \(X_{t-1}=BX_t\) และ \(X_{t-2}=B^2X_t\) จะได้ \(X_t=\phi_1BX_t+\phi_2B^2X_t+w_t\) ย้ายพจน์ของ X ไปทางซ้ายได้ \((1-\phi_1B-\phi_2B^2)X_t=w_t\) วงเล็บทางซ้ายคือ \(\Phi(B)\) ซึ่งสไลด์เรียกว่า <mark class="src" data-p="11">Characteristic polynomial of the process</mark></p>
+<p>แทน \(X_{t-1}=BX_t\) และ \(X_{t-2}=B^2X_t\) แล้วย้ายข้าง: \((1-\phi_1B-\phi_2B^2)X_t=w_t\) วงเล็บนี้คือ <mark class="src" data-p="11">𝟏−𝝓𝟏𝑩−𝝓𝟐𝑩𝟐</mark> หรือ <mark class="src" data-p="11">𝚽𝑩∶ Characteristic polynomial of the process</mark> ตัวอย่าง: \(X_t=1.1X_{t-1}-0.3X_{t-2}+w_t\) ได้ \(\Phi(B)=1-1.1B+0.3B^2\) สังเกตว่า φ₂ = −0.3 กลายเป็น +0.3 ในพหุนาม เพราะมีเครื่องหมายลบนำหน้า จุดนี้เป็นที่มาของความผิดพลาดเครื่องหมายบ่อยที่สุด</p>
 
 <figure>
-<img src="../assets/slides/ts6-p12.png" alt="Slide 6 หน้า 12: AR(2): characteristic polynomial และ characteristic equation" loading="lazy">
-<figcaption>Slide 6 หน้า 12 — AR(2): characteristic polynomial และ characteristic equation</figcaption>
+<img src="../assets/slides/ts6-p12.png" alt="Slide 6 หน้า 12: Characteristic equation: Φ(x) = 1 − φ₁x − φ₂x² = 0" loading="lazy">
+<figcaption>Slide 6 หน้า 12 — Characteristic equation: Φ(x) = 1 − φ₁x − φ₂x² = 0</figcaption>
 </figure>
 
-<p>เมื่อมอง B เป็นตัวแปรสมมติเพื่อการคำนวณทางพีชคณิต นิยาม AR(2) <mark class="src" data-p="12">characteristic polynomial</mark> เป็น \(\Phi(x)=1-\phi_1x-\phi_2x^2\) และ characteristic equation เป็น \(\Phi(x)=1-\phi_1x-\phi_2x^2=0\) เงื่อนไข stationary ของ AR(2) ได้จากการตรวจสมการนี้และคำตอบของมัน <mark class="src" data-p="12">; i.e. the roots of Φ(x).</mark> polynomial คือนิพจน์ ส่วน equation คือการตั้งนิพจน์นั้นเท่ากับศูนย์เพื่อหาราก</p>
+<p>เพื่อหาราก ให้มอง B เป็นตัวแปรธรรมดา x แล้วแก้ \(1-\phi_1x-\phi_2x^2=0\) ความนิ่งดูจาก <mark class="src" data-p="12">; i.e. the roots of𝚽𝒙.</mark> อาจารย์ชอบเขียน B ส่วนหนังสือเขียน x หรือ z (Class 7-2, 0:21:00) และบอกว่านี่คือ "ทฤษฎีอันเดียว คอนเซ็ปต์อันเดียวของวิชานี้" ที่ต้องใช้คณิต (Class 6, 1:23:15)</p>
 
 <figure>
-<img src="../assets/slides/ts6-p13.png" alt="Slide 6 หน้า 13: AR(2): รากของ characteristic equation" loading="lazy">
-<figcaption>Slide 6 หน้า 13 — AR(2): รากของ characteristic equation</figcaption>
+<img src="../assets/slides/ts6-p13.png" alt="Slide 6 หน้า 13: รากของ Φ(x) จากสูตรกำลังสอง" loading="lazy">
+<figcaption>Slide 6 หน้า 13 — รากของ Φ(x) จากสูตรกำลังสอง</figcaption>
 </figure>
 
-<p>ใช้สูตรกำลังสองกับ \(\Phi(x)=1-\phi_1x-\phi_2x^2\) ได้ราก \(x=\dfrac{\phi_1\pm\sqrt{\phi_1^2+4\phi_2}}{-2\phi_2}\) และเงื่อนไข stationary คือค่าสัมบูรณ์ของรากทั้งสองมากกว่า 1</p>
+<p>สไลด์ใช้สูตรรากของสมการกำลังสองกับ Φ(x) โดยตรง แล้วเขียนเงื่อนไขความนิ่งว่าค่าสัมบูรณ์ของรากทั้งสองต้องเกิน 1 ก่อนแทนค่า ทบทวนสูตรก่อน เพราะอาจารย์บอกว่าข้อสอบจะมีแค่สมการกำลังสอง (Class 6, 1:24:42)</p>
 
-<div class="calc" id="s2-roots">
-<div class="calc-title">ที่มาของสูตรราก และตัวอย่างตัวเลข</div>
-<ol class="steps">
-<li><div class="st-title">จัดรูปเป็น \(ax^2+bx+c=0\)</div><p>\(-\phi_2x^2-\phi_1x+1=0\) จึงได้ \(a=-\phi_2\), \(b=-\phi_1\), \(c=1\)</p></li>
-<li><div class="st-title">แทนในสูตร \(x=\dfrac{-b\pm\sqrt{b^2-4ac}}{2a}\)</div><p>\(x=\dfrac{\phi_1\pm\sqrt{\phi_1^2+4\phi_2}}{-2\phi_2}\) ตรงกับสไลด์</p></li>
-<li><div class="st-title">ตัวอย่างรากจริง: \(\phi_1=1.1\), \(\phi_2=-0.3\)</div><p>ในราก: \(1.1^2+4(-0.3)=1.21-1.2=0.01\) รากที่สองคือ 0.1 ตัวหารคือ \(-2(-0.3)=0.6\)</p><p>\(x=(1.1\pm0.1)/0.6=2\) และ \(1.667\) ทั้งสองมากกว่า 1 จึง stationary</p></li>
-<li><div class="st-title">ตัวอย่างรากเชิงซ้อน: \(\phi_1=1\), \(\phi_2=-0.5\)</div><p>ในราก: \(1+4(-0.5)=-1\) ติดลบ รากจึงเป็นจำนวนเชิงซ้อน ตัวหารคือ 1</p><p>\(x=1\pm i\) modulus คือ \(\sqrt{1^2+1^2}=1.414\) มากกว่า 1 จึง stationary</p></li>
-</ol>
-<p>ค่าใต้ราก \(\phi_1^2+4\phi_2\) บอกชนิดของราก: เป็นบวกได้รากจริงสองค่า เป็นศูนย์ได้รากจริงซ้ำ และเป็นลบได้รากเชิงซ้อนคู่หนึ่ง</p>
+<div class="box prereq">
+<div class="label">ทบทวนสูตรรากสมการกำลังสอง</div>
+<p>\(ax^2+bx+c=0\) มีราก \(x=\dfrac{-b\pm\sqrt{b^2-4ac}}{2a}\) ถ้า \(b^2-4ac\ge0\) รากเป็นจำนวนจริง ถ้า \(&lt;0\) รากเป็นจำนวนเชิงซ้อน \(u\pm vi\) มี modulus \(\sqrt{u^2+v^2}\) อาจารย์บอกว่า "ถ้ามึงไม่เข้าใจ complex number ก็ชั่งมันก่อน" (Class 6, 1:23:15–1:24:35) เพราะข้อสอบส่วนใหญ่เป็นรากจริง</p>
 </div>
 
-<figure>
-<img src="../assets/slides/ts6-p14.png" alt="Slide 6 หน้า 14: AR(2): ชนิดของรากและเงื่อนไขในรูปของ φ" loading="lazy">
-<figcaption>Slide 6 หน้า 14 — AR(2): ชนิดของรากและเงื่อนไขในรูปของ φ</figcaption>
-</figure>
-
-<p>รากของ \(\Phi(x)\) เป็นได้สามแบบ คือ real and distinct, real and equal หรือ complex conjugate pair ถ้าเรียกรากว่า \(x_1\) และ \(x_2\) โมเดลเขียนได้เป็น \((1-x_1^{-1}B)(1-x_2^{-1}B)X_t=w_t\) ซึ่งให้ \(\phi_1=x_1^{-1}+x_2^{-1}\) และ \(\phi_2=-(x_1x_2)^{-1}\) เมื่อรวมความสัมพันธ์นี้กับเงื่อนไขที่รากต้องมากกว่า 1 จะได้เงื่อนไขในรูปของสัมประสิทธิ์โดยตรง: \(\phi_1+\phi_2&lt;1\), \(\phi_2-\phi_1&lt;1\) และ \(|\phi_2|&lt;1\) สไลด์อ้างที่มาว่า <mark class="src" data-p="14">(See Appendix B, page 84, Cryer and Chan )</mark> ประโยชน์ของรูปนี้คือ ตรวจ stationarity ได้โดยไม่ต้องหาราก</p>
+<p>สำหรับ \(\Phi(x)=-\phi_2x^2-\phi_1x+1\) ได้ \(a=-\phi_2\), \(b=-\phi_1\), \(c=1\) แทนในสูตรได้ \(x=\dfrac{\phi_1\pm\sqrt{\phi_1^2+4\phi_2}}{-2\phi_2}\) ตรงกับสไลด์ และเงื่อนไขคือค่าสัมบูรณ์ของรากทั้งสองเกิน 1 ตรวจกับ φ = (1.1, −0.3): \(\phi_1^2+4\phi_2=1.21-1.2=0.01\) ราก \(=\dfrac{1.1\pm0.1}{0.6}\) ได้ 2 และ 1.667 นิ่ง ตรวจกับ φ = (0.5, −0.5): \(0.25-2=-1.75&lt;0\) รากเชิงซ้อน \(0.5\pm1.323i\) modulus \(\sqrt{0.25+1.75}=1.414\) นิ่ง</p>
 
 <figure>
-<img src="../assets/slides/ts6-p15.png" alt="Slide 6 หน้า 15: AR(2): บริเวณ stationary" loading="lazy">
-<figcaption>Slide 6 หน้า 15 — AR(2): บริเวณ stationary</figcaption>
+<img src="../assets/slides/ts6-p14.png" alt="Slide 6 หน้า 14: จากรากสู่เงื่อนไขสามข้อ (Appendix B, Cryer and Chan)" loading="lazy">
+<figcaption>Slide 6 หน้า 14 — จากรากสู่เงื่อนไขสามข้อ (Appendix B, Cryer and Chan)</figcaption>
 </figure>
 
-<p>หน้านี้สรุป <mark class="src" data-p="15">Stationarity Conditions :</mark> AR(2) เป็น stationary เมื่อรากทั้งสองของ \(\Phi(x)\) มากกว่า 1 ในค่าสัมบูรณ์ หรือใน modulus ถ้ารากเป็นเชิงซ้อน ซึ่งเกิดขึ้นก็ต่อเมื่อ \(\phi_1+\phi_2&lt;1\), \(\phi_2-\phi_1&lt;1\) และ \(|\phi_2|&lt;1\) เมื่อวาดบนระนาบที่แกนนอนเป็น \(\phi_1\) และแกนตั้งเป็น \(\phi_2\) สามเงื่อนไขนี้ล้อมเป็นสามเหลี่ยมที่มีจุดยอดที่ \((-2,-1)\), \((2,-1)\) และ \((0,1)\) จุดที่อยู่ในสามเหลี่ยมคือโมเดลที่ stationary กราฟแยกจุดที่มีรากจริงกับจุดที่มีรากเชิงซ้อน และแสดงจุดที่อยู่นอกบริเวณ</p>
+<p>ถ้าเรียกรากว่า \(x_1,x_2\) จะเขียน AR(2) ได้เป็น \((1-x_1^{-1}B)(1-x_2^{-1}B)X_t=w_t\) กระจายแล้วเทียบสัมประสิทธิ์ได้ \(\phi_1=x_1^{-1}+x_2^{-1}\) และ \(\phi_2=-x_1^{-1}x_2^{-1}\) เมื่อนำไปรวมกับเงื่อนไข \(|x_i|&gt;1\) จะได้เงื่อนไขสามข้อที่ใช้แทนการหาราก</p>
+<p>\(\phi_1+\phi_2&lt;1,\qquad \phi_2-\phi_1&lt;1,\qquad |\phi_2|&lt;1\)</p>
+<p>อาจารย์ให้จดเงื่อนไขนี้ "ถ้าอันใดอันหนึ่งไม่จริง มันไม่ใช่ AR(2) แล้ว ... คุณอาจจะโดนหลอก" (Class 6, 1:17:53–1:18:40) ที่มาของเงื่อนไขอยู่ใน <mark class="src" data-p="14">(See Appendix B, page 84, Cryer and Chan )</mark> ไม่ต้องพิสูจน์ในวิชานี้</p>
 
 <div class="calc" id="s2-tri">
-<div class="calc-title">ตรวจเงื่อนไขสามข้อกับโมเดลหกตัว</div>
-<table class="compact">
-<tr><th>\((\phi_1,\phi_2)\)</th><th>\(\phi_1+\phi_2\)</th><th>\(\phi_2-\phi_1\)</th><th>\(|\phi_2|\)</th><th>Stationary</th><th>ราก (จาก R)</th></tr>
-<tr><td>(0.5, −0.5)</td><td>0</td><td>−1</td><td>0.5</td><td>ใช่</td><td>0.5 ± 1.323i, modulus 1.414</td></tr>
-<tr><td>(1.1, −0.3)</td><td>0.8</td><td>−1.4</td><td>0.3</td><td>ใช่</td><td>1.667 และ 2</td></tr>
-<tr><td>(−0.5, 0.25)</td><td>−0.25</td><td>0.75</td><td>0.25</td><td>ใช่</td><td>−1.236 และ 3.236</td></tr>
-<tr><td>(1, −0.5)</td><td>0.5</td><td>−1.5</td><td>0.5</td><td>ใช่</td><td>1 ± i, modulus 1.414</td></tr>
-<tr><td>(1.5, −0.75)</td><td>0.75</td><td>−2.25</td><td>0.75</td><td>ใช่</td><td>1 ± 0.577i, modulus 1.155</td></tr>
-<tr><td>(1.7, −0.7)</td><td>1.0</td><td>−2.4</td><td>0.7</td><td>ไม่</td><td>1 และ 1.429</td></tr>
-</table>
-<p>ห้าแถวแรกคือตัวอย่างในสไลด์หน้า 20 และ 21 ทุกตัวผ่านทั้งสามข้อ แถวสุดท้ายคือตัวอย่าง (a) ในหน้า 51 ซึ่ง \(\phi_1+\phi_2=1\) ไม่น้อยกว่า 1 จึงไม่ผ่าน ตรงกับที่มีรากหนึ่งตัวเท่ากับ 1 พอดี ผลจากเงื่อนไขและจากรากตรงกันทุกแถว</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 1</span><span>AR(2)</span></div>
-<div class="qtext">AR(2) ที่ \(\phi_1=0.6\) และ \(\phi_2=0.5\) stationary หรือไม่</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ต้องผ่านทั้งสามเงื่อนไข และ φ₁ + φ₂ = 1.1 ไม่น้อยกว่า 1">stationary เพราะ \(|\phi_2|&lt;1\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ต้องผ่านทั้งสามเงื่อนไข">stationary เพราะ \(\phi_2-\phi_1&lt;1\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. 0.6 + 0.5 = 1.1 ซึ่งไม่น้อยกว่า 1">ไม่ stationary เพราะ \(\phi_1+\phi_2&gt;1\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. φ₂ − φ₁ = −0.1 ซึ่งน้อยกว่า 1 ข้อนี้ผ่าน">ไม่ stationary เพราะ \(\phi_2-\phi_1&gt;1\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 2</span><span>AR(2)</span></div>
-<div class="qtext">AR(2) ที่ \(\phi_1=1\) และ \(\phi_2=-0.5\) มีรากของ characteristic equation เป็นแบบใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. φ₁² + 4φ₂ = −1 ติดลบ จึงไม่ใช่รากจริง">รากจริงสองค่าที่ต่างกัน</button>
-<button class="opt" data-correct="false" data-note="ผิด. รากซ้ำเกิดเมื่อ φ₁² + 4φ₂ = 0">รากจริงสองค่าที่เท่ากัน</button>
-<button class="opt" data-correct="false" data-note="ผิด. รากคือ 1 ± i มี modulus 1.414">รากเชิงซ้อนที่ modulus เท่ากับ 1</button>
-<button class="opt" data-correct="true" data-note="ถูก. 1 + 4(−0.5) = −1 ราก 1 ± i มี modulus √2">รากเชิงซ้อนที่ modulus เท่ากับ 1.414</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 1 และ 2</div>
-<ul>
-<li>เขียน AR(2) ในรูป \((1-\phi_1B-\phi_2B^2)X_t=w_t\) และ characteristic equation \(1-\phi_1x-\phi_2x^2=0\)</li>
-<li>หารากด้วยสูตร \(x=\dfrac{\phi_1\pm\sqrt{\phi_1^2+4\phi_2}}{-2\phi_2}\) และหา modulus เมื่อรากเป็นเชิงซ้อน</li>
-<li>เงื่อนไข stationary: รากทุกตัวมากกว่า 1 ในค่าสัมบูรณ์</li>
-<li>เงื่อนไขสามข้อในรูปของสัมประสิทธิ์: \(\phi_1+\phi_2&lt;1\), \(\phi_2-\phi_1&lt;1\), \(|\phi_2|&lt;1\)</li>
-<li>ชนิดของรากจากเครื่องหมายของ \(\phi_1^2+4\phi_2\)</li>
-</ul>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s3">3. AR(2): ACF และ Yule-Walker equations</h2>
-
-<figure>
-<img src="../assets/slides/ts6-p16.png" alt="Slide 6 หน้า 16: AR(2): การหา ACF" loading="lazy">
-<figcaption>Slide 6 หน้า 16 — AR(2): การหา ACF</figcaption>
-</figure>
-
-<p>สไลด์เริ่มหัวข้อ <mark class="src" data-p="16">Autocorrelation function:</mark> ด้วยวิธีเดียวกับ AR(1) ใน Lesson 5 เริ่มจากสมการ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) คูณทั้งสองข้างด้วย \(X_{t-h}\) ได้ \(X_tX_{t-h}=\phi_1X_{t-1}X_{t-h}+\phi_2X_{t-2}X_{t-h}+w_tX_{t-h}\) แล้วหาค่าคาดหมายของทั้งสองข้าง ได้ \(E(X_tX_{t-h})=\phi_1E(X_{t-1}X_{t-h})+\phi_2E(X_{t-2}X_{t-h})+E(w_tX_{t-h})\)</p>
-
-<figure>
-<img src="../assets/slides/ts6-p17.png" alt="Slide 6 หน้า 17: AR(2): Yule-Walker equations" loading="lazy">
-<figcaption>Slide 6 หน้า 17 — AR(2): Yule-Walker equations</figcaption>
-</figure>
-
-<p>เนื่องจาก \(X_t\) มีค่าเฉลี่ยศูนย์ ค่าคาดหมายของผลคูณจึงเป็น autocovariance และเนื่องจาก \(w_t\) เป็นอิสระจาก \(X_{t-h}\) พจน์สุดท้ายเป็น 0 จึงได้ \(\gamma_h=\phi_1\gamma_{h-1}+\phi_2\gamma_{h-2}\) หารตลอดด้วย \(\gamma_0=\mathrm{var}(X_t)\) ได้ \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\) สมการนี้เรียกว่า <mark class="src" data-p="17">Yule-Walker equations</mark> สำหรับ AR(2) ความหมายคือ ACF ที่ lag ใดก็ตามคำนวณได้จากสอง lag ก่อนหน้า ด้วยสัมประสิทธิ์ชุดเดียวกับโมเดล ACF จึงเป็นไปตามกฎเดียวกับข้อมูล</p>
-
-<div class="calc" id="s3-calc">
-<div class="calc-title">ใช้ Yule-Walker หา \(\rho_1,\rho_2,\rho_3\)</div>
+<div class="calc-title">ตรวจเงื่อนไขสามข้อกับตัวอย่าง</div>
 <ol class="steps">
-<li><div class="st-title">ที่ \(h=1\)</div><p>\(\rho_1=\phi_1\rho_0+\phi_2\rho_{-1}\) ใช้ \(\rho_0=1\) และ \(\rho_{-1}=\rho_1\) ได้ \(\rho_1=\phi_1+\phi_2\rho_1\) จึงได้</p>
-\[\rho_1=\frac{\phi_1}{1-\phi_2}\]</li>
-<li><div class="st-title">ที่ \(h=2\)</div>
-\[\rho_2=\phi_1\rho_1+\phi_2\]</li>
-<li><div class="st-title">ที่ \(h\ge3\)</div><p>ใช้ \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\) ต่อไปทีละ lag</p></li>
-<li><div class="st-title">ตัวอย่าง: \(\phi_1=0.5\), \(\phi_2=-0.5\)</div>
-<p>\(\rho_1=0.5/(1+0.5)=0.333\)</p>
-<p>\(\rho_2=0.5(0.333)-0.5=-0.333\)</p>
-<p>\(\rho_3=0.5(-0.333)-0.5(0.333)=-0.333\)</p>
-<p>\(\rho_4=0.5(-0.333)-0.5(-0.333)=0\)</p></li>
+<li><div class="st-title">φ = (1.1, −0.3)</div><p>1.1 − 0.3 = 0.8 &lt; 1 ✓, −0.3 − 1.1 = −1.4 &lt; 1 ✓, |−0.3| &lt; 1 ✓ นิ่ง ตรงกับราก 2 และ 1.667</p></li>
+<li><div class="st-title">φ = (−0.5, 0.25)</div><p>−0.25 &lt; 1 ✓, 0.25 + 0.5 = 0.75 &lt; 1 ✓, 0.25 &lt; 1 ✓ นิ่ง ราก −1.236 และ 3.236 ค่าสัมบูรณ์เกิน 1 ทั้งคู่</p></li>
+<li><div class="st-title">φ = (1.7, −0.7)</div><p>1.7 − 0.7 = 1 ไม่น้อยกว่า 1 ✗ ไม่ใช่ AR(2) ที่นิ่ง แยกตัวประกอบได้ \((1-0.7x)(1-x)\) มีราก 1 พอดี (หัวข้อ 11)</p></li>
+<li><div class="st-title">φ = (0.5, 0.6)</div><p>0.5 + 0.6 = 1.1 ✗ ไม่นิ่ง แม้ φ แต่ละตัวจะน้อยกว่า 1 ก็ตาม</p></li>
 </ol>
-<div class="answer">AR(2): \(\rho_1=\dfrac{\phi_1}{1-\phi_2}\), \(\rho_2=\phi_1\rho_1+\phi_2\) และ \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\)</div>
-<p>ค่าในตัวอย่างตรงกับ <code>ARMAacf(ar = c(0.5,-0.5))</code> ซึ่งให้ 0.333, −0.333, −0.333, 0, 0.167</p>
+<div class="answer">ตัวอย่างสุดท้ายคือกับดัก: AR(1) ต้องการแค่ |φ| &lt; 1 แต่ AR(2) ดู φ แยกกันไม่ได้ ต้องดูผลรวมและผลต่างด้วย</div>
 </div>
 
 <figure>
-<img src="../assets/slides/ts6-p18.png" alt="Slide 6 หน้า 18: AR(2): closed-form expression" loading="lazy">
-<figcaption>Slide 6 หน้า 18 — AR(2): closed-form expression</figcaption>
+<img src="../assets/slides/ts6-p15.png" alt="Slide 6 หน้า 15: บริเวณสามเหลี่ยมของ (φ₁, φ₂) ที่ AR(2) นิ่ง" loading="lazy">
+<figcaption>Slide 6 หน้า 15 — บริเวณสามเหลี่ยมของ (φ₁, φ₂) ที่ AR(2) นิ่ง</figcaption>
 </figure>
 
-<p>ACF ของ AR(2) เขียนเป็น <mark class="src" data-p="18">closed-form expression</mark> ได้ รายละเอียดอยู่ใน <mark class="src" data-p="18">Shumway ( (i)-(iii) ,page 99 )</mark> ซึ่งแยกสามกรณีตามชนิดของราก จากคำตอบของทั้งสามกรณีเห็นได้ว่า \(\rho(h)\to0\) เมื่อ \(h\to\infty\) สไลด์ระบุว่าสูตรเหล่านี้มีประโยชน์เพราะเผยรูปทรงทั่วไปของ population ACF ของ AR(2) เมื่อเห็นรูปทรงเหล่านี้ใน sample ACF ของข้อมูลจริง จะช่วยในการเลือกและระบุโมเดล วิชานี้ไม่ต้องจำสูตร closed-form สิ่งที่ต้องรู้คือรูปทรงในหน้าถัดไป</p>
-
-<figure>
-<img src="../assets/slides/ts6-p19.png" alt="Slide 6 หน้า 19: AR(2): สรุปรูปทรงของ ACF" loading="lazy">
-<figcaption>Slide 6 หน้า 19 — AR(2): สรุปรูปทรงของ ACF</figcaption>
-</figure>
-
-<p><mark class="src" data-p="19">Autocorrelation function (Summary):</mark> ใน AR(2) population ACF ลดลงเข้าหาศูนย์เมื่อ h เพิ่มขึ้น และการลดลงมีลักษณะ exponential นอกจากนี้ เมื่อรากเป็นเชิงซ้อน ค่าของ \(\rho_h\) มีรูปแบบคล้ายคลื่นไซน์ที่ค่อย ๆ จางลงเมื่อ h เพิ่มขึ้น เรียกว่า damped sine-wave กราฟในสไลด์แสดงคลื่นที่ amplitude ลดลงทุกรอบ เปรียบได้กับลูกตุ้มที่แกว่งแล้วค่อย ๆ หยุด: ยังแกว่งข้ามศูนย์ไปมา แต่ระยะแกว่งสั้นลงทุกครั้ง</p>
-
-<table>
-<tr><th>ชนิดของราก</th><th>เกิดเมื่อ</th><th>รูปทรงของ ACF</th></tr>
-<tr><td>รากจริง</td><td>\(\phi_1^2+4\phi_2\ge0\)</td><td>ลดลงแบบ exponential อาจสลับเครื่องหมาย</td></tr>
-<tr><td>รากเชิงซ้อน</td><td>\(\phi_1^2+4\phi_2&lt;0\)</td><td>damped sine-wave</td></tr>
-</table>
+<p>เงื่อนไขสามข้อคือเส้นตรงสามเส้น \(\phi_2=1-\phi_1\), \(\phi_2=1+\phi_1\) และ \(\phi_2=-1\) ซึ่งล้อมเป็นสามเหลี่ยมที่มีจุดยอด (0, 1), (2, −1) และ (−2, −1) (Class 6, 1:19:03–1:19:33) จุดใดอยู่ในสามเหลี่ยมคือ AR(2) ที่นิ่ง เช่น (1.8, 0.9) อยู่นอกเพราะ 1.8 + 0.9 = 2.7 เกิน 1 ภายในสามเหลี่ยมยังแบ่งได้อีกสองส่วนด้วยเส้นโค้ง \(\phi_1^2+4\phi_2=0\): จุดที่อยู่เหนือเส้นโค้ง เช่น (0.5, 0.25) ที่ \(0.25+1=1.25&gt;0\) มีรากจริง จุดที่อยู่ใต้เส้นโค้ง เช่น (0, −0.5) ที่ \(0-2&lt;0\) มีรากเชิงซ้อน ซึ่งทำให้ ACF เป็นคลื่นในหัวข้อถัดไป</p>
 
 <!-- ===================================================== -->
-<h2 id="s4">4. ตัวอย่าง AR(2), AR(p) และการเทียบกับ MA(q)</h2>
+<h2 id="s3">3. ACF ของ AR(2): Yule-Walker และสี่ตัวอย่าง</h2>
+
+<p>ACF ของ AR(1) หาได้ด้วยทริกความนิ่งใน Lesson 5 AR(2) ใช้ทริกเดียวกัน แต่เขียนเป็นสูตรวนซ้ำ (recursion) แทนสูตรปิด</p>
 
 <figure>
-<img src="../assets/slides/ts6-p20.png" alt="Slide 6 หน้า 20: AR(2) Examples" loading="lazy">
-<figcaption>Slide 6 หน้า 20 — AR(2) Examples</figcaption>
+<img src="../assets/slides/ts6-p16.png" alt="Slide 6 หน้า 16: ACF ของ AR(2): คูณด้วย X(t−h) แล้วหาค่าคาดหมาย" loading="lazy">
+<figcaption>Slide 6 หน้า 16 — ACF ของ AR(2): คูณด้วย X(t−h) แล้วหาค่าคาดหมาย</figcaption>
 </figure>
 
-<p>สไลด์ใช้ R จำลอง AR(2) สี่ชุด คือ \((\phi_1,\phi_2)=(0.5,-0.5)\), \((1.1,-0.3)\), \((-0.5,0.25)\) และ \((1,-0.5)\) โค้ดอยู่ในไฟล์ Codes2 ของ Lecture 5 ตารางต่อไปนี้ให้ ACF ทางทฤษฎีจาก <code>ARMAacf</code> ของทั้งสี่ชุด</p>
+<p>ขั้นแรก คูณทั้งสองข้างของ AR(2) ด้วย \(X_{t-h}\) แล้วหาค่าคาดหมาย ได้ <mark class="src" data-p="16">𝑬(𝑿𝒕𝑿𝒕−𝒉) = 𝝓𝟏𝑬(𝑿𝒕−𝟏𝑿𝒕−𝒉) + 𝝓𝟐𝑬(𝑿𝒕−𝟐𝑿𝒕−𝒉) + 𝑬(𝒘𝒕𝑿𝒕−𝒉)</mark> เนื่องจาก mean เป็นศูนย์ \(E(X_tX_{t-h})\) คือ \(\gamma_h\) พอดี และพจน์สุดท้ายเป็นศูนย์เมื่อ h ≥ 1 เพราะ shock ใหม่ \(w_t\) อิสระจากค่าในอดีต \(X_{t-h}\)</p>
+
+<figure>
+<img src="../assets/slides/ts6-p17.png" alt="Slide 6 หน้า 17: Yule-Walker equations: ρ(h) = φ₁ρ(h−1) + φ₂ρ(h−2)" loading="lazy">
+<figcaption>Slide 6 หน้า 17 — Yule-Walker equations: ρ(h) = φ₁ρ(h−1) + φ₂ρ(h−2)</figcaption>
+</figure>
+
+<p>จึงได้ \(\gamma_h=\phi_1\gamma_{h-1}+\phi_2\gamma_{h-2}\) หารด้วย \(\gamma_0\) ได้ \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\) เรียกว่า <mark class="src" data-p="17">Yule-Walker equations</mark> อาจารย์บอกว่าเป็น property ของ AR ทุกอันดับ: AR(1) คือ \(\rho_s=\phi\rho_{s-1}\) AR(3) เพิ่ม \(\phi_3\rho_{s-3}\) (Class 6, 0:31:10–0:32:44) แต่ "สมัยก่อนสอนในเวลา ... ใช้ในการ estimate φ ... พอมีนอกเวลามาด้วย ผมจะไม่เน้น ... ให้โปรแกรม estimate เฉย ๆ" (Class 6, 0:32:54–0:33:34)</p>
+
+<div class="calc" id="s3-yw">
+<div class="calc-title">ใช้ Yule-Walker หา ρ₁, ρ₂, ρ₃ ของ AR(2) φ = (1.1, −0.3)</div>
+<ol class="steps">
+<li><div class="st-title">ρ₁ (ใช้ h = 1 และ ρ₋₁ = ρ₁)</div><p>\(\rho_1=\phi_1\rho_0+\phi_2\rho_{-1}=\phi_1+\phi_2\rho_1\) จึงได้ \(\rho_1=\dfrac{\phi_1}{1-\phi_2}=\dfrac{1.1}{1.3}=0.846\)</p></li>
+<li><div class="st-title">ρ₂</div><p>\(\rho_2=\phi_1\rho_1+\phi_2\rho_0=1.1(0.846)-0.3=0.931-0.3=0.631\)</p></li>
+<li><div class="st-title">ρ₃</div><p>\(\rho_3=1.1(0.631)-0.3(0.846)=0.694-0.254=0.440\)</p></li>
+<li><div class="st-title">ต่อไปเรื่อย ๆ</div><p>ρ₄ = 0.295, ρ₅ = 0.192, ρ₆ = 0.123 ลดลงแต่ไม่เป็นศูนย์ ตรงกับ <code>ARMAacf(ar = c(1.1, -0.3))</code></p></li>
+</ol>
+<div class="answer">ขั้น ρ₁ คือจุดที่ต้องระวัง ต้องใช้ความสมมาตร \(\rho_{-1}=\rho_1\) แล้วแก้สมการ ไม่ใช่แทน ρ₁ = φ₁ ตรง ๆ</div>
+</div>
+
+<figure>
+<img src="../assets/slides/ts6-p18.png" alt="Slide 6 หน้า 18: Closed-form ของ ACF AR(2) และ ρ(h) → 0" loading="lazy">
+<figcaption>Slide 6 หน้า 18 — Closed-form ของ ACF AR(2) และ ρ(h) → 0</figcaption>
+</figure>
+
+<p>สไลด์บอกว่ามีสูตรปิดสำหรับ <mark class="src" data-p="18">closed-form expression</mark> ของ ACF AR(2) อยู่ใน <mark class="src" data-p="18">Shumway ( (i)-(iii) ,page99 )</mark> แยกสามกรณีตามชนิดราก จุดที่ต้องจำคือทุกกรณีให้ \(\rho(h)\to0\) เมื่อ h เพิ่มขึ้น และสูตรช่วยให้รู้ "รูปร่าง" ของ ACF เพื่อนำไปเทียบกับ sample ACF</p>
+
+<figure>
+<img src="../assets/slides/ts6-p19.png" alt="Slide 6 หน้า 19: Summary: ACF ของ AR(2) ลดแบบเลขชี้กำลัง หรือเป็น damped sine wave" loading="lazy">
+<figcaption>Slide 6 หน้า 19 — Summary: ACF ของ AR(2) ลดแบบเลขชี้กำลัง หรือเป็น damped sine wave</figcaption>
+</figure>
+
+<p>สรุปรูปร่าง: ACF ของ AR(2) ลดลงแบบเลขชี้กำลังเสมอ และเมื่อรากเป็นจำนวนเชิงซ้อน ค่า \(\rho_h\) จะขึ้นลงเป็นคลื่นที่ค่อย ๆ เล็กลง เรียกว่า damped sine wave เหตุผลเชิงภาพ: รากเชิงซ้อนทำให้แต่ละก้าวเหมือน "หมุน" ไปบางมุม พร้อมกับหดลงด้วย modulus ค่าจึงวนบวกลบเป็นรอบ ตัวอย่างในหน้า 21 ทำให้เห็นรอบนี้ชัดเจน</p>
+
+<figure>
+<img src="../assets/slides/ts6-p20.png" alt="Slide 6 หน้า 20: AR(2) Examples: สี่กรณีของ (φ₁, φ₂)" loading="lazy">
+<figcaption>Slide 6 หน้า 20 — AR(2) Examples: สี่กรณีของ (φ₁, φ₂)</figcaption>
+</figure>
+
+<p>สี่กรณีบนสไลด์ทุกกรณีอยู่ในสามเหลี่ยม จึงนิ่งทั้งหมด แต่ชนิดรากต่างกัน กราฟ population ACF ข้างล่างสร้างด้วย <code>ARMAacf()</code> ตามโค้ดใน R_codes ของ Class 5</p>
+
+<figure><img src="../assets/slides/ts6-r1-ar2-acf.png" alt="Population ACF ของ AR(2) สี่กรณี" loading="lazy"><figcaption>รันจาก R_codes_2.txt (Class 5): population ACF ของ AR(2) สี่กรณี</figcaption></figure>
+
+<p>กราฟ (0.5, −0.5) ขึ้นลงเป็นคลื่นสั้น ๆ แล้วหายเร็ว กราฟ (1.1, −0.3) เป็นแท่งบวกที่ค่อย ๆ เตี้ยลง กราฟ (−0.5, 0.25) สลับบวกลบและหดช้า กราฟ (1, −0.5) ลงไปติดลบราว lag 3–5 แล้วกลับมาใกล้ศูนย์ ตารางข้างล่างอธิบายว่าความต่างนี้มาจากชนิดของราก</p>
 
 <table class="compact">
-<tr><th>\((\phi_1,\phi_2)\)</th><th>ราก</th><th>\(\rho_1\)</th><th>\(\rho_2\)</th><th>\(\rho_3\)</th><th>\(\rho_4\)</th><th>\(\rho_5\)</th><th>รูปทรง</th></tr>
-<tr><td>(0.5, −0.5)</td><td>เชิงซ้อน</td><td>0.333</td><td>−0.333</td><td>−0.333</td><td>0</td><td>0.167</td><td>คลื่นที่จางลง</td></tr>
-<tr><td>(1.1, −0.3)</td><td>จริง</td><td>0.846</td><td>0.631</td><td>0.440</td><td>0.295</td><td>0.192</td><td>บวกทั้งหมด ลดลงเรียบ</td></tr>
-<tr><td>(−0.5, 0.25)</td><td>จริง</td><td>−0.667</td><td>0.583</td><td>−0.458</td><td>0.375</td><td>−0.302</td><td>สลับเครื่องหมาย ลดลง</td></tr>
-<tr><td>(1, −0.5)</td><td>เชิงซ้อน</td><td>0.667</td><td>0.167</td><td>−0.167</td><td>−0.250</td><td>−0.167</td><td>คลื่นที่จางลง</td></tr>
+<tr><th>(φ₁, φ₂)</th><th>φ₁² + 4φ₂</th><th>ราก (modulus)</th><th>ρ₁, ρ₂, ρ₃, ρ₄</th><th>รูปร่าง</th></tr>
+<tr><td>(0.5, −0.5)</td><td>−1.75</td><td>0.5 ± 1.323i (1.414)</td><td>0.333, −0.333, −0.333, 0</td><td>คลื่นที่หดเร็ว</td></tr>
+<tr><td>(1.1, −0.3)</td><td>0.01</td><td>2, 1.667</td><td>0.846, 0.631, 0.440, 0.295</td><td>บวกทั้งหมด ลดแบบเลขชี้กำลัง คล้าย AR(1) φ บวก</td></tr>
+<tr><td>(−0.5, 0.25)</td><td>1.25</td><td>−1.236, 3.236</td><td>−0.667, 0.583, −0.458, 0.375</td><td>สลับเครื่องหมาย ลดช้า คล้าย AR(1) φ ลบ</td></tr>
+<tr><td>(1, −0.5)</td><td>−1</td><td>1 ± i (1.414)</td><td>0.667, 0.167, −0.167, −0.25</td><td>คลื่น ลงไปติดลบแล้วกลับ</td></tr>
 </table>
-<p>สองชุดที่มีรากจริงลดลงแบบ exponential ชุดที่สองเป็นบวกทั้งหมด ส่วนชุดที่สามสลับเครื่องหมายเพราะมีรากที่เป็นลบ สองชุดที่มีรากเชิงซ้อนข้ามศูนย์เป็นคลื่น ตรงกับสรุปในหน้า 19</p>
+<p>ตารางนี้สอนสองเรื่อง เรื่องแรก รากจริงให้ ACF ที่ดูเหมือน AR(1) ส่วนรากเชิงซ้อนให้คลื่น ดังนั้นเมื่อเห็น sample ACF เป็นคลื่น ให้นึกถึง AR(2) ที่มีรากเชิงซ้อน เรื่องที่สอง ไม่ว่ากรณีใด ACF ก็ไม่ตัดเป็นศูนย์ที่ lag 2 ACF จึงบอกไม่ได้ว่า p = 2 ข้อสังเกต: กรณีที่ 3 บนสไลด์คือ (−0.5, 0.25) แต่โค้ด simulation ใน R_codes_2 ใช้ <code>ar = c(-0.5,-0.25)</code> ซึ่งเป็นอีกโมเดลหนึ่ง (รากเชิงซ้อน modulus 2, ρ₁ = −0.4, ρ₂ = −0.05) sample ACF ในส่วนนั้นจึงไม่ตรงกับ population ACF ของกรณีที่ 3</p>
 
 <figure>
-<img src="../assets/slides/ts6-p21.png" alt="Slide 6 หน้า 21: Example 3.10 (Shumway, page 100)" loading="lazy">
-<figcaption>Slide 6 หน้า 21 — Example 3.10 (Shumway, page 100)</figcaption>
+<img src="../assets/slides/ts6-p21.png" alt="Slide 6 หน้า 21: Example 3.10: AR(2) ที่มีรากเชิงซ้อน φ = (1.5, −0.75), n = 144" loading="lazy">
+<figcaption>Slide 6 หน้า 21 — Example 3.10: AR(2) ที่มีรากเชิงซ้อน φ = (1.5, −0.75), n = 144</figcaption>
 </figure>
 
-<p><mark class="src" data-p="21">Example 3.10 (Shumway, page 100)</mark> <mark class="src" data-p="21">The sample path of an AR(2) with complex roots</mark> คือ \(X_t=1.5X_{t-1}-0.75X_{t-2}+w_t\) โดย n = 144 และ \(\sigma^2=1\) ค่าใต้รากคือ \(1.5^2+4(-0.75)=-0.75\) ติดลบ รากคือ \(1\pm0.577i\) มี modulus 1.155 มากกว่า 1 จึง stationary ACF ทางทฤษฎีคือ 0.857, 0.536, 0.161, −0.161, −0.362, −0.422, −0.362, −0.226, −0.068, 0.068, 0.153, 0.178 ที่ lag 1 ถึง 12 ค่าลดจากบวกเป็นลบ ต่ำสุดที่ lag 6 แล้วกลับเป็นบวก สูงสุดอีกครั้งที่ประมาณ lag 12 หนึ่งรอบของคลื่นจึงยาวประมาณ 12 ช่วงเวลา ข้อมูลจากโมเดลนี้จึงขึ้นลงเป็นรอบประมาณ 12 ช่วง ทั้งที่ไม่มีส่วน seasonal ในโมเดล</p>
+<p>ตัวอย่างจากหนังสือ \(X_t=1.5X_{t-1}-0.75X_{t-2}+w_t\) ตรวจสามเหลี่ยม: 1.5 − 0.75 = 0.75 &lt; 1, −0.75 − 1.5 &lt; 1, |−0.75| &lt; 1 นิ่ง และ \(\phi_1^2+4\phi_2=2.25-3=-0.75&lt;0\) รากเชิงซ้อน \(1\pm0.577i\) modulus 1.155 มุมของรากคือ \(\arctan(0.577)=30^\circ\) ACF จึงวนครบรอบทุก 360/30 = 12 lag โค้ดใน R_codes_2 คือ <code>ARMAacf(ar = c(1.5,-0.75), ma=0, 50)</code> และ <code>arima.sim(..., n = 144)</code></p>
+
+<figure><img src="../assets/slides/ts6-r2-ex310.png" alt="Example 3.10 อนุกรม population ACF และ sample ACF" loading="lazy"><figcaption>รันจาก R_codes_2.txt ด้วย set.seed(2603630): อนุกรม, population ACF และ sample ACF</figcaption></figure>
+
+<p>อนุกรมขึ้นลงเป็นรอบที่ยาวราว 10–15 ช่วงเวลา คล้ายวัฏจักรธุรกิจ ทั้งที่ไม่มี seasonal จริง population ACF ได้ ρ₁ = 0.857, ρ₃ = 0.161, ρ₆ = −0.422 และกลับมาบวกราว lag 12 sample ACF ของข้อมูลชุดนี้ได้ 0.855, 0.539, 0.169 ที่ lag 1–3 และ −0.419 ที่ lag 6 ใกล้ทฤษฎีมาก บทเรียนคือข้อมูลที่ดูเป็นวัฏจักรไม่จำเป็นต้องมาจาก seasonal อาจเป็น AR(2) ที่มีรากเชิงซ้อน ต่างกันตรงที่รอบของ AR(2) ไม่สม่ำเสมอ เพราะ shock ใหม่รบกวนทุกช่วง</p>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. AR(p) และการเทียบกับ MA(q)</h2>
 
 <figure>
-<img src="../assets/slides/ts6-p22.png" alt="Slide 6 หน้า 22: AR(p) process" loading="lazy">
-<figcaption>Slide 6 หน้า 22 — AR(p) process</figcaption>
+<img src="../assets/slides/ts6-p22.png" alt="Slide 6 หน้า 22: AR(p): เงื่อนไขรากเดียวกันใช้กับทุก AR(p)" loading="lazy">
+<figcaption>Slide 6 หน้า 22 — AR(p): เงื่อนไขรากเดียวกันใช้กับทุก AR(p)</figcaption>
 </figure>
 
-<p>AR(p) คือ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+\dots+\phi_pX_{t-p}+w_t\) และในรูป backshift คือ \((1-\phi_1B-\phi_2B^2-\dots-\phi_pB^p)X_t=w_t\) เงื่อนไขเดียวกันบนรากของ \(\Phi(x)\) ใช้กับ stationarity ของ AR(p) ทุกอันดับ คือรากทั้ง p ตัวต้องมากกว่า 1 ในค่าสัมบูรณ์</p>
+<p>AR(p) ทั่วไปเขียนเป็น \((1-\phi_1B-\dots-\phi_pB^p)X_t=w_t\) และใช้เงื่อนไขรากเดียวกัน: รากทุกตัวของ Φ(x) ต้องมีค่าสัมบูรณ์หรือ modulus เกิน 1 ไม่มีสามเหลี่ยมสำเร็จรูปให้ใช้</p>
 
 <figure>
-<img src="../assets/slides/ts6-p23.png" alt="Slide 6 หน้า 23: AR(p): ACF" loading="lazy">
-<figcaption>Slide 6 หน้า 23 — AR(p): ACF</figcaption>
+<img src="../assets/slides/ts6-p23.png" alt="Slide 6 หน้า 23: AR(p) ที่ p ≥ 3: บริเวณความนิ่งเป็นนามธรรม ACF เป็นผสมของ exponential decay และ damped sine" loading="lazy">
+<figcaption>Slide 6 หน้า 23 — AR(p) ที่ p ≥ 3: บริเวณความนิ่งเป็นนามธรรม ACF เป็นผสมของ exponential decay และ damped sine</figcaption>
 </figure>
 
-<p>สำหรับ AR(p) ที่ \(p\ge3\) บริเวณที่ process เป็น stationary ค่อนข้างเป็นนามธรรม ไม่มีรูปง่ายแบบสามเหลี่ยมของ AR(2) การคำนวณ ACF ใช้ Yule-Walker <mark class="src" data-p="23">(Shumway, page 121)</mark> ได้ และ ACF ของ AR(p) tails off เมื่อ h มากขึ้น โดยเป็นส่วนผสมของ exponential decays และ damped sine waves ขึ้นกับว่ารากเป็นจำนวนจริงหรือเชิงซ้อน</p>
+<p>เมื่อ p ≥ 3 บริเวณความนิ่งในปริภูมิของ φ <i>quite abstract</i> จึงต้องหารากด้วยโปรแกรม เช่น <code>polyroot()</code> ใน R อาจารย์เล่าว่าเคยออกข้อสอบกำลังสามแล้วทำได้ 2 คนจาก 40 จึงจะออกแค่กำลังสอง (Class 6, 1:24:42) ACF ของ AR(p) หาได้ด้วย Yule-Walker <mark class="src" data-p="23">(Shumway, page 121)</mark> และมีรูปเป็นผลรวมของการลดแบบเลขชี้กำลัง (จากรากจริง) กับคลื่นที่หดลง (จากรากเชิงซ้อน)</p>
 
 <figure>
 <img src="../assets/slides/ts6-p24.png" alt="Slide 6 หน้า 24: Comparison of AR(p) and MA(q)" loading="lazy">
 <figcaption>Slide 6 หน้า 24 — Comparison of AR(p) and MA(q)</figcaption>
 </figure>
 
-<p>สำหรับ moving average model ACF เป็นศูนย์ยกเว้นที่ lag จำนวนจำกัด ส่วน autoregressive model ACF เข้าหาศูนย์แบบ geometric แต่ไม่เป็นศูนย์พอดีที่ lag ใดเลย ความต่างนี้ทำให้ sample ACF เป็นเครื่องมือสำคัญในการตัดสินว่าจะ fit โมเดลตระกูลใด ข้อจำกัดคือ ACF บอกได้ว่าเป็น AR แต่บอกอันดับ p ไม่ได้ เพราะ ACF ของ AR ทุกอันดับค่อย ๆ ลดลงเหมือนกัน</p>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 3 และ 4</div>
-<ul>
-<li>พิสูจน์ Yule-Walker equations ของ AR(2): คูณด้วย \(X_{t-h}\) แล้วหาค่าคาดหมาย</li>
-<li>คำนวณ \(\rho_1=\phi_1/(1-\phi_2)\), \(\rho_2=\phi_1\rho_1+\phi_2\) และ lag ถัดไป</li>
-<li>รูปทรงของ ACF: รากจริงให้ exponential decay รากเชิงซ้อนให้ damped sine-wave</li>
-<li>ACF ของ MA(q) ตัดเป็นศูนย์ ส่วนของ AR(p) ลดลงแต่ไม่เป็นศูนย์</li>
-</ul>
-</div>
+<p>ข้อเปรียบเทียบที่สำคัญที่สุดของสองบท: ACF ของ MA เป็นศูนย์หลัง lag จำนวนจำกัด ส่วน ACF ของ AR ลดลงแบบเรขาคณิตแต่ไม่เป็นศูนย์พอดีที่ lag ใดเลย ตัวอย่าง: MA(1) θ = 0.9 มี ρ₂ = 0 พอดี ส่วน AR(1) φ = 0.9 มี ρ₂₀ = 0.9²⁰ = 0.12 ยังไม่เป็นศูนย์ ความต่างนี้ทำให้ sample ACF ใช้ตัดสินได้ว่าควรใช้ MA หรือ AR แต่บอก p ไม่ได้ อาจารย์บอกว่า ACF ของ AR "ไม่มีประโยชน์อะไรเลย" ในการหา p (Class 6, 1:02:34)</p>
 
 <!-- ===================================================== -->
-<h2 id="s5">5. Exercise สองข้อ พร้อมเฉลย</h2>
+<h2 id="s5">5. Exercise ท้ายส่วน AR</h2>
 
 <figure>
-<img src="../assets/slides/ts6-p25.png" alt="Slide 6 หน้า 25: Exercise: ผลต่างของ AR(1)" loading="lazy">
-<figcaption>Slide 6 หน้า 25 — Exercise: ผลต่างของ AR(1)</figcaption>
+<img src="../assets/slides/ts6-p25.png" alt="Slide 6 หน้า 25: Exercise: autocovariance ของ Y_t = ∇X_t เมื่อ X_t เป็น AR(1)" loading="lazy">
+<figcaption>Slide 6 หน้า 25 — Exercise: autocovariance ของ Y_t = ∇X_t เมื่อ X_t เป็น AR(1)</figcaption>
 </figure>
 
-<p>โจทย์ให้ \(X_t\) เป็น AR(1) ที่ \(-1&lt;\phi&lt;1\) (ก) หา autocovariance function ของ \(Y_t=\nabla X_t=X_t-X_{t-1}\) ในรูปของ \(\phi\) และ \(\sigma^2\) (ข) แสดงว่า \(\mathrm{var}(Y_t)=\dfrac{2\sigma^2}{1+\phi}\) สไลด์ไม่มีเฉลย วิธีทำใช้ผลของ AR(1) จาก Lesson 5 คือ \(\gamma_X(h)=\dfrac{\sigma^2\phi^{|h|}}{1-\phi^2}\)</p>
+<p>โจทย์นี้ถามว่าถ้าเอา AR(1) ที่นิ่งแล้วมา difference อีก จะได้อะไร เป็นการฝึกใช้สูตร covariance และเป็นคำเตือนเรื่อง over-differencing ใน Lesson 7</p>
 
-<div class="calc" id="s5-calc">
-<div class="calc-title">เฉลย Exercise หน้า 25</div>
+<div class="calc" id="s5-diff">
+<div class="calc-title">หา γ_Y(h) ของ Y_t = X_t − X_{t−1} เมื่อ X_t ~ AR(1)</div>
 <ol class="steps">
-<li><div class="st-title">เขียน autocovariance ของ Y ในรูปของ X</div>
-<p>\(\gamma_Y(h)=\mathrm{Cov}(X_{t+h}-X_{t+h-1},\ X_t-X_{t-1})\) กระจายสี่คู่</p>
-\[\gamma_Y(h)=\gamma_X(h)-\gamma_X(h+1)-\gamma_X(h-1)+\gamma_X(h)=2\gamma_X(h)-\gamma_X(h+1)-\gamma_X(h-1)\]</li>
-<li><div class="st-title">กรณี \(h=0\) คือข้อ (ข)</div>
-<p>\(\gamma_X(1)=\gamma_X(-1)=\phi\gamma_X(0)\) จึงได้ \(\gamma_Y(0)=2\gamma_X(0)-2\phi\gamma_X(0)=2\gamma_X(0)(1-\phi)\)</p>
-\[\mathrm{var}(Y_t)=\frac{2\sigma^2(1-\phi)}{1-\phi^2}=\frac{2\sigma^2(1-\phi)}{(1-\phi)(1+\phi)}=\frac{2\sigma^2}{1+\phi}\]</li>
-<li><div class="st-title">กรณี \(h\ge1\)</div>
-<p>\(\gamma_Y(h)=\gamma_X(0)\,[2\phi^h-\phi^{h+1}-\phi^{h-1}]=\gamma_X(0)\,\phi^{h-1}\,[2\phi-\phi^2-1]=-\gamma_X(0)\,\phi^{h-1}(1-\phi)^2\)</p>
-\[\gamma_Y(h)=-\frac{\sigma^2\phi^{h-1}(1-\phi)^2}{1-\phi^2}=-\frac{\sigma^2\phi^{h-1}(1-\phi)}{1+\phi}\]</li>
+<li><div class="st-title">ใช้ผลจาก Lesson 5</div><p>\(\gamma_X(h)=\phi^{|h|}\gamma_0\) โดย \(\gamma_0=\sigma^2/(1-\phi^2)\)</p></li>
+<li><div class="st-title">กระจาย covariance</div><p>\(\gamma_Y(h)=\mathrm{Cov}(X_t-X_{t-1},X_{t+h}-X_{t+h-1})=2\gamma_X(h)-\gamma_X(h+1)-\gamma_X(h-1)\)</p></li>
+<li><div class="st-title">h = 0 (ข้อ b)</div><p>\(\gamma_Y(0)=2\gamma_0-2\phi\gamma_0=2\gamma_0(1-\phi)=\dfrac{2\sigma^2(1-\phi)}{(1-\phi)(1+\phi)}=\dfrac{2\sigma^2}{1+\phi}\)</p></li>
+<li><div class="st-title">h ≥ 1 (ข้อ a)</div><p>\(\gamma_Y(h)=\gamma_0\phi^{h-1}(2\phi-\phi^2-1)=-\gamma_0\phi^{h-1}(1-\phi)^2=-\dfrac{\sigma^2(1-\phi)}{1+\phi}\phi^{h-1}\)</p></li>
+<li><div class="st-title">แทนค่า φ = 0.5, σ² = 1</div><p>Var(Y) = 2/1.5 = 1.333 และ γ_Y(1) = −(0.5/1.5) = −0.333 ได้ \(\rho_Y(1)=-0.25\)</p></li>
 </ol>
-<div class="answer">\(\gamma_Y(0)=\dfrac{2\sigma^2}{1+\phi}\) และ \(\gamma_Y(h)=-\dfrac{\sigma^2\phi^{h-1}(1-\phi)}{1+\phi}\) เมื่อ \(h\ge1\)</div>
-<p>ตรวจด้วยตัวเลข: \(\phi=0.5\), \(\sigma^2=1\) ได้ \(\gamma_Y(0)=2/1.5=1.333\) และ \(\gamma_Y(1)=-(0.5)/1.5=-0.333\) จึงได้ \(\rho_Y(1)=-0.25\) ผลต่างของ AR(1) ที่ stationary อยู่แล้วมี autocorrelation ที่ lag 1 เป็นลบ ซึ่งเป็นผลของการทำ differencing กับข้อมูลที่ไม่จำเป็นต้องทำ</p>
+<div class="answer">ρ_Y(1) ติดลบเสมอเมื่อ |φ| &lt; 1 การ difference อนุกรมที่นิ่งอยู่แล้วจึงสร้าง autocorrelation ติดลบเทียมขึ้นมา นี่คือสัญญาณของ over-differencing ที่อาจารย์เตือนใน Lesson 7</div>
 </div>
 
 <figure>
-<img src="../assets/slides/ts6-p26.png" alt="Slide 6 หน้า 26: Exercise: วาด ACF ของ AR(1)" loading="lazy">
-<figcaption>Slide 6 หน้า 26 — Exercise: วาด ACF ของ AR(1)</figcaption>
+<img src="../assets/slides/ts6-p26.png" alt="Slide 6 หน้า 26: Exercise: คำนวณและวาด ACF ของ AR(1) สี่ค่า φ" loading="lazy">
+<figcaption>Slide 6 หน้า 26 — Exercise: คำนวณและวาด ACF ของ AR(1) สี่ค่า φ</figcaption>
 </figure>
 
-<p>โจทย์ให้คำนวณและวาด ACF ของ AR(1) สี่กรณี คือ \(\phi=0.6\), \(-0.6\), \(0.95\) (ทำถึง 20 lags) และ \(0.3\) โดยวาดให้ถึง lag ที่ ACF เกือบหมดไป ใช้ \(\rho(h)=\phi^h\)</p>
-
+<p>ใช้ \(\rho_h=\phi^h\) ดูว่าต้องไปถึง lag ไหนจึงเล็กกว่า 0.05 (ถือว่า "nearly died out")</p>
 <table class="compact">
-<tr><th>\(\phi\)</th><th>\(\rho_1\)</th><th>\(\rho_2\)</th><th>\(\rho_3\)</th><th>\(\rho_4\)</th><th>\(\rho_5\)</th><th>lag ที่ค่าต่ำกว่า 0.05</th><th>รูปทรง</th></tr>
-<tr><td>0.6</td><td>0.600</td><td>0.360</td><td>0.216</td><td>0.130</td><td>0.078</td><td>lag 6 (0.047)</td><td>บวก ลดลงปานกลาง</td></tr>
-<tr><td>−0.6</td><td>−0.600</td><td>0.360</td><td>−0.216</td><td>0.130</td><td>−0.078</td><td>lag 6 (0.047)</td><td>สลับเครื่องหมาย</td></tr>
-<tr><td>0.95</td><td>0.950</td><td>0.903</td><td>0.857</td><td>0.815</td><td>0.774</td><td>ยังเป็น 0.358 ที่ lag 20</td><td>บวก ลดลงช้ามาก</td></tr>
-<tr><td>0.3</td><td>0.300</td><td>0.090</td><td>0.027</td><td>0.008</td><td>0.002</td><td>lag 3 (0.027)</td><td>บวก ลดลงเร็วมาก</td></tr>
+<tr><th>φ</th><th>ρ₁, ρ₂, ρ₃</th><th>lag แรกที่ |ρ| &lt; 0.05</th></tr>
+<tr><td>0.6</td><td>0.6, 0.36, 0.216</td><td>6 (0.6⁶ = 0.047)</td></tr>
+<tr><td>−0.6</td><td>−0.6, 0.36, −0.216</td><td>6 (สลับเครื่องหมาย)</td></tr>
+<tr><td>0.95</td><td>0.95, 0.903, 0.857</td><td>59 ที่ lag 20 ยังเท่ากับ 0.358</td></tr>
+<tr><td>0.3</td><td>0.3, 0.09, 0.027</td><td>3</td></tr>
 </table>
-<p>กรณี \(\phi=0.95\) ต้องวาดถึง 20 lags เพราะ \(0.95^{20}=0.358\) ยังห่างจากศูนย์มาก ACF ที่ลดลงช้าเช่นนี้ดูคล้ายของข้อมูลที่ไม่ stationary ซึ่งเป็นกรณีที่แยกยากในข้อมูลจริง</p>
+<p>φ = 0.95 คือเหตุผลที่โจทย์สั่ง "Do out to 20 lags" แม้ถึง lag 20 ACF ยังเหลือ 0.358 กราฟแบบนี้ดูเกือบเหมือน ACF ของอนุกรมที่มี trend ใน Lesson 3 ถ้าเห็น ACF ลดช้ามากต้องตรวจความนิ่งด้วย ADF ก่อน ไม่ใช่สรุปว่าเป็น AR(1) ทันที</p>
 
 <!-- ===================================================== -->
-<h2 id="s6">6. PACF: แนวคิด</h2>
+<h2 id="s6">6. PACF: แนวคิด partial correlation</h2>
 
 <figure>
-<img src="../assets/slides/ts6-p28.png" alt="Slide 6 หน้า 28: Partial Autocorrelation Function (PACF)" loading="lazy">
-<figcaption>Slide 6 หน้า 28 — Partial Autocorrelation Function (PACF)</figcaption>
+<img src="../assets/slides/ts6-p27.png" alt="Slide 6 หน้า 27: Partial Autocorrelation (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 6 หน้า 27 — Partial Autocorrelation (หน้าคั่น)</figcaption>
 </figure>
 
-<p>หลังจากทำให้ time series เป็น stationary ด้วย differencing ขั้นถัดไปของการ fit ARIMA คือตัดสินว่าต้องมีพจน์ AR หรือ MA เพื่อแก้ autocorrelation ที่เหลืออยู่ใน series ที่ทำผลต่างแล้ว การดูกราฟ ACF และ PACF ของ series นั้นช่วยระบุจำนวนพจน์ AR และ MA ที่ต้องใช้ได้ในเบื้องต้น</p>
+<p>ปัญหาที่ต้องแก้: AR(1) φ = 0.9 มี ρ₂ = 0.81 ทั้งที่สมการมีแค่ \(X_{t-1}\) ค่า \(X_{t-2}\) ไม่ได้มีผลต่อ \(X_t\) โดยตรงเลย correlation 0.81 เกิดขึ้นเพราะ \(X_{t-2}\) ส่งผลผ่าน \(X_{t-1}\) ต่อมาถึง \(X_t\) เหมือนการส่งข่าวต่อกันเป็นทอด ๆ ถ้าเราตัดทางอ้อมผ่าน \(X_{t-1}\) ออก correlation ที่เหลือควรเป็นศูนย์ เครื่องมือที่ตัดทางอ้อมนี้คือ PACF อาจารย์บอกว่า ACF "ไม่เหมาะ" กับ AR เพราะค่อย ๆ ลง ต้องใช้ PACF "จดนิดนึง" (Class 6, 0:33:54–0:35:07)</p>
 
 <figure>
-<img src="../assets/slides/ts6-p29.png" alt="Slide 6 หน้า 29: PACF: ทำไม ACF ไม่พอ" loading="lazy">
-<figcaption>Slide 6 หน้า 29 — PACF: ทำไม ACF ไม่พอ</figcaption>
+<img src="../assets/slides/ts6-p28.png" alt="Slide 6 หน้า 28: PACF: ขั้นต่อจาก differencing ในการสร้าง ARIMA" loading="lazy">
+<figcaption>Slide 6 หน้า 28 — PACF: ขั้นต่อจาก differencing ในการสร้าง ARIMA</figcaption>
 </figure>
 
-<p>MA(q) ระบุได้จาก ACF เพราะ ACF ไม่เป็นศูนย์ถึง lag q แล้วเป็นศูนย์หลังจากนั้น สไลด์ใช้คำว่า ACF ของ MA(q) “drops off” เป็นศูนย์หลัง lag q ACF จึงให้ข้อมูลมากเกี่ยวกับอันดับของ dependence เมื่อ process เป็น moving average แต่ถ้า process เป็น AR ACF อาจบอกได้ไม่มากเกี่ยวกับอันดับ จึงต้องมีเครื่องมือทำนองเดียวกันสำหรับ AR(p) เหตุผลคือ ใน AR(1) ค่า \(X_t\) ขึ้นกับ \(X_{t-1}\) ซึ่งขึ้นกับ \(X_{t-2}\) อีกทอดหนึ่ง \(X_t\) จึงสัมพันธ์กับ \(X_{t-2}\) ผ่านตัวกลาง แม้ไม่มี \(X_{t-2}\) ในสมการ ACF นับความสัมพันธ์ทางอ้อมนี้ด้วย จึงไม่ตัดเป็นศูนย์</p>
+<p>สไลด์วางตำแหน่งของ PACF ในขั้นตอนทั้งหมด: ทำให้นิ่งด้วย differencing ก่อน แล้วดู ACF และ PACF ของอนุกรมที่ difference แล้ว เพื่อตัดสินว่าต้องมี AR หรือ MA กี่พจน์ ลำดับนี้คือ "identification" ใน Lesson 7</p>
 
 <figure>
-<img src="../assets/slides/ts6-p30.png" alt="Slide 6 หน้า 30: Partial correlation" loading="lazy">
-<figcaption>Slide 6 หน้า 30 — Partial correlation</figcaption>
+<img src="../assets/slides/ts6-p29.png" alt="Slide 6 หน้า 29: ACF ระบุ MA(q) ได้ แต่ AR ต้องมีเครื่องมืออื่น" loading="lazy">
+<figcaption>Slide 6 หน้า 29 — ACF ระบุ MA(q) ได้ แต่ AR ต้องมีเครื่องมืออื่น</figcaption>
 </figure>
 
-<p>โดยทั่วไป partial correlation คือ <mark class="src" data-p="30">conditional correlation</mark> เป็น correlation ระหว่างตัวแปรสองตัวภายใต้สมมติฐานว่ารู้และนำค่าของตัวแปรชุดอื่นมาพิจารณาแล้ว กล่าวอีกแบบ คือปริมาณ correlation ระหว่างสองตัวแปรที่ไม่ได้อธิบายด้วย correlation ที่ทั้งสองมีร่วมกับตัวแปรชุดที่ระบุ ตัวอย่างในสไลด์: ใน regression ที่ y เป็นตัวแปรตาม และ x1, x2, x3 เป็นตัวแปรอธิบาย partial correlation ระหว่าง y กับ x3 คือ correlation ที่คิดโดยคำนึงว่าทั้ง y และ x3 สัมพันธ์กับ x1 และ x2 อย่างไร ตัวอย่างในชีวิตจริง: ยอดขายไอศกรีมกับจำนวนคนจมน้ำสัมพันธ์กัน เพราะทั้งสองขึ้นกับอุณหภูมิ เมื่อหักผลของอุณหภูมิออก ความสัมพันธ์ระหว่างสองอย่างนี้หายไป partial correlation วัดส่วนที่เหลือหลังหักตัวกลาง</p>
+<p>สไลด์สรุปสิ่งที่รู้แล้ว: MA(q) ระบุได้จาก ACF เพราะไม่เป็นศูนย์ถึง lag q แล้ว "drops off" เป็นศูนย์ แต่ถ้าเป็น AR ACF ไม่ค่อยบอกอะไรเรื่องอันดับ จึงต้องมีเครื่องมือที่ทำหน้าที่เดียวกันสำหรับ AR(p)</p>
 
 <figure>
-<img src="../assets/slides/ts6-p31.png" alt="Slide 6 หน้า 31: Partial correlation: วิธีคำนวณด้วย regression" loading="lazy">
-<figcaption>Slide 6 หน้า 31 — Partial correlation: วิธีคำนวณด้วย regression</figcaption>
+<img src="../assets/slides/ts6-p30.png" alt="Slide 6 หน้า 30: Partial correlation คือ conditional correlation" loading="lazy">
+<figcaption>Slide 6 หน้า 30 — Partial correlation คือ conditional correlation</figcaption>
 </figure>
 
-<p>ใน regression partial correlation หาได้จากการหา correlation ระหว่าง <mark class="src" data-p="31">residuals</mark> ของ regression สองชุด คือ regression ที่ทำนาย y จาก x1 และ x2 กับ regression ที่ทำนาย x3 จาก x1 และ x2 สไลด์สรุปว่า <mark class="src" data-p="31">we correlate the “parts” of y and x3 that are not predicted by x1 and x2.</mark> และเขียนเป็นสูตรว่า \(\dfrac{\mathrm{Covariance}(y,x_3\mid x_1,x_2)}{\sqrt{\mathrm{Variance}(y\mid x_1,x_2)\,\mathrm{Variance}(x_3\mid x_1,x_2)}}\) สูตรนี้มีรูปเดียวกับ correlation ทั่วไป คือ covariance หารด้วยรากของผลคูณของ variance ต่างกันที่ทุกตัวคิดแบบมีเงื่อนไข เครื่องหมายขีดตั้งอ่านว่า “เมื่อรู้”</p>
-
-<figure>
-<img src="../assets/slides/ts6-p32.png" alt="Slide 6 หน้า 32: Partial autocorrelation ของ time series" loading="lazy">
-<figcaption>Slide 6 หน้า 32 — Partial autocorrelation ของ time series</figcaption>
-</figure>
-
-<p>สำหรับ time series partial autocorrelation ระหว่าง \(X_t\) กับ \(X_{t-h}\) นิยามเป็น conditional correlation ระหว่างสองค่านี้ โดยมีเงื่อนไขบน \(X_{t-h+1},\dots,X_{t-1}\) ซึ่งคือชุดของค่าที่อยู่ระหว่างเวลา t กับ t−h Partial autocorrelation คือปริมาณ correlation ระหว่างตัวแปรกับ lag ของตัวเอง ที่ไม่ได้อธิบายด้วย correlation ที่ lag ต่ำกว่าทั้งหมด และ partial autocorrelation อันดับที่ 1 นิยามให้เท่ากับ autocorrelation อันดับที่ 1 เพราะระหว่าง \(X_t\) กับ \(X_{t-1}\) ไม่มีค่าใดคั่นกลางให้หักออก</p>
-
-<figure>
-<img src="../assets/slides/ts6-p33.png" alt="Slide 6 หน้า 33: Partial autocorrelation อันดับ 2 และ 3" loading="lazy">
-<figcaption>Slide 6 หน้า 33 — Partial autocorrelation อันดับ 2 และ 3</figcaption>
-</figure>
-
-<p>Partial autocorrelation อันดับ 2 คือ \(\dfrac{\mathrm{Covariance}(x_t,x_{t-2}\mid x_{t-1})}{\sqrt{\mathrm{Variance}(x_t\mid x_{t-1})\,\mathrm{Variance}(x_{t-2}\mid x_{t-1})}}\) คือความสัมพันธ์ระหว่างวันนี้กับเมื่อวานซืน หลังหักผลของเมื่อวาน อันดับ 3 คือ \(\dfrac{\mathrm{Covariance}(x_t,x_{t-3}\mid x_{t-1},x_{t-2})}{\sqrt{\mathrm{Variance}(x_t\mid x_{t-1},x_{t-2})\,\mathrm{Variance}(x_{t-3}\mid x_{t-1},x_{t-2})}}\) หักผลของสองค่าที่คั่นกลาง และเป็นเช่นนี้ต่อไปสำหรับทุก lag จำนวนค่าที่หักออกเพิ่มขึ้นหนึ่งค่าทุก lag</p>
-
-<table>
-<tr><th></th><th>ACF ที่ lag h</th><th>PACF ที่ lag h</th></tr>
-<tr><td>วัดอะไร</td><td>ความสัมพันธ์รวมระหว่าง \(X_t\) กับ \(X_{t-h}\)</td><td>ความสัมพันธ์โดยตรง หลังหักค่าที่คั่นกลาง</td></tr>
-<tr><td>รวมความสัมพันธ์ทางอ้อม</td><td>รวม</td><td>ไม่รวม</td></tr>
-<tr><td>ที่ lag 1</td><td colspan="2">เท่ากัน</td></tr>
-<tr><td>สัญลักษณ์</td><td>\(\rho(h)\)</td><td>\(\phi_{hh}\)</td></tr>
-</table>
-
-<!-- ===================================================== -->
-<h2 id="s7">7. PACF: นิยามและ Durbin-Levinson</h2>
-
-<figure>
-<img src="../assets/slides/ts6-p34.png" alt="Slide 6 หน้า 34: PACF: นิยามด้วย regression" loading="lazy">
-<figcaption>Slide 6 หน้า 34 — PACF: นิยามด้วย regression</figcaption>
-</figure>
-
-<p>ใน time series \(\{X_t\}\) partial autocorrelation ที่ lag h นิยามว่า <mark class="src" data-p="34">φ_hh = partial correlation of X_t and X_{t+h} given X_{t+h−1}, …, X_{t+1}</mark> สัญลักษณ์ \(\phi_{hh}\) มีตัวห้อยสองตัวที่เหมือนกัน สำหรับ zero mean time series ให้ \(X_h^{h-1}\) แทน regression ของ \(X_h\) บนค่าที่คั่นกลาง: \(X_h^{h-1}=\beta_1X_{h-1}+\beta_2X_{h-2}+\dots+\beta_{h-1}X_1\) และให้ \(X_0^{h-1}\) แทน regression ของ \(X_0\) บนค่าชุดเดียวกัน: \(X_0^{h-1}=\beta_1X_1+\beta_2X_2+\dots+\beta_{h-1}X_{h-1}\) ตัวยก \(h-1\) หมายถึงใช้ตัวแปรอธิบาย \(h-1\) ตัว สองสมการนี้ทำนายปลายทั้งสองข้าง คือ \(X_h\) และ \(X_0\) จากค่าที่อยู่ตรงกลาง</p>
-
-<figure>
-<img src="../assets/slides/ts6-p35.png" alt="Slide 6 หน้า 35: PACF: นิยามของ φ_hh" loading="lazy">
-<figcaption>Slide 6 หน้า 35 — PACF: นิยามของ φ_hh</figcaption>
-</figure>
-
-<p>PACF ของ stationary process \(\{X_t\}\) เขียนว่า \(\phi_{hh}\) สำหรับ \(h=1,2,3,\dots\) โดย \(\phi_{11}=\mathrm{corr}(X_1,X_0)=\rho(1)\) และ \(\phi_{hh}=\mathrm{corr}(X_h-X_h^{h-1},\ X_0-X_0^{h-1})\) สำหรับ \(h=2,3,\dots\) คือ correlation ระหว่างส่วนของ \(X_h\) ที่ค่าตรงกลางทำนายไม่ได้ กับส่วนของ \(X_0\) ที่ค่าตรงกลางทำนายไม่ได้ ซึ่งเป็นวิธี residuals ของหน้า 31 ที่ใช้กับ time series</p>
-
-<figure>
-<img src="../assets/slides/ts6-p36.png" alt="Slide 6 หน้า 36: PACF: prediction errors" loading="lazy">
-<figcaption>Slide 6 หน้า 36 — PACF: prediction errors</figcaption>
-</figure>
-
-<p>ปริมาณ \(X_h-X_h^{h-1}\) และ \(X_0-X_0^{h-1}\) เรียกว่า <mark class="src" data-p="36">prediction errors</mark> และ PACF ที่ lag h นิยามเป็น correlation ระหว่าง error ทั้งสอง ถ้า process เป็น normal นิยามที่เทียบเท่ากันคือ <mark class="src" data-p="36">φ_hh = corr(X_0, X_h | X_{h−1}, X_{h−2}, …, X_1)</mark> คือ correlation ระหว่าง \(X_h\) กับ \(X_0\) โดยมีเงื่อนไขบนตัวแปรที่คั่นกลาง กล่าวคือ \(\phi_{hh}\) วัด correlation ระหว่าง \(X_h\) กับ \(X_0\) หลังนำ linear effects ของ \(X_{h-1},\dots,X_1\) ออกแล้ว</p>
-
-<figure>
-<img src="../assets/slides/ts6-p37.png" alt="Slide 6 หน้า 37: Durbin-Levinson Algorithm" loading="lazy">
-<figcaption>Slide 6 หน้า 37 — Durbin-Levinson Algorithm</figcaption>
-</figure>
-
-<p>PACF ทางทฤษฎีของ stationary time series คำนวณได้ด้วย Durbin–Levinson Algorithm: \(\phi_{n,n}=\dfrac{\rho(n)-\sum_{k=1}^{n-1}\phi_{n-1,k}\,\rho(n-k)}{1-\sum_{k=1}^{n-1}\phi_{n-1,k}\,\rho(k)}\) โดย \(\phi_{n,k}=\phi_{n-1,k}-\phi_{n,n}\phi_{n-1,n-k}\) สำหรับ \(1\le k\le n-1\) สไลด์ใส่สีว่า <mark class="src" data-p="37">The formula above can be used with sample autocorrelations to find the sample partial autocorrelation function of any given time series</mark> สูตรนี้คำนวณ PACF จาก ACF โดยไม่ต้องทำ regression จริง และทำทีละ lag โดยใช้ผลของ lag ก่อนหน้า</p>
-
-<div class="calc" id="s7-calc">
-<div class="calc-title">ใช้ Durbin-Levinson หา \(\phi_{11}\), \(\phi_{22}\) และ \(\phi_{33}\)</div>
-<ol class="steps">
-<li><div class="st-title">\(n=1\)</div><p>ผลรวมไม่มีพจน์: \(\phi_{11}=\rho(1)\)</p></li>
-<li><div class="st-title">\(n=2\)</div><p>ผลรวมมีพจน์เดียวที่ \(k=1\) ใช้ \(\phi_{1,1}=\rho(1)\)</p>
-\[\phi_{22}=\frac{\rho(2)-\rho(1)^2}{1-\rho(1)^2}\]</li>
-<li><div class="st-title">ปรับค่าก่อนขึ้น \(n=3\)</div><p>\(\phi_{2,1}=\phi_{1,1}-\phi_{22}\phi_{1,1}=\rho(1)(1-\phi_{22})\)</p></li>
-<li><div class="st-title">\(n=3\)</div>
-\[\phi_{33}=\frac{\rho(3)-\phi_{2,1}\rho(2)-\phi_{22}\rho(1)}{1-\phi_{2,1}\rho(1)-\phi_{22}\rho(2)}\]</li>
-<li><div class="st-title">ตัวอย่าง AR(2): \(\phi_1=-0.5\), \(\phi_2=0.25\)</div>
-<p>ACF จากหัวข้อ 4: \(\rho(1)=-0.667\), \(\rho(2)=0.583\), \(\rho(3)=-0.458\)</p>
-<p>\(\phi_{11}=-0.667\)</p>
-<p>\(\phi_{22}=(0.583-0.444)/(1-0.444)=0.139/0.556=0.25\)</p>
-<p>\(\phi_{2,1}=-0.667(1-0.25)=-0.5\)</p>
-<p>ตัวเศษของ \(\phi_{33}\): \(-0.458-(-0.5)(0.583)-(0.25)(-0.667)=-0.458+0.292+0.167=0\) จึงได้ \(\phi_{33}=0\)</p></li>
-</ol>
-<div class="answer">\(\phi_{11}=-0.667\), \(\phi_{22}=0.25\), \(\phi_{33}=0\) ตรงกับ <code>ARMAacf(ar = c(-0.5,0.25), pacf=TRUE)</code> ซึ่งให้ −0.667, 0.25, 0, 0</div>
-<p>มีสามข้อที่เห็นจากตัวอย่างนี้ ข้อแรก \(\phi_{22}\) เท่ากับ \(\phi_2\) ของโมเดล ข้อที่สอง ค่ากลาง \(\phi_{2,1}=-0.5\) เท่ากับ \(\phi_1\) ของโมเดล ข้อที่สาม PACF เป็นศูนย์ตั้งแต่ lag 3 เพราะโมเดลเป็น AR(2) สูตรของ \(\phi_{22}\) เป็นสูตรเดียวกับค่าประมาณ Yule-Walker ของ \(\phi_2\) ใน Lesson 7</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 3</span><span>PACF</span></div>
-<div class="qtext">ข้อมูลชุดหนึ่งมี \(\rho(1)=0.5\) และ \(\rho(2)=0.4\) ค่า \(\phi_{22}\) คือเท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. φ₂₂ ไม่ใช่ ρ(2) ต้องหักผลของ lag 1">\(\phi_{22}=0.40\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. (0.4 − 0.25) / (1 − 0.25) = 0.15 / 0.75">\(\phi_{22}=0.20\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ 1 − ρ(1)² = 0.75 ไม่ใช่ 1">\(\phi_{22}=0.15\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวเศษคือ ρ(2) − ρ(1)² ไม่ใช่ ρ(2) − ρ(1)">\(\phi_{22}=-0.13\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s8">8. PACF ของ AR และ MA</h2>
-
-<figure>
-<img src="../assets/slides/ts6-p38.png" alt="Slide 6 หน้า 38: EXAMPLE: PACF of AR(1) and AR(2)" loading="lazy">
-<figcaption>Slide 6 หน้า 38 — EXAMPLE: PACF of AR(1) and AR(2)</figcaption>
-</figure>
-
-<p>รายละเอียดของ AR(1) อยู่ใน <mark class="src" data-p="38">Example 3.14 (page 106)</mark> สไลด์ให้พิจารณา stationary, zero mean AR(1) \(X_t=\phi X_{t-1}+w_t\) และ AR(2) \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) ใบงาน ARMA_properties หน้า 1 ให้หา \(\gamma(1)\), \(\gamma(2)\) และ PACF ของ AR(1) การ์ดต่อไปนี้ทำให้ครบ</p>
-
-<div class="calc" id="s8-ar1">
-<div class="calc-title">PACF ของ AR(1): \(X_t=\phi X_{t-1}+w_t\)</div>
-<ol class="steps">
-<li><div class="st-title">Autocovariance</div><p>จาก Lesson 5: \(\gamma(1)=\phi\gamma(0)\) และ \(\gamma(2)=\phi\gamma(1)=\phi^2\gamma(0)\) จึงได้ \(\rho(1)=\phi\) และ \(\rho(2)=\phi^2\)</p></li>
-<li><div class="st-title">Lag 1</div><p>\(\phi_{11}=\rho(1)=\phi\)</p></li>
-<li><div class="st-title">Lag 2</div>
-\[\phi_{22}=\frac{\rho(2)-\rho(1)^2}{1-\rho(1)^2}=\frac{\phi^2-\phi^2}{1-\phi^2}=0\]</li>
-<li><div class="st-title">Lag 3 ขึ้นไป</div><p>เป็น 0 ด้วยเหตุผลเดียวกัน</p></li>
-</ol>
-<div class="answer">PACF ของ AR(1): \(\phi_{11}=\phi\) และ \(\phi_{hh}=0\) เมื่อ \(h\ge2\)</div>
-<p>เหตุผลเชิงแนวคิด: ใน AR(1) ค่า \(X_t\) ขึ้นกับ \(X_{t-2}\) ผ่าน \(X_{t-1}\) เท่านั้น เมื่อรู้ \(X_{t-1}\) แล้ว \(X_{t-2}\) ไม่ให้ข้อมูลเพิ่ม ความสัมพันธ์โดยตรงที่ lag 2 จึงเป็นศูนย์ ทั้งที่ ACF ที่ lag 2 เป็น \(\phi^2\) ซึ่งไม่เป็นศูนย์</p>
-</div>
-
-<figure>
-<img src="../assets/slides/ts6-p39.png" alt="Slide 6 หน้า 39: EXAMPLE: โมเดลที่ใช้จำลอง" loading="lazy">
-<figcaption>Slide 6 หน้า 39 — EXAMPLE: โมเดลที่ใช้จำลอง</figcaption>
-</figure>
-
-<p>สไลด์ใช้ R สร้างข้อมูลจากสองโมเดล คือ \(X_t=0.9X_{t-1}+w_t\) และ \(X_t=-0.5X_{t-1}+0.25X_{t-2}+w_t\) ค่าทางทฤษฎีจาก <code>ARMAacf</code> มีดังนี้</p>
-
-<table class="compact">
-<tr><th>โมเดล</th><th></th><th>lag 1</th><th>lag 2</th><th>lag 3</th><th>lag 4</th></tr>
-<tr><td rowspan="2">AR(1), φ = 0.9</td><td>ACF</td><td>0.900</td><td>0.810</td><td>0.729</td><td>0.656</td></tr>
-<tr><td>PACF</td><td>0.900</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td rowspan="2">AR(2), φ = (−0.5, 0.25)</td><td>ACF</td><td>−0.667</td><td>0.583</td><td>−0.458</td><td>0.375</td></tr>
-<tr><td>PACF</td><td>−0.667</td><td>0.250</td><td>0</td><td>0</td></tr>
-</table>
-<p>ACF ของทั้งสองโมเดลค่อย ๆ ลดลงและไม่บอกอันดับ ส่วน PACF ของ AR(1) มีค่าเฉพาะ lag 1 และของ AR(2) มีค่าถึง lag 2 จำนวน lag ที่ PACF ไม่เป็นศูนย์เท่ากับอันดับของโมเดล</p>
-
-<figure>
-<img src="../assets/slides/ts6-p40.png" alt="Slide 6 หน้า 40: General results for AR(p)" loading="lazy">
-<figcaption>Slide 6 หน้า 40 — General results for AR(p)</figcaption>
-</figure>
-
-<p>สำหรับ AR(p) มีผลสองข้อ ข้อแรก \(\phi_{11}\ne0,\phi_{22}\ne0,\dots,\phi_{pp}\ne0\) คือ partial autocorrelation p ตัวแรกไม่เป็นศูนย์ ข้อที่สอง \(\phi_{hh}=0\) สำหรับทุก \(h&gt;p\) สไลด์สรุปว่า PACF ของ AR(p) <mark class="src" data-p="40">“drop off”</mark> เป็นศูนย์หลัง lag ที่ p ดังนั้น <mark class="src" data-p="40">PACF can help to determine the order of an AR(p)</mark> process เช่นเดียวกับที่ ACF ช่วยระบุอันดับของ MA(q)</p>
-
-<figure>
-<img src="../assets/slides/ts6-p41.png" alt="Slide 6 หน้า 41: What about PACF of moving average?" loading="lazy">
-<figcaption>Slide 6 หน้า 41 — What about PACF of moving average?</figcaption>
-</figure>
-
-<p>รายละเอียดอยู่ใน <mark class="src" data-p="41">Example 3.16 (page 107)</mark> สไลด์ถามว่า PACF ของ moving average มีพฤติกรรมอย่างไร และให้พิจารณา MA(1) \(X_t=w_t+\theta w_{t-1}\) ที่ \(|\theta|&lt;1\) โดยกำกับว่า <mark class="src" data-p="41">(invertible; details next class ).</mark> แล้วให้แสดง PACF ของ process นี้ ผลตามตำราคือ \(\phi_{hh}=-\dfrac{(-\theta)^h(1-\theta^2)}{1-\theta^{2(h+1)}}\) สำหรับ \(h\ge1\) ค่านี้ไม่เป็นศูนย์ที่ lag ใดเลย แต่ขนาดลดลงเรื่อย ๆ เพราะมี \(\theta^h\) เป็นตัวคูณ PACF ของ MA จึง tails off สูตรนี้มาจากตำรา Shumway ตามที่สไลด์อ้าง ไม่ได้เขียนอยู่ในสไลด์</p>
-
-<div class="calc" id="s8-ma1">
-<div class="calc-title">ตรวจสูตร PACF ของ MA(1) กับ θ = −0.9</div>
-<ol class="steps">
-<li><div class="st-title">Lag 1</div><p>\(\phi_{11}=-\dfrac{(0.9)(1-0.81)}{1-0.9^4}=-\dfrac{0.171}{0.3439}=-0.497\) เท่ากับ \(\rho(1)=\theta/(1+\theta^2)=-0.9/1.81\)</p></li>
-<li><div class="st-title">Lag 2</div><p>\(\phi_{22}=-\dfrac{(0.81)(0.19)}{1-0.9^6}=-\dfrac{0.1539}{0.4686}=-0.328\)</p></li>
-</ol>
-<p><code>ARMAacf(ma = -0.9, pacf=TRUE)</code> ให้ −0.497, −0.328, −0.243, −0.191, −0.156 ตรงกัน ทุกค่าเป็นลบและขนาดลดลงช้า</p>
-</div>
-
-<figure>
-<img src="../assets/slides/ts6-p42.png" alt="Slide 6 หน้า 42: MA(1) and MA(2): โมเดลที่ใช้จำลอง" loading="lazy">
-<figcaption>Slide 6 หน้า 42 — MA(1) and MA(2): โมเดลที่ใช้จำลอง</figcaption>
-</figure>
-
-<p>สไลด์ใช้ R สร้างข้อมูลจาก \(X_t=w_t-0.9w_{t-1}\) และ \(X_t=w_t+0.5w_{t-1}-0.25w_{t-2}\) ในไฟล์ R_codes เขียนเป็น <code>ma = c(-0.9)</code> และ <code>ma = c(0.5,-0.25)</code></p>
-
-<table class="compact">
-<tr><th>โมเดล</th><th></th><th>lag 1</th><th>lag 2</th><th>lag 3</th><th>lag 4</th><th>lag 5</th></tr>
-<tr><td rowspan="2">MA(1), θ = −0.9</td><td>ACF</td><td>−0.497</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>PACF</td><td>−0.497</td><td>−0.328</td><td>−0.243</td><td>−0.191</td><td>−0.156</td></tr>
-<tr><td rowspan="2">MA(2), θ = (0.5, −0.25)</td><td>ACF</td><td>0.286</td><td>−0.190</td><td>0</td><td>0</td><td>0</td></tr>
-<tr><td>PACF</td><td>0.286</td><td>−0.296</td><td>0.185</td><td>−0.151</td><td>0.115</td></tr>
-</table>
-<p>รูปแบบกลับกันกับ AR: ACF ของ MA ตัดเป็นศูนย์หลัง lag q ส่วน PACF ค่อย ๆ ลดลงโดยไม่เป็นศูนย์</p>
-
-<figure>
-<img src="../assets/slides/ts6-p43.png" alt="Slide 6 หน้า 43: SUMMARY: PACF for AR(p) and MA(q)" loading="lazy">
-<figcaption>Slide 6 หน้า 43 — SUMMARY: PACF for AR(p) and MA(q)</figcaption>
-</figure>
-
-<p>สไลด์สรุปเป็นข้อความสีแดง: <mark class="src" data-p="43">The PACF for an MA process behaves much like the ACF for an AR process of the same order.</mark> และให้ตารางจากตำรา <mark class="src" data-p="43">(page 108)</mark> ที่สรุปพฤติกรรมของ ACF และ PACF: ACF ของ AR(p) tails off และของ MA(q) cuts off after lag q ส่วน PACF ของ AR(p) cuts off after lag p และของ MA(q) tails off ดังนั้น ACF เป็นเครื่องมือหลักในการหาอันดับของ MA และ PACF เป็นเครื่องมือหลักในการหาอันดับของ AR</p>
-
-<table>
-<tr><th></th><th>AR(p)</th><th>MA(q)</th><th>ARMA(p,q)</th></tr>
-<tr><td>ACF</td><td>Tails off</td><td>Cuts off after lag q</td><td>Tails off</td></tr>
-<tr><td>PACF</td><td>Cuts off after lag p</td><td>Tails off</td><td>Tails off</td></tr>
-</table>
-<p>คอลัมน์ ARMA(p,q) ไม่อยู่ในตารางของสไลด์หน้านี้ แต่เป็นส่วนที่ใบงาน ARMA_properties หน้า 2 เว้นให้เติม และเป็นผลมาตรฐานจากตำราหน้าเดียวกัน: ARMA มีทั้งส่วน AR และ MA ทั้งสองกราฟจึง tails off ซึ่งเป็นเหตุที่ต้องใช้ EACF ในหัวข้อ 11</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 4</span><span>ระบุโมเดล</span></div>
-<div class="qtext">ข้อมูล stationary ชุดหนึ่งมี sample ACF ที่ค่อย ๆ ลดลง และ sample PACF ที่มีนัยสำคัญที่ lag 1 และ 2 แล้วอยู่ในขอบ โมเดลใดเข้ากับรูปแบบนี้</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. ACF tails off และ PACF cuts off หลัง lag 2">AR(2)</button>
-<button class="opt" data-correct="false" data-note="ผิด. MA(2) มี ACF ที่ตัดหลัง lag 2 และ PACF ที่ค่อย ๆ ลดลง">MA(2)</button>
-<button class="opt" data-correct="false" data-note="ผิด. AR(1) มี PACF ที่มีนัยสำคัญเฉพาะ lag 1">AR(1)</button>
-<button class="opt" data-correct="false" data-note="ผิด. MA(1) มี ACF ที่มีนัยสำคัญเฉพาะ lag 1">MA(1)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 5</span><span>PACF</span></div>
-<div class="qtext">AR(1) ที่ \(\phi=0.7\) มี \(\rho(2)\) และ \(\phi_{22}\) เท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ρ(2) = 0.7² = 0.49 ไม่ใช่ 0">\(\rho(2)=0\) และ \(\phi_{22}=0.49\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. PACF ของ AR(1) เป็น 0 ตั้งแต่ lag 2">\(\rho(2)=0.49\) และ \(\phi_{22}=0.49\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ACF ของ AR(1) ไม่ตัดเป็นศูนย์">\(\rho(2)=0\) และ \(\phi_{22}=0\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. ACF เป็น φ² ส่วน PACF ตัดหลัง lag 1">\(\rho(2)=0.49\) และ \(\phi_{22}=0\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 6 ถึง 8</div>
-<ul>
-<li>ความหมายของ partial correlation และ partial autocorrelation: correlation หลังหักผลของค่าที่คั่นกลาง</li>
-<li>นิยาม \(\phi_{11}=\rho(1)\) และ \(\phi_{hh}=\mathrm{corr}(X_h-X_h^{h-1},X_0-X_0^{h-1})\)</li>
-<li>คำนวณ \(\phi_{22}=\dfrac{\rho(2)-\rho(1)^2}{1-\rho(1)^2}\) และใช้ Durbin-Levinson ได้</li>
-<li>พิสูจน์ว่า PACF ของ AR(1) เป็น \(\phi\) ที่ lag 1 และ 0 หลังจากนั้น</li>
-<li>ตารางสรุป: AR(p) มี ACF tails off และ PACF cuts off after lag p ส่วน MA(q) กลับกัน</li>
-</ul>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s9">9. ARIMA model</h2>
-
-<figure>
-<img src="../assets/slides/ts6-p45.png" alt="Slide 6 หน้า 45: ARIMA model" loading="lazy">
-<figcaption>Slide 6 หน้า 45 — ARIMA model</figcaption>
-</figure>
-
-<p>หัวข้อนี้ขยายตระกูลของโมเดลให้ใช้กับ process ที่ไม่ stationary ได้ ผลคือตระกูลของโมเดลที่ใหญ่ขึ้นมาก คือ autoregressive integrated moving average (ARIMA) ซึ่งรวม nonstationary time series ไว้หลากหลาย</p>
-
-<figure>
-<img src="../assets/slides/ts6-p46.png" alt="Slide 6 หน้า 46: Trend model: Detrending" loading="lazy">
-<figcaption>Slide 6 หน้า 46 — Trend model: Detrending</figcaption>
-</figure>
-
-<p>หน้านี้ทวนแนวทาง detrending จาก Lesson 3: \(X_t=\mu_t+Y_t\) โดย \(\mu_t\) เป็น deterministic trend และ \(Y_t\) เป็น stochastic process ที่ \(E(Y_t)=0\) สมมติว่า \(Y_t\) stationary และ trend ที่แท้จริงเป็น \(\mu_t=\beta_0+\beta_1t\) <mark class="src" data-p="46">(linear function of time)</mark> หรือ \(\mu_t=\beta_0+\beta_1t+\beta_2t^2\) <mark class="src" data-p="46">(quadratic function of time)</mark> สองกรณีนี้เชื่อมกับ differencing: trend เส้นตรงหายไปเมื่อทำผลต่างหนึ่งครั้ง และ trend กำลังสองหายไปเมื่อทำสองครั้ง ตัวอย่าง: 1, 4, 9, 16, 25 ซึ่งเป็น \(t^2\) มีผลต่างครั้งแรก 3, 5, 7, 9 ที่ยังเพิ่มขึ้น และผลต่างครั้งที่สอง 2, 2, 2 ที่คงที่</p>
-
-<figure>
-<img src="../assets/slides/ts6-p47.png" alt="Slide 6 หน้า 47: ARIMA model: นิยาม" loading="lazy">
-<figcaption>Slide 6 หน้า 47 — ARIMA model: นิยาม</figcaption>
-</figure>
-
-<p>Stochastic process \(\{X_t\}\) เป็น ARIMA ถ้าผลต่างครั้งที่ d คือ \(\nabla^dX_t\) เป็น stationary ARMA model โมเดล ARIMA กำหนดด้วยค่าสำคัญสามค่า p คืออันดับของส่วน AR, d คือจำนวนครั้งของผลต่างที่ต้องทำเพื่อให้ได้ stationary ARMA(p,q) และ q คืออันดับของส่วน MA คำว่า integrated หมายถึงการกลับทิศของ differencing: ถ้าผลต่างเป็น ARMA ข้อมูลเดิมได้จากการบวกสะสมของ ARMA นั้น</p>
-
-<figure>
-<img src="../assets/slides/ts6-p48.png" alt="Slide 6 หน้า 48: Definition 3.11 (page 141)" loading="lazy">
-<figcaption>Slide 6 หน้า 48 — Definition 3.11 (page 141)</figcaption>
-</figure>
-
-<p>Process \(\{X_t\}\) เป็น <mark class="src" data-p="48">ARIMA(p,d,q)</mark> ถ้า \(\nabla^dX_t=(1-B)^dX_t\) เป็น ARMA(p,q) โดยทั่วไปเขียนโมเดลเป็น \(\Phi(B)\)<mark class="src" data-p="48">(1 − B)^d</mark>\(X_t=\theta(B)w_t\) ตัวคูณ \((1-B)^d\) คือส่วนที่เพิ่มจาก ARMA ถ้า \(d=0\) ตัวคูณนี้เท่ากับ 1 และโมเดลกลับเป็น ARMA</p>
-
-<figure>
-<img src="../assets/slides/ts6-p49.png" alt="Slide 6 หน้า 49: Definition 3.11: กรณี nonzero mean" loading="lazy">
-<figcaption>Slide 6 หน้า 49 — Definition 3.11: กรณี nonzero mean</figcaption>
-</figure>
-
-<p>ถ้าผลต่างมีค่าเฉลี่ยไม่เป็นศูนย์ คือ <mark class="src" data-p="49">E(∇^d X_t) = μ</mark> เขียนโมเดลเป็น \(\Phi(B)(1-B)^dX_t=\alpha+\theta(B)w_t\) โดย \(\alpha=\mu(1-\phi_1-\dots-\phi_p)\) ซึ่งเป็นความสัมพันธ์เดียวกับค่าคงที่ a ของ AR ใน Lesson 5 สไลด์ให้ข้อสังเกตเชิงปฏิบัติสองข้อ ข้อแรก กับข้อมูลจริง แทบไม่มีความจำเป็นต้องพิจารณา <mark class="src" data-p="49">differencing order d &gt; 2</mark> ข้อที่สอง ข้อมูลจริงส่วนใหญ่ทำให้เป็น stationary ARMA ได้โดย <mark class="src" data-p="49">taking one difference or occasionally two differences</mark> ซึ่งอาจทำหลังจากแปลงข้อมูลก่อน</p>
-
-<figure>
-<img src="../assets/slides/ts6-p50.png" alt="Slide 6 หน้า 50: Definition 3.11: สมาชิกของตระกูล ARIMA" loading="lazy">
-<figcaption>Slide 6 หน้า 50 — Definition 3.11: สมาชิกของตระกูล ARIMA</figcaption>
-</figure>
-
-<p>AR, MA และ ARMA เป็นสมาชิกของตระกูล ARIMA(p,d,q) ทั้งหมด AR(p) คือ ARIMA(p,0,0), MA(q) คือ ARIMA(0,0,q), ARMA(p,q) คือ ARIMA(p,0,q), ARI(p,d) คือ ARIMA(p,d,0) และ IMA(d,q) คือ ARIMA(0,d,q) ชื่อย่อได้จากการตัดส่วนที่มีอันดับเป็นศูนย์ออก</p>
-
-<table>
-<tr><th>ชื่อ</th><th>ARIMA(p,d,q)</th><th>มีส่วน AR</th><th>มี differencing</th><th>มีส่วน MA</th></tr>
-<tr><td>AR(p)</td><td>(p, 0, 0)</td><td>มี</td><td>ไม่มี</td><td>ไม่มี</td></tr>
-<tr><td>MA(q)</td><td>(0, 0, q)</td><td>ไม่มี</td><td>ไม่มี</td><td>มี</td></tr>
-<tr><td>ARMA(p,q)</td><td>(p, 0, q)</td><td>มี</td><td>ไม่มี</td><td>มี</td></tr>
-<tr><td>ARI(p,d)</td><td>(p, d, 0)</td><td>มี</td><td>มี</td><td>ไม่มี</td></tr>
-<tr><td>IMA(d,q)</td><td>(0, d, q)</td><td>ไม่มี</td><td>มี</td><td>มี</td></tr>
-</table>
-
-<figure>
-<img src="../assets/slides/ts6-p51.png" alt="Slide 6 หน้า 51: Examples" loading="lazy">
-<figcaption>Slide 6 หน้า 51 — Examples</figcaption>
-</figure>
-
-<p>สไลด์ให้สองโมเดลโดยไม่มีเฉลย คือ (a) \(X_t=1.7X_{t-1}-0.7X_{t-2}+w_t\) และ (b) \(X_t=1.5X_{t-1}-0.5X_{t-2}+w_t-w_{t-1}+0.25w_{t-2}\) คำถามคือแต่ละโมเดลเป็น ARIMA(p,d,q) ใด ทั้งสองดูเหมือน AR(2) และ ARMA(2,2) แต่ต้องตรวจรากก่อน</p>
-
-<div class="calc" id="s9-ex">
-<div class="calc-title">ระบุ p, d, q ของตัวอย่างหน้า 51</div>
-<ol class="steps">
-<li><div class="st-title">(a) เขียนรูป backshift</div><p>\((1-1.7B+0.7B^2)X_t=w_t\)</p></li>
-<li><div class="st-title">(a) แยกตัวประกอบ</div><p>\(1-1.7B+0.7B^2=(1-B)(1-0.7B)\) ตรวจ: \(1-0.7B-B+0.7B^2\)</p></li>
-<li><div class="st-title">(a) อ่านผล</div><p>\((1-0.7B)(1-B)X_t=w_t\) ตัวประกอบ \((1-B)\) คือผลต่างหนึ่งครั้ง ส่วนที่เหลือ \((1-0.7B)\) คือ AR(1) ที่ \(\phi=0.7\) ซึ่ง stationary ไม่มีส่วน MA</p>
-<p>คำตอบ: ARIMA(1,1,0) หรือ ARI(1,1) กล่าวคือ \(\nabla X_t=0.7\nabla X_{t-1}+w_t\)</p></li>
-<li><div class="st-title">(b) เขียนรูป backshift</div><p>\((1-1.5B+0.5B^2)X_t=(1-B+0.25B^2)w_t\)</p></li>
-<li><div class="st-title">(b) แยกตัวประกอบทั้งสองข้าง</div><p>ซ้าย: \((1-B)(1-0.5B)\) และขวา: \((1-0.5B)^2\)</p></li>
-<li><div class="st-title">(b) ตัดตัวประกอบร่วม</div><p>\((1-0.5B)\) อยู่ทั้งสองข้าง จึงตัดออกได้ เหลือ \((1-B)X_t=(1-0.5B)w_t\)</p>
-<p>คำตอบ: ARIMA(0,1,1) หรือ IMA(1,1) กล่าวคือ \(X_t=X_{t-1}+w_t-0.5w_{t-1}\)</p></li>
-</ol>
-<p>ตัวอย่างนี้แสดงสองเรื่อง ข้อแรก รากที่เท่ากับ 1 พอดีในฝั่ง AR ไม่ได้นับเป็นอันดับของ AR แต่นับเป็น differencing ตารางในหัวข้อ 2 แสดงว่า (1.7, −0.7) มีรากเท่ากับ 1 และ 1.429 ข้อที่สอง ตัวประกอบที่ซ้ำกันทั้งสองข้างต้องตัดออกก่อนนับอันดับ ซึ่งคือ parameter redundancy ในหัวข้อ 11</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 6</span><span>ARIMA</span></div>
-<div class="qtext">โมเดล \(X_t=1.7X_{t-1}-0.7X_{t-2}+w_t\) คือ ARIMA ใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. มีรากเท่ากับ 1 จึงไม่ใช่ AR(2) ที่ stationary">ARIMA(2,0,0)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ไม่มีพจน์ของ w ย้อนหลัง จึงไม่มีส่วน MA">ARIMA(0,1,1)</button>
-<button class="opt" data-correct="true" data-note="ถูก. (1 − 0.7B)(1 − B)X_t = w_t">ARIMA(1,1,0)</button>
-<button class="opt" data-correct="false" data-note="ผิด. มีตัวประกอบ (1 − B) เพียงตัวเดียว">ARIMA(0,2,0)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s10">10. IMA(1,1) และ IMA(2,2)</h2>
-
-<figure>
-<img src="../assets/slides/ts6-p52.png" alt="Slide 6 หน้า 52: Example: IMA(1,1)" loading="lazy">
-<figcaption>Slide 6 หน้า 52 — Example: IMA(1,1)</figcaption>
-</figure>
-
-<p>ให้ \(\{w_t\}\) เป็น zero mean white noise ที่มีความแปรปรวน \(\sigma^2\) ARIMA(p,d,q) ที่ p = 0, d = 1 และ q = 1 เรียกว่า IMA(1,1) เขียนได้เป็น \(X_t=X_{t-1}+w_t-\theta w_{t-1}\) หรือ <mark class="src" data-p="52">(1 − B)X_t = (1 − θB)w_t</mark> สไลด์ระบุว่าโมเดลนี้นิยมมากในงานเศรษฐศาสตร์ และถ้า \(\theta=0\) IMA(1,1) ลดรูปเป็น random walk หน้านี้เขียนส่วน MA ด้วยเครื่องหมายลบ คือ \(-\theta w_{t-1}\) ซึ่งกลับกับรูป \(+\theta w_{t-1}\) ที่ R ใช้ โมเดลนี้เชื่อมกับ exponential smoothing: ใน <a href="0007-arima-identification-and-estimation.html">Lesson 7</a> แสดงว่าค่าพยากรณ์ของ IMA(1,1) คือ simple exponential smoothing</p>
-
-<figure>
-<img src="../assets/slides/ts6-p53.png" alt="Slide 6 หน้า 53: Example IMA(1,1) with θ = 0.5" loading="lazy">
-<figcaption>Slide 6 หน้า 53 — Example IMA(1,1) with θ = 0.5</figcaption>
-</figure>
-
-<p>กราฟแสดง IMA(1,1) ที่ <mark class="src" data-p="53">with θ = 0.5</mark> จำนวน 150 ค่า ข้อมูลเดิมเคลื่อนระหว่างประมาณ −6 ถึง 3 โดยไม่กลับมาที่ระดับเดิม Sample ACF ของข้อมูลเดิมเริ่มใกล้ 1 และลดลงช้า ยังเกินขอบที่ lag 15 ซึ่งเป็นสัญญาณของ nonstationarity ผลต่างครั้งที่ 1 แกว่งรอบศูนย์ระหว่างประมาณ −2 ถึง 3 และ sample ACF ของผลต่างมีแท่งลบที่เกินขอบเฉพาะ lag 1 ตรงกับ MA(1) ค่าทางทฤษฎีของแท่งนั้นคือ \(-\theta/(1+\theta^2)=-0.5/1.25=-0.4\) เครื่องหมายลบมาจากรูป \(-\theta w_{t-1}\) ในไฟล์ R_codes ของ Lecture 7 กราฟนี้สร้างด้วย <code>ma = c(-0.5)</code></p>
-
-<figure>
-<img src="../assets/slides/ts6-p54.png" alt="Slide 6 หน้า 54: Example: IMA(2,2)" loading="lazy">
-<figcaption>Slide 6 หน้า 54 — Example: IMA(2,2)</figcaption>
-</figure>
-
-<p>ARIMA(p,d,q) ที่ p = 0, d = 2 และ q = 2 เรียกว่า IMA(2,2) เขียนได้เป็น <mark class="src" data-p="54">(1 − B)²X_t = (1 − θ₁B − θ₂B²)w_t</mark> เนื่องจาก \(\nabla^2X_t=(1-B)^2X_t\) โมเดลจึงบอกว่าผลต่างครั้งที่ 2 ของข้อมูลเป็น MA(2) เมื่อกระจาย \((1-B)^2X_t=X_t-2X_{t-1}+X_{t-2}\) จะได้รูปเต็ม \(X_t=2X_{t-1}-X_{t-2}+w_t-\theta_1w_{t-1}-\theta_2w_{t-2}\)</p>
-
-<figure>
-<img src="../assets/slides/ts6-p55.png" alt="Slide 6 หน้า 55: Example IMA(2,2)" loading="lazy">
-<figcaption>Slide 6 หน้า 55 — Example IMA(2,2)</figcaption>
-</figure>
-
-<p>กราฟแสดง IMA(2,2) จำนวน 150 ค่า ข้อมูลเดิมเป็นเส้นเรียบที่เพิ่มจาก 0 ถึงประมาณ 450 แล้วลดลง sample ACF ใกล้ 1 เกือบทุก lag ผลต่างครั้งที่ 1 ยังเคลื่อนเป็นช่วงยาวระหว่างประมาณ −8 ถึง 7 และ sample ACF ของผลต่างครั้งที่ 1 ยังลดลงช้า ผลต่างครั้งเดียวจึงไม่พอ ผลต่างครั้งที่ 2 แกว่งรอบศูนย์ระหว่างประมาณ −3 ถึง 3 และ sample ACF มีแท่งที่เกินขอบเฉพาะ lag ต้น ๆ ตรงกับ MA(2) จึงได้ d = 2 และ q = 2 ลำดับของการอ่านนี้คือกฎเลือก d ใน Lesson 7</p>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 9 และ 10</div>
-<ul>
-<li>นิยาม ARIMA(p,d,q): \(\nabla^dX_t\) เป็น ARMA(p,q) และรูป \(\Phi(B)(1-B)^dX_t=\theta(B)w_t\)</li>
-<li>ความหมายของ p, d, q และชื่อย่อ AR, MA, ARMA, ARI, IMA</li>
-<li>กรณี nonzero mean: \(\alpha=\mu(1-\phi_1-\dots-\phi_p)\)</li>
-<li>แทบไม่ต้องใช้ d มากกว่า 2</li>
-<li>ระบุ p, d, q จากสมการ โดยแยกตัวประกอบ หา \((1-B)\) และตัดตัวประกอบร่วม</li>
-<li>เขียน IMA(1,1) และ IMA(2,2) ทั้งรูป backshift และรูปกระจาย</li>
-</ul>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s11">11. ใบงาน ARMA_properties</h2>
-
-<p>ไฟล์ ARMA_properties เป็นใบงาน 9 หน้าที่เว้นช่องให้เติมระหว่างเรียน เนื้อหาเชื่อม Lecture 6 กับ Lecture 7 หัวข้อนี้แสดงทุกหน้าและเติมช่องที่เว้นไว้</p>
-
-<figure>
-<img src="../assets/slides/ts6a-p02.png" alt="ARMA_properties: ใบงานหน้า 1: Partial autocovariance function review" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 1: Partial autocovariance function review</figcaption>
-</figure>
-
-<p>หน้านี้ให้ AR(1) \(X_t=\phi_1X_{t-1}+w_t\) แล้วเว้นให้หา \(\gamma(1)\) และ \(\gamma(2)\) สรุป และ PACF ของ AR(1) คำตอบอยู่ใน<a href="#s8-ar1">การ์ดในหัวข้อ 8</a>: \(\gamma(1)=\phi_1\gamma(0)\), \(\gamma(2)=\phi_1^2\gamma(0)\) โดย \(\gamma(0)=\sigma^2/(1-\phi_1^2)\) สรุปคือ \(\gamma(h)=\phi_1^h\gamma(0)\) และ \(\rho(h)=\phi_1^h\) ส่วน PACF คือ \(\phi_{11}=\phi_1\) และ \(\phi_{hh}=0\) เมื่อ \(h\ge2\)</p>
-
-<figure>
-<img src="../assets/slides/ts6a-p03.png" alt="ARMA_properties: ใบงานหน้า 2: Definition, PACF and ACF, Sample PACF" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 2: Definition, PACF and ACF, Sample PACF</figcaption>
-</figure>
-
-<p>หน้านี้เว้นสามส่วน ส่วน Definition คือนิยามของ PACF: \(\phi_{11}=\rho(1)\) และ \(\phi_{hh}=\mathrm{corr}(X_h-X_h^{h-1},X_0-X_0^{h-1})\) ตามหัวข้อ 7 ส่วน PACF and ACF เป็นตารางสามแถว คือ AR(p), MA(q) และ ARMA(p,q) ซึ่งเติมได้ตามตารางท้ายหัวข้อ 8: AR(p) มี ACF tails off และ PACF cuts off after lag p, MA(q) มี ACF cuts off after lag q และ PACF tails off, ARMA(p,q) มีทั้งสอง tails off ส่วน Sample PACF คือการใช้สูตร Durbin-Levinson กับ sample autocorrelations ตามหน้า 37 ซึ่งใน R คือคำสั่ง <code>pacf()</code></p>
-
-<figure>
-<img src="../assets/slides/ts6a-p04.png" alt="ARMA_properties: ใบงานหน้า 3: The Box-Jenkins model building process" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 3: The Box-Jenkins model building process</figcaption>
-</figure>
-
-<p>แผนภาพแสดงขั้นตอนของ Box-Jenkins เริ่มจาก Plot series แล้วถามว่า Is it stationary? ถ้าไม่ ให้ Difference “integrate” series แล้วถามใหม่ ถ้าใช่ ไปที่ Model identification ตามด้วย Model estimation แล้วถามว่า Is model adequate? ถ้าไม่ ให้ Modify model แล้วกลับไป identification ถ้าใช่ จึงทำ Forecasts แผนภาพมีวงวนสองวง วงแรกทำ differencing จนข้อมูล stationary วงที่สองปรับโมเดลจนผ่านการตรวจสอบ Lecture 7 ขยายทุกกล่องของแผนภาพนี้</p>
-<p>ครึ่งล่างของหน้าเริ่มเรื่อง Some issues with ARMA models ARMA(p,q) เขียนว่า \(X_t=\alpha+\sum_{j=1}^{p}\phi_jX_{t-j}+\sum_{j=1}^{q}\theta_jw_{t-j}+w_t\) หรือ \(\Phi(B)X_t=\theta(B)w_t\) โดย \(\Phi(B)=1-\sum\phi_jB^j\) และ \(\theta(B)=1+\sum\theta_jB^j\) ประเด็นแรกคือ Parameter redundancy: ถ้า \(\Phi(z)\) และ \(\theta(z)\) มีตัวประกอบร่วม ตัวประกอบนั้นตัดออกได้ โมเดลจึงเหมือนกับโมเดลที่มีอันดับต่ำกว่า ใบงานระบุว่าจะสมมติว่าไม่มี redundancy ตัวอย่าง (b) ในหัวข้อ 9 เป็นกรณีนี้</p>
-
-<figure>
-<img src="../assets/slides/ts6a-p05.png" alt="ARMA_properties: ใบงานหน้า 4: Causality, Invertibility และ Exercises" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 4: Causality, Invertibility และ Exercises</figcaption>
-</figure>
-
-<p>Causality: ถ้า \(\Phi(z)\ne0\) สำหรับทุก \(|z|\le1\) แล้ว \(X_t\) เขียนได้ในรูปของ w ปัจจุบันและอดีต ใบงานระบุว่าจะสมมติ causality เงื่อนไขนี้พูดอีกแบบคือ \(\Phi\) ไม่มีรากในหรือบนวงกลมหนึ่งหน่วย ซึ่งเท่ากับรากทุกตัวมี modulus มากกว่า 1 Invertibility: ถ้า \(\theta(z)\ne0\) สำหรับทุก \(|z|\le1\) แล้ว \(w_t\) เขียนได้ในรูปของ X ปัจจุบันและอดีต และ \(X_t\) เขียนได้เป็น autoregression อันดับอนันต์ ใบงานระบุว่าจะสมมติ invertibility สองเงื่อนไขนี้เป็นคู่กัน: causality ตรวจฝั่ง AR และ invertibility ตรวจฝั่ง MA</p>
-
-<div class="calc" id="s11-ex">
-<div class="calc-title">เฉลย Exercises ของใบงานหน้า 4</div>
-<p>อาจารย์ทำสี่ข้อนี้ในวิดีโอ TIME SERIES (CLASS 7-2) เฉลยต่อไปนี้ถอดจากกระดาษที่อาจารย์เขียน เวลาในวงเล็บคือตำแหน่งในวิดีโอ</p>
-<ol class="steps">
-<li><div class="st-title">\(X_t=0.3X_{t-1}+w_t\) (21:15–24:00)</div>
-<p>\((1-0.3B)X_t=w_t\) และ \(\Phi(x)=1-0.3x=0\) ได้ \(|x|=1/0.3=3.33&gt;1\) จึง causal และไม่มีส่วน MA จึง invertible</p></li>
-<li><div class="st-title">\(X_t=w_t-1.3w_{t-1}+0.4w_{t-2}\) (25:00–28:30)</div>
-<p>\(\theta(x)=1-1.3x+0.4x^2\) ใช้สูตรกำลังสองที่ \(a=0.4\), \(b=-1.3\), \(c=1\): \(b^2-4ac=0.09\) และ \(x=(1.3\pm0.3)/0.8=2\) และ \(1.25\) ทั้งสองมากกว่า 1 จึง invertible และไม่มีส่วน AR จึง causal</p></li>
-<li><div class="st-title">\(X_t=0.5X_{t-1}+w_t-0.3w_{t-1}+1.2w_{t-2}\) (29:00–37:30)</div>
-<p>\((1-0.5B)X_t=(1-0.3B+1.2B^2)w_t\) ฝั่ง AR: \(x=2&gt;1\) จึง causal ฝั่ง MA: \(D=(-0.3)^2-4(1.2)(1)=-4.71&lt;0\) รากคือ \(0.125\pm0.904i\) มี modulus \(\sqrt{0.125^2+0.904^2}=0.913&lt;1\) จึงไม่ invertible</p></li>
-<li><div class="st-title">\(X_t=0.4X_{t-1}+0.45X_{t-2}+w_t+w_{t-1}+0.25w_{t-2}\) (37:50–44:00)</div>
-<p>\((1-0.4B-0.45B^2)X_t=(1+B+0.25B^2)w_t\) แยกตัวประกอบได้ \((1+0.5B)(1-0.9B)X_t=(1+0.5B)(1+0.5B)w_t\) ตัดตัวประกอบร่วม \((1+0.5B)\) เหลือ \((1-0.9B)X_t=(1+0.5B)w_t\) โมเดลเป็น ARMA(1,1) ไม่ใช่ ARMA(2,2) ฝั่ง AR: \(x=1/0.9=1.11&gt;1\) จึง causal ฝั่ง MA: \(x=-2\), \(|x|=2&gt;1\) จึง invertible</p></li>
-</ol>
-<p>ข้อสรุปของข้อ 3 ว่าไม่ invertible เติมจากผล modulus 0.913 ตามเงื่อนไขในใบงาน ในเฟรมของวิดีโอที่อ่านได้ อาจารย์เขียนถึงค่า 0.913 คำตอบแบบเต็มที่ลอกได้และวิธีเขียนเป็น MA(∞) กับ AR(∞) อยู่ใน <a href="../reference/0007-invertible-causal-answer-sheets.html">ใบคำตอบ Invertible และ Causal</a></p>
-</div>
-
-<div class="box exam">
-<div class="label">อาจารย์พูดในคลิป Class 7-2 (ถอดจากเสียง)</div>
-<ul>
-<li><b>เขียนแค่ pattern ก็ได้เต็ม</b> หลังเขียน \(X_t=(1+1.4B+1.4(0.9)B^2+1.4(0.9)^2B^3+\dots)w_t\) อาจารย์บอกว่า "ถ้าในข้อสอบคุณเขียนแค่นี้ ผมให้เต็ม ให้คุณหา pattern เจอ" ส่วนรูป \(X_t=w_t+\sum_{j=1}^{\infty}1.4(0.9)^{j-1}w_{t-j}\) ในหนังสือคือการเขียน "ให้ดู professional" (56:10)</li>
-<li><b>คำถามที่อาจารย์ทิ้งไว้ทุกรุ่น</b>: ทำไมต้องแปลง MA(q) เป็น AR(∞) ในเมื่อ MA(q) มีพารามิเตอร์แค่ q ตัว (13:34) คำตอบ: MA(1) ที่ θ กับ 1/θ ให้ ACF เท่ากัน เช่น 1/5 กับ 5 ได้ 0.1923 ทั้งคู่ เงื่อนไข invertible ทำให้เลือกโมเดลได้ตัวเดียว และทำให้เขียน \(w_t\) จากข้อมูลในอดีตได้ จึงคำนวณ residual และพยากรณ์ได้ R และ Python จึงบังคับให้ \(|\theta|&lt;1\)</li>
-<li>ข้อ 4: "อย่าเช็คจากสมการก่อนตัด เพราะมัน redundant" ให้ตัดตัวประกอบร่วมก่อนแล้วจึงตรวจ (42:25)</li>
-<li>วิธีขยาย \((1-0.9z)^{-1}\) อาจารย์เรียกว่า power series และบอกว่าถ้าทำ "ลูกทุ่ง" จะติดที่รูปเศษส่วน ต้องใช้สูตร \((1-az)^{-1}=1+az+a^2z^2+\dots\) เมื่อ \(|a|&lt;1\) (50:50–52:58) ที่มาของวิธีอยู่ในหนังสือหน้า 94–95</li>
-<li>ระวัง: ช่วง 36:41 อาจารย์พูดถึงข้อ 3 ว่า "ไม่ stationary" แต่ตามทฤษฎีบท stationarity ของ ARMA ขึ้นกับรากของ \(\Phi\) เท่านั้น ข้อ 3 จึงเป็น causal (stationary) แต่ไม่ invertible ให้ตอบตามทฤษฎีบท และช่วง 59:21 อาจารย์อ่าน π-weight ว่า "+1.4" แต่คูณจริงได้ \(w_t=X_t-1.4\sum_{j\ge1}(-0.5)^{j-1}X_{t-j}\)</li>
-</ul>
-<p>บันทึกฉบับเต็มอยู่ใน <code>video-notes/class-7-2.md</code></p>
-</div>
-
-<figure>
-<img src="../assets/slides/ts6a-p06.png" alt="ARMA_properties: ใบงานหน้า 5: EACF for ARMA" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 5: EACF for ARMA</figcaption>
-</figure>
-
-<p>ในทางปฏิบัติ อันดับจริง p และ q ของ ARMA(p,q) ไม่ทราบค่าและต้องประมาณ ใบงานเสนอฟังก์ชันชนิดใหม่ที่เรียกว่า sample extended autocorrelation function (EACF) โดยอ้าง Cryer และ Chan (2008) เหตุที่ต้องมีเครื่องมือนี้คือ ARMA มี ACF และ PACF ที่ tails off ทั้งคู่ จึงอ่านอันดับจากสองกราฟนั้นไม่ได้ Theoretical EACF เป็นตารางที่แถวคืออันดับ AR และคอลัมน์คืออันดับ MA แต่ละช่องเป็น x หรือ 0 สำหรับ ARMA(1,1) แถว 0 เป็น x ทั้งหมด แถว 1 เป็น x ที่คอลัมน์ 0 แล้วเป็น 0 ตั้งแต่คอลัมน์ 1 แถว 2 เป็น 0 ตั้งแต่คอลัมน์ 2 และแถวถัดไปเริ่มเป็น 0 ช้าลงแถวละหนึ่งคอลัมน์</p>
-
-<figure>
-<img src="../assets/slides/ts6a-p07.png" alt="ARMA_properties: ใบงานหน้า 6: รูปแบบของ EACF" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 6: รูปแบบของ EACF</figcaption>
-</figure>
-
-<p>รูปแบบที่ต้องมองหา: ค่าศูนย์เรียงเป็นรูป “wedge” ที่มีปลายแหลมที่ตำแหน่ง (1,1) ปลายแหลมนี้ตรงกับ p = 1 และ q = 1 ของโมเดล ตาราง EACF ของ ARMA(2,2) มีแถว 0 และแถว 1 เป็น x ทั้งหมด และศูนย์เริ่มที่แถว 2 คอลัมน์ 2 ปลายของ wedge อยู่ที่ (2,2) จึงได้ p = 2 และ q = 2 ท้ายหน้าเริ่มตารางของ ARMA(2,1) ซึ่งต่อในหน้าถัดไป</p>
-
-<figure>
-<img src="../assets/slides/ts6a-p08.png" alt="ARMA_properties: ใบงานหน้า 7: ARMA(2,1) และ Sample EACF" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 7: ARMA(2,1) และ Sample EACF</figcaption>
-</figure>
-
-<p>ในตารางของ ARMA(2,1) ศูนย์เริ่มที่แถว 2 คอลัมน์ 1 ปลายของ wedge อยู่ที่ (2,1) จึงได้ p = 2 และ q = 1 ส่วน Sample EACF ใบงานเตือนสองข้อ ข้อแรก ตารางข้างต้นเป็นผลทางทฤษฎีสำหรับตัวอย่างขนาดใหญ่ไม่จำกัด กับข้อมูลจริงไม่ควรคาดว่าตารางจะมีรูปแบบชัดเจนเช่นนั้น ข้อที่สอง sample EACF อาจกำกวมและให้ข้อมูลน้อยหรือไม่ให้เลย โดยเฉพาะเมื่อ n เล็ก ท้ายหน้าเริ่มโค้ด R ด้วย <code>library(TSA)</code></p>
+<p>partial correlation คือ <mark class="src" data-p="30">conditional correlation</mark> คือ correlation ระหว่างสองตัวแปร หลังจากนำผลของตัวแปรกลุ่มอื่นออกไปแล้ว อาจารย์อธิบายผ่าน regression ธรรมดาก่อน (Class 6, 0:36:39–0:43:18): ถ้า Y มีตัวแปรต้น X₁, X₂, X₃ ความสัมพันธ์ระหว่าง X₁ กับ Y "มี X₂, X₃ เจือปนด้วย เรียกว่า confound" partial correlation คือการ remove อิทธิพลของ X₂, X₃ ออก</p>
 
 <div class="box beginner">
-<div class="label">อ่านตาราง EACF อย่างไร</div>
-<ol>
-<li>แถวคืออันดับ AR (p) และคอลัมน์คืออันดับ MA (q)</li>
-<li>มองหาบริเวณรูปสามเหลี่ยมที่เป็นศูนย์ทั้งหมด ใน R ศูนย์แสดงด้วยตัว o</li>
-<li>หาปลายแหลมด้านบนซ้ายของบริเวณนั้น</li>
-<li>แถวของปลายแหลมคือ p และคอลัมน์ของปลายแหลมคือ q</li>
-</ol>
-<table class="compact">
-<tr><th>โมเดล</th><th>ปลายของ wedge</th></tr>
-<tr><td>ARMA(1,1)</td><td>แถว 1 คอลัมน์ 1</td></tr>
-<tr><td>ARMA(2,1)</td><td>แถว 2 คอลัมน์ 1</td></tr>
-<tr><td>ARMA(2,2)</td><td>แถว 2 คอลัมน์ 2</td></tr>
-</table>
+<div class="label">Simpson's paradox ที่อาจารย์เล่า</div>
+<p>อาจารย์ยกตัวอย่างการรับนักศึกษาของ UC Berkeley ช่วงทศวรรษ 1970 (Class 6, 0:38:58–0:41:35) ข้อมูลปี 1973 ที่รู้จักกันดี: ภาพรวมผู้ชายถูกรับราว 44% ผู้หญิงราว 35% ดูเหมือนลำเอียง แต่เมื่อแยกดูทีละคณะ หลายคณะรับผู้หญิงในอัตราเท่ากันหรือสูงกว่า ความต่างในภาพรวมเกิดเพราะผู้หญิงสมัครคณะที่แข่งขันสูงมากกว่า คณะจึงเป็นตัวแปรที่ "เจือปน" อยู่ ข้อสรุปเปลี่ยนเมื่อนำตัวแปรนั้นเข้ามาพิจารณา นี่คือเหตุผลที่ต้องมี partial correlation</p>
 </div>
 
 <figure>
-<img src="../assets/slides/ts6a-p09.png" alt="ARMA_properties: ใบงานหน้า 8: R codes ของ EACF" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 8: R codes ของ EACF</figcaption>
+<img src="../assets/slides/ts6-p31.png" alt="Slide 6 หน้า 31: คำนวณ partial correlation จาก residual ของสอง regression" loading="lazy">
+<figcaption>Slide 6 หน้า 31 — คำนวณ partial correlation จาก residual ของสอง regression</figcaption>
 </figure>
 
-<p>โค้ดจำลอง ARMA สามโมเดลที่มี n = 200 แล้วเรียก <code>eacf()</code> โมเดลแรกคือ ARMA(1,1) ที่ <code>ar = c(0.6), ma = c(0.8)</code> โมเดลที่สองคือ ARMA(2,2) ที่ <code>ar = c(0.5,-0.5), ma = c(0.8,-0.2)</code> และโมเดลที่สามคือ ARMA(3,3) ที่ <code>ar = c(0.8,0.8,-0.9), ma = c(-0.9,0.8,-0.2)</code> ใน <code>arima.sim</code> ใช้ <code>order = c(p,0,q)</code> และใส่ทั้ง <code>ar</code> และ <code>ma</code></p>
-
-<figure>
-<img src="../assets/slides/ts6a-p10.png" alt="ARMA_properties: ใบงานหน้า 9: ผลของ eacf()" loading="lazy">
-<figcaption>ARMA_properties — ใบงานหน้า 9: ผลของ eacf()</figcaption>
-</figure>
-
-<p>หน้านี้แสดงผลของ <code>eacf()</code> กับข้อมูลจำลองของ ARMA(2,2) และ ARMA(3,3) ตารางมีแถว 0 ถึง 7 และคอลัมน์ 0 ถึง 13 แสดงด้วยตัว x และ o ในตารางของ ARMA(2,2) แถว 2 เริ่มเป็น o ที่คอลัมน์ 2 และเป็น o ต่อเนื่องไปทางขวา ตรงกับปลายของ wedge ที่ (2,2) แต่มี x กระจายอยู่ในแถวอื่นโดยไม่เป็นรูปแบบ ซึ่งเป็นลักษณะของ sample EACF ที่ใบงานเตือนไว้ ตารางของ ARMA(3,3) อ่านยากกว่า เพราะ x กระจายมากกว่า ตัวอักษรในภาพมีขนาดเล็ก การอ่านตำแหน่งของ o ในบทเรียนนี้จึงเป็นค่าโดยประมาณ ผลของ <code>eacf()</code> เปลี่ยนทุกครั้งที่จำลองข้อมูลใหม่</p>
+<p>วิธีคำนวณบนสไลด์มีสองขั้น ขั้นแรกทำ regression สองสมการ: y บน x₁, x₂ และ x₃ บน x₁, x₂ ขั้นสองนำ <mark class="src" data-p="31">residuals</mark> ของสองสมการมาหา correlation กัน เพราะ <mark class="src" data-p="31">we correlate the “parts” of y and x3 that are not predicted by x1 and x2.</mark> residual คือส่วนที่ x₁, x₂ อธิบายไม่ได้ correlation ของส่วนที่เหลือจึงเป็นความสัมพันธ์ของ y กับ x₃ ที่ไม่ผ่าน x₁, x₂</p>
 
 <!-- ===================================================== -->
-<h2 id="s12">12. โค้ด R_codes ทั้งไฟล์</h2>
+<h2 id="s7">7. PACF ของอนุกรมเวลา: นิยาม φ_hh</h2>
 
-<p>ไฟล์ R_codes ของ Lecture 6 มีสามส่วน คือ ARMA(1,1), PACF และ EACF ส่วน EACF อธิบายแล้วในหัวข้อ 11 ค่าที่แสดงในหัวข้อนี้ได้จากการรัน <code>ARMAacf</code></p>
+<figure>
+<img src="../assets/slides/ts6-p32.png" alt="Slide 6 หน้า 32: PACF ของ X_t กับ X(t−h) โดยตัดผลของค่าที่อยู่ระหว่างกลาง" loading="lazy">
+<figcaption>Slide 6 หน้า 32 — PACF ของ X_t กับ X(t−h) โดยตัดผลของค่าที่อยู่ระหว่างกลาง</figcaption>
+</figure>
 
-<h3>ส่วน ARMA(1,1): theoretical ACF</h3>
-<pre><code>par(mfrow=c(2,2))
+<p>ยกแนวคิดเดียวกันมาใช้กับอนุกรมเวลา: partial autocorrelation ระหว่าง \(X_t\) กับ \(X_{t-h}\) คือ correlation หลังจากตัดผลของ \(X_{t-1},\dots,X_{t-h+1}\) ซึ่งเป็นจุดเวลาที่ "ซ่อนอยู่" ตรงกลาง (Class 6, 0:44:29–0:50:41) ที่ lag 1 ไม่มีจุดคั่นกลาง PACF lag 1 จึงเท่ากับ ACF lag 1 พอดี "φ₁₁ = ρ₁ เพราะ lag 1 ไม่มีจุดคั่นกลาง" (Class 6, 0:55:09)</p>
 
-y = ARMAacf(ar = 0.9, ma = 0.25, lag.max = 20)
-plot(y, x = 0:20, type = "h", ylim = c(-1,1), xlab = "h", ylab = "Autocorrelation", main = "ACF (phi=0.9, theta=0.25)")
-abline(h = 0)</code></pre>
-<p>โค้ดทำสี่กรณี คือ \(\phi=0.9,-0.9,0.5,-0.5\) โดย \(\theta=0.25\) ทุกกรณี จุดต่างจาก Lesson 5 คือใส่ทั้ง <code>ar</code> และ <code>ma</code> ในคำสั่งเดียว</p>
-<table class="compact">
-<tr><th>\((\phi,\theta)\)</th><th>\(\rho_1\)</th><th>\(\rho_2\)</th><th>\(\rho_3\)</th><th>\(\rho_4\)</th><th>รูปทรง</th></tr>
-<tr><td>(0.9, 0.25)</td><td>0.931</td><td>0.838</td><td>0.754</td><td>0.679</td><td>บวก ลดลงช้า</td></tr>
-<tr><td>(−0.9, 0.25)</td><td>−0.822</td><td>0.740</td><td>−0.666</td><td>0.600</td><td>สลับเครื่องหมาย ลดลงช้า</td></tr>
-<tr><td>(0.5, 0.25)</td><td>0.643</td><td>0.321</td><td>0.161</td><td>0.080</td><td>บวก ลดลงเร็ว</td></tr>
-<tr><td>(−0.5, 0.25)</td><td>−0.269</td><td>0.135</td><td>−0.067</td><td>0.034</td><td>สลับเครื่องหมาย ลดลงเร็ว</td></tr>
+<figure>
+<img src="../assets/slides/ts6-p33.png" alt="Slide 6 หน้า 33: PACF lag 2 และ lag 3 เป็น conditional covariance" loading="lazy">
+<figcaption>Slide 6 หน้า 33 — PACF lag 2 และ lag 3 เป็น conditional covariance</figcaption>
+</figure>
+
+<p>PACF lag 2 คือ covariance ของ \(x_t\) กับ \(x_{t-2}\) เมื่อรู้ \(x_{t-1}\) หารด้วยส่วนเบี่ยงเบนแบบมีเงื่อนไข lag 3 ใส่เงื่อนไขเพิ่มเป็น \(x_{t-1},x_{t-2}\) และ lag สูงขึ้นก็เพิ่มเงื่อนไขไปเรื่อย ๆ ใช้กับ AR(1) φ = 0.9: เมื่อรู้ \(x_{t-1}\) แล้ว \(x_t=0.9x_{t-1}+w_t\) ส่วนที่ยังสุ่มคือ \(w_t\) ซึ่งไม่เกี่ยวกับ \(x_{t-2}\) PACF lag 2 จึงเป็นศูนย์</p>
+
+<figure>
+<img src="../assets/slides/ts6-p34.png" alt="Slide 6 หน้า 34: นิยาม φ_hh ด้วย regression ของ X_h และ X_0 บนค่าระหว่างกลาง" loading="lazy">
+<figcaption>Slide 6 หน้า 34 — นิยาม φ_hh ด้วย regression ของ X_h และ X_0 บนค่าระหว่างกลาง</figcaption>
+</figure>
+
+<p>สไลด์ใช้สัญลักษณ์ \(\phi_{hh}\) (φ₁₁ คือ lag 1, φ₂₂ คือ lag 2) "มันเป็นตัว φ คล้าย ๆ AR ... อาจจะงงนิดนึง" (Class 6, 0:46:46) \(X_h^{h-1}\) คือค่าทำนายของ \(X_h\) จาก regression บน \(X_{h-1},\dots,X_1\) "X ยกกำลัง h−1 ไม่ใช่ยกกำลังนะครับ" (Class 6, 0:49:33) เป็นเพียงป้ายบอกว่าใช้ตัวแปร h − 1 ตัว และ \(X_0^{h-1}\) คือค่าทำนายของ \(X_0\) จากตัวแปรชุดเดียวกัน</p>
+
+<figure>
+<img src="../assets/slides/ts6-p35.png" alt="Slide 6 หน้า 35: φ₁₁ = ρ(1) และ φ_hh คือ correlation ของ prediction errors" loading="lazy">
+<figcaption>Slide 6 หน้า 35 — φ₁₁ = ρ(1) และ φ_hh คือ correlation ของ prediction errors</figcaption>
+</figure>
+
+<p>\(\phi_{11}=\mathrm{corr}(X_1,X_0)=\rho(1)\) และสำหรับ h ≥ 2 \(\phi_{hh}\) คือ correlation ของส่วนที่เหลือ \(X_h-X_h^{h-1}\) กับ \(X_0-X_0^{h-1}\) ซึ่งเป็นสูตรเดียวกับ residual ของสอง regression ในหัวข้อ 6 ทุกประการ ต่างกันแค่ตัวแปรเป็นค่าของอนุกรมเดียวกันคนละเวลา</p>
+
+<figure>
+<img src="../assets/slides/ts6-p36.png" alt="Slide 6 หน้า 36: Prediction errors และนิยามเทียบเท่าเมื่อเป็น normal" loading="lazy">
+<figcaption>Slide 6 หน้า 36 — Prediction errors และนิยามเทียบเท่าเมื่อเป็น normal</figcaption>
+</figure>
+
+<p>ส่วนที่เหลือทั้งสองเรียกว่า <mark class="src" data-p="36">prediction errors</mark> และถ้าอนุกรมเป็น normal นิยามจะเทียบเท่ากับ <mark class="src" data-p="36">𝝓𝒉𝒉= 𝒄𝒐𝒓𝒓(𝑿𝟎, 𝑿𝒉|𝑿𝒉−𝟏, 𝑿𝒉−𝟐, … , 𝑿𝟏)</mark> คือ correlation แบบมีเงื่อนไข ประโยคสรุปที่ควรจำ: \(\phi_{hh}\) วัด correlation ระหว่าง \(X_h\) กับ \(X_0\) หลังจากตัดผลเชิงเส้นของ \(X_{h-1},\dots,X_1\) ออกแล้ว</p>
+
+<figure>
+<img src="../assets/slides/ts6-p37.png" alt="Slide 6 หน้า 37: Durbin–Levinson algorithm สำหรับคำนวณ PACF" loading="lazy">
+<figcaption>Slide 6 หน้า 37 — Durbin–Levinson algorithm สำหรับคำนวณ PACF</figcaption>
+</figure>
+
+<p>การคำนวณ PACF จริงใช้ Durbin–Levinson ซึ่ง "ต้องทำย้อนหลังด้วย และก็มีตัว ρ มาเกี่ยวด้วย" และอาจารย์บอกชัดว่า "อันนี้ผมจะไม่ออกสอบ เอาให้คุณเข้าใจคอนเซ็ปต์" (Class 6, 0:53:44–0:54:23) สูตรสำหรับ lag 2 สั้นพอที่จะใช้ตรวจความเข้าใจ: \(\phi_{22}=\dfrac{\rho_2-\rho_1^2}{1-\rho_1^2}\)</p>
+
+<div class="calc" id="s7-phi22">
+<div class="calc-title">ใช้สูตร φ₂₂ ตรวจว่า PACF ตัดตามที่ทฤษฎีบอก</div>
+<ol class="steps">
+<li><div class="st-title">AR(1) φ = 0.9</div><p>ρ₁ = 0.9, ρ₂ = 0.81 ได้ \(\phi_{22}=(0.81-0.81)/(1-0.81)=0\) ตัวเศษเป็นศูนย์พอดีเพราะ ρ₂ = ρ₁² ใน AR(1)</p></li>
+<li><div class="st-title">AR(2) φ = (−0.5, 0.25)</div><p>ρ₁ = −0.667, ρ₂ = 0.583 ได้ \(\phi_{22}=(0.583-0.444)/(1-0.444)=0.139/0.556=0.25\) เท่ากับ φ₂ พอดี</p></li>
+<li><div class="st-title">MA(1) θ = −0.9</div><p>ρ₁ = −0.497, ρ₂ = 0 ได้ \(\phi_{22}=(0-0.247)/(1-0.247)=-0.328\) ไม่เป็นศูนย์ แม้ ρ₂ = 0</p></li>
+</ol>
+<div class="answer">PACF lag สุดท้ายของ AR(p) เท่ากับ φ_p และหลังจากนั้นเป็นศูนย์ ส่วน MA มี PACF ไม่เป็นศูนย์แม้ ACF จะเป็นศูนย์แล้ว ทุกค่าตรงกับ ARMAacf(..., pacf = TRUE)</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s8">8. PACF ของ AR และ MA และตารางสรุป</h2>
+
+<figure>
+<img src="../assets/slides/ts6-p38.png" alt="Slide 6 หน้า 38: Example: PACF ของ AR(1) และ AR(2) (Example 3.14)" loading="lazy">
+<figcaption>Slide 6 หน้า 38 — Example: PACF ของ AR(1) และ AR(2) (Example 3.14)</figcaption>
+</figure>
+
+<p>สไลด์ให้ดูรายละเอียดของ AR(1) ใน <mark class="src" data-p="38">Example 3.14 (page 106)</mark> เหตุผลสั้น ๆ: ใน AR(p) เมื่อรู้ \(X_{t-1},\dots,X_{t-p}\) แล้ว ส่วนที่เหลือคือ \(w_t\) ซึ่งไม่เกี่ยวกับ \(X_{t-p-1}\) หรือเก่ากว่า PACF ที่ lag เกิน p จึงเป็นศูนย์</p>
+
+<figure>
+<img src="../assets/slides/ts6-p39.png" alt="Slide 6 หน้า 39: สร้างข้อมูล AR(1) φ = 0.9 และ AR(2) φ = (−0.5, 0.25)" loading="lazy">
+<figcaption>Slide 6 หน้า 39 — สร้างข้อมูล AR(1) φ = 0.9 และ AR(2) φ = (−0.5, 0.25)</figcaption>
+</figure>
+
+<p>สองโมเดลที่ใช้ดูคือ \(X_t=0.9X_{t-1}+w_t\) และ \(X_t=-0.5X_{t-1}+0.25X_{t-2}+w_t\) โค้ดใน R_codes ของ Class 6 ใช้ <code>ARMAacf(..., pacf=TRUE)</code> สำหรับค่าทฤษฎี และ <code>pacf()</code> สำหรับข้อมูลจำลอง (Class 6, 1:02:34–1:03:43)</p>
+
+<figure><img src="../assets/slides/ts6-r3-ar-pacf.png" alt="Population ACF และ PACF ของ AR(1) และ AR(2)" loading="lazy"><figcaption>รันจาก R_codes.txt (Class 6): population ACF และ PACF ของ AR(1) φ = 0.9 และ AR(2) φ = (−0.5, 0.25)</figcaption></figure>
+
+<p>ทฤษฎี: AR(1) มี ACF 0.9, 0.81, 0.73 ลดช้า แต่ PACF คือ 0.9 ที่ lag 1 แล้วเป็นศูนย์ตั้งแต่ lag 2 AR(2) มี ACF สลับเครื่องหมาย −0.667, 0.583, −0.458 แต่ PACF คือ −0.667 และ 0.25 แล้วเป็นศูนย์ตั้งแต่ lag 3 PACF จึงอ่าน p ได้ตรง ๆ: p = 1 และ p = 2 ในโค้ด แกนนอนของ PACF เริ่มที่ lag 1 (<code>x = 1:20</code>) เพราะ PACF ไม่มี lag 0</p>
+
+<figure><img src="../assets/slides/ts6-r4-ar-sample.png" alt="Sample ACF และ PACF ของ AR(1) และ AR(2)" loading="lazy"><figcaption>รันด้วย set.seed(3), n = 150: sample ACF และ PACF</figcaption></figure>
+
+<p>ข้อมูลจำลอง 150 ค่ามีเส้นประที่ \(2/\sqrt{150}=0.163\) AR(1): sample PACF = 0.899, −0.010, 0.031, −0.056 มีแค่ lag 1 ทะลุเส้น จึงอ่านได้ p = 1 AR(2): sample PACF = −0.703, 0.163, −0.053 lag 2 แตะเส้นพอดี ค่าทฤษฎีคือ 0.25 แต่ข้อมูลชุดนี้ได้แค่ 0.163 ในทางปฏิบัติต้องลองทั้ง AR(1) และ AR(2) แล้วเทียบ AIC ใน Lesson 7 เมื่อฟิต <code>arima(a2, order = c(2,0,0))</code> ได้ ar2 = 0.1641 (s.e. 0.0810) ประมาณ 2 เท่าของ s.e. จึงยังถือว่ามีนัยสำคัญ อาจารย์เห็นกรณีคล้ายกันในคลาส: PACF ของ AR(2) "มี lag 4 โผล่นิดหนึ่ง แต่มันควรจะหลังจาก lag 2 เป็น 0" (Class 6, 1:08:12) ข้อมูลจริงไม่เคย perfect</p>
+
+<figure>
+<img src="../assets/slides/ts6-p40.png" alt="Slide 6 หน้า 40: General results for AR(p): φ_hh = 0 เมื่อ h > p" loading="lazy">
+<figcaption>Slide 6 หน้า 40 — General results for AR(p): φ_hh = 0 เมื่อ h > p</figcaption>
+</figure>
+
+<p>ผลทั่วไปของ AR(p): \(\phi_{11},\dots,\phi_{pp}\) ไม่เป็นศูนย์ และ \(\phi_{hh}=0\) ทุก h &gt; p PACF จึง <mark class="src" data-p="40">“drop off”</mark> หลัง lag p และ <mark class="src" data-p="40">PACF can help to determine the order of an AR(p)</mark> เหมือนที่ ACF ใช้หา q ของ MA "ACF ใช้ detect q (MA): หลัง lag q เป็น 0; PACF ใช้ detect p (AR): หลัง lag p เป็น 0" (Class 6, 0:57:43–0:59:33)</p>
+
+<figure>
+<img src="../assets/slides/ts6-p41.png" alt="Slide 6 หน้า 41: PACF ของ MA(1) ที่ invertible (Example 3.16)" loading="lazy">
+<figcaption>Slide 6 หน้า 41 — PACF ของ MA(1) ที่ invertible (Example 3.16)</figcaption>
+</figure>
+
+<p>คำถามกลับด้าน: PACF ของ MA เป็นอย่างไร สไลด์อ้าง <mark class="src" data-p="41">Example 3.16 (page 107)</mark> และให้เงื่อนไข |θ| &lt; 1 ซึ่งเรียกว่า invertible (Lesson 7) เหตุผลเชิงความหมาย: MA(1) ที่ invertible เขียนกลับเป็น AR(∞) ได้ คือ \(X_t\) ขึ้นกับค่าในอดีตทุกค่าด้วยน้ำหนักที่ลดลง ไม่มี lag ไหนที่ "ตัดได้" PACF ของ MA จึงค่อย ๆ ลดลง</p>
+
+<figure>
+<img src="../assets/slides/ts6-p42.png" alt="Slide 6 หน้า 42: สร้างข้อมูล MA(1) และ MA(2)" loading="lazy">
+<figcaption>Slide 6 หน้า 42 — สร้างข้อมูล MA(1) และ MA(2)</figcaption>
+</figure>
+
+<p>สไลด์ใช้ \(X_t=w_t-0.9w_{t-1}\) และ \(X_t=w_t+0.5w_{t-1}-0.25w_{t-2}\) ในโค้ด R ตรงกับ <code>ma = c(-0.9)</code> และ <code>ma = c(0.5,-0.25)</code></p>
+
+<figure><img src="../assets/slides/ts6-r5-ma-pacf.png" alt="Population ACF และ PACF ของ MA(1) และ MA(2)" loading="lazy"><figcaption>รันจาก R_codes.txt (Class 6): population ACF และ PACF ของ MA(1) θ = −0.9 และ MA(2) θ = (0.5, −0.25)</figcaption></figure>
+
+<p>"ตรงกันข้ามกัน" กับ AR (Class 6, 1:09:16–1:10:33): MA(1) มี ACF −0.497 ที่ lag 1 แล้วเป็นศูนย์ แต่ PACF ติดลบและลดลงช้า ๆ −0.497, −0.328, −0.243, −0.191 MA(2) มี ACF 0.286, −0.190 แล้วเป็นศูนย์ ส่วน PACF สลับเครื่องหมายและลดลง 0.286, −0.296, 0.185, −0.151 อาจารย์บอกว่า "PACF ของ MA(q) มีสูตรอยู่ ... หนังสือเขาจะไม่เขียนด้วยซ้ำ มันวุ่นวายมาก" (Class 6, 1:05:30) จึงจำแค่รูปร่าง</p>
+
+<figure><img src="../assets/slides/ts6-r6-ma-sample.png" alt="Sample ACF และ PACF ของ MA(1) และ MA(2)" loading="lazy"><figcaption>รันด้วย set.seed(3), n = 150: sample ACF และ PACF ของ MA</figcaption></figure>
+
+<p>sample ของ MA(1) ได้ ACF −0.497 แล้วตกลงในเส้นทันที (0.002, −0.016) ส่วน PACF −0.497, −0.325, −0.262, −0.244 ทะลุเส้นหลาย lag ก่อนลดลง MA(2) ได้ ACF 0.220, −0.187 ทะลุเส้นแล้ว lag 3 = 0.091 อยู่ในเส้น ส่วน PACF 0.220, −0.247, 0.220, −0.181 ยังทะลุเส้นถึง lag 4 รูปแบบ "ACF ตัด PACF ลาก" ชัดเจน</p>
+
+<figure>
+<img src="../assets/slides/ts6-p43.png" alt="Slide 6 หน้า 43: SUMMARY: ACF และ PACF ของ AR(p) และ MA(q)" loading="lazy">
+<figcaption>Slide 6 หน้า 43 — SUMMARY: ACF และ PACF ของ AR(p) และ MA(q)</figcaption>
+</figure>
+
+<p>สไลด์สรุปว่า <mark class="src" data-p="43">The PACF for an MA process behaves much like the ACF for an AR process of the same order.</mark> และให้ตารางจากหนังสือหน้า 108 ซึ่งอาจารย์วาดใหม่บนกระดาษ (Class 6, 1:04:01–1:06:09)</p>
+<table>
+<tr><th></th><th>ACF</th><th>PACF</th></tr>
+<tr><td>AR(p)</td><td>tail off (ลดลงช้า อาจสลับเครื่องหมายหรือเป็นคลื่น)</td><td>เป็นศูนย์หลัง lag p</td></tr>
+<tr><td>MA(q)</td><td>เป็นศูนย์หลัง lag q</td><td>tail off</td></tr>
+<tr><td>ARMA(p,q)</td><td>tail off</td><td>tail off</td></tr>
 </table>
-<p>ในทุกแถว ค่าตั้งแต่ lag 2 ได้จากการคูณ lag ก่อนหน้าด้วย \(\phi\) เช่น \(0.931\times0.9=0.838\) และ \(0.643\times0.5=0.321\) ACF ของ ARMA(1,1) จึงลดลงแบบเดียวกับ AR(1) ตั้งแต่ lag 2 ส่วนค่าที่ lag 1 ต่างจาก \(\phi\) เพราะส่วน MA: สูตรคือ \(\rho_1=\dfrac{(1+\phi\theta)(\phi+\theta)}{1+2\phi\theta+\theta^2}\) ตรวจกับแถวแรก: \((1.225)(1.15)/1.5125=0.931\) สูตรนี้มาจากตำรา ไม่อยู่ในสไลด์ ข้อสรุปคือ ACF ของ ARMA tails off เหมือน AR จึงแยก ARMA จาก AR ด้วย ACF ไม่ได้</p>
+<p>วิธีจำ: ตัวที่ "ตัด" บอกอันดับ ACF ตัดบอก q ของ MA PACF ตัดบอก p ของ AR แถว ARMA เป็นการบ้านจากอาจารย์ (Class 6, 1:06:17) คำตอบมาตรฐานคือ tail off ทั้งคู่ ไม่มีตัวไหนตัด จึงอ่าน p, q จาก ACF/PACF ไม่ได้</p>
 
-<h3>ส่วน PACF: theoretical ACF และ PACF</h3>
-<pre><code>y = ARMAacf(ar = c(0.9), lag.max = 20)
-plot(y, x = 0:20, type = "h", ylim = c(-1,1), xlab = "h",
-      ylab = "Autocorrelation", main = "Population ACF")
-abline(h = 0)
+<!-- ===================================================== -->
+<h2 id="s9">9. ARMA ผสม และ EACF</h2>
 
-y = ARMAacf(ar = c(0.9), lag.max = 20, pacf=TRUE)
-plot(y, x = 1:20, type = "h", ylim = c(-1,1), xlab = "h",
-      ylab = "Partial autocorrelation", main = "Population PACF")
-abline(h = 0)</code></pre>
-<table class="codeexp compact">
-<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>ARMAacf(ar = c(0.9), lag.max = 20)</td><td>ACF ทางทฤษฎีตั้งแต่ lag 0 ถึง 20 รวม 21 ค่า</td></tr>
-<tr><td>plot(y, x = 0:20, ...)</td><td>แกนนอนเริ่มที่ 0 เพราะ ACF มีค่าที่ lag 0</td></tr>
-<tr><td>ARMAacf(ar = c(0.9), lag.max = 20, pacf=TRUE)</td><td>เพิ่ม <code>pacf=TRUE</code> ได้ PACF ทางทฤษฎีตั้งแต่ lag 1 ถึง 20 รวม 20 ค่า</td></tr>
-<tr><td>plot(y, x = 1:20, ...)</td><td>แกนนอนเริ่มที่ 1 เพราะ PACF ไม่มีค่าที่ lag 0 ถ้าใช้ <code>x = 0:20</code> จำนวนค่าจะไม่ตรงกันและ R แจ้ง error</td></tr>
-</table>
-<p>ไฟล์ทำคู่ ACF กับ PACF สี่โมเดล คือ AR(1) ที่ 0.9, AR(2) ที่ (−0.5, 0.25), MA(1) ที่ −0.9 และ MA(2) ที่ (0.5, −0.25) ค่าทั้งหมดอยู่ในตารางของหัวข้อ 8</p>
+<p>ARMA ยากเพราะ "มัน mix กัน จะดูยากนิดนึง p กับ q" (Class 6, 1:10:37) R_codes ของ Class 6 เริ่มด้วย ACF ทฤษฎีของ ARMA(1,1) สี่ชุด</p>
 
-<h3>ส่วน PACF: sample ACF และ PACF</h3>
-<pre><code>par(mfrow=c(2,2))
+<figure><img src="../assets/slides/ts6-r7-arma11-acf.png" alt="Population ACF ของ ARMA(1,1) สี่ชุด" loading="lazy"><figcaption>รันจาก R_codes.txt (Class 6): population ACF ของ ARMA(1,1) θ = 0.25 และ φ = 0.9, −0.9, 0.5, −0.5</figcaption></figure>
 
+<p>φ = 0.9 ได้ 0.931, 0.838, 0.754 φ = −0.9 ได้ −0.822, 0.740, −0.666 φ = 0.5 ได้ 0.643, 0.321, 0.161 และ φ = −0.5 ได้ −0.269, 0.135, −0.067 ทุกชุดหาร lag ติดกันได้ φ พอดีตั้งแต่ lag 2 เช่น 0.838/0.931 = 0.9 แต่ ρ₁ ไม่เท่ากับ φ (0.931 ไม่ใช่ 0.9) เพราะส่วน MA เปลี่ยนเฉพาะ lag แรก ถ้าเห็นแค่กราฟ ACF จึงแยก ARMA(1,1) ออกจาก AR(1) ได้ยาก</p>
+
+<h3>EACF (extended ACF)</h3>
+<p>อาจารย์ให้การบ้าน search EACF (Class 6, 1:13:07) EACF เป็นตารางที่แถวคืออันดับ AR (p = 0, 1, 2, …) คอลัมน์คืออันดับ MA (q = 0, 1, 2, …) ช่อง x คือยังมี autocorrelation เหลือ ช่อง o คือไม่มี วิธีอ่านคือหามุมบนซ้ายของสามเหลี่ยมที่เต็มไปด้วย o มุมนั้นคือ (p, q) ที่แนะนำ โค้ดใช้ <code>eacf()</code> จาก package TSA</p>
+<pre class="out">&gt; set.seed(2603630)
+&gt; eacf(arima.sim(list(order=c(1,0,1), ar=0.6, ma=0.8), n=200))
+AR/MA
+  0 1 2 3 4 5 6 7 8 9 10 11 12 13
+0 x x x x o o o o o o o  o  o  o
+1 x o o o o o o o o o o  o  o  o
+2 x o x o o o o o o o o  o  o  o
+3 x x x o o o o o o o o  o  o  o
+4 x x x o o o o o o o o  o  o  o</pre>
+<p>มุมบนซ้ายของสามเหลี่ยม o อยู่ที่แถว 1 คอลัมน์ 1 จึงแนะนำ ARMA(1,1) ตรงกับโมเดลจริง แม้แถว 2 คอลัมน์ 2 จะมี x หนึ่งช่องที่ไม่ควรมี</p>
+<pre class="out">&gt; eacf(arima.sim(list(order=c(2,0,2), ar=c(0.5,-0.5), ma=c(0.8,-0.2)), n=200))
+AR/MA
+  0 1 2 3 4 5 6 7 8 9 10 11 12 13
+0 x x x o o o o o o o o  o  o  o
+1 x x x o o o o o o o o  o  o  o
+2 x o o o o o o o o o o  o  o  o
+3 x o o x o o o o o o o  o  o  o
+4 x o x x o o o o o o o  o  o  o</pre>
+<p>โมเดลจริงคือ ARMA(2,2) แต่สามเหลี่ยม o ที่สะอาดที่สุดเริ่มที่แถว 0 คอลัมน์ 3 ซึ่งแนะนำ MA(3) ส่วนมุม (2,1) มี x ที่แถว 3 คอลัมน์ 3 ขวางอยู่ ตัวอย่างนี้ตรงกับที่อาจารย์เตือน: "ถ้าคุณ search EACF pattern จะสวยมาก ... แต่พอทำ data จริงจะดูแย่มาก" (Class 6, 1:26:33) และ "คนสมัยก่อนใช้ ... ประมาณ 20 ปีที่แล้ว แต่ 10 ปีหลังไม่มีใครเขาใช้หรอก เขาใช้ auto.arima" (Class 6, 1:10:58–1:12:46) สรุปขั้นตอนของอาจารย์: ACF → q, PACF → p, ถ้ามีทั้งสองใช้ EACF หรือ auto.arima (Class 6, 1:14:16)</p>
+
+<!-- ===================================================== -->
+<h2 id="s10">10. ARIMA(p,d,q)</h2>
+
+<figure>
+<img src="../assets/slides/ts6-p44.png" alt="Slide 6 หน้า 44: Integrated Models for nonstationary data (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 6 หน้า 44 — Integrated Models for nonstationary data (หน้าคั่น)</figcaption>
+</figure>
+
+<p>ทุกโมเดลจนถึงตอนนี้ใช้ได้กับข้อมูลนิ่งเท่านั้น แต่ข้อมูลจริงส่วนใหญ่มี trend เช่น อุณหภูมิโลกใน Lesson 3 หรือยอดขาย Sales ใน Lesson 4 ส่วนนี้เติมตัว I (Integrated) เข้าไปเพื่อให้ Box-Jenkins ใช้กับข้อมูลที่มี trend ได้</p>
+
+<figure>
+<img src="../assets/slides/ts6-p45.png" alt="Slide 6 หน้า 45: ARIMA: ขยายไปสู่ข้อมูลไม่นิ่ง" loading="lazy">
+<figcaption>Slide 6 หน้า 45 — ARIMA: ขยายไปสู่ข้อมูลไม่นิ่ง</figcaption>
+</figure>
+
+<p>การเติม differencing ทำให้ได้ตระกูลโมเดลที่ใหญ่ขึ้นมาก ชื่อเต็มคือ autoregressive integrated moving average "แค่เติม I เติม d เข้าไป" (Class 6, 1:32:42–1:33:36) คำว่า integrated มาจากทิศกลับของ differencing: ถ้า \(\nabla X_t\) เป็น ARMA ค่า \(X_t\) ได้จากการ "รวมสะสม" \(\nabla X_t\) กลับขึ้นไป</p>
+
+<figure>
+<img src="../assets/slides/ts6-p46.png" alt="Slide 6 หน้า 46: Trend model: X_t = μ_t + Y_t แบบเส้นตรงและกำลังสอง" loading="lazy">
+<figcaption>Slide 6 หน้า 46 — Trend model: X_t = μ_t + Y_t แบบเส้นตรงและกำลังสอง</figcaption>
+</figure>
+
+<p>แบบจำลอง trend คือ \(X_t=\mu_t+Y_t\) โดย \(\mu_t\) เป็น trend ที่กำหนดแน่นอน และ \(Y_t\) นิ่งมี mean 0 ถ้า \(\mu_t=\beta_0+\beta_1t\) (linear) difference หนึ่งครั้งพอ ถ้า \(\mu_t=\beta_0+\beta_1t+\beta_2t^2\) (quadratic) ต้องสองครั้ง อาจารย์เทียบกับ "จุดหัก" ของพหุนาม: ดีกรี n หักได้ n − 1 ครั้ง (Class 6, 1:44:26–1:46:29) เส้นตรงไม่มีจุดหัก d = 1 พาราโบลาหักหนึ่งครั้ง d = 2</p>
+
+<div class="calc" id="s10-quad">
+<div class="calc-title">ข้อสอบเก่า: ทำไม quadratic trend ไม่นิ่ง และทำไมต้อง difference สองครั้ง</div>
+<ol class="steps">
+<li><div class="st-title">โมเดล</div><p>\(Y_t=\beta_0+\beta_1t+\beta_2t^2+w_t\) (Class 6, 1:46:36)</p></li>
+<li><div class="st-title">ไม่นิ่ง</div><p>\(E(Y_t)=\beta_0+\beta_1t+\beta_2t^2\) ขึ้นกับ t ขัดเงื่อนไข mean คงที่ของความนิ่ง</p></li>
+<li><div class="st-title">difference ครั้งที่หนึ่ง</div><p>\(t^2-(t-1)^2=2t-1\) จึงได้ \(\nabla Y_t=\beta_1+\beta_2(2t-1)+w_t-w_{t-1}\) mean \(=\beta_1+\beta_2(2t-1)\) ยังขึ้นกับ t เป็นเส้นตรง "ดิฟ 1 ครั้ง ยังมี t อยู่ เป็นรูปแบบสมการเส้นตรง" (Class 6, 1:48:29)</p></li>
+<li><div class="st-title">difference ครั้งที่สอง</div><p>\((2t-1)-(2t-3)=2\) จึงได้ \(\nabla^2Y_t=2\beta_2+w_t-2w_{t-1}+w_{t-2}\) mean \(=2\beta_2\) คงที่ variance \(=6\sigma^2\) คงที่ "ดิฟ 2 ครั้ง มันไม่มี trend ถือว่านิ่ง"</p></li>
+</ol>
+<div class="answer">ตัวอย่างตัวเลข: β = (1, 2, 3) ไม่มี noise ได้ Y = 6, 17, 34, 57 ผลต่างครั้งแรก 11, 17, 23 ยังเพิ่มขึ้น ผลต่างครั้งที่สอง 6, 6 = 2β₂ คงที่ ส่วน \(w_t-2w_{t-1}+w_{t-2}\) คือ MA(2) ที่มี ACF ไม่เป็นศูนย์ถึง lag 2</div>
+</div>
+
+<figure>
+<img src="../assets/slides/ts6-p47.png" alt="Slide 6 หน้า 47: ARIMA: ค่าสามค่า p, d, q" loading="lazy">
+<figcaption>Slide 6 หน้า 47 — ARIMA: ค่าสามค่า p, d, q</figcaption>
+</figure>
+
+<p>อนุกรมเป็น ARIMA ถ้า difference ครั้งที่ d แล้ว \(\nabla^dX_t\) เป็น ARMA ที่นิ่ง ค่าที่กำหนดโมเดลมีสามค่า อาจารย์ให้จดความต่าง: "p = จำนวนพารามิเตอร์ของ AR, q = จำนวนพารามิเตอร์ของ MA, d ไม่ใช่จำนวนพารามิเตอร์ แต่เป็นจำนวนครั้งที่ differencing" (Class 6, 1:33:41–1:34:02) เช่น ARIMA(1,1,1) มีพารามิเตอร์ที่ต้องประมาณสองตัว คือ φ กับ θ ไม่ใช่สามตัว ทุกครั้งที่ difference ข้อมูลหายไปหนึ่งจุด เช่น 40 จุดเหลือ 39 (Class 6, 1:36:46–1:38:21)</p>
+
+<figure>
+<img src="../assets/slides/ts6-p48.png" alt="Slide 6 หน้า 48: Definition 3.11: Φ(B)(1 − B)^d X_t = θ(B)w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 48 — Definition 3.11: Φ(B)(1 − B)^d X_t = θ(B)w_t</figcaption>
+</figure>
+
+<p>นิยามบนสไลด์คือ <mark class="src" data-p="48">ARIMA(p,d,q)</mark>: \(\nabla^dX_t=(1-B)^dX_t\) เป็น ARMA(p,q) จึงเขียนได้ \(\Phi(B)(1-B)^dX_t=\theta(B)w_t\) "ต่างกันแค่ตัวนี้ ... เพราะ X_t มัน handle ไม่ได้" (Class 6, 1:39:17) บางเว็บเขียน \(\Phi(B)\nabla^dX_t\) "คืออันเดียวกัน" (Class 6, 1:43:41) ระวังสองเรื่อง เรื่องแรก \(\nabla^d\) ไม่ใช่ยกกำลังของตัวเลข แต่เป็นการทำ difference d ครั้ง เรื่องที่สอง \((1-B)^2=1-2B+B^2\) ให้ \(X_t-2X_{t-1}+X_{t-2}\) ซึ่งไม่ใช่ \(1-B^2\) ที่ให้ \(X_t-X_{t-2}\) (Class 6, 1:40:29–1:41:59)</p>
+
+<figure>
+<img src="../assets/slides/ts6-p49.png" alt="Slide 6 หน้า 49: Definition 3.11: mean ไม่เป็นศูนย์ และ d ในทางปฏิบัติ" loading="lazy">
+<figcaption>Slide 6 หน้า 49 — Definition 3.11: mean ไม่เป็นศูนย์ และ d ในทางปฏิบัติ</figcaption>
+</figure>
+
+<p>ถ้า \(E(\nabla^dX_t)=\mu\) ไม่เป็นศูนย์ ให้เติมค่าคงที่ \(\alpha=\mu(1-\phi_1-\dots-\phi_p)\) สูตรเดียวกับ intercept ของ AR ใน Lesson 5 ตัวอย่าง: ARIMA(1,1,0) ที่ \(\nabla X_t\) มี mean 2 และ φ = 0.5 ได้ α = 2(0.5) = 1 ความหมายคือ X เพิ่มขึ้นเฉลี่ย 2 หน่วยต่อช่วง เรียกว่า drift สไลด์เน้นว่าในข้อมูลจริง <mark class="src" data-p="49">differencing order d &gt; 2</mark> แทบไม่ต้องใช้ และส่วนใหญ่ <mark class="src" data-p="49">taking one difference or occasionally two differences</mark> ก็พอ (บางครั้งหลัง log) อาจารย์บอกว่า d = 3 "ผมไม่ออกสอบ" (Class 6, 1:42:21)</p>
+
+<figure>
+<img src="../assets/slides/ts6-p50.png" alt="Slide 6 หน้า 50: AR, MA, ARMA, ARI, IMA เป็นสมาชิกของตระกูล ARIMA" loading="lazy">
+<figcaption>Slide 6 หน้า 50 — AR, MA, ARMA, ARI, IMA เป็นสมาชิกของตระกูล ARIMA</figcaption>
+</figure>
+
+<p>ARIMA ครอบคลุมทุกโมเดลที่เรียนมา: AR(p) = ARIMA(p,0,0), MA(q) = ARIMA(0,0,q), ARMA(p,q) = ARIMA(p,0,q), ARI(p,d) = ARIMA(p,d,0), IMA(d,q) = ARIMA(0,d,q) "อันนี้ไม่ค่อยสำคัญหรอก" (Class 6, 1:50:39) ระวังลำดับตัวเลขใน IMA(d,q) ที่ d มาก่อน ต่างจาก ARIMA(0,d,q) ที่ d อยู่กลาง อีกสองครั้งจะเรียน SARIMA ซึ่งรวม ARIMA ไว้ด้วย "โมเดลสุดท้ายของ Box-Jenkins คือมีโมเดลเดียวคือ SARIMA" (Class 6, 1:49:47–1:50:39)</p>
+
+<!-- ===================================================== -->
+<h2 id="s11">11. Examples: ดูเหมือน AR(2)/ARMA(2,2) แต่ไม่ใช่</h2>
+
+<figure>
+<img src="../assets/slides/ts6-p51.png" alt="Slide 6 หน้า 51: Examples (a) และ (b)" loading="lazy">
+<figcaption>Slide 6 หน้า 51 — Examples (a) และ (b)</figcaption>
+</figure>
+
+<p>นี่คือแนวข้อสอบที่อาจารย์ชอบ: ให้สมการที่ "ดูเหมือน" แล้วถามว่าเป็นโมเดลอะไรจริง วิธีคือย้าย X ไปซ้าย w ไปขวา เขียนด้วย B แล้วแยกตัวประกอบ ถ้ามีวงเล็บ \((1-B)\) ออกมา นั่นคือ d</p>
+
+<div class="calc" id="s11-a">
+<div class="calc-title">(a) X_t = 1.7X_{t−1} − 0.7X_{t−2} + w_t</div>
+<ol class="steps">
+<li><div class="st-title">ตรวจสามเหลี่ยม</div><p>φ₁ + φ₂ = 1.7 − 0.7 = 1 ไม่น้อยกว่า 1 จึงไม่ใช่ AR(2) ที่นิ่ง (Class 6, 1:52:56–1:54:41)</p></li>
+<li><div class="st-title">ย้ายข้างและเขียนด้วย B</div><p>\(X_t-1.7X_{t-1}+0.7X_{t-2}=w_t\) ได้ \((1-1.7B+0.7B^2)X_t=w_t\)</p></li>
+<li><div class="st-title">แยกตัวประกอบ</div><p>หาสองจำนวนที่บวกกันได้ 1.7 และคูณกันได้ 0.7 คือ 1 กับ 0.7 จึงได้ \((1-0.7B)(1-B)X_t=w_t\) ตรวจ: \(1-B-0.7B+0.7B^2=1-1.7B+0.7B^2\) ✓</p></li>
+<li><div class="st-title">อ่านโมเดล</div><p>\((1-B)X_t=\nabla X_t\) จึงได้ \((1-0.7B)\nabla X_t=w_t\) คือ \(\nabla X_t\) เป็น AR(1) φ = 0.7 "ก้อนข้างหลัง (1 − B) มันคือ d ไงครับ ... อย่าไปแก้รากแล้วนะ" (Class 6, 1:57:40)</p></li>
+</ol>
+<div class="answer">ARIMA(1,1,0) ไม่ใช่ AR(2) เขียนได้ทั้ง \((1-0.7B)(1-B)X_t=w_t\) และ \(\nabla X_t=0.7\nabla X_{t-1}+w_t\) (Class 6, 1:58:09–1:59:03)</div>
+</div>
+
+<div class="calc" id="s11-b">
+<div class="calc-title">(b) X_t = 1.5X_{t−1} − 0.5X_{t−2} + w_t − w_{t−1} + 0.25w_{t−2}</div>
+<ol class="steps">
+<li><div class="st-title">เขียนด้วย B</div><p>\((1-1.5B+0.5B^2)X_t=(1-B+0.25B^2)w_t\) ดูเหมือน ARMA(2,2) "แต่ไม่ใช่" (Class 6, 2:00:26)</p></li>
+<li><div class="st-title">แยกด้านซ้าย</div><p>บวกได้ 1.5 คูณได้ 0.5 คือ 1 กับ 0.5: \((1-0.5B)(1-B)\)</p></li>
+<li><div class="st-title">แยกด้านขวา</div><p>\(1-B+0.25B^2=(1-0.5B)^2\) ตรวจ: \(1-0.5B-0.5B+0.25B^2\) ✓</p></li>
+<li><div class="st-title">ตัดตัวประกอบร่วม</div><p>\((1-0.5B)(1-B)X_t=(1-0.5B)(1-0.5B)w_t\) ตัด \((1-0.5B)\) ทั้งสองข้าง "มันจะตัดกันแล้วมันจะเหลือ 1 − B" (Class 6, 2:01:34) ได้ \((1-B)X_t=(1-0.5B)w_t\)</p></li>
+</ol>
+<div class="answer">ARIMA(0,1,1) หรือ IMA(1,1) ตาม convention เครื่องหมายลบของสไลด์ถัดไป θ = 0.5 ถ้าใช้ convention เครื่องหมายบวกของ R จะเป็น ma = −0.5 การมีตัวประกอบร่วมทั้งสองข้างเรียกว่า parameter redundancy ซึ่งจะเรียนต่อใน Lesson 7</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s12">12. IMA(1,1) และ IMA(2,2)</h2>
+
+<figure>
+<img src="../assets/slides/ts6-p52.png" alt="Slide 6 หน้า 52: IMA(1,1): (1 − B)X_t = (1 − θB)w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 52 — IMA(1,1): (1 − B)X_t = (1 − θB)w_t</figcaption>
+</figure>
+
+<p>IMA(1,1) คือ ARIMA(0,1,1): \(X_t=X_{t-1}+w_t-\theta w_{t-1}\) หรือ \((1-B)X_t=(1-\theta B)w_t\) อาจารย์ให้เขียน \((1-B)X_t\) ระบุ d ชัด ๆ ในข้อสอบ (Class 6, 2:02:14) สไลด์บอกว่าเป็นโมเดลที่นิยมมากในเศรษฐศาสตร์ และถ้า θ = 0 จะเหลือ \(X_t=X_{t-1}+w_t\) คือ random walk ความหมาย: วันนี้เท่ากับเมื่อวาน บวก shock ใหม่ หัก shock เมื่อวานบางส่วน ข้อเชื่อมที่จะเห็นใน Lesson 7: ค่าพยากรณ์ของ IMA(1,1) เท่ากับ simple exponential smoothing ใน Lesson 4 ที่ α = 1 − θ</p>
+
+<figure>
+<img src="../assets/slides/ts6-p53.png" alt="Slide 6 หน้า 53: IMA(1,1) θ = 0.5: อนุกรมและ ACF ก่อนและหลัง difference" loading="lazy">
+<figcaption>Slide 6 หน้า 53 — IMA(1,1) θ = 0.5: อนุกรมและ ACF ก่อนและหลัง difference</figcaption>
+</figure>
+
+<p>แถวบน: อนุกรม \(X_t\) เดินขึ้นลงเป็นช่วงยาวเหมือน random walk และ sample ACF ลดลงช้ามาก ยังเกิน 0.2 ถึงราว lag 12 ลักษณะของอนุกรมไม่นิ่ง แถวล่าง: \(\nabla X_t\) แกว่งรอบศูนย์ และ ACF มีแท่งเดียวที่ lag 1 ติดลบราว −0.4 แล้วอยู่ในเส้น ค่าทฤษฎีคือ \(-\theta/(1+\theta^2)=-0.5/1.25=-0.4\) ตรงกัน จึงสรุปได้ว่า \(\nabla X_t\) เป็น MA(1) และ \(X_t\) เป็น ARIMA(0,1,1) (Class 6, 2:02:39–2:03:45)</p>
+
+<figure>
+<img src="../assets/slides/ts6-p54.png" alt="Slide 6 หน้า 54: IMA(2,2): (1 − B)²X_t = (1 − θ₁B − θ₂B²)w_t" loading="lazy">
+<figcaption>Slide 6 หน้า 54 — IMA(2,2): (1 − B)²X_t = (1 − θ₁B − θ₂B²)w_t</figcaption>
+</figure>
+
+<p>IMA(2,2) คือ ARIMA(0,2,2): \((1-B)^2X_t=(1-\theta_1B-\theta_2B^2)w_t\) ต้อง difference สองครั้งจึงเป็น MA(2) กระจายด้านซ้ายได้ \(X_t-2X_{t-1}+X_{t-2}\) ตรงกับ \(\nabla^2X_t\) จาก Lesson 5</p>
+
+<figure>
+<img src="../assets/slides/ts6-p55.png" alt="Slide 6 หน้า 55: IMA(2,2): อนุกรม, ผลต่างครั้งที่หนึ่ง และครั้งที่สอง" loading="lazy">
+<figcaption>Slide 6 หน้า 55 — IMA(2,2): อนุกรม, ผลต่างครั้งที่หนึ่ง และครั้งที่สอง</figcaption>
+</figure>
+
+<p>อ่านสามแถวตามที่อาจารย์ทำ (Class 6, 2:04:04–2:05:37) แถวบน \(X_t\) "ไม่ใช่ linear มันโค้ง" ขึ้นจากราว 0 ไปถึงราว 400–500 แล้วลง ACF ใกล้ 1 ทุก lag แถวกลาง \(\nabla X_t\) "ยังดูเหมือนมี trend อยู่" ขึ้นแล้วลงเป็นช่วงยาว ACF ยังลดช้า difference ครั้งเดียวจึงไม่พอ แถวล่าง \(\nabla^2X_t\) แกว่งรอบศูนย์ไม่มี trend ACF ทะลุเส้นที่ lag 1 และ 2 แล้วอยู่ในเส้น จึงเป็น MA(2) และ \(X_t\) เป็น ARIMA(0,2,2) วิธีอ่านนี้คือสิ่งที่อาจารย์บอกว่าจะออกควิซ: "ผมอาจจะโชว์แบบเนี้ย แล้วคุณทายว่ามันเป็นแบบไหน" (Class 6, 2:06:13) ขั้นตอนคือ difference ทีละครั้งจนกว่า ACF จะไม่ลดช้า แล้วอ่าน q จาก ACF ของอนุกรมสุดท้าย</p>
+
+<!-- ===================================================== -->
+<h2 id="s13">13. แบบฝึกห้าแบบ</h2>
+
+<p>ไฟล์ R_codes.txt และ EXERCISE.pdf (Homework) อยู่ในโฟลเดอร์ CLASS 6 บน myCourseVille ข้อที่ใช้ <code>eacf()</code> ต้องติดตั้ง package TSA</p>
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>Yule-Walker</span></div>
+<div class="qtext">AR(2) \(X_t=0.4X_{t-1}+0.3X_{t-2}+w_t\) มีค่า \(\rho_1\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ ρ₁ = φ₁ แบบ AR(1) ลืมผลของ φ₂">\(\rho_1=0.400\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นำ φ₁ + φ₂ มาเป็น ρ₁">\(\rho_1=0.700\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ρ₁ = φ₁/(1 − φ₂) = 0.4/0.7 = 0.571">\(\rho_1=0.571\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย 1 + φ₁ แทน 1 − φ₂">\(\rho_1=0.286\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>PACF lag 2</span></div>
+<div class="qtext">อนุกรมนิ่งมี \(\rho_1=0.5\) และ \(\rho_2=0.4\) ค่า \(\phi_{22}\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. (0.4 − 0.25)/(1 − 0.25) = 0.15/0.75 = 0.2">\(\phi_{22}=0.200\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. PACF lag 2 ไม่เท่ากับ ACF lag 2 ยกเว้นเมื่อ ρ₁ = 0">\(\phi_{22}=0.400\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ได้แค่ตัวเศษ ลืมหารด้วย 1 − ρ₁²">\(\phi_{22}=0.150\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมลบ ρ₁² ในตัวเศษ">\(\phi_{22}=0.533\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>คำนวณมือ</span></div>
+<div class="qtext">AR(2) \(X_t=0.6X_{t-1}-0.2X_{t-2}+w_t\) (ก) ตรวจเงื่อนไขสามข้อ (ข) หารากของ Φ(x) และ modulus (ค) หา ρ₁, ρ₂, ρ₃ ด้วย Yule-Walker (ง) หา φ₁₁ และ φ₂₂</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) 0.6 − 0.2 = 0.4 &lt; 1, −0.2 − 0.6 = −0.8 &lt; 1, |−0.2| &lt; 1 นิ่ง</p>
+<p>(ข) \(\Phi(x)=1-0.6x+0.2x^2\) ได้ \(0.36-0.8=-0.44&lt;0\) รากเชิงซ้อน \(x=\dfrac{0.6\pm\sqrt{-0.44}}{0.4}=1.5\pm1.658i\) modulus \(\sqrt{2.25+2.75}=\sqrt5=2.236&gt;1\)</p>
+<p>(ค) \(\rho_1=0.6/1.2=0.5\), \(\rho_2=0.6(0.5)-0.2=0.1\), \(\rho_3=0.6(0.1)-0.2(0.5)=-0.04\)</p>
+<p>(ง) \(\phi_{11}=\rho_1=0.5\), \(\phi_{22}=(0.1-0.25)/(1-0.25)=-0.2=\phi_2\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>สามเหลี่ยม</span></div>
+<div class="qtext">AR(2) ที่มี (φ₁, φ₂) คู่ใดเป็นกระบวนการที่นิ่ง</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. φ₁ + φ₂ = 1.1 ไม่น้อยกว่า 1 แม้แต่ละตัวจะน้อยกว่า 1">(0.6, 0.5)</button>
+<button class="opt" data-correct="false" data-note="ผิด. φ₂ − φ₁ = 0.3 + 0.8 = 1.1 ไม่น้อยกว่า 1">(−0.8, 0.3)</button>
+<button class="opt" data-correct="false" data-note="ผิด. |φ₂| = 1.1 ไม่น้อยกว่า 1">(0.2, −1.1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.9 < 1, 0.3 < 1 และ |0.6| < 1 ผ่านครบสามข้อ">(0.3, 0.6)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>แยกตัวประกอบ</span></div>
+<div class="qtext">\(X_t=1.4X_{t-1}-0.4X_{t-2}+w_t\) เป็นโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. φ₁ + φ₂ = 1 ไม่ผ่านเงื่อนไข จึงไม่ใช่ AR(2) ที่นิ่ง">AR(2) ที่นิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. เมื่อดึง (1 − B) ออกแล้ว ส่วน AR ที่เหลือมีอันดับ 1 ไม่ใช่ 2">ARIMA(2,1,0)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 1 − 1.4B + 0.4B² = (1 − 0.4B)(1 − B) จึงเป็น AR(1) φ = 0.4 ของ ∇X_t">ARIMA(1,1,0)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ด้านขวามีแค่ w_t จึงไม่มีส่วน MA">ARIMA(0,1,1)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>แยกตัวประกอบ</span></div>
+<div class="qtext">จงแสดงว่า \(X_t=1.2X_{t-1}-0.2X_{t-2}+w_t-0.5w_{t-1}\) ไม่ใช่ ARMA(2,1) ที่นิ่ง และบอกว่าเป็น ARIMA อันดับใด พร้อมค่า φ และ θ</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\((1-1.2B+0.2B^2)X_t=(1-0.5B)w_t\) ตรวจ: φ₁ + φ₂ = 1.2 − 0.2 = 1 ไม่น้อยกว่า 1</p>
+<p>บวกได้ 1.2 คูณได้ 0.2 คือ 1 กับ 0.2 จึงได้ \((1-0.2B)(1-B)X_t=(1-0.5B)w_t\) ราก 1 และ 5</p>
+<p>\((1-0.2B)\nabla X_t=(1-0.5B)w_t\) เป็น ARIMA(1,1,1) φ = 0.2 และ θ = 0.5 (convention ลบ) ไม่มีตัวประกอบร่วมจึงตัดต่อไม่ได้</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>พิสูจน์</span></div>
+<div class="qtext">(ก) แสดงว่าถ้า \(X_t\) เป็น random walk \(\nabla X_t\) เป็น white noise (ข) ถ้า \(X_t=w_t\) เป็น white noise อยู่แล้ว แล้วนำไป difference จงหา ACF ของ \(\nabla X_t\) และอธิบายว่าบอกอะไร</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(X_t=X_{t-1}+w_t\) จึงได้ \(\nabla X_t=w_t\) เป็น white noise ARIMA(0,1,0)</p>
+<p>(ข) \(\nabla X_t=w_t-w_{t-1}\) เป็น MA(1) θ = −1 (convention บวก) γ₀ = 2σ², γ₁ = −σ² จึงได้ ρ₁ = −0.5 และ ρ_h = 0 เมื่อ h ≥ 2</p>
+<p>ACF lag 1 ใกล้ −0.5 หลัง difference คือสัญญาณว่า difference เกินจำเป็น (over-differencing) และ θ = −1 ทำให้ไม่ invertible ตรงกับ Exercise หน้า 25 ที่ φ = 0 ให้ \(\rho_Y(1)=-(1-0)/2=-0.5\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>ตาราง ACF/PACF</span></div>
+<div class="qtext">sample ACF ทะลุเส้นที่ lag 1 และ 2 แล้วอยู่ในเส้นทั้งหมด ส่วน sample PACF ลดลงช้า ๆ และสลับเครื่องหมาย ควรเลือกโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. AR(2) ต้องมี PACF ตัดหลัง lag 2 และ ACF ลดช้า ซึ่งกลับด้าน">AR(2)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ACF ตัดหลัง lag 2 บอก q = 2 และ PACF tail off ยืนยันว่าเป็น MA">MA(2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ARMA ต้อง tail off ทั้ง ACF และ PACF">ARMA(2,2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ACF ที่ตัดเร็วบอกว่าอนุกรมนิ่งแล้ว ไม่ต้อง difference">ARIMA(0,2,0)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>นับพารามิเตอร์</span></div>
+<div class="qtext">ARIMA(2,1,1) ที่ไม่มีค่าคงที่ ต้องประมาณสัมประสิทธิ์ φ และ θ รวมกี่ตัว</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. φ₁, φ₂ และ θ₁ ส่วน d = 1 เป็นจำนวนครั้งที่ difference ไม่ใช่พารามิเตอร์">3 ตัว</button>
+<button class="opt" data-correct="false" data-note="ผิด. นับ d เป็นพารามิเตอร์ด้วย อาจารย์ให้จดว่า d ไม่ใช่จำนวนพารามิเตอร์">4 ตัว</button>
+<button class="opt" data-correct="false" data-note="ผิด. p = 2 หมายถึงมี φ สองตัว">2 ตัว</button>
+<button class="opt" data-correct="false" data-note="ผิด. นับแค่ส่วน MA">1 ตัว</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>Homework Q1, Q6</span></div>
+<div class="qtext">จงบรรยายลักษณะสำคัญของ ACF และ PACF ของ (ก) ARMA(0,3) (ข) ARMA(3,0) (ค) ARMA(1,2) (ง) AR(2) ที่มีรากเชิงซ้อน</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) ARMA(0,3) = MA(3): ACF ไม่เป็นศูนย์ถึง lag 3 แล้วเป็นศูนย์ PACF tail off</p>
+<p>(ข) ARMA(3,0) = AR(3): ACF tail off (ผสม exponential decay และ/หรือ damped sine) PACF ไม่เป็นศูนย์ถึง lag 3 แล้วเป็นศูนย์</p>
+<p>(ค) ARMA(1,2): ACF และ PACF tail off ทั้งคู่ ACF ลดแบบเลขชี้กำลังด้วยอัตรา φ ตั้งแต่หลัง lag 2 อ่าน p, q จากสองกราฟไม่ได้ ใช้ EACF หรือ auto.arima</p>
+<p>(ง) ACF เป็นคลื่นที่หดลง (damped sine wave) PACF ไม่เป็นศูนย์ที่ lag 1, 2 แล้วเป็นศูนย์</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) อธิบายด้วยภาษาของตัวเองว่าทำไม AR(1) มี ρ₂ = φ² แต่ φ₂₂ = 0 (ข) ทำไม PACF ของ MA(1) จึงไม่ตัดที่ lag ใด (ค) ทำไมอาจารย์บอกว่า ACF "ไม่มีประโยชน์อะไรเลย" ในการหา p</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(X_{t-2}\) ไม่อยู่ในสมการของ \(X_t\) แต่ส่งผลทางอ้อมผ่าน \(X_{t-1}\) ρ₂ นับรวมทางอ้อมนี้จึงได้ φ² เมื่อรู้ \(X_{t-1}\) แล้ว ส่วนที่เหลือของ \(X_t\) คือ \(w_t\) ซึ่งไม่เกี่ยวกับ \(X_{t-2}\) PACF ที่ตัดทางอ้อมออกจึงเป็นศูนย์</p>
+<p>(ข) MA(1) ที่ invertible เขียนกลับเป็น AR(∞) ได้ \(X_t\) จึงขึ้นกับค่าในอดีตทุกค่าด้วยน้ำหนักที่ลดลง ไม่มี lag ที่ทำให้ความสัมพันธ์ตรงหายไปพอดี</p>
+<p>(ค) ACF ของ AR ทุกอันดับลดลงช้าเหมือนกัน เช่น AR(1) φ = 0.9 และ AR(2) φ = (1.1, −0.3) ให้ ACF ลดแบบเลขชี้กำลังเหมือนกัน จึงแยก p ไม่ได้ ต้องใช้ PACF</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>อ่าน acf/pacf</span></div>
+<div class="qtext"><p>อนุกรมนิ่งยาว 100 ค่า (เส้นประ ±0.2) ได้ผลดังนี้ ควรเลือกโมเดลใด</p>
+<pre class="out">lag     1      2      3      4      5      6
+ACF   0.55  0.01  -0.24  -0.19  -0.05   0.05
+PACF  0.55 -0.43   0.06  -0.04   0.08  -0.03</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. PACF lag 2 = −0.43 ทะลุเส้นชัดเจน จึงต้องมีอย่างน้อยสองพจน์">AR(1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ACF lag 3 = −0.24 ยังทะลุเส้น ACF จึงไม่ได้ตัดหลัง lag 2">MA(2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. PACF ตัดชัดหลัง lag 2 ไม่ได้ tail off">ARMA(1,1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. PACF ทะลุเส้นที่ lag 1, 2 แล้วตัด ACF เป็นคลื่นที่ลดลง ลักษณะของ AR(2) รากเชิงซ้อน">AR(2)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 13</span><span>อ่าน EACF</span></div>
+<div class="qtext"><p>จากผล <code>eacf()</code> นี้ ควรเลือกโมเดลใด</p>
+<pre class="out">AR/MA
+  0 1 2 3 4 5
+0 x x x x x x
+1 x x o o o o
+2 x x x o o o
+3 x x x x o o
+4 x x x x x o</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. แถวคือ AR และคอลัมน์คือ MA สลับกัน">ARMA(2,1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. มุมบนซ้ายของสามเหลี่ยม o อยู่แถว 1 คอลัมน์ 2">ARMA(1,2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. แถว 1 คอลัมน์ 1 ยังเป็น x">ARMA(1,1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. แถว 0 ไม่มี o เลย ไม่ใช่ MA ล้วน">MA(2)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>อ่าน output</span></div>
+<div class="qtext"><p>อนุกรมยาว 150 ค่า (เส้นประ ±0.163) จงเลือก d และ q และเขียนโมเดลด้วย B</p>
+<pre class="out">acf(x):        0.97  0.94  0.91  0.88  0.86  0.83 ...
+acf(diff(x)): -0.41  0.03 -0.05  0.07 -0.02  0.04
+pacf(diff(x)):-0.41 -0.19 -0.12 -0.03 -0.06  0.01</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ACF ของ x ลดช้ามาก ไม่นิ่ง ต้อง difference หลัง difference หนึ่งครั้ง ACF ทะลุเส้นแค่ lag 1 แล้วตัด PACF ลดลงช้า ๆ (−0.41, −0.19, −0.12) จึงเป็น MA(1) ของ ∇x</p>
+<p>d = 1, q = 1 ได้ ARIMA(0,1,1) \((1-B)X_t=(1-\theta B)w_t\) จาก \(-\theta/(1+\theta^2)=-0.41\) ได้ θ ≈ 0.5 แบบเดียวกับ IMA(1,1) ในหน้า 53</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันส่วน PACF ของ R_codes.txt (Class 6) ด้วย seed นี้แล้วเทียบค่า</p>
+<pre><code>round(ARMAacf(ar = c(-0.5,0.25), lag.max = 4, pacf = TRUE), 3)
+round(ARMAacf(ma = c(-0.9), lag.max = 4, pacf = TRUE), 3)
+set.seed(3)
 ar1.sim &lt;- arima.sim(list(order = c(1,0,0), ar = c(0.9)), n = 150)
 ar2.sim &lt;- arima.sim(list(order = c(2,0,0), ar = c(-0.5,0.25)), n = 150)
-
-acf(ar1.sim,main="AR(1) sample ACF")
-pacf(ar1.sim,main="AR(1) sample PACF")
-acf(ar2.sim,main="AR(2) sample ACF")
-pacf(ar2.sim,main="AR(2) sample PACF")</code></pre>
-<p>คำสั่ง <code>pacf()</code> คำนวณและวาด sample PACF พร้อมเส้นประของขอบนัยสำคัญ ใช้คู่กับ <code>acf()</code> ส่วนของ MA ใช้โค้ดชุดเดียวกัน เปลี่ยนเป็น <code>order = c(0,0,1), ma = c(-0.9)</code> และ <code>order = c(0,0,2), ma = c(0.5,-0.25)</code> เมื่อ n = 150 ขอบคือ \(\pm2/\sqrt{150}=\pm0.163\)</p>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 11 และ 12</div>
-<ul>
-<li>ขั้นตอนของ Box-Jenkins: plot, ตรวจ stationarity, differencing, identification, estimation, ตรวจความเหมาะสม, forecast</li>
-<li>นิยามของ parameter redundancy, causality และ invertibility</li>
-<li>ตรวจ causality และ invertibility ด้วยรากของ \(\Phi\) และ \(\theta\)</li>
-<li>อ่านตาราง EACF: ปลายของ wedge ให้ p และ q</li>
-<li>คำสั่ง <code>ARMAacf(..., pacf=TRUE)</code>, <code>pacf()</code> และ <code>eacf()</code> และความต่างของแกนนอน 0:20 กับ 1:20</li>
-</ul>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s13">13. แบบฝึกท้ายบท</h2>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 7</span><span>Yule-Walker</span></div>
-<div class="qtext">AR(2) ที่ \(\phi_1=0.6\) และ \(\phi_2=0.2\) มี \(\rho_1\) เท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ρ₁ ไม่เท่ากับ φ₁ ใน AR(2) ต้องหารด้วย 1 − φ₂">\(\rho_1=0.60\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. 0.6 / (1 − 0.2) = 0.75">\(\rho_1=0.75\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ 1 − φ₂ ไม่ใช่ 1 + φ₂">\(\rho_1=0.50\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 0.8 คือ φ₁ + φ₂">\(\rho_1=0.80\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 8</span><span>ACF</span></div>
-<div class="qtext">ACF ของโมเดลหนึ่งมีรูปเป็น damped sine-wave โมเดลใดให้รูปนี้ได้</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. MA(2) มี ACF ที่ตัดเป็นศูนย์หลัง lag 2">MA(2) ที่มี θ ทั้งสองเป็นบวก</button>
-<button class="opt" data-correct="false" data-note="ผิด. AR(1) ที่ φ บวกมี ACF เป็นบวกทั้งหมด">AR(1) ที่มี φ เป็นค่าบวก</button>
-<button class="opt" data-correct="false" data-note="ผิด. รากจริงให้ exponential decay">AR(2) ที่มีรากเป็นจำนวนจริง</button>
-<button class="opt" data-correct="true" data-note="ถูก. รากเชิงซ้อนให้ ACF ที่เป็นคลื่นซึ่งจางลง">AR(2) ที่มีรากเป็นเชิงซ้อน</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 9</span><span>ARIMA</span></div>
-<div class="qtext">IMA(1,1) คือ ARIMA ใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ARIMA(1,1,0) คือ ARI(1,1)">ARIMA(1,1,0)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ARIMA(1,0,1) คือ ARMA(1,1) ไม่มี differencing">ARIMA(1,0,1)</button>
-<button class="opt" data-correct="true" data-note="ถูก. IMA(d,q) คือ ARIMA(0,d,q)">ARIMA(0,1,1)</button>
-<button class="opt" data-correct="false" data-note="ผิด. IMA(1,1) มี q = 1 และไม่มี AR">ARIMA(1,1,1)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 10</span><span>EACF</span></div>
-<div class="qtext">ในตาราง EACF ปลายแหลมของบริเวณศูนย์อยู่ที่แถว 2 คอลัมน์ 1 โมเดลที่ตารางชี้คือข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. แถวคือ p และคอลัมน์คือ q">ARMA(2,1)</button>
-<button class="opt" data-correct="false" data-note="ผิด. แถวคือ p คอลัมน์คือ q สลับกัน">ARMA(1,2)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตาราง EACF เริ่มนับจาก 0 จึงไม่ต้องลบ 1">ARMA(1,0)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ปลายแหลมอยู่ที่คอลัมน์ 1 ไม่ใช่ 2">ARMA(2,2)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 11</span><span>R</span></div>
-<div class="qtext">คำสั่งใดให้ PACF ทางทฤษฎีของ MA(1) ที่ \(\theta=-0.9\)</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. pacf() ต้องรับข้อมูล และให้ sample PACF">pacf(ma = c(-0.9), lag.max = 20)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ขาด pacf=TRUE จึงได้ ACF">ARMAacf(ma = c(-0.9), lag.max = 20)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ar = คือโมเดล AR ไม่ใช่ MA">ARMAacf(ar = c(-0.9), lag.max = 20, pacf=TRUE)</button>
-<button class="opt" data-correct="true" data-note="ถูก. ma = ร่วมกับ pacf=TRUE">ARMAacf(ma = c(-0.9), lag.max = 20, pacf=TRUE)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 12</span><span>Causality</span></div>
-<div class="qtext">โมเดล \(X_t=0.5X_{t-1}+w_t-0.3w_{t-1}+1.2w_{t-2}\) มีรากฝั่ง AR เท่ากับ 2 และรากฝั่ง MA มี modulus 0.913 ข้อสรุปคือข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. modulus 0.913 น้อยกว่า 1 จึงไม่ invertible">causal และ invertible</button>
-<button class="opt" data-correct="true" data-note="ถูก. ราก AR มากกว่า 1 และราก MA มี modulus น้อยกว่า 1">causal แต่ไม่ invertible</button>
-<button class="opt" data-correct="false" data-note="ผิด. causality ดูจากฝั่ง AR ซึ่งมีราก 2 มากกว่า 1">ไม่ causal แต่ invertible</button>
-<button class="opt" data-correct="false" data-note="ผิด. ฝั่ง AR ผ่าน">ไม่ causal และไม่ invertible</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<p>ข้อต่อไปนี้ให้เขียนคำตอบเองก่อน แล้วจึงเปิดเฉลย</p>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 13</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">จงพิสูจน์ Yule-Walker equations ของ AR(2) และหา \(\rho_1\) กับ \(\rho_2\) ในรูปของ \(\phi_1\) และ \(\phi_2\)</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
+round(pacf(ar1.sim, plot = FALSE, lag.max = 4)$acf, 3)
+round(pacf(ar2.sim, plot = FALSE, lag.max = 4)$acf, 3)
+arima(ar2.sim, order = c(2,0,0))
+polyroot(c(1, -1.5, 0.75)); Mod(polyroot(c(1, -1.5, 0.75)))</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
 <div class="model-answer">
-<p>คูณ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) ด้วย \(X_{t-h}\) แล้วหาค่าคาดหมาย</p>
-<p>\(E(w_tX_{t-h})=0\) เมื่อ \(h\ge1\) จึงได้ \(\gamma_h=\phi_1\gamma_{h-1}+\phi_2\gamma_{h-2}\)</p>
-<p>หารด้วย \(\gamma_0\): \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\)</p>
-<p>\(h=1\): \(\rho_1=\phi_1+\phi_2\rho_1\) จึงได้ \(\rho_1=\phi_1/(1-\phi_2)\)</p>
-<p>\(h=2\): \(\rho_2=\phi_1\rho_1+\phi_2\)</p>
+<pre class="out">-0.667  0.250  0.000  0.000
+-0.497 -0.328 -0.243 -0.191
+ 0.899 -0.010  0.031 -0.056
+-0.703  0.163 -0.053  0.054
+ar1 -0.5831 (0.0807)  ar2 0.1641 (0.0810)  intercept 0.0767  aic 442.95
+1+0.5774i 1-0.5774i     1.154701 1.154701</pre>
+<p>PACF ทฤษฎีของ AR(2) ตัดหลัง lag 2 ส่วน MA(1) ลดลงช้า ๆ ข้อมูลจำลองของ AR(2) ได้ PACF lag 2 = 0.163 แตะเส้น 0.163 พอดี และ ar2 = 0.164 ห่างจากค่าจริง 0.25 ด้วย sampling error บรรทัดสุดท้ายคือรากของ Example 3.10 modulus 1.155 &gt; 1 จึงนิ่ง</p>
 </div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 14</span><span>คำนวณ</span></div>
-<div class="qtext">AR(2) ที่ \(\phi_1=1.5\) และ \(\phi_2=-0.56\) จง (ก) ตรวจ stationarity ด้วยเงื่อนไขสามข้อ (ข) หารากของ characteristic equation (ค) หา \(\rho_1\) และ \(\rho_2\)</div>
-<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
+<div class="qhead"><span>ข้อ 16</span><span>Homework Q5</span></div>
+<div class="qtext"><p>Simulate AR(2) n = 72, φ₁ = 0.7, φ₂ = −0.4 ด้วย <code>set.seed(3)</code> แล้วเทียบ ACF/PACF ทฤษฎีกับตัวอย่าง และฟิต AR(2)</p></div>
+<textarea placeholder="จดผลและเปรียบเทียบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
 <div class="model-answer">
-<p>(ก) \(\phi_1+\phi_2=0.94&lt;1\), \(\phi_2-\phi_1=-2.06&lt;1\), \(|\phi_2|=0.56&lt;1\) ผ่านทั้งสามข้อ จึง stationary</p>
-<p>(ข) ในราก: \(1.5^2+4(-0.56)=2.25-2.24=0.01\) รากที่สองคือ 0.1 ตัวหารคือ \(-2(-0.56)=1.12\)</p>
-<p>\(x=(1.5\pm0.1)/1.12=1.429\) และ \(1.25\) รากจริงทั้งคู่และมากกว่า 1</p>
-<p>(ค) \(\rho_1=1.5/(1+0.56)=0.962\) และ \(\rho_2=1.5(0.962)-0.56=0.882\)</p>
-</div>
-</div>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 15</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">จงแสดงว่า PACF ของ AR(1) \(X_t=\phi X_{t-1}+w_t\) เป็น \(\phi_{11}=\phi\) และ \(\phi_{22}=0\)</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>AR(1) มี \(\rho(1)=\phi\) และ \(\rho(2)=\phi^2\)</p>
-<p>\(\phi_{11}=\rho(1)=\phi\)</p>
-<p>\(\phi_{22}=\dfrac{\rho(2)-\rho(1)^2}{1-\rho(1)^2}=\dfrac{\phi^2-\phi^2}{1-\phi^2}=0\)</p>
-</div>
-</div>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 16</span><span>ระบุโมเดล</span></div>
-<div class="qtext">จงระบุ p, d, q ของ \(X_t=1.5X_{t-1}-0.5X_{t-2}+w_t-w_{t-1}+0.25w_{t-2}\)</div>
-<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>\((1-1.5B+0.5B^2)X_t=(1-B+0.25B^2)w_t\)</p>
-<p>ซ้าย: \((1-B)(1-0.5B)\) และขวา: \((1-0.5B)^2\)</p>
-<p>ตัด \((1-0.5B)\) ที่ซ้ำกัน เหลือ \((1-B)X_t=(1-0.5B)w_t\)</p>
-<p>p = 0, d = 1, q = 1 คือ ARIMA(0,1,1) หรือ IMA(1,1)</p>
-</div>
-</div>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 17</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">ให้ \(X_t\) เป็น AR(1) ที่ \(-1&lt;\phi&lt;1\) และ \(Y_t=X_t-X_{t-1}\) จงแสดงว่า \(\mathrm{var}(Y_t)=\dfrac{2\sigma^2}{1+\phi}\)</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>\(\mathrm{var}(Y_t)=\mathrm{var}(X_t)+\mathrm{var}(X_{t-1})-2\mathrm{Cov}(X_t,X_{t-1})=2\gamma_X(0)-2\gamma_X(1)\)</p>
-<p>\(\gamma_X(1)=\phi\gamma_X(0)\) จึงได้ \(2\gamma_X(0)(1-\phi)\)</p>
-<p>แทน \(\gamma_X(0)=\sigma^2/(1-\phi^2)\): \(\dfrac{2\sigma^2(1-\phi)}{(1-\phi)(1+\phi)}=\dfrac{2\sigma^2}{1+\phi}\)</p>
+<pre class="out">ACF ทฤษฎี:   0.500 -0.050 -0.235 -0.144 -0.007
+PACF ทฤษฎี:  0.500 -0.400  0      0
+ACF ตัวอย่าง: 0.490 -0.049 -0.161 -0.059  0.031
+PACF ตัวอย่าง:0.490 -0.381  0.092 -0.018  0.023   (เส้นประ ±0.236)
+arima: ar1 0.6898 (0.1089)  ar2 -0.3889 (0.1093)</pre>
+<p>PACF ตัวอย่างทะลุเส้นที่ lag 1 และ 2 แล้วตัด ตรงกับทฤษฎี ส่วน ACF lag 3 ทฤษฎี −0.235 แต่ตัวอย่างได้ −0.161 อยู่ในเส้น เพราะ n = 72 มีเส้นประกว้างกว่า n = 150 รากของ Φ(x) คือ 0.875 ± 1.317i modulus 1.581 ACF จึงเป็นคลื่นเล็กน้อย</p>
 </div>
 </div>
 
@@ -1062,42 +887,43 @@ pacf(ar2.sim,main="AR(2) sample PACF")</code></pre>
 <div class="box win">
 <div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
 <ul>
-<li>ตรวจ stationarity ของ AR(2) ทั้งด้วยรากและด้วยเงื่อนไขสามข้อ</li>
-<li>พิสูจน์และใช้ Yule-Walker equations ของ AR(2) และบอกรูปทรงของ ACF จากชนิดของราก</li>
-<li>อธิบาย PACF คำนวณ \(\phi_{22}\) และใช้ ACF คู่กับ PACF ระบุ AR(p) หรือ MA(q)</li>
-<li>เขียนนิยามของ ARIMA(p,d,q) และระบุ p, d, q จากสมการ</li>
-<li>ตรวจ causality, invertibility และ parameter redundancy</li>
-<li>อ่านตาราง EACF และใช้คำสั่ง <code>ARMAacf</code>, <code>pacf</code>, <code>eacf</code></li>
+<li>ตรวจความนิ่งของ AR(2) ด้วยเงื่อนไขสามข้อ และด้วยรากของ Φ(x) จากสูตรกำลังสอง รวมถึง modulus ของรากเชิงซ้อน</li>
+<li>ใช้ Yule-Walker หา ρ₁, ρ₂, ρ₃ ของ AR(2) และใช้ φ₂₂ = (ρ₂ − ρ₁²)/(1 − ρ₁²)</li>
+<li>อธิบาย partial correlation ด้วย residual ของสอง regression และอธิบายว่าทำไม PACF ของ AR(p) ตัดหลัง lag p</li>
+<li>ใช้ตาราง ACF/PACF เลือก AR, MA หรือ ARMA และอ่าน EACF ได้</li>
+<li>เขียน ARIMA(p,d,q) ด้วย B และรู้ว่า d ไม่ใช่จำนวนพารามิเตอร์</li>
+<li>พิสูจน์ว่า quadratic trend ต้อง difference สองครั้ง</li>
+<li>แยกตัวประกอบสมการที่ "ดูเหมือน" AR(2) หรือ ARMA(2,2) เพื่อหา (1 − B) และตัวประกอบร่วม</li>
+<li>อ่านกราฟ IMA(1,1) และ IMA(2,2) เพื่อเลือก d และ q</li>
 </ul>
-<p>บทถัดไป: <a href="0007-arima-identification-and-estimation.html">Lesson 7 — การแปลงข้อมูล การเลือกโมเดล และการประมาณค่า</a></p>
 </div>
 
-<!-- ===================================================== -->
+<p>บทถัดไป: <a href="0007-arima-identification-and-estimation.html">Lesson 7 — ระบุและประมาณ ARIMA</a></p>
+
 <h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 55 หน้าอยู่ในหัวข้อใด</h2>
 <table>
 <tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
 <tr data-pages="1" class="etc"><td>1</td><td>ปก Model for Stationary Time Series (Part 2)</td><td>etc — ปก</td></tr>
-<tr data-pages="2-8"><td>2–8</td><td>Review: MA, AR, stationary condition, ARMA at first glance</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
-<tr data-pages="9-15"><td>9–15</td><td>AR(2): characteristic equation และ stationarity conditions</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
-<tr data-pages="16-19"><td>16–19</td><td>AR(2): autocorrelation function</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
-<tr data-pages="20-24"><td>20–24</td><td>AR(2) Examples, AR(p), Comparison of AR(p) and MA(q)</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="2-8"><td>2–8</td><td>ทบทวน MA, AR, เงื่อนไขความนิ่ง, ARMA</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="9-15"><td>9–15</td><td>AR(2) characteristic polynomial และสามเหลี่ยม</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="16-21"><td>16–21</td><td>ACF ของ AR(2), Yule-Walker, ตัวอย่าง</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="22-24"><td>22–24</td><td>AR(p) และเทียบกับ MA(q)</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
 <tr data-pages="25-26"><td>25–26</td><td>Exercise</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
-<tr data-pages="27" class="etc"><td>27</td><td>หน้าคั่น Partial Autocorrelation</td><td>etc — หน้าคั่น</td></tr>
-<tr data-pages="28-33"><td>28–33</td><td>PACF: แนวคิดและ partial correlation</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
-<tr data-pages="34-37"><td>34–37</td><td>PACF: นิยามและ Durbin-Levinson</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
-<tr data-pages="38-43"><td>38–43</td><td>PACF ของ AR และ MA, Summary</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
-<tr data-pages="44" class="etc"><td>44</td><td>หน้าคั่น Integrated Models for nonstationary data</td><td>etc — หน้าคั่น</td></tr>
-<tr data-pages="45-51"><td>45–51</td><td>ARIMA model, Definition 3.11, Examples</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
-<tr data-pages="52-55"><td>52–55</td><td>IMA(1,1) และ IMA(2,2)</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
+<tr data-pages="27-31"><td>27–31</td><td>PACF: partial correlation</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
+<tr data-pages="32-37"><td>32–37</td><td>นิยาม φ_hh และ Durbin–Levinson</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="38-43"><td>38–43</td><td>PACF ของ AR และ MA และตารางสรุป</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+<tr data-pages="44-50"><td>44–50</td><td>ARIMA(p,d,q)</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
+<tr data-pages="51"><td>51</td><td>Examples (a), (b)</td><td><a href="#s11">หัวข้อ 11</a></td></tr>
+<tr data-pages="52-55"><td>52–55</td><td>IMA(1,1) และ IMA(2,2)</td><td><a href="#s12">หัวข้อ 12</a></td></tr>
 </table>
+<p>ใบงาน ARMA_properties (10 หน้า) ในโฟลเดอร์ CLASS 6 อาจารย์ใช้สอนใน Class 7-2 จึงอยู่ใน Lesson 7</p>
 
-<h3>ใบงาน ARMA_properties และไฟล์ R_codes</h3>
+<h3>คลิปและเอกสารที่ใช้ในบทนี้</h3>
 <table>
-<tr><th>ส่วน</th><th>สอนที่</th></tr>
-<tr><td>ใบงานหน้าปก</td><td>etc — ปก</td></tr>
-<tr><td>ใบงานหน้า 1–9</td><td><a href="#s11">หัวข้อ 11</a></td></tr>
-<tr><td>R_codes: ARMA(1,1), PACF</td><td><a href="#s12">หัวข้อ 12</a></td></tr>
-<tr><td>R_codes: EACF</td><td><a href="#s11">หัวข้อ 11</a></td></tr>
+<tr><th>แหล่ง</th><th>ช่วงที่ใช้</th><th>หัวข้อ</th></tr>
+<tr><td>Class 6</td><td>ทั้งคาบ (0:00–2:08)</td><td>1–12</td></tr>
+<tr><td>Class 7-2</td><td>0:21 การเขียน B เป็น x</td><td>2</td></tr>
+<tr><td>R_codes.txt, EXERCISE.pdf (CLASS 6); R_codes_2.txt (CLASS 5)</td><td>ทั้งไฟล์</td><td>3, 8, 9, 13</td></tr>
 </table>
 
 <script src="../assets/quiz.js"></script>

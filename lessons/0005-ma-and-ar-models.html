@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 5: Model for Stationary Time Series (Part 1) — MA และ AR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 5: โมเดล MA และ AR</title>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -16,1090 +17,825 @@
   <span><a href="0006-ar2-pacf-and-arima.html">Lesson 6 →</a></span>
 </nav>
 
-<p class="kicker">Slide_5 — Time Series Analysis · Model for Stationary Time Series (Part 1) · 41 หน้า + Codes1, Codes2, xbox.txt</p>
-<h1>โมเดล MA และ AR สำหรับข้อมูล stationary</h1>
+<p class="kicker">Slide 5 — Model for Stationary Time Series (Part 1) · 41 หน้า · คลิป Class 5 (0:46–2:10) และต้นคาบ Class 6 (0:00–0:30)</p>
+<h1>เริ่ม Box-Jenkins: โมเดล MA(q) และ AR(p)</h1>
 
 <div class="box">
-<div class="label">วิธีใช้บทเรียนนี้</div>
-<p>บทนี้แสดงสไลด์ Lecture 5 เกือบทุกหน้าตามลำดับ ใต้แต่ละหน้ามีคำอธิบายเป็นภาษาง่าย สไลด์หลายหน้าเขียนเพียงว่า “Find the mean function, autocovariance function, and ACF” บทเรียนนี้พิสูจน์ให้ครบทุกข้อทีละขั้น เพราะเป็นส่วนที่ต้องเขียนเองในข้อสอบ</p>
-<p>ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ กล่อง “ต้องรู้ก่อน” ปูพื้นสิ่งที่สไลด์ไม่ได้อธิบาย กล่อง “จุดสอบ” สรุปสิ่งที่ต้องทำได้ โค้ด R ทุกบรรทัดจาก Codes2 และ Codes1 มีคำอธิบายและผลลัพธ์ที่รันจริง</p>
-<p>บทนี้ยังไม่ได้รวมสิ่งที่อาจารย์พูดในวิดีโอ Class 5 จะเพิ่มภายหลังพร้อมระบุคลิปและเวลา ถ้าอ่านแล้วติดตรงไหน ถามต่อในแชตได้</p>
+<div class="label">บทนี้ตอบคำถามอะไร</div>
+<p>สองบทก่อนเราทำให้อนุกรม "นิ่ง" ด้วยการ detrend หรือ differencing สิ่งที่เหลือคือ residual ที่ยังมี autocorrelation อยู่ บทนี้ถามต่อว่า residual ที่นิ่งแล้วแต่ยังสัมพันธ์กันข้ามเวลา จะเขียนเป็นสมการได้อย่างไร คำตอบของ Box และ Jenkins มีสองแบบพื้นฐาน</p>
+<ol>
+<li><b>MA(q)</b>: ค่าวันนี้เกิดจาก shock (ปัจจัยที่เราไม่ได้เก็บ) ของวันนี้และย้อนหลัง q วัน → ACF มีค่าถึง lag q แล้วเป็นศูนย์ทันที</li>
+<li><b>AR(p)</b>: ค่าวันนี้เกิดจากค่าของตัวเองย้อนหลัง p วัน บวก shock ใหม่ → ACF ค่อย ๆ ลดแบบเลขชี้กำลัง ไม่ตัดทันที</li>
+</ol>
+<p>วิธีเรียนของอาจารย์คือ "ศึกษา property ก่อน แล้วเทียบกับข้อมูลจริง ถ้าตรงก็น่าจะเป็น MA(q) แล้ว forecast ได้" (Class 5, 1:14:04) property ที่ต้องหาให้ได้ทุกโมเดลคือ mean, autocovariance \(\gamma_h\) และ ACF \(\rho_h\)</p>
 </div>
 
-<div class="box source">
-<div class="label">แหล่งอ่านหลัก</div>
-<p>Shumway &amp; Stoffer, <em>Time Series Analysis and Its Applications</em> บทที่ 3 สไลด์อ้างหน้า 84 (Autoregressive Models), หน้า 86 (AR(1)) และหน้า 90 (Moving Average Model, Example 3.3–3.4) อ่านเสริมได้ที่ <a href="https://online.stat.psu.edu/stat510/lesson/2" target="_blank" rel="noopener">Penn State STAT 510 บทที่ 2</a> (MA models, ACF)</p>
+<div class="box exam">
+<div class="label">สิ่งที่อาจารย์พูดถึงข้อสอบ</div>
+<ul>
+<li><b>\(\rho_1=\theta/(1+\theta^2)\) ของ MA(1)</b> "ผมออกข้อสอบได้หลายปีเลย ... แค่เนี่ยดูเหมือนง่ายเนอะ จริงมันไม่ง่ายนะ" (Class 5, 1:30:00)</li>
+<li><b>ข้อสอบเก่า: พิสูจน์ว่า \(|\rho_1|\le 1/2\)</b> "เด็ก 30 คนเรียนวิชานี้ พรูฟได้กี่คน ... ทำได้ 2 คน" ต้องพิสูจน์ ไม่ใช่แทนค่า θ ทีละตัว (Class 5, 1:36:11–1:37:41) ดู<a href="#s4">หัวข้อ 4</a></li>
+<li><b>ข้อสอบเก่า: ให้กราฟ ACF สี่กราฟแล้วถามว่าเป็น MA อะไร</b> "ถ้าคุณตอบ MA(4) แสดงว่าคุณดูข้างซ้ายผิด เพราะมันเริ่มจาก lag 0 ... ผมเคยเก็บแล้วก็ศูนย์ทันที" (Class 5, 1:54:30–1:56:08) ดู<a href="#s7">หัวข้อ 7</a></li>
+<li>ข้อสอบเคยให้ scatter plot ของ \(X_t\) กับ \(X_{t-1}\), \(X_{t-2}\) (Class 5, 1:50:48)</li>
+<li>เขียน MA(q) ในรูป backshift \(X_t=\theta(B)w_t\) "อันนี้สำคัญมาก" (Class 5, 1:19:02)</li>
+<li>\(\gamma_0=\sigma^2/(1-\phi^2)\) ของ AR(1) "อันนี้สำคัญมาก" (Class 6, 0:04:21)</li>
+<li>Class 6 อาจารย์บอกว่า MA "ตั้งแต่ออกข้อสอบมา ไม่ค่อยจะมีใครทำผิดหรอก ... ที่จะยากคือมัน mix กัน" (Class 6, 1:10:37) ข้อสอบมีสองภาค คือ concept และภาคปฏิบัติกับข้อมูลจริง (Class 6, 1:13:23)</li>
+</ul>
 </div>
 
 <table>
 <tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
-<tr><td><a href="#s1">1</a></td><td>ทบทวน detrending, differencing และที่มาของ AR, MA</td><td>2–5</td></tr>
-<tr><td><a href="#s2">2</a></td><td>เครื่องมือคำนวณที่ต้องรู้ก่อน</td><td>—</td></tr>
-<tr><td><a href="#s3">3</a></td><td>นิยาม MA(q)</td><td>6–8</td></tr>
-<tr><td><a href="#s4">4</a></td><td>MA(1): พิสูจน์ mean, autocovariance, ACF</td><td>9–10</td></tr>
-<tr><td><a href="#s5">5</a></td><td>MA(1): จำลองด้วย R</td><td>11–16</td></tr>
-<tr><td><a href="#s6">6</a></td><td>MA(2): พิสูจน์และจำลอง</td><td>17–21</td></tr>
-<tr><td><a href="#s7">7</a></td><td>MA(q) ทั่วไป, Box-Jenkins, สรุป MA</td><td>22–25</td></tr>
-<tr><td><a href="#s8">8</a></td><td>QUIZ: อ่าน ACF ของ MA</td><td>26</td></tr>
-<tr><td><a href="#s9">9</a></td><td>นิยาม AR(p)</td><td>27–31</td></tr>
-<tr><td><a href="#s10">10</a></td><td>AR(1): พิสูจน์ mean, variance, ACF</td><td>32–34</td></tr>
-<tr><td><a href="#s11">11</a></td><td>Theorem: characteristic polynomial และ stationarity</td><td>35–37</td></tr>
-<tr><td><a href="#s12">12</a></td><td>Population ACF กับ Sample ACF ใน R</td><td>38–41</td></tr>
-<tr><td><a href="#s13">13</a></td><td>โค้ด Codes2 ทั้งไฟล์</td><td>—</td></tr>
-<tr><td><a href="#s14">14</a></td><td>โค้ด Codes1: XBOX sales</td><td>—</td></tr>
-<tr><td><a href="#s15">15</a></td><td>เทียบ MA กับ AR และแบบฝึก</td><td>—</td></tr>
+<tr><td><a href="#s1">1</a></td><td>ปิดท้าย decomposition: ข้อมูล Xbox รายเดือน</td><td>— (R_codes_1)</td></tr>
+<tr><td><a href="#s2">2</a></td><td>ทำไมต้องมี Box-Jenkins</td><td>2–5, 23</td></tr>
+<tr><td><a href="#s3">3</a></td><td>MA(q): นิยาม ความหมาย และการเขียนสามระดับ</td><td>6–8, 22, 24–25</td></tr>
+<tr><td><a href="#s4">4</a></td><td>MA(1): mean, autocovariance, ACF และสมบัติ</td><td>9–10</td></tr>
+<tr><td><a href="#s5">5</a></td><td>MA(1) ใน R: θ = 0.9 และ θ = −0.9</td><td>11–16</td></tr>
+<tr><td><a href="#s6">6</a></td><td>MA(2)</td><td>17–21</td></tr>
+<tr><td><a href="#s7">7</a></td><td>MA(q) ทั่วไป และควิซข้อสอบเก่า</td><td>26</td></tr>
+<tr><td><a href="#s8">8</a></td><td>AR(p): นิยาม Φ(B) และ mean ที่ไม่ใช่ศูนย์</td><td>27–31</td></tr>
+<tr><td><a href="#s9">9</a></td><td>AR(1): mean, γ₀, γ_h, ρ_h และรูปร่าง ACF</td><td>32–34</td></tr>
+<tr><td><a href="#s10">10</a></td><td>Theorem: เมื่อไร AR(p) จึงนิ่ง</td><td>35–37</td></tr>
+<tr><td><a href="#s11">11</a></td><td>AR(1) ใน R: population ACF กับ sample ACF</td><td>38–41</td></tr>
+<tr><td><a href="#s12">12</a></td><td>ARMA(p,q) และสรุปเทียบ MA กับ AR</td><td>—</td></tr>
+<tr><td><a href="#s13">13</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
-<h2 id="s1">1. ทบทวน และที่มาของ AR กับ MA</h2>
+<h2 id="s1">1. ปิดท้าย decomposition: ข้อมูล Xbox รายเดือน</h2>
 
-<p>บทก่อนหน้าจัดการข้อมูลที่ไม่ stationary ด้วยสองวิธี คือ detrending และ differencing สไลด์สองหน้าแรกทบทวนทั้งสองวิธี แล้วอธิบายว่าทำไมต้องมีโมเดลใหม่</p>
+<p>ก่อนเริ่ม Box-Jenkins อาจารย์ใช้ข้อมูลจริงหนึ่งชุดเพื่อเทียบสองวิธีจาก Lesson 4 ข้อมูลคือยอดขาย Xbox รายเดือน ตั้งแต่พฤศจิกายน 2005 ถึงธันวาคม 2014 รวม 110 เดือน เป้าหมายคือพยากรณ์มกราคมถึงมีนาคม 2015 (Class 5, 0:48:41–0:55:08) ไฟล์คือ XBOX.txt กับ R_codes_1.txt ในโฟลเดอร์ CLASS 5</p>
+
+<h3>อ่านวันที่และสร้าง ts</h3>
+<pre><code>data &lt;- read.table("xbox.txt", h=T)
+data$date &lt;- as.Date(data$date, format = "%m/%d/%Y")
+library(lubridate)
+sales_ts &lt;- ts(data$sales, start = c(year(min(data$date)), month(min(data$date))), frequency = 12)</code></pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>format = "%m/%d/%Y"</td><td>บอก R ว่าวันที่เขียนแบบอเมริกา เดือน/วัน/ปี เช่น 11/01/2005 คือ 1 พฤศจิกายน ถ้าไม่บอก R อ่านผิด อาจารย์บอกว่าเรื่องนี้ "สำคัญกับโมเดลท้าย ๆ พวก Facebook Prophet" (Class 5, 0:49:23–0:52:24)</td></tr>
+<tr><td>year(min(...)), month(min(...))</td><td>ฟังก์ชันจาก lubridate ดึงปีและเดือนของวันแรก ได้ start = c(2005, 11) โดยไม่ต้องพิมพ์เอง</td></tr>
+<tr><td>frequency = 12</td><td>ข้อมูลรายเดือน หนึ่งรอบ seasonal มี 12 จุด ถ้าลืม ETS และ decompose จะไม่เห็น seasonal (บทเรียนเดียวกับ german ใน Lesson 4)</td></tr>
+</table>
+
+<p>กราฟมียอดพุ่งทุกพฤศจิกายนและธันวาคม (ช่วงเทศกาล) และความสูงของยอดพุ่งไม่เท่ากันทุกปี อาจารย์จึงสรุปว่า seasonal น่าจะเป็นแบบคูณ (Class 5, 0:55:30–0:56:56) อีกเรื่องที่ต้องสังเกตคือยอดรายปีขึ้นแล้วลง: ผลรวมปี 2011 ราว 7.97 ล้านเครื่อง ปี 2014 เหลือ 1.45 ล้าน เพราะ Xbox 360 กำลังหมดรุ่น ข้อนี้จะอธิบายผลข้างล่าง</p>
+
+<h3>วิธีที่ 1: ETS</h3>
+<pre class="out">&gt; etssales &lt;- ets(sales_ts)
+ETS(M,A,M)
+  Smoothing parameters:
+    alpha = 0.3619
+    beta  = 0.0156
+    gamma = 0.419
+  sigma:  0.2957
+     AIC     AICc      BIC
+3045.657 3052.309 3091.565
+&gt; forecast(etssales, h = 3)
+         Point Forecast    Lo 80    Hi 80     Lo 95    Hi 95
+Jan 2015       42941.97 26666.44 59217.50 18050.700 67833.24
+Feb 2015       42531.02 24783.83 60278.21 15389.039 69673.00
+Mar 2015       33242.12 17493.27 48990.98  9156.328 57327.92</pre>
+<p>R เลือก ETS(M,A,M): error แบบคูณ trend แบบบวก seasonal แบบคูณ คือ Holt-Winters แบบคูณที่มีครบ α, β, γ อาจารย์ชี้ว่าการรู้ชื่อเหล่านี้ "มีประโยชน์ต่อการที่คุณเป็นคนค้นคว้าเอง" (Class 5, 1:00:38–1:01:43) α = 0.36 แปลว่า level ปรับตามข้อมูลใหม่พอสมควร β = 0.016 แปลว่าความชันแทบไม่เปลี่ยน γ = 0.42 แปลว่ารูปแบบฤดูกาลปรับตามปีล่าสุดค่อนข้างมาก ค่าพยากรณ์มกราคม 2015 ราว 42,942 เครื่อง เทียบกับมกราคม 2014 ที่ขายได้ 108,003 สอดคล้องกับยอดที่ลดลงต่อเนื่อง</p>
+
+<h3>วิธีที่ 2: decomposition แบบคูณด้วย regression</h3>
+<p>อาจารย์เขียนโค้ด R ที่ทำตามขั้นใน Excel ของ Lesson 4 (Class 5, 1:01:49–1:03:29)</p>
+<pre><code>trend_fit &lt;- lm(y ~ t)                         # ขั้น 1 trend เส้นตรง
+detrended &lt;- y / trend_hat                     # ขั้น 2 detrend แบบคูณ
+seasonal &lt;- tapply(detrended, cycle(y), mean)  # ขั้น 3 เฉลี่ยตามเดือน
+seasonal &lt;- seasonal / mean(seasonal)          # ปรับให้เฉลี่ยเป็น 1
+forecast &lt;- trend_future * seasonal_future     # ขั้น 4 trend × seasonal</code></pre>
+<pre class="out">trend:     388917.9 + 249.72 t
+seasonal:  ม.ค. 0.822  ก.พ. 0.762  มี.ค. 0.666 ... พ.ย. 2.307  ธ.ค. 3.127
+forecast:  342461.0  317604.6  277801.0</pre>
+<p>สังเกตสองเรื่อง เรื่องแรก โค้ดนี้ปรับ seasonal ด้วยการ<b>หาร</b>ด้วยค่าเฉลี่ย ขณะที่ใน Excel อาจารย์<b>ลบ</b>ส่วนเกินออก เมื่อค่าเฉลี่ยใกล้ 1 สองวิธีให้ผลเกือบเท่ากัน ธันวาคม 3.127 แปลว่ายอดธันวาคมสูงกว่า trend ราว 3 เท่า</p>
+<p>เรื่องที่สองสำคัญกว่า: ค่าพยากรณ์มกราคมจาก regression คือ 342,461 สูงกว่า ETS ราว 8 เท่า และสูงกว่ายอดมกราคม 2014 (108,003) มาก สาเหตุคือเส้นตรงที่ลากผ่านข้อมูลทั้ง 9 ปีมีความชันบวก (+250 ต่อเดือน) เพราะช่วงปี 2006–2011 ยอดขึ้น แต่สามปีหลังยอดลดลงต่อเนื่อง trend เส้นตรงจึงไม่เห็นขาลงนี้ ส่วน ETS ปรับ level ตามข้อมูลล่าสุดด้วย α จึงตามขาลงทัน ในคลิปอาจารย์บอกว่าสองวิธี "ใกล้เคียง ... ไม่ได้ต่างกันมาก" แต่ output บนจอของอาจารย์ (เฟรม 1:02) ก็แสดง 342461.0 เช่นเดียวกับที่รันได้ บทเรียนที่ได้คือ decomposition ด้วย regression ใช้ได้ดีเมื่อ trend เป็นเส้นตรงจริง เช่น beer ใน Lesson 4 แต่ใช้ไม่ได้กับสินค้าที่ขึ้นแล้วลง</p>
+
+<h3>วิธีที่ 3: decompose() แล้วพยากรณ์ส่วนที่ปรับฤดูกาลแล้ว</h3>
+<p>โค้ดส่วนสุดท้ายหาร seasonal ออกด้วย <code>decompose()</code> พยากรณ์ส่วนที่เหลือด้วย <code>auto.arima()</code> แล้วคูณ seasonal กลับ ได้ 64,964, 70,639 และ 64,994 อาจารย์ให้ข้ามส่วนนี้ไปก่อน "มันก็ไม่ค่อยดีเท่าไหร่" (Class 5, 1:03:37–1:04:10) auto.arima จะเรียนใน Lesson 10</p>
+
+<div class="box exam">
+<div class="label">โปรเจกต์ปลายภาค</div>
+<p>"ตอนสุดท้ายในวิชานี้จะมี final project ต้องมีโมเดลแบบ exponential ตัวหนึ่ง จะเปรียบเทียบกับ decompose ก็ได้" (Class 5, 0:57:06) โมเดลหลักของวิชาคือ exponential smoothing, decomposition และ Box-Jenkins ส่วนโมเดลยุคใหม่ ได้แก่ neural network และ Facebook Prophet (Class 5, 0:57:34)</p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. ทำไมต้องมี Box-Jenkins</h2>
+
+<p>อาจารย์เปิดหัวข้อนี้ว่า Box-Jenkins "เป็น requirement เลย ไม่ว่าที่ไหนที่จะเรียน time series ... เป็นโมเดล standard" (Class 5, 1:04:28) ประสิทธิภาพ "ไม่ได้แย่ก็ไม่ได้ดี" แต่ข้อดีเหนือ ETS และ decomposition คือ<b>ไม่ต้องเป็นข้อมูลรายเดือนหรือรายไตรมาส</b> "flexible มากกว่า" (Class 5, 1:05:13–1:05:49) เช่น ผลตอบแทนหุ้นรายวันที่ไม่มีฤดูกาลก็ใช้ได้</p>
 
 <figure>
-<img src="../assets/slides/ts5-p02.png" alt="Slide 5 หน้า 2: Review: Detrending" loading="lazy">
-<figcaption>Slide 5 หน้า 2 — Review: Detrending</figcaption>
+<img src="../assets/slides/ts5-p02.png" alt="Slide 5 หน้า 2: Review: Detrending (locally linear regression)" loading="lazy">
+<figcaption>Slide 5 หน้า 2 — Review: Detrending (locally linear regression)</figcaption>
 </figure>
 
-<p>Detrending แบบที่เรียนมาใช้เส้นตรงเส้นเดียวทั้งชุดข้อมูล คือ \(X_t=\alpha+\beta t+w_t\) หน้านี้เสนออีกแนวคิดหนึ่ง คือ locally linear regression ซึ่งเขียนเป็น \(X_t=\alpha_t+\beta_tt+w_t\) จุดต่างคือ \(\alpha_t\) และ \(\beta_t\) มีตัวห้อย t จึงเปลี่ยนค่าได้ตามเวลา เปรียบได้กับการใช้ไม้บรรทัดสั้นหลายอันวางต่อกันตามแนวโค้ง แทนไม้บรรทัดยาวอันเดียว สไลด์ระบุว่าแนวคิดนี้อยู่ใน <mark class="src" data-p="2">the state space modeling approach</mark> และ trend ยังแทนได้ด้วย <mark class="src" data-p="2">lowess estimator</mark> ทั้งสองเรื่องไม่อยู่ในวิชานี้ จึงรู้เพียงชื่อและแนวคิด</p>
+<p>สไลด์ทบทวน detrending จาก Lesson 3 และชี้ว่ามีวิธีที่ยืดหยุ่นกว่าเส้นตรง คือให้ intercept และ slope เปลี่ยนตามเวลา \(X_t=\alpha_t+\beta_t t+w_t\) วิธีนี้อยู่ใน <mark class="src" data-p="2">the state space modeling approach</mark> และอีกทางคือ <mark class="src" data-p="2">lowess estimator</mark> ทั้งสองไม่อยู่ในวิชานี้ ข้อที่ต้องจำคือ trend เส้นตรงแบบคงที่ เช่น ที่ใช้กับ Xbox ในหัวข้อ 1 มีข้อจำกัด และถ้า trend ไม่ใช่เส้นตรงต้องหาวิธีอื่น</p>
 
 <figure>
 <img src="../assets/slides/ts5-p03.png" alt="Slide 5 หน้า 3: Review: Differencing" loading="lazy">
 <figcaption>Slide 5 หน้า 3 — Review: Differencing</figcaption>
 </figure>
 
-<p>Differencing มีจุดประสงค์เพื่อกำจัด trend สไลด์เน้นว่า <mark class="src" data-p="3">This technique is integral part of the so-called Box-Jenkins methodology</mark> และถ้าข้อมูลเป็น <mark class="src" data-p="3">non-seasonal usually a first order difference is sufficient</mark> ผลต่างอันดับหนึ่งคือ \(\nabla X_t=X_t-X_{t-1}\) เริ่มที่ \(t=2\) เพราะค่าแรกไม่มีค่าก่อนหน้าให้ลบ ผลต่างอันดับสองคือ \(\nabla^2X_t=X_t-2X_{t-1}+X_{t-2}\) เริ่มที่ <mark class="src" data-p="3">t = 3, 4, …, n</mark> เพราะต้องใช้ค่าย้อนหลังสองค่า ตัวอย่าง: ข้อมูล 10, 12, 15, 19 ได้ผลต่างอันดับหนึ่ง 2, 3, 4 และผลต่างอันดับสอง 1, 1 จำนวนข้อมูลลดลงครั้งละหนึ่งค่า</p>
-
-<div class="calc">
-<div class="calc-title">ที่มาของสูตรผลต่างอันดับสอง</div>
-<ol class="steps">
-<li><div class="st-title">ผลต่างอันดับสองคือผลต่างของผลต่าง</div><p>\(\nabla^2X_t=\nabla X_t-\nabla X_{t-1}\)</p></li>
-<li><div class="st-title">แทนนิยามของผลต่างอันดับหนึ่ง</div><p>\(=(X_t-X_{t-1})-(X_{t-1}-X_{t-2})\)</p></li>
-<li><div class="st-title">รวมพจน์</div><p>\(=X_t-2X_{t-1}+X_{t-2}\)</p></li>
-</ol>
-<p>ตรวจด้วยตัวเลข: ที่ค่า 15 ได้ \(15-2(12)+10=1\) ตรงกับผลต่างอันดับสองตัวแรก</p>
-</div>
+<p>differencing <mark class="src" data-p="3">This technique is integral part of the so-called Box-Jenkins methodology</mark> คือเป็นแกนของวิธีที่จะเรียน และ <mark class="src" data-p="3">non-seasonal usually a first order difference is sufficient</mark> ตัวอย่าง: อนุกรม 10, 13, 16, 19 มี trend เส้นตรง ผลต่างครั้งแรกคือ 3, 3, 3 ไม่มี trend แล้ว ถ้าอนุกรมคือ \(t^2\) = 1, 4, 9, 16, 25 ผลต่างครั้งแรกคือ 3, 5, 7, 9 ยังเพิ่มขึ้น ผลต่างครั้งที่สองคือ 2, 2, 2 จึงนิ่ง สูตรผลต่างครั้งที่สอง \(\nabla^2X_t=X_t-2X_{t-1}+X_{t-2}\) เริ่มได้ที่ \(t=3\) เพราะต้องใช้สองค่าก่อนหน้า จำนวนครั้งที่ difference คือ d ใน ARIMA ซึ่งจะเรียนใน Lesson 6</p>
 
 <figure>
-<img src="../assets/slides/ts5-p04.png" alt="Slide 5 หน้า 4: Looking ahead" loading="lazy">
-<figcaption>Slide 5 หน้า 4 — Looking ahead</figcaption>
+<img src="../assets/slides/ts5-p04.png" alt="Slide 5 หน้า 4: Looking ahead: regression ไม่พอ" loading="lazy">
+<figcaption>Slide 5 หน้า 4 — Looking ahead: regression ไม่พอ</figcaption>
 </figure>
 
-<p>หน้านี้สรุปสิ่งที่ทำมาและชี้ข้อจำกัด regression ใช้ “detrend” ข้อมูลโดยหวังให้ residual คล้าย stationary process ส่วน differencing เปลี่ยนข้อมูลที่ไม่ stationary ให้เป็น stationary ได้ ข้อจำกัดอยู่ในประโยคสุดท้าย: classical regression บางครั้งไม่เพียงพอที่จะอธิบายพลวัตทั้งหมดของ time series หมายความว่าแม้ลบ trend ออกแล้ว ส่วนที่เหลือมักยังสัมพันธ์กันข้ามเวลา ซึ่ง regression ถือว่า error เป็นอิสระต่อกันจึงอธิบายส่วนนี้ไม่ได้</p>
+<p>ข้อความสุดท้ายของหน้านี้คือเหตุผลของบททั้งบท: regression ใน detrending <mark class="src" data-p="4">is sometimes insufficient for explaining all of the dynamics of a time series</mark> ตัวอย่างจาก Lesson 3: residual ของอุณหภูมิหลัง detrend ยังมี ACF ที่ lag 1 เท่ากับ 0.530 แปลว่า residual ปีนี้ยังสัมพันธ์กับปีก่อน regression มองแต่ trend จึงอธิบายความสัมพันธ์ข้ามเวลานี้ไม่ได้ ต้องมีโมเดลที่เขียนความสัมพันธ์นี้ตรง ๆ</p>
 
 <figure>
-<img src="../assets/slides/ts5-p05.png" alt="Slide 5 หน้า 5: Looking ahead (ต่อ)" loading="lazy">
-<figcaption>Slide 5 หน้า 5 — Looking ahead (ต่อ)</figcaption>
+<img src="../assets/slides/ts5-p05.png" alt="Slide 5 หน้า 5: Looking ahead: AR, ARMA, ARIMA (Box and Jenkins 1970)" loading="lazy">
+<figcaption>Slide 5 หน้า 5 — Looking ahead: AR, ARMA, ARIMA (Box and Jenkins 1970)</figcaption>
 </figure>
 
-<p>ทางออกคือโมเดลที่อธิบายความสัมพันธ์ข้ามเวลาโดยตรง ได้แก่ autoregressive (AR) และ autoregressive moving average (ARMA) เมื่อรวมโมเดล <mark class="src" data-p="5">nonstationary</mark> เข้าไปจะได้ autoregressive integrated moving average (ARIMA) ซึ่ง Box และ Jenkins เสนอในปี 1970 บทนี้สร้างชิ้นส่วนสองชิ้นแรก คือ MA และ AR ทั้งสองชิ้นใช้กับข้อมูลที่ stationary แล้ว</p>
+<p>โมเดลที่ตอบโจทย์นี้คือ AR, ARMA และเมื่อเพิ่ม differencing เพื่อรองรับข้อมูลไม่นิ่งก็เป็น ARIMA เสนอโดย Box และ Jenkins ในปี 1970 ชื่อ ARIMA มาจากสามส่วนที่จะเรียนตามลำดับ: AR ในบทนี้ I (differencing) ใน Lesson 6 และ MA ในบทนี้</p>
 
-<table>
-<tr><th>ชิ้นส่วน</th><th>แนวคิด</th><th>อยู่ในบท</th></tr>
-<tr><td>MA (moving average)</td><td>ค่าวันนี้ขึ้นกับแรงกระแทกสุ่มของวันนี้และของวันก่อน ๆ</td><td>บทนี้ หัวข้อ 3–8</td></tr>
-<tr><td>AR (autoregressive)</td><td>ค่าวันนี้ขึ้นกับค่าของตัวเองในวันก่อน ๆ</td><td>บทนี้ หัวข้อ 9–12</td></tr>
-<tr><td>I (integrated)</td><td>differencing ก่อนใช้ AR และ MA</td><td>Lecture 6</td></tr>
-</table>
+<figure>
+<img src="../assets/slides/ts5-p23.png" alt="Slide 5 หน้า 23: Box-Jenkins Model: Auto-Regressive, Integrated, Moving average" loading="lazy">
+<figcaption>Slide 5 หน้า 23 — Box-Jenkins Model: Auto-Regressive, Integrated, Moving average</figcaption>
+</figure>
 
-<!-- ===================================================== -->
-<h2 id="s2">2. เครื่องมือคำนวณที่ต้องรู้ก่อน</h2>
-
-<p>การพิสูจน์ทั้งหมดในบทนี้ใช้กฎไม่กี่ข้อซ้ำไปมา ถ้าจำกฎชุดนี้ได้ จะพิสูจน์ได้ทุกโมเดล</p>
+<p>อาจารย์เตือนเรื่องชื่อ: "MA ตรงนี้ไม่ใช่อันเดียวกับ moving average ที่คุณเรียน 3 อาทิตย์ที่แล้ว ... ตอนเรียนครั้งแรกผมคิดว่ามันอันเดียวกัน" (Class 5, 1:06:21–1:07:10) moving average ใน Lesson 4 คือการเฉลี่ยค่าที่สังเกตได้ \(X\) เพื่อทำให้เรียบ ส่วน MA ในบทนี้คือโมเดลที่ \(X_t\) เป็นผลรวมถ่วงน้ำหนักของ white noise \(w\) ซึ่งสังเกตไม่ได้ ชื่อเหมือนกันแต่เป็นคนละเรื่อง</p>
 
 <div class="box prereq">
-<div class="label">ต้องรู้ก่อน 1 — white noise</div>
-<p>White noise \(w_t\) คือค่าสุ่มที่เกิดใหม่ทุกช่วงเวลาและไม่เกี่ยวกับค่าก่อนหน้า เปรียบเหมือนการทอยลูกเต๋าใหม่ทุกวัน ผลของวันนี้ไม่บอกอะไรเกี่ยวกับผลของพรุ่งนี้ สมบัติที่ใช้มีสามข้อ</p>
-<table class="compact">
-<tr><th>สมบัติ</th><th>เขียนเป็นสูตร</th><th>ความหมาย</th></tr>
-<tr><td>ค่าเฉลี่ยศูนย์</td><td>\(E(w_t)=0\)</td><td>บวกและลบหักล้างกันโดยเฉลี่ย</td></tr>
-<tr><td>ความแปรปรวนคงที่</td><td>\(\mathrm{Var}(w_t)=E(w_t^2)=\sigma^2\)</td><td>ขนาดของการแกว่งเท่ากันทุกเวลา</td></tr>
-<tr><td>ไม่สัมพันธ์กันข้ามเวลา</td><td>\(E(w_tw_s)=0\) เมื่อ \(t\ne s\)</td><td>ค่าของสองเวลาที่ต่างกันไม่เกี่ยวกัน</td></tr>
-</table>
-<p>สองข้อหลังรวมเป็นกฎเดียวที่ใช้บ่อยที่สุด: <strong>ผลคูณของ w สองตัวมีค่าคาดหมายเป็น \(\sigma^2\) เมื่อเป็นตัวเดียวกัน และเป็น 0 เมื่อเป็นคนละตัว</strong></p>
-</div>
-
-<div class="box prereq">
-<div class="label">ต้องรู้ก่อน 2 — กฎของค่าคาดหมาย ความแปรปรวน และ covariance</div>
-<table class="compact">
-<tr><th>กฎ</th><th>สูตร</th><th>ตัวอย่าง</th></tr>
-<tr><td>ค่าคาดหมายของผลรวม</td><td>\(E(aX+bY)=aE(X)+bE(Y)\)</td><td>\(E(w_t+0.9w_{t-1})=0+0.9(0)=0\)</td></tr>
-<tr><td>ความแปรปรวนของผลรวมของตัวที่ไม่สัมพันธ์กัน</td><td>\(\mathrm{Var}(aX+bY)=a^2\mathrm{Var}(X)+b^2\mathrm{Var}(Y)\)</td><td>\(\mathrm{Var}(w_t+0.9w_{t-1})=\sigma^2+0.81\sigma^2\)</td></tr>
-<tr><td>covariance เมื่อค่าเฉลี่ยเป็นศูนย์</td><td>\(\mathrm{Cov}(X,Y)=E(XY)\)</td><td>ใช้ได้กับทุกโมเดลในบทนี้เพราะค่าเฉลี่ยเป็น 0</td></tr>
-<tr><td>autocovariance</td><td>\(\gamma(h)=\mathrm{Cov}(X_{t+h},X_t)\)</td><td>\(\gamma(0)\) คือความแปรปรวน</td></tr>
-<tr><td>autocorrelation (ACF)</td><td>\(\rho(h)=\gamma(h)/\gamma(0)\)</td><td>มีค่าระหว่าง −1 ถึง 1 และ \(\rho(0)=1\)</td></tr>
-</table>
-<p>วิธีหา \(E(XY)\) เมื่อ X และ Y เป็นผลรวมของ w หลายตัว: คูณกระจายทุกคู่ แล้วเก็บเฉพาะคู่ที่เป็น w ตัวเดียวกัน คู่อื่นเป็น 0 ทั้งหมด</p>
-</div>
-
-<div class="box prereq">
-<div class="label">ต้องรู้ก่อน 3 — lag operator B</div>
-<p>B (backshift หรือ lag operator) เป็นคำสั่งให้ถอยเวลาหนึ่งช่วง: \(BX_t=X_{t-1}\) ใช้สองครั้งถอยสองช่วง: \(B^2X_t=X_{t-2}\) และใช้กับ \(w_t\) ได้เหมือนกัน ประโยชน์คือเขียนโมเดลยาว ๆ ให้สั้น เช่น \(w_t+\theta_1w_{t-1}+\theta_2w_{t-2}\) เขียนเป็น \((1+\theta_1B+\theta_2B^2)w_t\) วงเล็บนี้เป็นพหุนามของ B ซึ่งจัดการแบบพีชคณิตธรรมดาได้ เช่น แยกตัวประกอบและหาราก</p>
+<div class="label">ทบทวน backshift operator B</div>
+<p>\(BX_t=X_{t-1}\), \(B^2X_t=X_{t-2}\), \(B^kX_t=X_{t-k}\) "B ไม่ใช่ B มันเป็น operator" (Class 5, 1:07:51) คือคำสั่ง "ถอยหลังหนึ่งช่วง" ไม่ใช่ตัวเลข ใช้กับ \(w\) ได้เหมือนกัน \(Bw_t=w_{t-1}\) differencing เขียนได้เป็น \(\nabla X_t=X_t-X_{t-1}=(1-B)X_t\) ประโยชน์ของ B คือทำให้เขียนโมเดลยาว ๆ เป็นพหุนามสั้น ๆ แล้วใช้พีชคณิตกับพหุนามนั้นได้ เช่น แยกตัวประกอบ</p>
 </div>
 
 <!-- ===================================================== -->
-<h2 id="s3">3. นิยามของ MA(q)</h2>
+<h2 id="s3">3. MA(q): นิยาม ความหมาย และการเขียนสามระดับ</h2>
+
+<p>เริ่มจากคำถามง่าย ๆ: ราคาน้ำมันวันนี้ขึ้นกับอะไร ถ้าเมื่อวานมีข่าวสงคราม (shock) ราคาวันนี้ยังได้รับผลอยู่ พรุ่งนี้อาจยังเหลือผลนิดหน่อย แล้วหลังจากนั้นข่าวนั้นก็หมดผล MA(q) คือโมเดลของแนวคิดนี้: ค่าวันนี้คือผลรวมของ shock วันนี้กับ shock ย้อนหลัง q วัน shock ที่เก่ากว่า q วันไม่มีผลแล้ว</p>
 
 <figure>
-<img src="../assets/slides/ts5-p06.png" alt="Slide 5 หน้า 6: Moving Average Model (page 90)" loading="lazy">
-<figcaption>Slide 5 หน้า 6 — Moving Average Model (page 90)</figcaption>
+<img src="../assets/slides/ts5-p06.png" alt="Slide 5 หน้า 6: Moving Average Model: MA(q)" loading="lazy">
+<figcaption>Slide 5 หน้า 6 — Moving Average Model: MA(q)</figcaption>
 </figure>
 
-<p>ให้ \(w_t\) เป็น Gaussian white noise ที่มีค่าเฉลี่ยศูนย์และความแปรปรวน \(\sigma^2\) กระบวนการ \(X_t=w_t+\theta_1w_{t-1}+\theta_2w_{t-2}+\dots+\theta_qw_{t-q}\) เรียกว่า <mark class="src" data-p="6">a moving average model of order q</mark> เขียนย่อว่า MA(q) โดยมีเงื่อนไข \(\theta_q\ne0\) เลข q คือจำนวนช่วงเวลาที่ย้อนไปไกลที่สุด เงื่อนไข \(\theta_q\ne0\) มีไว้ให้อันดับเป็น q จริง ถ้า \(\theta_q=0\) พจน์สุดท้ายหายไปและโมเดลกลายเป็นอันดับที่ต่ำกว่า</p>
-<p>เปรียบเทียบ: ร้านค้าได้รับข่าวสุ่มทุกวัน ข่าวดีทำให้ยอดขายเพิ่ม ข่าวร้ายทำให้ลด ข่าวของวันนี้คือ \(w_t\) ผลของข่าวไม่ได้หายไปในวันเดียว ข่าวเมื่อวานยังส่งผลต่อวันนี้ด้วยน้ำหนัก \(\theta_1\) ข่าวเมื่อสองวันก่อนส่งผลด้วยน้ำหนัก \(\theta_2\) ใน MA(q) ข่าวหนึ่งชิ้นมีผลอยู่ q วันแล้วหมดไปทันที</p>
-<p>สไลด์ให้รูปแบบที่สองซึ่งใช้เครื่องหมายลบ: \(X_t=w_t-\theta_1w_{t-1}-\dots-\theta_qw_{t-q}\) ทั้งสองรูปเป็นโมเดลเดียวกัน ต่างกันที่เครื่องหมายของ \(\theta\) ตำราและโปรแกรมแต่ละแห่งเลือกต่างกัน R ใช้รูปเครื่องหมายบวก เมื่ออ่านโจทย์ต้องดูก่อนว่าใช้รูปใด เพราะเครื่องหมายของ \(\rho(1)\) จะกลับกัน</p>
-
-<figure>
-<img src="../assets/slides/ts5-p07.png" alt="Slide 5 หน้า 7: Moving Average Model (ต่อ)" loading="lazy">
-<figcaption>Slide 5 หน้า 7 — Moving Average Model (ต่อ)</figcaption>
-</figure>
-
-<p>รูปผลรวม \(X_t=w_t+\sum_{j=1}^{q}\theta_jw_{t-j}\) เป็นสมการเดียวกับหน้าก่อน เขียนให้สั้นลง ประโยคสำคัญคือ ภายใต้โมเดลนี้ ค่าที่สังเกตได้ขึ้นกับ \(w_t\) ในอดีต และ MA(q) กำหนดโครงสร้าง correlated noise ในข้อมูลได้ ซึ่งไปไกลกว่าสมมติฐานดั้งเดิมที่ว่า error เป็น iid คำว่า iid หมายถึงอิสระต่อกันและมีการแจกแจงเดียวกัน regression ทั่วไปสมมติเช่นนั้น MA ยอมให้ค่าที่อยู่ใกล้กันในเวลาสัมพันธ์กันได้ เพราะใช้ w ตัวเดียวกันร่วมกัน เช่น \(X_t\) และ \(X_{t-1}\) ต่างมี \(w_{t-1}\) อยู่ในสมการ</p>
-
-<figure>
-<img src="../assets/slides/ts5-p08.png" alt="Slide 5 หน้า 8: Moving Average Model: รูป lag operator" loading="lazy">
-<figcaption>Slide 5 หน้า 8 — Moving Average Model: รูป lag operator</figcaption>
-</figure>
-
-<p>เมื่อนิยาม \(\theta(B)=1+\theta_1B+\theta_2B^2+\dots+\theta_qB^q\) โมเดล MA(q) เขียนได้เป็น \(X_t=\theta(B)w_t\) ตรวจกับ MA(1): \(\theta(B)w_t=(1+\theta_1B)w_t=w_t+\theta_1Bw_t=w_t+\theta_1w_{t-1}\) ได้สมการเดิม รูปนี้จะใช้มากใน Lecture 6 และ 7 เมื่อรวม AR กับ MA เข้าด้วยกัน</p>
-
-<div class="box exam">
-<div class="label">จุดสอบ — นิยาม MA(q)</div>
+<p>นิยามบนสไลด์คือ \(X_t=w_t+\theta_1w_{t-1}+\theta_2w_{t-2}+\dots+\theta_qw_{t-q}\) เรียกว่า <mark class="src" data-p="6">a moving average model of order q</mark> โดย \(w_t\) เป็น Gaussian white noise mean 0 variance \(\sigma^2\) และ \(\theta_q\neq 0\) เงื่อนไขสุดท้ายนี้ทำให้ order ชัดเจน: ถ้า \(\theta_3=0\) โมเดลที่เขียนว่า MA(3) ก็คือ MA(2) อาจารย์อธิบายส่วนประกอบดังนี้ (Class 5, 1:09:48–1:15:28)</p>
 <ul>
-<li>เขียน MA(q) ได้สามรูป: รูปกระจาย รูปผลรวม และรูป \(X_t=\theta(B)w_t\)</li>
-<li>บอกได้ว่า q คืออะไร และทำไมต้องมี \(\theta_q\ne0\)</li>
-<li>รู้ว่ามีรูปเครื่องหมายบวกและรูปเครื่องหมายลบ</li>
+<li><b>q คือ order และเป็นจำนวนพารามิเตอร์ θ</b> "เราก็ไม่อยากให้มันเยอะ ... คล้าย ๆ regression มี X 20 ตัวก็มี 20 slope ... ก็ต้องทำ variable selection"</li>
+<li><b>w เป็นตัวแปรสุ่ม θ ไม่ใช่</b> θ เป็นสัมประสิทธิ์ "เหมือน slope"</li>
+<li><b>w_t คือ "ค่าปัจจัยอื่นที่คุณไม่ได้เก็บมา"</b> เช่น GDP ปีนี้ถูกกำหนดโดยเหตุการณ์ที่ไม่ได้อยู่ในข้อมูล GDP ภาษา finance เรียก w ว่า shock (Class 5, 1:41:51)</li>
 </ul>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s4">4. MA(1): พิสูจน์ mean, autocovariance และ ACF</h2>
+<p>สไลด์ให้สองแบบ แบบเครื่องหมายบวกและแบบเครื่องหมายลบ \(X_t=w_t-\theta_1w_{t-1}-\dots\) หนังสือ Cryer and Chan ใช้แบบลบ ส่วน R (<code>arima</code>, <code>arima.sim</code>) และอาจารย์ในคาบนี้ใช้แบบบวก สองแบบต่างกันแค่เครื่องหมายของ θ: MA(1) แบบบวก θ = 0.5 คือโมเดลเดียวกับแบบลบ θ = −0.5 เวลาอ่านโจทย์ต้องดูว่าใช้แบบไหน</p>
 
 <figure>
-<img src="../assets/slides/ts5-p09.png" alt="Slide 5 หน้า 9: MA(1) process (example 3.3–3.4, page 90)" loading="lazy">
-<figcaption>Slide 5 หน้า 9 — MA(1) process (example 3.3–3.4, page 90)</figcaption>
+<img src="../assets/slides/ts5-p07.png" alt="Slide 5 หน้า 7: MA(q) แบบผลรวม Σ" loading="lazy">
+<figcaption>Slide 5 หน้า 7 — MA(q) แบบผลรวม Σ</figcaption>
 </figure>
 
-<p>เมื่อ \(q=1\) โมเดลคือ \(X_t=w_t+\theta_1w_{t-1}\) สไลด์ให้หา mean function, autocovariance function และ ACF โดยไม่ได้แสดงวิธีทำ การพิสูจน์ต่อไปนี้ใช้กฎในหัวข้อ 2 เท่านั้น เขียน \(\theta\) แทน \(\theta_1\)</p>
+<p>การเขียนด้วยผลรวม \(X_t=w_t+\sum_{j=1}^{q}\theta_jw_{t-j}\) สั้นกว่า สไลด์บอกความหมายเชิงสถิติว่า MA(q) <mark class="src" data-p="7">can define correlated noise structure in our data and goes beyond the traditional assumption where errors are iid</mark> ใน regression ทั่วไปเราสมมุติว่า error แต่ละตัวอิสระกัน แต่ \(X_t\) กับ \(X_{t-1}\) ของ MA(1) ใช้ \(w_{t-1}\) ร่วมกัน จึงสัมพันธ์กัน MA จึงเป็นเครื่องมือเขียน error ที่สัมพันธ์กันข้ามเวลา</p>
 
-<div class="calc" id="s4-calc">
-<div class="calc-title">พิสูจน์สมบัติของ MA(1): \(X_t=w_t+\theta w_{t-1}\)</div>
+<figure>
+<img src="../assets/slides/ts5-p08.png" alt="Slide 5 หน้า 8: MA(q) ในรูป lag operator: X_t = θ(B)w_t" loading="lazy">
+<figcaption>Slide 5 หน้า 8 — MA(q) ในรูป lag operator: X_t = θ(B)w_t</figcaption>
+</figure>
+
+<p>อาจารย์สอนการเขียนเป็นสามระดับ (Class 5, 1:15:31–1:19:02) ระดับแรก "มือสมัครเล่น" เขียนยาวทุกพจน์ ระดับสอง "นักสถิติ" ใช้ Σ "ดูเป็น professional ขึ้น" ระดับสาม advanced ใช้ B: เพราะ \(w_{t-j}=B^jw_t\) ทุกพจน์จึงมี \(w_t\) ร่วม ดึงออกมาได้</p>
+<p>\(X_t=w_t+\theta_1Bw_t+\dots+\theta_qB^qw_t=(1+\theta_1B+\dots+\theta_qB^q)w_t=\theta(B)w_t\)</p>
+<p>พหุนามในวงเล็บคือ <b>characteristic function ของ MA(q)</b> "ฟังก์ชันที่บอกนิสัยของ MA" (Class 5, 1:19:08) ตัวอย่าง: MA(2) ที่ θ₁ = 0.4, θ₂ = −0.3 เขียนได้เป็น \(X_t=(1+0.4B-0.3B^2)w_t\) การเขียนแบบนี้สำคัญเพราะ Lesson 6–7 จะแยกตัวประกอบพหุนามนี้เพื่อตรวจสมบัติของโมเดล</p>
+
+<figure>
+<img src="../assets/slides/ts5-p22.png" alt="Slide 5 หน้า 22: MA(q) process: หา mean, autocovariance และ ACF" loading="lazy">
+<figcaption>Slide 5 หน้า 22 — MA(q) process: หา mean, autocovariance และ ACF</figcaption>
+</figure>
+
+<p>หน้านี้ตั้งงานที่ต้องทำกับทุกโมเดล คือหา mean, autocovariance function และ ACF เหตุผลคือข้อมูลจริงให้เราได้แค่ sample ACF ถ้ารู้ว่า ACF ตามทฤษฎีของ MA(q) มีหน้าตาอย่างไร เราจะเทียบรูปแล้วเลือกโมเดลได้ หัวข้อ 4 และ 6 จะทำงานนี้กับ MA(1) และ MA(2)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p24.png" alt="Slide 5 หน้า 24: Summary: MA(q) ที่มี mean μ" loading="lazy">
+<figcaption>Slide 5 หน้า 24 — Summary: MA(q) ที่มี mean μ</figcaption>
+</figure>
+
+<p>ในทางปฏิบัติอนุกรมไม่ได้แกว่งรอบศูนย์ สไลด์จึงเพิ่ม μ: \(X_t=\mu+w_t+\theta_1w_{t-1}+\dots+\theta_qw_{t-q}\) โดย μ คือ <mark class="src" data-p="24">a mean of the series</mark> และ θ คือ <mark class="src" data-p="24">the parameters of the model</mark> เมื่อหาค่าคาดหมายทุก \(w\) มี mean 0 จึงได้ \(E(X_t)=\mu\) พอดี R จะรายงาน μ ในชื่อ intercept "เพราะเขาเชื่อว่าอนุกรมไม่ได้แกว่งประมาณ 0" (Class 5, 1:42:22) การเพิ่ม μ ไม่เปลี่ยน autocovariance เพราะค่าคงที่ไม่มี covariance กับอะไร</p>
+
+<figure>
+<img src="../assets/slides/ts5-p25.png" alt="Slide 5 หน้า 25: Summary: MA(q) = μ + θ(B)w_t" loading="lazy">
+<figcaption>Slide 5 หน้า 25 — Summary: MA(q) = μ + θ(B)w_t</figcaption>
+</figure>
+
+<p>สไลด์สรุปว่า MA <mark class="src" data-p="25">is conceptually a linear regression of the current value of the series against current and previous white noise error terms</mark> คือเหมือน regression ที่ตัวแปรต้นเป็น shock ย้อนหลัง ข้อต่างจาก regression จริงคือ shock สังเกตไม่ได้ จึงประมาณ θ ด้วย least squares ตรง ๆ ไม่ได้ ต้องใช้ maximum likelihood ซึ่ง R ทำให้ใน <code>arima()</code></p>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. MA(1): mean, autocovariance, ACF และสมบัติ</h2>
+
+<figure>
+<img src="../assets/slides/ts5-p09.png" alt="Slide 5 หน้า 9: MA(1): X_t = w_t + θw(t−1)" loading="lazy">
+<figcaption>Slide 5 หน้า 9 — MA(1): X_t = w_t + θw(t−1)</figcaption>
+</figure>
+
+<p>MA(1) คือ \(X_t=w_t+\theta w_{t-1}\) "ถ้ามี θ ตัวเดียวไม่ต้องห้อย 1" (Class 5, 1:13:19) งานคือหา mean, autocovariance และ ACF ทุกขั้นใช้กฎสองข้อของ white noise: \(\mathrm{Var}(w_t)=\sigma^2\) และ \(\mathrm{Cov}(w_s,w_t)=0\) เมื่อ \(s\neq t\)</p>
+
+<div class="calc" id="s4-ma1">
+<div class="calc-title">หา property ของ MA(1) แบบที่อาจารย์ทำในห้อง</div>
 <ol class="steps">
-<li><div class="st-title">Mean function</div>
-\[E(X_t)=E(w_t)+\theta E(w_{t-1})=0+\theta(0)=0\]
-<p>ค่าเฉลี่ยเป็น 0 ทุกเวลา ไม่ขึ้นกับ t</p></li>
-<li><div class="st-title">Variance คือ \(\gamma(0)\)</div>
-<p>\(w_t\) และ \(w_{t-1}\) ไม่สัมพันธ์กัน จึงบวกความแปรปรวนได้ตรง ๆ</p>
-\[\gamma(0)=\mathrm{Var}(w_t+\theta w_{t-1})=\sigma^2+\theta^2\sigma^2=(1+\theta^2)\sigma^2\]</li>
-<li><div class="st-title">Autocovariance ที่ lag 1</div>
-<p>เขียน \(X_{t+1}=w_{t+1}+\theta w_t\) และ \(X_t=w_t+\theta w_{t-1}\) แล้วคูณกระจาย</p>
-\[\gamma(1)=E(X_{t+1}X_t)=E\big[(w_{t+1}+\theta w_t)(w_t+\theta w_{t-1})\big]\]
-<table class="compact">
-<tr><th>คู่ที่คูณกัน</th><th>ตัวเดียวกันหรือไม่</th><th>ค่าคาดหมาย</th></tr>
-<tr><td>\(w_{t+1}\cdot w_t\)</td><td>ไม่</td><td>0</td></tr>
-<tr><td>\(w_{t+1}\cdot\theta w_{t-1}\)</td><td>ไม่</td><td>0</td></tr>
-<tr><td>\(\theta w_t\cdot w_t\)</td><td>ใช่</td><td>\(\theta\sigma^2\)</td></tr>
-<tr><td>\(\theta w_t\cdot\theta w_{t-1}\)</td><td>ไม่</td><td>0</td></tr>
-</table>
-\[\gamma(1)=\theta\sigma^2\]</li>
-<li><div class="st-title">Autocovariance ที่ lag 2 ขึ้นไป</div>
-<p>\(X_{t+2}=w_{t+2}+\theta w_{t+1}\) และ \(X_t=w_t+\theta w_{t-1}\) ไม่มี w ตัวใดซ้ำกัน ทุกคู่จึงเป็น 0</p>
-\[\gamma(h)=0\quad\text{เมื่อ }h\ge2\]</li>
-<li><div class="st-title">ACF</div>
-\[\rho(1)=\frac{\gamma(1)}{\gamma(0)}=\frac{\theta\sigma^2}{(1+\theta^2)\sigma^2}=\frac{\theta}{1+\theta^2},\qquad \rho(h)=0\ \text{เมื่อ }h\ge2\]</li>
+<li><div class="st-title">Mean</div><p>\(E(X_t)=E(w_t)+\theta E(w_{t-1})=0+0=0\) "แกว่งประมาณเลขศูนย์ ถ้าอยากให้แกว่งรอบเลขอื่นค่อยเติม intercept ทีหลัง" (Class 5, 1:22:24)</p></li>
+<li><div class="st-title">γ₀ (variance)</div><p>\(\mathrm{Cov}(w_t+\theta w_{t-1},\,w_t+\theta w_{t-1})\) กระจายได้สี่คู่ คู่ที่ "ชนกัน" (ดัชนีเวลาเท่ากัน) คือ \(w_t\) กับ \(w_t\) ได้ \(\sigma^2\) และ \(\theta w_{t-1}\) กับ \(\theta w_{t-1}\) ได้ \(\theta^2\sigma^2\) อีกสองคู่เป็น 0 จึงได้ \(\gamma_0=\sigma^2(1+\theta^2)\) (Class 5, 1:23:39–1:25:21)</p></li>
+<li><div class="st-title">γ₁</div><p>\(\mathrm{Cov}(w_t+\theta w_{t-1},\,w_{t+1}+\theta w_t)\) คู่ที่ชนกันมีคู่เดียวคือ \(w_t\) กับ \(\theta w_t\) จึงได้ \(\gamma_1=\theta\sigma^2\) (Class 5, 1:25:33–1:28:08)</p></li>
+<li><div class="st-title">γ₂ เป็นต้นไป</div><p>\(\mathrm{Cov}(w_t+\theta w_{t-1},\,w_{t+2}+\theta w_{t+1})\) ดัชนี \(t, t-1\) ไม่ตรงกับ \(t+2, t+1\) เลย "ไม่มีตัวที่มันชนกันได้เลย" \(\gamma_h=0\) เมื่อ \(h\ge 2\)</p></li>
+<li><div class="st-title">ACF</div><p>หารด้วย \(\gamma_0\): \(\rho_0=1\), \(\rho_1=\dfrac{\theta\sigma^2}{\sigma^2(1+\theta^2)}=\dfrac{\theta}{1+\theta^2}\), \(\rho_h=0\) เมื่อ \(h\ge2\) σ² ตัดกันหมด ACF จึงขึ้นกับ θ อย่างเดียว</p></li>
 </ol>
-<div class="answer">MA(1): \(E(X_t)=0\), \(\gamma(0)=(1+\theta^2)\sigma^2\), \(\gamma(1)=\theta\sigma^2\), \(\rho(1)=\dfrac{\theta}{1+\theta^2}\) และทุกค่าเป็น 0 เมื่อ \(h\ge2\)</div>
-<p>ค่าเฉลี่ยคงที่ และ autocovariance ขึ้นกับ h เท่านั้น ไม่ขึ้นกับ t MA(1) จึง stationary เสมอ ไม่ว่า \(\theta\) มีค่าเท่าใด</p>
+<div class="answer">ตัวอย่าง θ = 0.9: γ₀ = 1.81σ², γ₁ = 0.9σ², ρ₁ = 0.9/1.81 = 0.497 และ ρ₂ = ρ₃ = … = 0</div>
 </div>
 
 <figure>
-<img src="../assets/slides/ts5-p10.png" alt="Slide 5 หน้า 10: MA(1) process: ข้อสรุป" loading="lazy">
-<figcaption>Slide 5 หน้า 10 — MA(1) process: ข้อสรุป</figcaption>
+<img src="../assets/slides/ts5-p10.png" alt="Slide 5 หน้า 10: MA(1) has zero correlation beyond lag 1" loading="lazy">
+<figcaption>Slide 5 หน้า 10 — MA(1) has zero correlation beyond lag 1</figcaption>
 </figure>
 
-<p>สไลด์สรุปผลจากการพิสูจน์เป็นคำพูด: MA(1) มี correlation เป็นศูนย์เมื่อเลย lag 1 ค่าที่ห่างกันหนึ่งช่วงเวลาสัมพันธ์กัน ค่าที่ห่างกันมากกว่าหนึ่งช่วงเวลาไม่สัมพันธ์กัน เหตุผลเห็นได้จากตารางในขั้นที่ 3 และ 4: \(X_t\) กับ \(X_{t-1}\) มี \(w_{t-1}\) ร่วมกันหนึ่งตัว ส่วน \(X_t\) กับ \(X_{t-2}\) ไม่มีตัวร่วม ข้อความสีแดงบอกการนำไปใช้: ต้องจำข้อนี้ไว้เมื่อสร้างโมเดลให้ข้อมูลจริงโดยใช้หลักฐานเชิงประจักษ์ <mark class="src" data-p="10">(e.g. sample autocorrelations ).</mark> นั่นคือ ถ้า sample ACF ของข้อมูลมีแท่งที่มีนัยสำคัญเฉพาะ lag 1 แล้วหายไป MA(1) เป็นโมเดลที่ควรพิจารณา</p>
+<p>ผลข้างบนสรุปเป็นประโยคบนสไลด์: MA(1) มี correlation เป็นศูนย์หลัง lag 1 ค่าที่ห่างกันหนึ่งช่วงสัมพันธ์กัน ค่าที่ห่างกันมากกว่านั้นไม่สัมพันธ์ เหตุผลเชิงความหมายคือ \(X_t\) กับ \(X_{t-1}\) ใช้ shock \(w_{t-1}\) ร่วมกัน แต่ \(X_t\) กับ \(X_{t-2}\) ไม่มี shock ร่วมเลย สไลด์เน้นให้จำข้อนี้ไว้ใช้กับข้อมูลจริงผ่าน <mark class="src" data-p="10">(e.g. sample autocorrelations ).</mark> คือถ้า sample ACF ทะลุเส้นที่ lag 1 แล้วอยู่ในเส้นทั้งหมด ให้สงสัยว่าเป็น MA(1) "ถ้า data นิสิตทำ correlogram ออกมาแล้วได้รูปข้างล่าง แสดงว่าน่าจะเป็น MA(1)" (Class 5, 1:31:31–1:33:42)</p>
 
-<div class="calc">
-<div class="calc-title">ข้อสังเกตเพิ่ม: \(\rho(1)\) ของ MA(1) มีค่าได้ไม่เกิน 0.5</div>
-<table class="compact">
-<tr><th>\(\theta\)</th><td>0.2</td><td>0.5</td><td>0.9</td><td>1</td><td>2</td><td>5</td></tr>
-<tr><th>\(\rho(1)=\theta/(1+\theta^2)\)</th><td>0.192</td><td>0.400</td><td>0.497</td><td>0.500</td><td>0.400</td><td>0.192</td></tr>
-</table>
-<p>ค่าสูงสุดคือ 0.5 ที่ \(\theta=1\) และ \(\theta\) กับ \(1/\theta\) ให้ค่าเท่ากัน เช่น 0.5 กับ 2 และ 0.2 กับ 5 ข้อแรกใช้ตรวจข้อมูล: ถ้า sample ACF ที่ lag 1 สูงถึง 0.8 MA(1) อธิบายไม่ได้ ข้อที่สองคือที่มาของเรื่อง invertibility ใน Lecture 7 ข้อสังเกตนี้ไม่อยู่ในสไลด์ Lecture 5 แต่ได้จากสูตรโดยตรง</p>
-</div>
+<h3>สมบัติสามข้อของ MA(1) (Class 5, 1:33:44–1:40:14)</h3>
+<ol>
+<li><b>θ = 0 ทำให้ MA(1) เป็น white noise</b> เพราะเหลือแค่ \(X_t=w_t\) และ ρ₁ = 0</li>
+<li><b>\(-\tfrac12\le\rho_1\le\tfrac12\)</b> "correlation ปกติอยู่ระหว่าง −1 ถึง 1 แต่ MA(1) ρ₁ ไม่มีทางน้อยกว่า −0.5 และไม่มากกว่า 0.5" นี่คือข้อสอบเก่าที่ทำได้ 2 คนจาก 30</li>
+<li><b>θ กับ 1/θ ให้ ρ₁ เท่ากัน</b></li>
+</ol>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 1</span><span>MA(1)</span></div>
-<div class="qtext">โมเดล \(X_t=w_t+0.5w_{t-1}\) มี \(\rho(1)\) เท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. 0.5 คือ θ ต้องหารด้วย 1 + θ²">\(\rho(1)=0.50\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 0.25 คือ θ² ไม่ใช่ ρ(1)">\(\rho(1)=0.25\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. 0.5 ÷ (1 + 0.25) = 0.4">\(\rho(1)=0.40\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ 1 + θ² = 1.25 ไม่ใช่ 0.625">\(\rho(1)=0.80\)</button>
-</div>
-<div class="feedback"></div>
+<div class="calc" id="s4-proof">
+<div class="calc-title">พิสูจน์ |ρ₁| ≤ 1/2 (ข้อสอบเก่า)</div>
+<ol class="steps">
+<li><div class="st-title">เริ่มจากกำลังสองที่ไม่ติดลบ</div><p>สำหรับทุกจำนวนจริง θ: \((1-|\theta|)^2\ge0\)</p></li>
+<li><div class="st-title">กระจาย</div><p>\(1-2|\theta|+\theta^2\ge0\) จึงได้ \(1+\theta^2\ge2|\theta|\)</p></li>
+<li><div class="st-title">หารทั้งสองข้างด้วย 2(1 + θ²) ซึ่งเป็นบวก</div><p>\(\dfrac{|\theta|}{1+\theta^2}\le\dfrac12\) คือ \(|\rho_1|\le\tfrac12\)</p></li>
+<li><div class="st-title">เมื่อไรเท่ากับ 1/2</div><p>เมื่อ \((1-|\theta|)^2=0\) คือ θ = 1 ได้ ρ₁ = 1/2 และ θ = −1 ได้ ρ₁ = −1/2</p></li>
+</ol>
+<div class="answer">อีกวิธีที่ใช้แคลคูลัส: \(f(\theta)=\theta/(1+\theta^2)\) มี \(f'(\theta)=(1-\theta^2)/(1+\theta^2)^2=0\) ที่ θ = ±1 ค่าสูงสุดคือ f(1) = 1/2 ค่าต่ำสุดคือ f(−1) = −1/2</div>
 </div>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 2</span><span>MA(1)</span></div>
-<div class="qtext">โมเดล \(X_t=w_t+0.6w_{t-1}\) โดย \(\sigma^2=2\) มีความแปรปรวน \(\gamma(0)\) เท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. (1 + 0.36) × 2 = 2.72">\(\gamma(0)=2.72\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 1.20 คือ γ(1) = θσ²">\(\gamma(0)=1.20\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ลืมคูณ σ² = 2">\(\gamma(0)=1.36\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ต้องใช้ θ² = 0.36 ไม่ใช่ θ = 0.6">\(\gamma(0)=3.20\)</button>
-</div>
-<div class="feedback"></div>
-</div>
+<p>ความหมายของสมบัตินี้ในการใช้งาน: ถ้า sample ACF ที่ lag 1 เท่ากับ 0.8 แล้ว lag อื่นเป็นศูนย์ ข้อมูลนี้ไม่ใช่ MA(1) เพราะ MA(1) สร้าง ρ₁ เกิน 0.5 ไม่ได้ ต้องพิจารณาโมเดลอื่น เช่น AR</p>
 
-<div class="box exam">
-<div class="label">จุดสอบ — MA(1)</div>
-<ul>
-<li>พิสูจน์ mean, \(\gamma(0)\), \(\gamma(1)\), \(\gamma(h)\) และ \(\rho(h)\) ได้เองโดยคูณกระจายและใช้กฎของ white noise</li>
-<li>จำสูตร \(\rho(1)=\theta/(1+\theta^2)\) และคำนวณจากตัวเลขได้</li>
-<li>อธิบายได้ว่าทำไม ACF ตัดที่ lag 1: เพราะค่าที่ห่างกันเกินหนึ่งช่วงไม่มี w ร่วมกัน</li>
-<li>ถ้าโจทย์ใช้รูปเครื่องหมายลบ \(X_t=w_t-\theta w_{t-1}\) จะได้ \(\rho(1)=-\theta/(1+\theta^2)\)</li>
-</ul>
+<div class="calc" id="s4-inv">
+<div class="calc-title">θ กับ 1/θ ให้ ρ₁ เท่ากัน</div>
+<ol class="steps">
+<li><div class="st-title">ตัวอย่างของอาจารย์ θ = 5</div><p>\(\rho_1=5/(1+25)=5/26=0.1923\)</p></li>
+<li><div class="st-title">θ = 1/5</div><p>\(\rho_1=0.2/(1+0.04)=0.2/1.04=0.1923\) เท่ากัน</p></li>
+<li><div class="st-title">พิสูจน์ทั่วไป</div><p>\(\dfrac{1/\theta}{1+1/\theta^2}\) คูณเศษและส่วนด้วย θ² ได้ \(\dfrac{\theta}{\theta^2+1}\) ซึ่งคือ ρ₁ ของ θ</p></li>
+</ol>
+<div class="answer">ACF เดียวกันมาจาก θ ได้สองค่า ถ้าเห็นแค่ข้อมูลจึงแยกไม่ออก ต้องเลือกค่าเดียว อาจารย์บอกว่า "อันที่ใช้ได้คือ 1/7 ไม่ใช่ 7" (Class 5, 1:38:12–1:40:14) คือเลือก |θ| &lt; 1 เงื่อนไขนี้ชื่อ invertibility ซึ่งจะเรียนใน Lesson 7</div>
 </div>
 
 <!-- ===================================================== -->
-<h2 id="s5">5. MA(1): จำลองด้วย R</h2>
+<h2 id="s5">5. MA(1) ใน R: θ = 0.9 และ θ = −0.9</h2>
 
-<p>สูตรในหัวข้อ 4 เป็นค่าทางทฤษฎี สไลด์หน้า 11–16 จำลองข้อมูลจาก MA(1) เพื่อดูว่าข้อมูลจริงที่มาจากโมเดลนี้มีหน้าตาอย่างไร และ sample ACF ใกล้ค่าทางทฤษฎีเพียงใด</p>
-
-<h3>กรณี θ = 0.9</h3>
-<figure>
-<img src="../assets/slides/ts5-p11.png" alt="Slide 5 หน้า 11: MA(1) process (R-simulation): θ = 0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 11 — MA(1) process (R-simulation): θ = 0.9</figcaption>
-</figure>
-
-<p>การจำลองใช้ \(\theta=0.9\), \(n=100\), \(\sigma^2=1\) ค่าทางทฤษฎีที่สไลด์คำนวณไว้คือ <mark class="src" data-p="11">ρ(1) = 0.9/(1+0.9²) = 0.497</mark> ตัวหารคือ \(1+0.81=1.81\) และ \(0.9/1.81=0.497\) ค่านี้เป็นบวก จึงคาดว่าค่าที่อยู่ติดกันจะไปทางเดียวกัน คือถ้าวันนี้สูงกว่าค่าเฉลี่ย วันถัดไปมีแนวโน้มสูงด้วย</p>
+<p>ทฤษฎีบอกว่า ρ₁ = 0.497 แต่ข้อมูลจริงมีแค่ n ค่า sample ACF จึงไม่เท่าทฤษฎีพอดี อาจารย์ให้ simulate ด้วย R เพื่อดูว่าข้อมูลที่มาจาก MA(1) จริงมีหน้าตาอย่างไร (การบ้าน Class 5, 1:56:17)</p>
 
 <figure>
-<img src="../assets/slides/ts5-p12.png" alt="Slide 5 หน้า 12: MA(1) simulation และ Sample ACF เมื่อ θ = 0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 12 — MA(1) simulation และ Sample ACF เมื่อ θ = 0.9</figcaption>
+<img src="../assets/slides/ts5-p11.png" alt="Slide 5 หน้า 11: MA(1) simulation: θ = 0.9, n = 100, σ² = 1" loading="lazy">
+<figcaption>Slide 5 หน้า 11 — MA(1) simulation: θ = 0.9, n = 100, σ² = 1</figcaption>
 </figure>
 
-<p>ข้อมูลจำลอง 100 ค่าแกว่งรอบศูนย์ระหว่างประมาณ −4 ถึง 3 โดยไม่มี trend ซึ่งเป็นลักษณะของข้อมูล stationary เส้นกราฟค่อนข้างเรียบ คือค่าที่อยู่ติดกันมักอยู่ฝั่งเดียวกันของศูนย์ ตรงกับ \(\rho(1)\) ที่เป็นบวก Sample ACF ที่ lag 1 สูงประมาณ 0.47 ใกล้ค่าทางทฤษฎี 0.497 และเกินเส้นประที่ \(\pm2/\sqrt{100}=\pm0.2\) ส่วน lag 2 ถึง 20 อยู่ภายในเส้นประทั้งหมด รูปแบบนี้คือ ACF ที่ตัดหลัง lag 1 ตามที่พิสูจน์ไว้ ค่าที่ lag 2 ขึ้นไปไม่เป็นศูนย์พอดีเพราะคำนวณจากตัวอย่าง 100 ค่า ไม่ใช่จากประชากร</p>
+<p>ตั้งค่า θ = 0.9, n = 100, σ² = 1 ค่าทฤษฎีคือ \(\rho_1=0.9/(1+0.81)=0.9/1.81=0.497\) ส่วนเส้นประของ sample ACF อยู่ที่ \(\pm2/\sqrt{n}=\pm2/\sqrt{100}=\pm0.2\) จาก Lesson 3 ดังนั้นคาดว่า lag 1 จะทะลุเส้นราว 0.5 และ lag อื่นจะอยู่ในช่วง ±0.2</p>
 
-<figure>
-<img src="../assets/slides/ts5-p13.png" alt="Slide 5 หน้า 13: Lag 1 และ Lag 2 scatterplot เมื่อ θ = 0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 13 — Lag 1 และ Lag 2 scatterplot เมื่อ θ = 0.9</figcaption>
-</figure>
-
-<p>Scatterplot เป็นอีกวิธีดูความสัมพันธ์ข้ามเวลา รูป lag 1 ใช้ \(Y_{t-1}\) เป็นแกนนอนและ \(Y_t\) เป็นแกนตั้ง จุดเรียงตัวเฉียงขึ้นจากซ้ายล่างไปขวาบน แสดงความสัมพันธ์ทางบวกระดับปานกลาง ตรงกับ \(\rho(1)\approx0.5\) รูป lag 2 ใช้ \(Y_{t-2}\) เป็นแกนนอน จุดกระจายเป็นกลุ่มกลมไม่มีทิศทาง ตรงกับ \(\rho(2)=0\) สไลด์ใช้ชื่อ \(Y_t\) แทน \(X_t\) เพราะโค้ดตั้งชื่อแกนไว้เช่นนั้น เป็นข้อมูลชุดเดียวกัน</p>
-
-<div class="box beginner">
-<div class="label">อ่าน lag scatterplot อย่างไร</div>
-<table class="compact">
-<tr><th>รูปร่างของกลุ่มจุด</th><th>ความหมาย</th></tr>
-<tr><td>เฉียงขึ้น</td><td>autocorrelation ที่ lag นั้นเป็นบวก</td></tr>
-<tr><td>เฉียงลง</td><td>autocorrelation ที่ lag นั้นเป็นลบ</td></tr>
-<tr><td>กลม ไม่มีทิศทาง</td><td>autocorrelation ใกล้ศูนย์</td></tr>
-<tr><td>ยิ่งเรียงเป็นเส้นแคบ</td><td>ค่าสัมบูรณ์ของ autocorrelation ยิ่งสูง</td></tr>
-</table>
-</div>
-
-<h3>กรณี θ = −0.9</h3>
-<figure>
-<img src="../assets/slides/ts5-p14.png" alt="Slide 5 หน้า 14: MA(1) process (R-simulation): θ = −0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 14 — MA(1) process (R-simulation): θ = −0.9</figcaption>
-</figure>
-
-<p>เมื่อเปลี่ยนเป็น \(\theta=-0.9\) ตัวหารยังเป็น \(1+(-0.9)^2=1.81\) เท่าเดิมเพราะยกกำลังสอง แต่ตัวเศษเป็นลบ จึงได้ <mark class="src" data-p="14">ρ(1) = −0.497</mark> ขนาดเท่าเดิม เครื่องหมายกลับ คาดว่าค่าที่อยู่ติดกันจะไปคนละทาง</p>
-
-<figure>
-<img src="../assets/slides/ts5-p15.png" alt="Slide 5 หน้า 15: MA(1) simulation และ Sample ACF เมื่อ θ = −0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 15 — MA(1) simulation และ Sample ACF เมื่อ θ = −0.9</figcaption>
-</figure>
-
-<p>เส้นกราฟข้อมูลหยักถี่กว่ากรณีก่อนมาก ค่าสลับขึ้นลงข้ามศูนย์เกือบทุกช่วงเวลา เป็นผลของ \(\rho(1)\) ที่เป็นลบ: ค่าสูงมักตามด้วยค่าต่ำ Sample ACF ที่ lag 1 ประมาณ −0.55 เกินเส้นประด้านล่างไปมาก ส่วน lag อื่นอยู่ในหรือแตะขอบเส้นประ รูปแบบยังเป็นการตัดหลัง lag 1 เหมือนเดิม ต่างกันที่ทิศของแท่งแรก</p>
-
-<figure>
-<img src="../assets/slides/ts5-p16.png" alt="Slide 5 หน้า 16: Lag 1 และ Lag 2 scatterplot เมื่อ θ = −0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 16 — Lag 1 และ Lag 2 scatterplot เมื่อ θ = −0.9</figcaption>
-</figure>
-
-<p>รูป lag 1 จุดเรียงเฉียงลงจากซ้ายบนไปขวาล่าง แสดงความสัมพันธ์ทางลบ ตรงกับ \(\rho(1)=-0.497\) รูป lag 2 ไม่มีทิศทาง ตรงกับ \(\rho(2)=0\) เมื่อเทียบกับหน้า 13 สิ่งที่เปลี่ยนคือทิศของรูป lag 1 เท่านั้น</p>
-
-<table>
-<tr><th></th><th>θ = 0.9</th><th>θ = −0.9</th></tr>
-<tr><td>\(\rho(1)\) ทางทฤษฎี</td><td>0.497</td><td>−0.497</td></tr>
-<tr><td>ลักษณะกราฟข้อมูล</td><td>ค่อนข้างเรียบ</td><td>หยักสลับขึ้นลง</td></tr>
-<tr><td>Sample ACF ที่ lag 1</td><td>ประมาณ 0.47</td><td>ประมาณ −0.55</td></tr>
-<tr><td>Lag 1 scatterplot</td><td>เฉียงขึ้น</td><td>เฉียงลง</td></tr>
-<tr><td>Lag 2 ขึ้นไป</td><td colspan="2">ใกล้ศูนย์ทั้งสองกรณี</td></tr>
-</table>
-
-<h3>โค้ด R ของการจำลอง MA(1)</h3>
-<pre data-p="11"><code>ma.sim &lt;- arima.sim(list(order = c(0,0,1), ma = 0.9), n = 100)
-
+<pre><code>ma.sim &lt;- arima.sim(list(order = c(0,0,1), ma = 0.9), n = 100)
 par(mfrow=c(2,1))
-plot(ma.sim,ylab=expression(Y[t]),xlab="Time",type="o",main="MA(1) simulation")
-acf(ma.sim,main="Sample ACF")
-
-par(mfrow=c(2,1))
-plot(y=ma.sim,x=zlag(ma.sim,1),ylab=expression(Y[t]),xlab=expression(Y[t-1]),type='p',main="Lag 1 scatterplot")
-plot(y=ma.sim,x=zlag(ma.sim,2),ylab=expression(Y[t]),xlab=expression(Y[t-2]),type='p',main="Lag 2 scatterplot")</code></pre>
+plot(ma.sim, ylab=expression(Y[t]), xlab="Time", type="o", main="MA(1) simulation")
+acf(ma.sim, main="Sample ACF")</code></pre>
 <table class="codeexp compact">
 <tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>arima.sim(list(order = c(0,0,1), ma = 0.9), n = 100)</td><td>จำลองข้อมูล 100 ค่า <code>order = c(p,d,q)</code> ในที่นี้ p = 0, d = 0, q = 1 คือ MA(1) และ <code>ma = 0.9</code> คือ θ ถ้าไม่ระบุ ความแปรปรวนของ noise คือ 1</td></tr>
-<tr><td>par(mfrow=c(2,1))</td><td>แบ่งหน้ากราฟเป็น 2 แถว 1 คอลัมน์ กราฟถัดไปสองรูปจะเรียงบนล่าง</td></tr>
-<tr><td>plot(ma.sim, ylab=expression(Y[t]), type="o", ...)</td><td>วาดข้อมูลตามเวลา <code>type="o"</code> วาดทั้งจุดและเส้น <code>expression(Y[t])</code> แสดงชื่อแกนเป็น Y ที่มีตัวห้อย t</td></tr>
-<tr><td>acf(ma.sim, main="Sample ACF")</td><td>คำนวณและวาด sample ACF พร้อมเส้นประ ±2/√n</td></tr>
-<tr><td>zlag(ma.sim, 1)</td><td>เลื่อนข้อมูลไปหนึ่งช่วง ได้ \(Y_{t-1}\) ฟังก์ชันนี้อยู่ใน <code>library(TSA)</code> ต้องเรียก package ก่อน</td></tr>
-<tr><td>plot(y=ma.sim, x=zlag(ma.sim,1), type='p', ...)</td><td>วาด scatterplot ของ \(Y_t\) เทียบกับ \(Y_{t-1}\) <code>type='p'</code> วาดเฉพาะจุด บรรทัดถัดไปใช้ <code>zlag(ma.sim,2)</code> สำหรับ lag 2</td></tr>
+<tr><td>order = c(0,0,1)</td><td>ลำดับคือ (p, d, q) ตัวแรก p ของ AR ตัวกลาง d จำนวนครั้ง differencing ตัวสุดท้าย q ของ MA (Class 6, 0:22:47–0:25:02) MA(1) จึงเป็น c(0,0,1)</td></tr>
+<tr><td>ma = 0.9</td><td>ค่า θ ตาม convention เครื่องหมายบวก \(X_t=w_t+0.9w_{t-1}\)</td></tr>
+<tr><td>n = 100</td><td>ความยาวของอนุกรม w เป็น N(0, 1) โดยค่าเริ่มต้น</td></tr>
+<tr><td>par(mfrow=c(2,1))</td><td>แบ่งหน้าต่างกราฟเป็น 2 แถว 1 คอลัมน์</td></tr>
+<tr><td>type="o"</td><td>วาดทั้งจุดและเส้น</td></tr>
 </table>
-<p>กรณี θ = −0.9 ใช้โค้ดชุดเดียวกัน เปลี่ยนเฉพาะ <code>ma = -0.9</code> เมื่อรันโค้ดนี้เองด้วย <code>set.seed(5)</code> ได้ sample ACF ที่ lag 1 ถึง 4 เป็น 0.603, 0.147, −0.028, −0.146 ค่าที่ lag 1 ต่างจากสไลด์เพราะ <code>arima.sim</code> สุ่มข้อมูลใหม่ทุกครั้ง แต่รูปแบบเหมือนกัน คือ lag 1 เกินเส้นประ 0.2 และ lag อื่นอยู่ภายใน คำสั่ง <code>ARMAacf(ma = 0.9, lag.max = 4)</code> ให้ค่าทางทฤษฎี 1, 0.4972, 0, 0, 0</p>
-
-<!-- ===================================================== -->
-<h2 id="s6">6. MA(2): พิสูจน์และจำลอง</h2>
 
 <figure>
-<img src="../assets/slides/ts5-p17.png" alt="Slide 5 หน้า 17: MA(2) process" loading="lazy">
-<figcaption>Slide 5 หน้า 17 — MA(2) process</figcaption>
+<img src="../assets/slides/ts5-p12.png" alt="Slide 5 หน้า 12: MA(1) θ = 0.9: กราฟอนุกรมและ sample ACF" loading="lazy">
+<figcaption>Slide 5 หน้า 12 — MA(1) θ = 0.9: กราฟอนุกรมและ sample ACF</figcaption>
 </figure>
 
-<p>เมื่อ \(q=2\) โมเดลคือ \(X_t=w_t+\theta_1w_{t-1}+\theta_2w_{t-2}\) สไลด์เรียกว่า <mark class="src" data-p="17">a moving average model of order 2,</mark> เขียนย่อ MA(2) ข่าวหนึ่งชิ้นมีผลสองวันถัดไปแล้วหมด วิธีพิสูจน์เหมือน MA(1) ทุกประการ ต่างกันที่มีพจน์ให้คูณมากขึ้น</p>
+<p>sample ACF ของการ simulate นี้ทะลุเส้นที่ lag 1 ราว 0.45 ใกล้ค่าทฤษฎี 0.497 และ lag 2 เป็นต้นไปอยู่ในเส้นประ จึงตรงกับรูปแบบ "ตัดหลัง lag 1" กราฟอนุกรมแกว่งรอบศูนย์และมีลักษณะเรียบกว่า white noise เล็กน้อย เพราะค่าติดกันใช้ shock ร่วมกันด้วยเครื่องหมายเดียวกัน ทุกครั้งที่รันได้ตัวเลขต่างกัน เช่น เมื่อใช้ <code>set.seed(2603630)</code> ได้ lag 1 = 0.412 ต่ำกว่าทฤษฎีแต่ยังทะลุเส้น 0.2</p>
 
-<div class="calc" id="s6-calc">
-<div class="calc-title">พิสูจน์สมบัติของ MA(2): \(X_t=w_t+\theta_1w_{t-1}+\theta_2w_{t-2}\)</div>
+<figure>
+<img src="../assets/slides/ts5-p13.png" alt="Slide 5 หน้า 13: MA(1) θ = 0.9: scatter plot lag 1 และ lag 2" loading="lazy">
+<figcaption>Slide 5 หน้า 13 — MA(1) θ = 0.9: scatter plot lag 1 และ lag 2</figcaption>
+</figure>
+
+<p>scatter plot เป็นอีกวิธีดู autocorrelation ที่ข้อสอบเคยให้ (Class 5, 1:50:48) แกนนอนคือ \(Y_{t-1}\) แกนตั้งคือ \(Y_t\) ทุกจุดคือคู่ของค่าที่ห่างกันหนึ่งช่วง ที่ lag 1 จุดเรียงตัวเอียงขึ้นอย่างหลวม ๆ ตรงกับ ρ₁ ≈ 0.5 ซึ่งเป็นความสัมพันธ์บวกระดับปานกลาง ที่ lag 2 จุดกระจายเป็นก้อนกลมไม่มีทิศทาง ตรงกับ ρ₂ = 0 โค้ดใช้ <code>zlag()</code> จาก package TSA เพื่อเลื่อนอนุกรมไปหนึ่งหรือสองช่วง</p>
+
+<figure>
+<img src="../assets/slides/ts5-p14.png" alt="Slide 5 หน้า 14: MA(1) simulation: θ = −0.9" loading="lazy">
+<figcaption>Slide 5 หน้า 14 — MA(1) simulation: θ = −0.9</figcaption>
+</figure>
+
+<p>เมื่อ θ = −0.9 ค่าทฤษฎีคือ \(\rho_1=-0.9/(1+0.81)=-0.497\) ขนาดเท่าเดิม เครื่องหมายกลับ เพราะ θ² ในตัวส่วนไม่สนเครื่องหมาย ส่วนตัวเศษ θ กำหนดเครื่องหมาย ความหมายคือ shock ที่ทำให้วันนี้สูงจะทำให้พรุ่งนี้ต่ำ</p>
+
+<figure>
+<img src="../assets/slides/ts5-p15.png" alt="Slide 5 หน้า 15: MA(1) θ = −0.9: กราฟอนุกรมและ sample ACF" loading="lazy">
+<figcaption>Slide 5 หน้า 15 — MA(1) θ = −0.9: กราฟอนุกรมและ sample ACF</figcaption>
+</figure>
+
+<p>sample ACF ที่ lag 1 ติดลบราว −0.45 ทะลุเส้นล่าง และ lag อื่นอยู่ในเส้น กราฟอนุกรมดูหยักกว่ากรณี θ = 0.9 มาก ขึ้นลงสลับกันเกือบทุกจุด เพราะค่าที่ติดกันมีความสัมพันธ์ทางลบ จุดนี้ช่วยอ่านกราฟในข้อสอบ: อนุกรมที่ฟันเลื่อยถี่ ๆ บ่งบอก ρ₁ ติดลบ</p>
+
+<figure>
+<img src="../assets/slides/ts5-p16.png" alt="Slide 5 หน้า 16: MA(1) θ = −0.9: scatter plot" loading="lazy">
+<figcaption>Slide 5 หน้า 16 — MA(1) θ = −0.9: scatter plot</figcaption>
+</figure>
+
+<p>scatter plot ที่ lag 1 เอียงลง (Class 5, 1:51:38–1:52:28) ตรงกับ ρ₁ = −0.497 และที่ lag 2 ไม่มีทิศทาง ตรงกับ ρ₂ = 0 เทียบกับหน้า 13 จะเห็นว่าความชันของกลุ่มจุดที่ lag 1 บอกเครื่องหมายของ θ ได้ทันที</p>
+
+<!-- ===================================================== -->
+<h2 id="s6">6. MA(2)</h2>
+
+<figure>
+<img src="../assets/slides/ts5-p17.png" alt="Slide 5 หน้า 17: MA(2): X_t = w_t + θ₁w(t−1) + θ₂w(t−2)" loading="lazy">
+<figcaption>Slide 5 หน้า 17 — MA(2): X_t = w_t + θ₁w(t−1) + θ₂w(t−2)</figcaption>
+</figure>
+
+<p>MA(2) คือ \(X_t=w_t+\theta_1w_{t-1}+\theta_2w_{t-2}\) <mark class="src" data-p="17">a moving average model of order 2,</mark> อาจารย์อธิบายว่าอนุกรม "ถูกพยากรโดยปัจจัยอื่นย้อนหลัง 2 จุดเวลา" (Class 5, 1:40:31) วิธีหา property เหมือน MA(1) ทุกอย่าง ต่างแค่มีพจน์มากขึ้น อาจารย์บอกว่า γ₀ กระจายได้ 9 เทอม "เหลือ 3" (Class 5, 1:43:05–1:45:48)</p>
+
+<div class="calc" id="s6-ma2">
+<div class="calc-title">หา γ₀, γ₁, γ₂ ของ MA(2) โดยจับคู่ดัชนีเวลาที่ตรงกัน</div>
 <ol class="steps">
-<li><div class="st-title">Mean</div>
-\[E(X_t)=0+\theta_1(0)+\theta_2(0)=0\]</li>
-<li><div class="st-title">Variance</div>
-<p>w ทั้งสามตัวไม่สัมพันธ์กัน</p>
-\[\gamma(0)=\sigma^2+\theta_1^2\sigma^2+\theta_2^2\sigma^2=(1+\theta_1^2+\theta_2^2)\sigma^2\]</li>
-<li><div class="st-title">Lag 1</div>
-<p>วาง \(X_{t+1}\) และ \(X_t\) ให้ w ตัวเดียวกันอยู่ตรงกัน แล้วคูณสัมประสิทธิ์ของคู่ที่ตรงกัน</p>
-<table class="compact">
-<tr><th></th><th>\(w_{t+1}\)</th><th>\(w_t\)</th><th>\(w_{t-1}\)</th><th>\(w_{t-2}\)</th></tr>
-<tr><th>\(X_{t+1}\)</th><td>1</td><td>\(\theta_1\)</td><td>\(\theta_2\)</td><td></td></tr>
-<tr><th>\(X_t\)</th><td></td><td>1</td><td>\(\theta_1\)</td><td>\(\theta_2\)</td></tr>
-<tr><th>ผลคูณ</th><td>ไม่มีคู่</td><td>\(\theta_1\)</td><td>\(\theta_1\theta_2\)</td><td>ไม่มีคู่</td></tr>
-</table>
-\[\gamma(1)=(\theta_1+\theta_1\theta_2)\sigma^2\]</li>
-<li><div class="st-title">Lag 2</div>
-<table class="compact">
-<tr><th></th><th>\(w_{t+2}\)</th><th>\(w_{t+1}\)</th><th>\(w_t\)</th><th>\(w_{t-1}\)</th><th>\(w_{t-2}\)</th></tr>
-<tr><th>\(X_{t+2}\)</th><td>1</td><td>\(\theta_1\)</td><td>\(\theta_2\)</td><td></td><td></td></tr>
-<tr><th>\(X_t\)</th><td></td><td></td><td>1</td><td>\(\theta_1\)</td><td>\(\theta_2\)</td></tr>
-<tr><th>ผลคูณ</th><td></td><td></td><td>\(\theta_2\)</td><td></td><td></td></tr>
-</table>
-\[\gamma(2)=\theta_2\sigma^2\]</li>
-<li><div class="st-title">Lag 3 ขึ้นไป</div>
-<p>\(X_{t+3}\) ใช้ \(w_{t+3},w_{t+2},w_{t+1}\) ส่วน \(X_t\) ใช้ \(w_t,w_{t-1},w_{t-2}\) ไม่มีตัวร่วม จึงได้ \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p></li>
-<li><div class="st-title">ACF</div>
-\[\rho(1)=\frac{\theta_1+\theta_1\theta_2}{1+\theta_1^2+\theta_2^2},\qquad \rho(2)=\frac{\theta_2}{1+\theta_1^2+\theta_2^2},\qquad \rho(h)=0\ \text{เมื่อ }h\ge3\]</li>
+<li><div class="st-title">γ₀</div><p>\(\mathrm{Cov}(X_t,X_t)\): ดัชนีของ \(X_t\) คือ \(t, t-1, t-2\) จับคู่กับตัวเองได้สามคู่ \(\sigma^2+\theta_1^2\sigma^2+\theta_2^2\sigma^2\) จึงได้ \(\gamma_0=\sigma^2(1+\theta_1^2+\theta_2^2)\)</p></li>
+<li><div class="st-title">γ₁</div><p>\(X_{t+1}=w_{t+1}+\theta_1w_t+\theta_2w_{t-1}\) มีดัชนี \(t+1, t, t-1\) ตรงกับ \(X_t\) สองตัว: ดัชนี t ได้ \(1\cdot\theta_1\) และดัชนี t − 1 ได้ \(\theta_1\cdot\theta_2\) จึงได้ \(\gamma_1=(\theta_1+\theta_1\theta_2)\sigma^2\)</p></li>
+<li><div class="st-title">γ₂</div><p>\(X_{t+2}=w_{t+2}+\theta_1w_{t+1}+\theta_2w_t\) ตรงกับ \(X_t\) ตัวเดียวที่ดัชนี t ได้ \(1\cdot\theta_2\) จึงได้ \(\gamma_2=\theta_2\sigma^2\)</p></li>
+<li><div class="st-title">γ₃ เป็นต้นไป</div><p>ดัชนีของ \(X_{t+3}\) คือ \(t+3, t+2, t+1\) ไม่ตรงกับ \(t, t-1, t-2\) เลย จึงเป็น 0 (Class 5, 1:45:48–1:46:44)</p></li>
+<li><div class="st-title">ACF</div><p>\(\rho_1=\dfrac{\theta_1+\theta_1\theta_2}{1+\theta_1^2+\theta_2^2}\), \(\rho_2=\dfrac{\theta_2}{1+\theta_1^2+\theta_2^2}\), \(\rho_h=0\) เมื่อ \(h\ge3\) (Class 5, 1:47:21–1:47:59)</p></li>
 </ol>
-<p>วิธีวางตารางให้ w ตรงกันใช้ได้กับ MA ทุกอันดับ และลดโอกาสคูณตกหล่น</p>
+<div class="answer">จำแบบง่าย: γ_h คือผลรวมของ "สัมประสิทธิ์คูณสัมประสิทธิ์ที่ห่างกัน h ตำแหน่ง" ในลำดับ (1, θ₁, θ₂) เช่น γ₁ = 1·θ₁ + θ₁·θ₂ และ γ₂ = 1·θ₂</div>
 </div>
 
 <figure>
-<img src="../assets/slides/ts5-p18.png" alt="Slide 5 หน้า 18: MA(2) process: ข้อสรุป" loading="lazy">
-<figcaption>Slide 5 หน้า 18 — MA(2) process: ข้อสรุป</figcaption>
+<img src="../assets/slides/ts5-p18.png" alt="Slide 5 หน้า 18: MA(2) has zero correlation beyond lag 2" loading="lazy">
+<figcaption>Slide 5 หน้า 18 — MA(2) has zero correlation beyond lag 2</figcaption>
 </figure>
 
-<p>ข้อสรุปของสไลด์ตรงกับผลพิสูจน์: MA(2) มี correlation เป็นศูนย์เมื่อเลย lag 2 ค่าที่ห่างกันหนึ่งหรือสองช่วงเวลาสัมพันธ์กัน ค่าที่ห่างกันมากกว่าสองช่วงเวลาไม่สัมพันธ์กัน หัวเรื่องของ bullet แรกในสไลด์พิมพ์ว่า “beyond lag h = 1 and 2” ซึ่งหมายถึงเลย lag 2</p>
+<p>สรุปเหมือน MA(1): ค่าที่ห่างกันหนึ่งหรือสองช่วงสัมพันธ์กัน เพราะยังมี shock ร่วมกัน ค่าที่ห่างกันเกินสองช่วงไม่มี shock ร่วมเลยจึงไม่สัมพันธ์ ดังนั้น sample ACF ของ MA(2) ควรทะลุเส้นที่ lag 1 และ 2 แล้วอยู่ในเส้นตั้งแต่ lag 3</p>
 
 <figure>
-<img src="../assets/slides/ts5-p19.png" alt="Slide 5 หน้า 19: MA(2) process (R-simulation): θ₁ = −0.9, θ₂ = 0.7" loading="lazy">
-<figcaption>Slide 5 หน้า 19 — MA(2) process (R-simulation): θ₁ = −0.9, θ₂ = 0.7</figcaption>
+<img src="../assets/slides/ts5-p19.png" alt="Slide 5 หน้า 19: MA(2) simulation: θ₁ = −0.9, θ₂ = 0.7" loading="lazy">
+<figcaption>Slide 5 หน้า 19 — MA(2) simulation: θ₁ = −0.9, θ₂ = 0.7</figcaption>
 </figure>
 
-<p>การจำลองใช้ \(\theta_1=-0.9\), \(\theta_2=0.7\), \(n=100\), \(\sigma^2=1\) แทนค่าลงในสูตร ตัวหารร่วมคือ \(1+(-0.9)^2+0.7^2=1+0.81+0.49=2.30\) ตัวเศษของ \(\rho(1)\) คือ \(-0.9+(-0.9)(0.7)=-0.9-0.63=-1.53\) จึงได้ <mark class="src" data-p="19">ρ(1) = −0.665</mark> ตัวเศษของ \(\rho(2)\) คือ 0.7 จึงได้ <mark class="src" data-p="19">ρ(2) = 0.304</mark> คาดว่า ACF จะมีแท่งลบขนาดใหญ่ที่ lag 1 แท่งบวกขนาดเล็กกว่าที่ lag 2 แล้วเป็นศูนย์</p>
+<p>แทนค่า θ₁ = −0.9, θ₂ = 0.7: ตัวส่วน \(1+0.81+0.49=2.30\) ตัวเศษของ ρ₁ คือ \(-0.9+(-0.9)(0.7)=-0.9-0.63=-1.53\) จึงได้ \(\rho_1=-1.53/2.30=-0.665\) และ \(\rho_2=0.7/2.30=0.304\) สังเกตว่า |ρ₁| = 0.665 เกิน 0.5 ได้ ข้อจำกัด |ρ₁| ≤ 1/2 เป็นของ MA(1) เท่านั้น เพราะ MA(2) มีพจน์ θ₁θ₂ เพิ่มเข้ามา</p>
 
 <figure>
-<img src="../assets/slides/ts5-p20.png" alt="Slide 5 หน้า 20: MA(2) simulation และ Sample ACF" loading="lazy">
-<figcaption>Slide 5 หน้า 20 — MA(2) simulation และ Sample ACF</figcaption>
+<img src="../assets/slides/ts5-p20.png" alt="Slide 5 หน้า 20: MA(2): กราฟอนุกรมและ sample ACF" loading="lazy">
+<figcaption>Slide 5 หน้า 20 — MA(2): กราฟอนุกรมและ sample ACF</figcaption>
 </figure>
 
-<p>ข้อมูลหยักสลับขึ้นลงถี่ เพราะ \(\rho(1)\) เป็นลบและมีขนาดใหญ่ Sample ACF ที่ lag 1 ประมาณ −0.68 และที่ lag 2 ประมาณ 0.37 ทั้งสองค่าเกินเส้นประและใกล้ค่าทางทฤษฎี −0.665 และ 0.304 ตั้งแต่ lag 3 เป็นต้นไปอยู่ในหรือใกล้ขอบเส้นประ รูปแบบคือ ACF ตัดหลัง lag 2</p>
+<p>sample ACF ทะลุเส้นที่ lag 1 ทางลบราว −0.65 และ lag 2 ทางบวกราว 0.3 ใกล้ค่าทฤษฎี −0.665 และ 0.304 หลังจากนั้นอยู่ในเส้นประ จึงเป็นรูปแบบ "ตัดหลัง lag 2" เมื่อรันซ้ำด้วย <code>set.seed(2603630)</code> ได้ −0.661 และ 0.259 ส่วน lag 3 = 0.006 กราฟอนุกรมหยักถี่เพราะ ρ₁ ติดลบมาก (Class 5, 1:52:53–1:54:16)</p>
 
 <figure>
-<img src="../assets/slides/ts5-p21.png" alt="Slide 5 หน้า 21: Lag 1 และ Lag 2 scatterplot ของ MA(2)" loading="lazy">
-<figcaption>Slide 5 หน้า 21 — Lag 1 และ Lag 2 scatterplot ของ MA(2)</figcaption>
+<img src="../assets/slides/ts5-p21.png" alt="Slide 5 หน้า 21: MA(2): scatter plot lag 1 และ lag 2" loading="lazy">
+<figcaption>Slide 5 หน้า 21 — MA(2): scatter plot lag 1 และ lag 2</figcaption>
 </figure>
 
-<p>รูป lag 1 จุดเรียงเฉียงลงชัดเจน ตรงกับ \(\rho(1)=-0.665\) รูป lag 2 จุดเรียงเฉียงขึ้นเล็กน้อย ตรงกับ \(\rho(2)=0.304\) ความชันและความแคบของกลุ่มจุดใน lag 1 มากกว่า lag 2 เพราะค่าสัมบูรณ์ของ correlation สูงกว่า</p>
+<p>scatter plot lag 1 เอียงลงชัดเจนตาม ρ₁ = −0.665 ส่วน lag 2 เอียงขึ้นเล็กน้อยตาม ρ₂ = 0.304 ความชันของกลุ่มจุดในสองรูปนี้จึงตรงกับเครื่องหมายและขนาดของ ρ₁ และ ρ₂ ถ้าข้อสอบให้ scatter plot มาแทน ACF ก็อ่านแบบเดียวกัน: กลุ่มจุดเอียงชัดคือสัมพันธ์มาก กลุ่มจุดกลมคือไม่สัมพันธ์</p>
 
-<p>โค้ดต่างจาก MA(1) สองจุด: <code>arima.sim(list(order = c(0,0,2), ma = c(-0.9,0.7)), n = 100)</code> ใช้ q = 2 และใส่ θ สองค่าเรียงตามลำดับ และ <code>par(mfrow=c(2,2))</code> แบ่งหน้ากราฟเป็น 2 แถว 2 คอลัมน์ วาดสี่รูปในหน้าเดียว คำสั่ง <code>ARMAacf(ma = c(-0.9,0.7), lag.max = 4)</code> ให้ค่าทางทฤษฎี 1, −0.6652, 0.3043, 0, 0 ตรงกับที่คำนวณมือ</p>
+<!-- ===================================================== -->
+<h2 id="s7">7. MA(q) ทั่วไป และควิซข้อสอบเก่า</h2>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 3</span><span>MA(q)</span></div>
-<div class="qtext">ACF ทางทฤษฎีของโมเดลหนึ่งมีค่าไม่เป็นศูนย์ที่ lag 1 และ lag 2 และเป็นศูนย์ตั้งแต่ lag 3 โมเดลนี้คือข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. MA(1) มี ACF ไม่เป็นศูนย์เฉพาะ lag 1">MA(1)</button>
-<button class="opt" data-correct="false" data-note="ผิด. AR(2) มี ACF ที่ค่อย ๆ ลดลง ไม่ตัดเป็นศูนย์">AR(2)</button>
-<button class="opt" data-correct="false" data-note="ผิด. AR(1) มี ACF เป็น φ ยกกำลัง h ไม่ตัดเป็นศูนย์">AR(1)</button>
-<button class="opt" data-correct="true" data-note="ถูก. ACF ของ MA(q) เป็นศูนย์เมื่อ h มากกว่า q">MA(2)</button>
-</div>
-<div class="feedback"></div>
+<p>จาก MA(1) และ MA(2) ได้รูปทั่วไป ให้ \(\theta_0=1\) แล้ว</p>
+<p>\(\gamma_h=\sigma^2\sum_{j=0}^{q-h}\theta_j\theta_{j+h}\) เมื่อ \(0\le h\le q\) และ \(\gamma_h=0\) เมื่อ \(h&gt;q\)</p>
+<p>ตรวจกับ MA(2) ที่ h = 1: \(\theta_0\theta_1+\theta_1\theta_2=\theta_1+\theta_1\theta_2\) ตรงกับข้างบน ข้อสรุปที่ต้องจำคือ <b>MA(q): autocorrelation มีนัยสำคัญจนถึง lag q หลังจาก lag q เป็น 0</b> (Class 5, 1:48:17–1:49:45) ACF จึงเป็นเครื่องมือหา q ของ MA โดยตรง: ดู lag สุดท้ายที่ทะลุเส้น</p>
+
+<figure>
+<img src="../assets/slides/ts5-p26.png" alt="Slide 5 หน้า 26: QUIZ: Moving average process (ข้อสอบเก่า)" loading="lazy">
+<figcaption>Slide 5 หน้า 26 — QUIZ: Moving average process (ข้อสอบเก่า)</figcaption>
+</figure>
+
+<p>โจทย์ข้อสอบเก่าให้ ACF สี่กราฟแล้วถามว่าแต่ละกราฟเป็น MA อันดับเท่าไร กับดักคือแท่งแรกสูงเท่ากับ 1 อยู่ที่ <b>lag 0</b> ซึ่งทุกอนุกรมมีค่า 1 เสมอ ไม่ได้บอกอะไร "ถ้าคุณตอบ MA(4) แสดงว่าคุณดูข้างซ้ายผิด เพราะมันเริ่มจาก lag 0 ... มีคนตอบ MA(4) ด้วย ผมเคยเก็บแล้วก็ศูนย์ทันที" (Class 5, 1:54:30–1:56:08) อ่านทีละกราฟโดยนับจาก lag 1 และหา lag สุดท้ายที่ทะลุเส้นประ ±0.2</p>
+<table class="compact">
+<tr><th>กราฟ</th><th>lag ที่ทะลุเส้น (ประมาณ)</th><th>คำตอบ</th></tr>
+<tr><td>Process 1</td><td>lag 1 ≈ −0.6, lag 2 ≈ +0.45, lag 3 ≈ −0.25 หลังจากนั้นอยู่ในเส้น</td><td>MA(3)</td></tr>
+<tr><td>Process 2</td><td>lag 1 ≈ +0.4, lag 3 ≈ −0.35, lag 4 ≈ −0.25 ส่วน lag 2 อยู่ใกล้เส้น</td><td>MA(4)</td></tr>
+<tr><td>Process 3</td><td>lag 1 ≈ −0.7, lag 2 ≈ +0.4</td><td>MA(2)</td></tr>
+<tr><td>Process 4</td><td>lag 1 ≈ −0.35</td><td>MA(1)</td></tr>
+</table>
+<p>Process 2 สอนอีกเรื่อง: order คือ lag <b>สุดท้าย</b>ที่ไม่เป็นศูนย์ แม้ lag กลางบางตัวจะเล็กจนอยู่ในเส้นก็ไม่เปลี่ยนคำตอบ เพราะ MA(4) อาจมีค่า \(\rho_2\) ใกล้ศูนย์ได้ถ้า θ ทำให้ผลรวม \(\theta_2+\theta_1\theta_3+\theta_2\theta_4\) เล็ก เฉลยของอาจารย์คือ Process 1 = MA(3), 2 = MA(4), 3 = MA(2), 4 = MA(1) (Class 5, 1:55:28) ใน Class 6 อาจารย์เล่าว่าวิธีนี้ "สมัยก่อน ... 20 ปีที่แล้ว" ใช้หา q จริง ปัจจุบันใช้ฟังก์ชันอัตโนมัติ แต่ข้อสอบภาค concept ยังถามได้ (Class 6, 0:16:57, 0:18:23)</p>
+
+<!-- ===================================================== -->
+<h2 id="s8">8. AR(p): นิยาม Φ(B) และ mean ที่ไม่ใช่ศูนย์</h2>
+
+<p>MA ใช้ shock ย้อนหลังอธิบายค่าวันนี้ AR ใช้<b>ค่าของตัวเอง</b>ย้อนหลัง ตัวอย่างในชีวิตจริง: อุณหภูมิห้องตอนนี้ใกล้กับอุณหภูมิเมื่อชั่วโมงก่อน บวกการเปลี่ยนแปลงสุ่มเล็กน้อย "AR มีความยากกว่า MA นิดนึง" (Class 5, 1:57:11) เพราะ \(X_{t-1}\) เองก็มาจาก \(X_{t-2}\) ต่อไปเรื่อย ๆ เวลาหา covariance จึง "ไล่ แล้วมันก็จะชนไปเรื่อย ๆ" (Class 6, 0:00:16)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p27.png" alt="Slide 5 หน้า 27: Autoregressive model of order p" loading="lazy">
+<figcaption>Slide 5 หน้า 27 — Autoregressive model of order p</figcaption>
+</figure>
+
+<p>AR(p) คือ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+\dots+\phi_pX_{t-p}+w_t\) หรือ \(X_t=\sum_{j=1}^{p}\phi_jX_{t-j}+w_t\) โดย \(w_t\sim N(0,\sigma^2)\) p คือ order และเป็นจำนวนพารามิเตอร์ φ ตัวแปรสุ่มคือ \(X\) และ \(w\) ส่วน φ เป็นสัมประสิทธิ์ (Class 5, 1:57:25–1:58:49) ความหมายตามที่อาจารย์สรุป: "ค่าของอนุกรมเวลาเวลา t สามารถพยากรด้วยค่าของตัวมันเองย้อนหลัง p ค่า" ขณะที่ MA "ถูกพยากรด้วยปัจจัยอื่นที่ไม่ได้เก็บมาย้อนหลัง q ค่า" (Class 5, 2:03:47–2:04:43)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p28.png" alt="Slide 5 หน้า 28: AR(p) ในรูป lag operator: Φ(B)X_t = w_t" loading="lazy">
+<figcaption>Slide 5 หน้า 28 — AR(p) ในรูป lag operator: Φ(B)X_t = w_t</figcaption>
+</figure>
+
+<p>การเขียนแบบ backshift ต้องย้ายพจน์ X ทั้งหมดไปซ้าย: \(X_t-\phi_1X_{t-1}-\dots-\phi_pX_{t-p}=w_t\) แล้วดึง \(X_t\) ออก ได้ \((1-\phi_1B-\dots-\phi_pB^p)X_t=w_t\) หรือ <mark class="src" data-p="28">𝚽(𝑩)𝑿𝒕= 𝒘𝒕; 𝒕= 𝟏, 𝟐, . . , 𝒏</mark> "ต่างจาก MA ที่ดึง w_t ออก อันนี้ดึง X_t ออก" (Class 5, 1:58:49–2:01:55) สังเกตเครื่องหมาย: θ(B) ของ MA เป็นบวก \(1+\theta_1B+\dots\) แต่ Φ(B) ของ AR เป็นลบ \(1-\phi_1B-\dots\) เพราะเกิดจากการย้ายข้าง Φ(B) เรียกว่า <mark class="src" data-p="28">characteristic</mark> polynomial และรากของมันบอกว่าอนุกรมนิ่งหรือไม่ (หัวข้อ 10) ตัวอย่าง: \(X_t=0.5X_{t-1}+0.3X_{t-2}+w_t\) เขียนได้เป็น \((1-0.5B-0.3B^2)X_t=w_t\)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p29.png" alt="Slide 5 หน้า 29: AR(p): เงื่อนไขของพารามิเตอร์" loading="lazy">
+<figcaption>Slide 5 หน้า 29 — AR(p): เงื่อนไขของพารามิเตอร์</figcaption>
+</figure>
+
+<p>สไลด์ระบุเงื่อนไขสี่ข้อ ข้อที่ต้องจำคือ \(\phi_p\neq0\) ซึ่งสไลด์เขียนว่า <mark class="src" data-p="29">(important)</mark> เหตุผลเดียวกับ \(\theta_q\neq0\) ของ MA: ถ้า φ ตัวสุดท้ายเป็นศูนย์ order ก็ลดลง อีกข้อคือ \(w_t\) เป็น <mark class="src" data-p="29">uncorrelated</mark> กับ \(X_{t-j}\) ทุก j ≥ 1 แปลว่า shock ใหม่ไม่เกี่ยวกับอดีต ข้อนี้คือกุญแจของการหา γ₀ ในหัวข้อ 9 เพราะทำให้ \(\mathrm{Cov}(X_{t-1},w_t)=0\)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p30.png" alt="Slide 5 หน้า 30: AR(p): linear combination ของ p ค่าก่อนหน้า" loading="lazy">
+<figcaption>Slide 5 หน้า 30 — AR(p): linear combination ของ p ค่าก่อนหน้า</figcaption>
+</figure>
+
+<p>สไลด์สรุปว่า AR บอกว่าค่า ณ เวลา t คือ <mark class="src" data-p="30">linearcombination of the 𝒑previous realization</mark> บวก noise จุดต่างจาก regression ปกติคือตัวแปรต้น \(X_{t-1},\dots,X_{t-p}\) เป็นตัวแปรสุ่ม ไม่ใช่ค่าคงที่ที่เรากำหนด ถ้า p = 0 จะเหลือ \(X_t=w_t\) คือ white noise และถ้า mean μ ไม่เป็นศูนย์ให้ใช้ \(X_t-\mu\) แทน \(X_t\)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p31.png" alt="Slide 5 หน้า 31: AR(p) ที่มี mean μ: a = μ(1 − φ₁ − … − φ_p)" loading="lazy">
+<figcaption>Slide 5 หน้า 31 — AR(p) ที่มี mean μ: a = μ(1 − φ₁ − … − φ_p)</figcaption>
+</figure>
+
+<p>แทน \(X_t-\mu\) ลงในโมเดล: \(X_t-\mu=\phi_1(X_{t-1}-\mu)+\dots+\phi_p(X_{t-p}-\mu)+w_t\) ย้าย μ ทั้งหมดมารวมกันได้ \(X_t=a+\phi_1X_{t-1}+\dots+\phi_pX_{t-p}+w_t\) โดย \(a=\mu(1-\phi_1-\dots-\phi_p)\)</p>
+
+<div class="calc" id="s8-mean">
+<div class="calc-title">intercept a กับ mean μ ไม่ใช่ค่าเดียวกัน</div>
+<ol class="steps">
+<li><div class="st-title">โจทย์</div><p>AR(1): \(X_t=5+0.75X_{t-1}+w_t\) mean ของอนุกรมคือเท่าไร</p></li>
+<li><div class="st-title">ใช้ความนิ่ง</div><p>อนุกรมนิ่งมี \(E(X_t)=E(X_{t-1})=\mu\) จึงได้ \(\mu=5+0.75\mu\)</p></li>
+<li><div class="st-title">แก้สมการ</div><p>\(0.25\mu=5\) ได้ \(\mu=20\) ตรงกับสูตร \(a=\mu(1-\phi)=20(0.25)=5\)</p></li>
+</ol>
+<div class="answer">intercept 5 ไม่ใช่ mean ถ้าอนุกรมอยู่ที่ 20 พอดี ค่าถัดไปคาดว่าเป็น 5 + 0.75(20) = 20 เท่าเดิม จึงเป็นจุดสมดุล ระวัง: <code>arima()</code> ใน R รายงานค่าที่ชื่อ intercept แต่ค่านั้นคือ μ ไม่ใช่ a</div>
 </div>
 
 <!-- ===================================================== -->
-<h2 id="s7">7. MA(q) ทั่วไป, Box-Jenkins และสรุป MA</h2>
+<h2 id="s9">9. AR(1): mean, γ₀, γ_h, ρ_h และรูปร่าง ACF</h2>
 
 <figure>
-<img src="../assets/slides/ts5-p22.png" alt="Slide 5 หน้า 22: MA(q) process" loading="lazy">
-<figcaption>Slide 5 หน้า 22 — MA(q) process</figcaption>
+<img src="../assets/slides/ts5-p32.png" alt="Slide 5 หน้า 32: AR(1): X_t = φX(t−1) + w_t" loading="lazy">
+<figcaption>Slide 5 หน้า 32 — AR(1): X_t = φX(t−1) + w_t</figcaption>
 </figure>
 
-<p>สไลด์ให้หา mean, autocovariance และ ACF ของ MA(q) ทั่วไป ผลได้จากการขยายตารางในหัวข้อ 6 กำหนด \(\theta_0=1\) เพื่อให้เขียนสูตรได้เป็นรูปเดียว</p>
+<p>ตั้ง p = 1 ได้ AR(1) \(X_t=\phi X_{t-1}+w_t\) สไลด์ชี้สองกรณีพิเศษที่เชื่อมกับ Lesson 1: ถ้า φ = 1 จะเป็น <mark class="src" data-p="32">a random walk</mark> \(X_t=X_{t-1}+w_t\) และถ้า φ = 0 จะเป็น <mark class="src" data-p="32">white noise</mark> AR(1) จึงอยู่ระหว่างสองขั้วนี้ φ ใกล้ 0 คือแทบไม่จำอดีต φ ใกล้ 1 คือจำอดีตมากจนเกือบเป็น random walk การบ้านจาก Class 5 คือหา γ₀, γ₁, γ₂ ของ AR(1) "มันจะยากกว่า MA นิดนึง ... มันไม่ได้ตรง ๆ" (Class 5, 2:04:53) อาจารย์เฉลยต้น Class 6</p>
 
-<div class="calc">
-<div class="calc-title">สมบัติของ MA(q)</div>
-\[E(X_t)=0,\qquad \gamma(0)=\sigma^2\,(1+\theta_1^2+\theta_2^2+\dots+\theta_q^2)\]
-\[\gamma(h)=\begin{cases}\sigma^2\displaystyle\sum_{j=0}^{q-h}\theta_j\theta_{j+h}, &amp; 1\le h\le q\\[6pt] 0, &amp; h&gt;q\end{cases}\qquad\qquad \rho(h)=\frac{\gamma(h)}{\gamma(0)}\]
-<p>ผลรวม \(\sum\theta_j\theta_{j+h}\) คือการจับคู่สัมประสิทธิ์ที่ห่างกัน h ตำแหน่งแล้วคูณกัน เหมือนแถว “ผลคูณ” ในตาราง ตรวจกับ MA(2) ที่ \(h=1\): \(\theta_0\theta_1+\theta_1\theta_2=\theta_1+\theta_1\theta_2\) ตรงกับหัวข้อ 6 และที่ \(h=2\): \(\theta_0\theta_2=\theta_2\)</p>
-<p>ข้อสรุปที่ใช้ระบุโมเดล: <strong>ACF ของ MA(q) ไม่เป็นศูนย์ถึง lag q แล้วเป็นศูนย์หลังจากนั้น</strong> และ MA(q) stationary เสมอ เพราะ mean และ autocovariance ไม่ขึ้นกับ t</p>
+<div class="calc" id="s9-ar1">
+<div class="calc-title">หา property ของ AR(1) ด้วยทริกของอาจารย์ (Class 6, 0:00:02–0:08:44)</div>
+<ol class="steps">
+<li><div class="st-title">ทริก</div><p>ถ้าอนุกรมนิ่ง ค่าคาดหมายและ variance ไม่ขึ้นกับเวลา จึงใช้ \(E(X_t)=E(X_{t-1})\) และ \(\mathrm{Var}(X_t)=\mathrm{Var}(X_{t-1})=\gamma_0\) แทนการไล่แทนค่าย้อนหลังไม่รู้จบ</p></li>
+<li><div class="st-title">Mean</div><p>\(E(X_t)=\phi E(X_{t-1})+0\) จึงได้ \(\mu=\phi\mu\) หรือ \(\mu(1-\phi)=0\) เมื่อ φ ≠ 1 ได้ \(\mu=0\)</p></li>
+<li><div class="st-title">γ₀</div><p>\(\mathrm{Var}(\phi X_{t-1}+w_t)=\phi^2\mathrm{Var}(X_{t-1})+\sigma^2\) (ไม่มีพจน์ covariance เพราะ \(w_t\) ไม่สัมพันธ์กับ \(X_{t-1}\)) จึงได้ \(\gamma_0=\phi^2\gamma_0+\sigma^2\) แก้สมการได้ \(\gamma_0=\dfrac{\sigma^2}{1-\phi^2}\) "อันนี้สำคัญมาก" (Class 6, 0:04:21)</p></li>
+<li><div class="st-title">γ₁</div><p>\(\mathrm{Cov}(X_t,X_{t+1})=\mathrm{Cov}(X_t,\phi X_t+w_{t+1})=\phi\gamma_0+0\) "X_t คูณตัวนี้เป็น 0 แต่ X_t เจอตัวนี้ไม่เป็น 0" (Class 6, 0:05:09–0:06:29) ได้ \(\gamma_1=\phi\gamma_0\)</p></li>
+<li><div class="st-title">γ₂ (การบ้าน) และรูปทั่วไป</div><p>\(\mathrm{Cov}(X_t,\phi X_{t+1}+w_{t+2})=\phi\gamma_1=\phi^2\gamma_0\) ทำซ้ำได้ \(\gamma_h=\phi^h\gamma_0\)</p></li>
+<li><div class="st-title">ACF</div><p>\(\rho_h=\gamma_h/\gamma_0=\phi^h\)</p></li>
+</ol>
+<div class="answer">ตัวอย่าง φ = 0.9, σ² = 1: γ₀ = 1/(1 − 0.81) = 1/0.19 = 5.263, γ₁ = 4.737, ρ₁ = 0.9, ρ₂ = 0.81, ρ₃ = 0.729</div>
 </div>
 
-<figure>
-<img src="../assets/slides/ts5-p23.png" alt="Slide 5 หน้า 23: Box-Jenkins Model" loading="lazy">
-<figcaption>Slide 5 หน้า 23 — Box-Jenkins Model</figcaption>
-</figure>
-
-<p>Box และ Jenkins ทำให้แนวทางวิเคราะห์ time series ที่อิงสามส่วนเป็นที่นิยม คือ Auto-Regressive, Integrated และ Moving average ซึ่งรวมเป็นโมเดล ARIMA สไลด์ใส่สีแดงที่ <mark class="src" data-p="23">Moving average</mark> เพื่อบอกว่าส่วนนี้เรียนแล้ว ตัวอักษรใน ARIMA(p,d,q) ตรงกับสามส่วนนี้: p คืออันดับของ AR, d คือจำนวนครั้งของ differencing และ q คืออันดับของ MA</p>
+<p>สูตร γ₀ อธิบายได้สองเรื่อง เรื่องแรก ตัวส่วน \(1-\phi^2\) ต้องเป็นบวก variance จึงมีความหมาย ต้องมี \(|\phi|&lt;1\) เรื่องที่สอง เมื่อ φ เข้าใกล้ 1 ตัวส่วนเข้าใกล้ 0 variance จึงโตไม่จำกัด ตรงกับ random walk ใน Lesson 1 ที่ variance เท่ากับ \(t\sigma^2\) โตตามเวลา และเปรียบเทียบกับ MA(1): variance ของ MA(1) คือ \(\sigma^2(1+\theta^2)\) จำกัดเสมอไม่ว่า θ เป็นเท่าไร MA จึงนิ่งเสมอ แต่ AR นิ่งเฉพาะเมื่อ φ อยู่ในช่วงที่กำหนด</p>
 
 <figure>
-<img src="../assets/slides/ts5-p24.png" alt="Slide 5 หน้า 24: Summary: MA(q) process" loading="lazy">
-<figcaption>Slide 5 หน้า 24 — Summary: MA(q) process</figcaption>
+<img src="../assets/slides/ts5-p33.png" alt="Slide 5 หน้า 33: รูปแบบ ACF ของ AR(1): ρ(h) = φ^h" loading="lazy">
+<figcaption>Slide 5 หน้า 33 — รูปแบบ ACF ของ AR(1): ρ(h) = φ^h</figcaption>
 </figure>
 
-<p>หน้าสรุปเพิ่มสิ่งหนึ่งจากนิยามเดิม คือค่าเฉลี่ย \(\mu\): \(X_t=\mu+w_t+\theta_1w_{t-1}+\dots+\theta_qw_{t-q}\) โดย <mark class="src" data-p="24">μ</mark> เป็นค่าเฉลี่ยของ series, \(\theta_1,\dots,\theta_q\) เป็น <mark class="src" data-p="24">the parameters of the model</mark> และ \(w_t,\dots,w_{t-q}\) เป็น white noise error terms การบวก \(\mu\) ยกระดับของข้อมูลทั้งชุดขึ้นเท่ากัน ค่าเฉลี่ยจึงเป็น \(E(X_t)=\mu\) แทน 0 ส่วนความแปรปรวนและ ACF ไม่เปลี่ยน เพราะการบวกค่าคงที่ไม่เปลี่ยนการกระจาย ข้อมูลจริงส่วนใหญ่ไม่ได้มีค่าเฉลี่ยเป็นศูนย์ รูปนี้จึงเป็นรูปที่ใช้เมื่อ fit โมเดล และ R รายงานค่า \(\mu\) ในชื่อ intercept</p>
+<p>เพราะ <mark class="src" data-p="33">(population)</mark> ACF คือ \(\rho_h=\phi^h\) และ |φ| &lt; 1 ค่าจึงลดลง <mark class="src" data-p="33">exponentially</mark> ไม่ตัดเป็นศูนย์ทันทีเหมือน MA อาจารย์วาดสี่กรณีด้วยตัวเลขจริง (Class 6, 0:10:35–0:15:06)</p>
+<table class="compact">
+<tr><th>φ</th><th>ρ₁, ρ₂, ρ₃, ρ₄</th><th>รูปร่าง</th></tr>
+<tr><td>0.9</td><td>0.9, 0.81, 0.729, 0.656</td><td>บวกทั้งหมด ลดช้ามาก ต้องถึง lag 16 จึงต่ำกว่า 0.2 (\(0.9^{16}=0.185\))</td></tr>
+<tr><td>0.5</td><td>0.5, 0.25, 0.125, 0.0625</td><td>บวกทั้งหมด ลดเร็ว ต่ำกว่า 0.2 ตั้งแต่ lag 3</td></tr>
+<tr><td>−0.9</td><td>−0.9, 0.81, −0.729, 0.656</td><td>สลับบวกลบ (กำลังคี่ติดลบ กำลังคู่เป็นบวก) ขนาดลดช้า</td></tr>
+<tr><td>−0.5</td><td>−0.5, 0.25, −0.125, 0.0625</td><td>สลับบวกลบ ลดเร็ว</td></tr>
+</table>
+<p>อาจารย์เรียกรูปแบบนี้ว่า <b>tail off</b> หรือ <b>decay slowly</b> สไลด์ให้จำรูปแบบเหล่านี้ไว้เทียบกับ sample ACF ของข้อมูลจริง และอาจารย์เตือนว่า "Data จริงมันอาจจะไม่ได้ perfect แบบนี้ ... แต่ถ้ามันใกล้เคียงสัก 80% เราก็คิดว่ามันน่าจะเป็นแบบนี้" (Class 6, 0:15:13) ข้อเชื่อมกับ Lesson 3: อุณหภูมิโลกมี ACF lag 1 = 0.819 และลดลงช้า ๆ ถึง lag 16 คล้าย AR(1) ที่ φ ใกล้ 0.9 มาก แต่ในกรณีนั้นสาเหตุคือ trend ไม่ใช่ AR ต้องตรวจความนิ่งก่อนเสมอ</p>
 
 <figure>
-<img src="../assets/slides/ts5-p25.png" alt="Slide 5 หน้า 25: Summary: MA(q) process (ต่อ)" loading="lazy">
-<figcaption>Slide 5 หน้า 25 — Summary: MA(q) process (ต่อ)</figcaption>
+<img src="../assets/slides/ts5-p34.png" alt="Slide 5 หน้า 34: AR(1) φ = 0.9: population ACF เทียบ sample ACF" loading="lazy">
+<figcaption>Slide 5 หน้า 34 — AR(1) φ = 0.9: population ACF เทียบ sample ACF</figcaption>
 </figure>
 
-<p>รูป lag operator เมื่อมีค่าเฉลี่ยคือ \(X_t=\mu+(1+\theta_1B+\dots+\theta_qB^q)w_t=\mu+\theta(B)w_t\) ประโยคท้ายให้มุมมองเชิงแนวคิด: moving average คือ linear regression ของค่าปัจจุบันของ series บน white noise error terms ปัจจุบันและก่อนหน้า ข้อแตกต่างจาก regression ทั่วไปคือ ตัวแปรอธิบาย \(w_t,w_{t-1},\dots\) เป็นค่าที่สังเกตโดยตรงไม่ได้ จึงประมาณ \(\theta\) ด้วยวิธี least squares ธรรมดาไม่ได้ ต้องใช้วิธีใน Lecture 7</p>
+<p>population ACF ลดลงตาม 0.9, 0.81, 0.729 อย่างสม่ำเสมอ sample ACF จากข้อมูล 100 ค่ามีรูปแบบเดียวกันแต่ไม่เรียบเท่า เมื่อรันด้วย <code>set.seed(2603630)</code> ได้ sample ACF 0.905, 0.826, 0.760, 0.698 ใกล้ทฤษฎีมาก และ <code>arima(a, order = c(1,0,0))</code> ประมาณ φ ได้ 0.9105 (s.e. 0.0391) ข้อสังเกตของอาจารย์คือ ACF ของ AR "ดูไม่ออกว่าแลกเท่าไหร่" (Class 6, 0:20:21) เพราะ AR(1) และ AR(2) ต่างก็ลดลงช้า ๆ ACF จึงบอก p ไม่ได้ ต้องใช้ PACF ใน Lesson 6</p>
 
-<div class="box exam">
-<div class="label">จุดสอบ — MA(2) และ MA(q)</div>
+<!-- ===================================================== -->
+<h2 id="s10">10. Theorem: เมื่อไร AR(p) จึงนิ่ง</h2>
+
+<p>หัวข้อ 9 พบว่า AR(1) นิ่งเมื่อ |φ| &lt; 1 คำถามต่อไปคือ AR(p) ที่มีหลาย φ จะตรวจอย่างไร คำตอบอยู่ในรากของ Φ(B) อาจารย์บอกว่านี่คือ "ทฤษฎีอันเดียว คอนเซ็ปต์อันเดียวของวิชานี้" ที่ต้องใช้คณิต คือแก้สมการกำลังสอง (Class 6, 1:23:15) และสอนเต็มรูปแบบใน Class 7-2 (Lesson 7)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p35.png" alt="Slide 5 หน้า 35: Theorem: characteristic polynomial ของ AR(p)" loading="lazy">
+<figcaption>Slide 5 หน้า 35 — Theorem: characteristic polynomial ของ AR(p)</figcaption>
+</figure>
+
+<p>เริ่มจาก \(\Phi(B)=1-\phi_1B-\dots-\phi_pB^p\) และโมเดล \(\Phi(B)X_t=w_t\) ทฤษฎีนี้ทำงานกับพหุนามนี้โดยมอง B เป็นตัวแปรธรรมดา เช่น AR(1) ที่ φ = 0.5 มี \(\Phi(B)=1-0.5B\)</p>
+
+<figure>
+<img src="../assets/slides/ts5-p36.png" alt="Slide 5 หน้า 36: Theorem: แยกตัวประกอบเป็น Π(1 − α_iB) โดย α คือ reciprocal roots" loading="lazy">
+<figcaption>Slide 5 หน้า 36 — Theorem: แยกตัวประกอบเป็น Π(1 − α_iB) โดย α คือ reciprocal roots</figcaption>
+</figure>
+
+<p>พหุนามดีกรี p แยกตัวประกอบได้เป็น \(\prod_{i=1}^{p}(1-\alpha_iB)\) โดย α คือ <mark class="src" data-p="36">the reciprocal roots</mark> เพราะถ้าแทน \(B=1/\alpha_i\) วงเล็บนั้นจะเป็นศูนย์ รากจริงของพหุนามจึงเป็น \(\beta_i=1/\alpha_i\) ตัวอย่าง: \(\Phi(B)=1-1.1B+0.3B^2=(1-0.5B)(1-0.6B)\) ตรวจโดยกระจาย: \(0.5+0.6=1.1\) และ \(0.5\times0.6=0.3\) ได้ α = 0.5, 0.6 และราก β = 2, 1.667</p>
+
+<figure>
+<img src="../assets/slides/ts5-p37.png" alt="Slide 5 หน้า 37: Theorem: AR(p) นิ่งก็ต่อเมื่อ |β_i| > 1 ทุกตัว หรือ |α_i| < 1" loading="lazy">
+<figcaption>Slide 5 หน้า 37 — Theorem: AR(p) นิ่งก็ต่อเมื่อ |β_i| > 1 ทุกตัว หรือ |α_i| < 1</figcaption>
+</figure>
+
+<p>ทฤษฎีบท: AR(p) นิ่งก็ต่อเมื่อ modulus ของรากทุกตัวมากกว่า 1 หรือเทียบเท่ากับ |α| ทุกตัวน้อยกว่า 1 ดูตัวอย่างสามแบบ</p>
 <ul>
-<li>พิสูจน์ \(\gamma(0),\gamma(1),\gamma(2)\) ของ MA(2) ได้ และคำนวณ \(\rho(1),\rho(2)\) จากตัวเลขได้</li>
-<li>บอกได้ว่า ACF ของ MA(q) ตัดหลัง lag q และใช้ข้อนี้อ่านอันดับจาก sample ACF</li>
-<li>รู้ว่า MA(q) stationary เสมอ</li>
-<li>เขียน MA(q) ที่มีค่าเฉลี่ย \(\mu\) ได้ และรู้ว่า \(\mu\) ไม่เปลี่ยน ACF</li>
+<li><b>AR(1)</b>: \(1-\phi B=0\) ได้ราก \(\beta=1/\phi\) เงื่อนไข \(|1/\phi|&gt;1\) คือ \(|\phi|&lt;1\) ตรงกับที่ได้จาก γ₀ ในหัวข้อ 9 เช่น φ = 0.5 มีราก 2 จึงนิ่ง</li>
+<li><b>AR(2) ที่ φ = (1.1, −0.3)</b>: ราก 2 และ 1.667 มากกว่า 1 ทั้งคู่ จึงนิ่ง ตรวจด้วยสูตร: \(0.3B^2-1.1B+1=0\) ได้ \(B=\dfrac{1.1\pm\sqrt{1.21-1.2}}{0.6}=\dfrac{1.1\pm0.1}{0.6}\) คือ 2 และ 1.667 นี่คือหนึ่งในสี่กรณีของ R_codes_2</li>
+<li><b>AR(2) ที่ φ = (1.7, −0.7)</b>: \(1-1.7B+0.7B^2=(1-0.7B)(1-B)\) มีราก 1 ซึ่งไม่มากกว่า 1 จึงไม่นิ่ง อาจารย์ใช้ตัวอย่างนี้เป็นกับดัก "ดูเหมือน AR(2) แต่ไม่ใช่" วงเล็บ \((1-B)\) คือ differencing จึงเป็น ARIMA(1,1,0) (Class 6, 1:52:56–1:59:03 ดู Lesson 6)</li>
 </ul>
-</div>
+<p>คำว่า modulus ใช้เมื่อรากเป็นจำนวนเชิงซ้อน เช่น φ = (1, −0.5): \(0.5B^2-B+1=0\) ได้ \(B=1\pm i\) modulus \(\sqrt{1^2+1^2}=1.414&gt;1\) จึงนิ่ง อาจารย์บอกว่าในข้อสอบ "ส่วนใหญ่จะเป็นจำนวนจริง" (Class 7-2, 0:16:52) และจะมีแค่สมการกำลังสอง (Class 6, 1:24:42) สไลด์เรียก α ว่า poles ของ AR และบอกว่าทฤษฎีนี้มาจาก general linear process ซึ่งไม่ต้องพิสูจน์ในวิชานี้</p>
 
 <!-- ===================================================== -->
-<h2 id="s8">8. QUIZ ในสไลด์: อ่าน ACF ของ moving average process</h2>
+<h2 id="s11">11. AR(1) ใน R: population ACF กับ sample ACF</h2>
 
 <figure>
-<img src="../assets/slides/ts5-p26.png" alt="Slide 5 หน้า 26: QUIZ: Moving average process" loading="lazy">
-<figcaption>Slide 5 หน้า 26 — QUIZ: Moving average process</figcaption>
+<img src="../assets/slides/ts5-p38.png" alt="Slide 5 หน้า 38: Population ACF ของ AR(1) ที่ φ = 0.9, −0.9, 0.7, −0.7" loading="lazy">
+<figcaption>Slide 5 หน้า 38 — Population ACF ของ AR(1) ที่ φ = 0.9, −0.9, 0.7, −0.7</figcaption>
 </figure>
 
-<p>สไลด์ให้ sample ACF ของสี่ process โดยไม่มีเฉลย กราฟชุดนี้เริ่มที่ lag 0 ซึ่งมีค่า 1 เสมอ จึงไม่นับแท่งแรก เส้นประอยู่ที่ประมาณ ±0.2 แสดงว่า n ประมาณ 100 วิธีอ่านคือนับว่าแท่งเกินเส้นประถึง lag ใดแล้วตัด และดูเครื่องหมายของแต่ละแท่ง Process 1 มีค่าประมาณ −0.65 ที่ lag 1 และ 0.45 ที่ lag 2 จึงอ่านเป็น MA(2) ที่มี \(\rho(1)\) ลบและ \(\rho(2)\) บวก คล้ายตัวอย่าง \(\theta_1=-0.9,\theta_2=0.7\) Process 3 มีค่าประมาณ −0.75 ที่ lag 1 และ 0.4 ที่ lag 2 อ่านเป็น MA(2) เช่นกัน Process 4 มีค่าประมาณ −0.4 ที่ lag 1 แล้วอยู่ในเส้นประ อ่านเป็น MA(1) ที่ \(\theta\) เป็นลบ Process 2 มีค่าประมาณ 0.4 ที่ lag 1 แล้วมีแท่งลบที่ lag 2 ถึง 4 โดย lag 3 ลงถึงประมาณ −0.4 จึงมีแท่งที่มีนัยสำคัญเลย lag 1 อันดับน่าจะสูงกว่า 1</p>
-
-<div class="box">
-<div class="label">หมายเหตุเรื่องเฉลย</div>
-<p>การอ่านข้างต้นเป็นการอ่านจากกราฟตามหลักในบทนี้ ไม่ใช่เฉลยของอาจารย์ สไลด์ไม่ได้ให้คำถามที่แน่นอนและไม่ได้ให้เฉลย อาจารย์น่าจะเฉลยในห้อง ซึ่งจะตรวจกับวิดีโอ Class 5 ภายหลัง ข้อที่ยืนยันได้จากทฤษฎี: Process 1 และ 3 มีค่าสัมบูรณ์ที่ lag 1 เกิน 0.5 จึงเป็น MA(1) ไม่ได้ ตามตารางในหัวข้อ 4</p>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s9">9. นิยามของ AR(p)</h2>
-
-<p>MA อธิบายค่าปัจจุบันด้วยแรงกระแทกสุ่มในอดีต ส่วน AR อธิบายค่าปัจจุบันด้วยค่าของตัวเองในอดีต คำว่า autoregressive แปลว่า regression บนตัวเอง</p>
-
-<figure>
-<img src="../assets/slides/ts5-p27.png" alt="Slide 5 หน้า 27: Autoregressive Models (page 84)" loading="lazy">
-<figcaption>Slide 5 หน้า 27 — Autoregressive Models (page 84)</figcaption>
-</figure>
-
-<p>Autoregressive model of order p เขียนว่า AR(p) คือ \(X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+\dots+\phi_pX_{t-p}+w_t\) หรือรูปผลรวม \(X_t=\sum_{j=1}^{p}\phi_jX_{t-j}+w_t\) โดย \(w_t\) มีการแจกแจง \(N(0,\sigma^2)\) เลข p คือจำนวนค่าในอดีตที่ใช้</p>
-<p>เปรียบเทียบ: อุณหภูมิของวันนี้ใกล้เคียงกับเมื่อวาน เพราะอากาศเปลี่ยนช้า ค่าวันนี้จึงเท่ากับส่วนหนึ่งของค่าเมื่อวาน บวกกับการเปลี่ยนแปลงสุ่มของวันนี้ ใน AR(1) สัมประสิทธิ์ \(\phi\) บอกว่าระบบ “จำ” ค่าเมื่อวานไว้มากเพียงใด ข้อแตกต่างจาก MA คือ ความจำของ AR ไม่ถูกตัดทิ้ง ค่าเมื่อวานเองก็มีค่าของวันก่อนอยู่ข้างใน ผลของแรงกระแทกหนึ่งครั้งจึงค่อย ๆ จางลงแต่ไม่หายไปทันที</p>
-
-<figure>
-<img src="../assets/slides/ts5-p28.png" alt="Slide 5 หน้า 28: Autoregressive Models: รูป lag operator" loading="lazy">
-<figcaption>Slide 5 หน้า 28 — Autoregressive Models: รูป lag operator</figcaption>
-</figure>
-
-<p>นิยาม \(\Phi(B)=1-\sum_{j=1}^{p}\phi_jB^j=1-\phi_1B-\phi_2B^2-\dots-\phi_pB^p\) แล้วโมเดล AR(p) เขียนได้เป็น <mark class="src" data-p="28">Φ(B)X_t = w_t ; t = 1, 2, …, n</mark> เครื่องหมายใน \(\Phi(B)\) เป็นลบ เพราะต้องย้ายพจน์ของ X ทั้งหมดไปทางซ้ายก่อน ตรวจกับ AR(1): \(X_t=\phi X_{t-1}+w_t\) ย้ายข้างได้ \(X_t-\phi X_{t-1}=w_t\) คือ \((1-\phi B)X_t=w_t\) ข้อนี้ต่างจาก \(\theta(B)\) ของ MA ซึ่งใช้เครื่องหมายบวก เพราะพจน์ของ w อยู่ทางขวาอยู่แล้ว สไลด์ระบุว่า \(\Phi(B)\) เรียกว่า <mark class="src" data-p="28">characteristic</mark> polynomial ของ process และรากของมันกำหนดว่า process นั้น stationary หรือไม่ รายละเอียดอยู่ใน<a href="#s11">หัวข้อ 11</a></p>
-
-<figure>
-<img src="../assets/slides/ts5-p29.png" alt="Slide 5 หน้า 29: Autoregressive Models: เงื่อนไขของโมเดล" loading="lazy">
-<figcaption>Slide 5 หน้า 29 — Autoregressive Models: เงื่อนไขของโมเดล</figcaption>
-</figure>
-
-<p>หน้านี้ระบุเงื่อนไขสี่ข้อ ข้อแรก \(\phi=(\phi_1,\phi_2,\dots,\phi_p)\) เป็นเวกเตอร์ของสัมประสิทธิ์ และ p เป็นจำนวนเต็มที่ไม่ติดลบ ข้อที่สอง สัมประสิทธิ์เป็นค่าคงที่ และ <mark class="src" data-p="29">(important)</mark> \(\phi_p\ne0\) ด้วยเหตุผลเดียวกับ \(\theta_q\ne0\) คือให้อันดับเป็น p จริง ข้อที่สาม โดยทั่วไป \(X_t\) stationary และมีค่าเฉลี่ย 0 ข้อที่สี่ \(w_t\) เป็น <mark class="src" data-p="29">uncorrelated</mark> กับ \(X_{t-j}\) สำหรับ \(j=1,2,\dots\) ข้อสุดท้ายนี้เป็นกุญแจของการพิสูจน์ในหัวข้อ 10: แรงกระแทกของวันนี้ไม่เกี่ยวกับค่าของข้อมูลในอดีต เพราะค่าในอดีตเกิดขึ้นก่อนที่ \(w_t\) จะเกิด ผลคือ \(E(w_tX_{t-j})=0\) เมื่อ \(j\ge1\)</p>
-
-<figure>
-<img src="../assets/slides/ts5-p30.png" alt="Slide 5 หน้า 30: Autoregressive Models: การตีความ" loading="lazy">
-<figcaption>Slide 5 หน้า 30 — Autoregressive Models: การตีความ</figcaption>
-</figure>
-
-<p>AR model กำหนดว่าค่าที่เกิดขึ้นจริง ณ เวลา t เป็น <mark class="src" data-p="30">linear combination of the p previous realization</mark> บวกกับ noise term ตัวแปรอธิบาย \(X_{t-1},\dots,X_{t-p}\) เป็น random components ข้อนี้ต่างจาก regression ทั่วไปที่ถือว่าตัวแปรอธิบายเป็นค่าคงที่ที่รู้ล่วงหน้า กรณี \(p=0\) ได้ \(X_t=w_t\) ไม่มีพจน์ autoregression โมเดลคือ white noise และถ้าค่าเฉลี่ย \(\mu\) ของ \(X_t\) ไม่เป็นศูนย์ ให้แทน \(X_t\) ด้วย \(X_t-\mu\)</p>
-
-<figure>
-<img src="../assets/slides/ts5-p31.png" alt="Slide 5 หน้า 31: Autoregressive Models: กรณีค่าเฉลี่ยไม่เป็นศูนย์" loading="lazy">
-<figcaption>Slide 5 หน้า 31 — Autoregressive Models: กรณีค่าเฉลี่ยไม่เป็นศูนย์</figcaption>
-</figure>
-
-<p>แทน \(X_t\) ด้วย \(X_t-\mu\) ทุกตัว ได้ \(X_t-\mu=\phi_1(X_{t-1}-\mu)+\dots+\phi_p(X_{t-p}-\mu)+w_t\) เมื่อกระจายแล้วรวมค่าคงที่ไว้ด้วยกัน ได้ \(X_t=a+\phi_1X_{t-1}+\phi_2X_{t-2}+\dots+\phi_pX_{t-p}+w_t\) โดย \(a=\mu(1-\phi_1-\dots-\phi_p)\)</p>
-
-<div class="calc">
-<div class="calc-title">ที่มาของ \(a=\mu(1-\phi_1-\dots-\phi_p)\) และตัวอย่างตัวเลข</div>
-<ol class="steps">
-<li><div class="st-title">กระจายวงเล็บ (แสดงกรณี p = 2)</div>
-<p>\(X_t-\mu=\phi_1X_{t-1}-\phi_1\mu+\phi_2X_{t-2}-\phi_2\mu+w_t\)</p></li>
-<li><div class="st-title">ย้าย \(\mu\) ไปทางขวา</div>
-<p>\(X_t=\mu-\phi_1\mu-\phi_2\mu+\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\)</p></li>
-<li><div class="st-title">ดึง \(\mu\) ออก</div>
-<p>\(X_t=\mu(1-\phi_1-\phi_2)+\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) ค่าคงที่ตัวหน้าคือ a</p></li>
-</ol>
-<p>ตัวอย่าง: \(\mu=10\), \(\phi_1=0.5\), \(\phi_2=0.2\) ได้ \(a=10(1-0.5-0.2)=3\) โมเดลคือ \(X_t=3+0.5X_{t-1}+0.2X_{t-2}+w_t\)</p>
-<p>ข้อควรระวัง: <strong>a ไม่ใช่ค่าเฉลี่ย</strong> ค่าเฉลี่ยคือ \(\mu=a/(1-\phi_1-\dots-\phi_p)\) ในตัวอย่างนี้ค่าคงที่คือ 3 แต่ค่าเฉลี่ยคือ 10 ต่างจาก MA ที่ค่าคงที่ในสมการคือค่าเฉลี่ยโดยตรง</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 4</span><span>AR(p)</span></div>
-<div class="qtext">โมเดล \(X_t=0.5X_{t-1}+0.24X_{t-2}+w_t\) มี \(\Phi(B)\) เป็นข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. ย้ายพจน์ X ไปทางซ้าย เครื่องหมายกลับเป็นลบ">\(1-0.5B-0.24B^2\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายบวกเป็นของ θ(B) ฝั่ง MA">\(1+0.5B+0.24B^2\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. พจน์แรกต้องเป็น 1 จาก X_t เอง">\(0.5B+0.24B^2\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. φ₂ คู่กับ B² เครื่องหมายต้องเป็นลบทั้งคู่">\(1-0.5B+0.24B^2\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 5</span><span>AR(p)</span></div>
-<div class="qtext">AR(2) มีค่าเฉลี่ย \(\mu=10\), \(\phi_1=0.5\), \(\phi_2=0.2\) ค่าคงที่ a ในรูป \(X_t=a+\phi_1X_{t-1}+\phi_2X_{t-2}+w_t\) คือเท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. a ไม่เท่ากับ μ ต้องคูณด้วย 1 − φ₁ − φ₂">\(a=10\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. 10 × (1 − 0.5 − 0.2) = 3">\(a=3\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ต้องลบทั้ง φ₁ และ φ₂">\(a=5\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 7 คือ 10 × (φ₁ + φ₂) ต้องใช้ 1 ลบผลรวม">\(a=7\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s10">10. AR(1): พิสูจน์ mean, variance และ ACF</h2>
-
-<figure>
-<img src="../assets/slides/ts5-p32.png" alt="Slide 5 หน้า 32: AR(1) process (page 86)" loading="lazy">
-<figcaption>Slide 5 หน้า 32 — AR(1) process (page 86)</figcaption>
-</figure>
-
-<p>เมื่อ \(p=1\) ได้ \(X_t=\phi X_{t-1}+w_t\) สไลด์ชี้สองกรณีพิเศษ ถ้า \(\phi=1\) โมเดลกลายเป็น <mark class="src" data-p="32">a random walk</mark> คือ \(X_t=X_{t-1}+w_t\) ซึ่งจำค่าเมื่อวานไว้ทั้งหมด แรงกระแทกทุกครั้งสะสมถาวร ความแปรปรวนจึงโตขึ้นตามเวลาและไม่ stationary ตามที่พิสูจน์ใน Lesson 1 ถ้า \(\phi=0\) โมเดลกลายเป็น <mark class="src" data-p="32">white noise</mark> คือไม่จำอะไรเลย AR(1) ที่ stationary อยู่ระหว่างสองขั้วนี้ คือ \(-1&lt;\phi&lt;1\) สไลด์ให้หา mean, autocovariance และ ACF</p>
-
-<div class="calc" id="s10-calc">
-<div class="calc-title">พิสูจน์สมบัติของ AR(1): \(X_t=\phi X_{t-1}+w_t\) เมื่อ stationary</div>
-<div class="given">ใช้สองข้อ: (1) stationary หมายความว่า mean และ variance เท่ากันทุกเวลา (2) \(w_t\) ไม่สัมพันธ์กับ \(X_{t-1},X_{t-2},\dots\)</div>
-<ol class="steps">
-<li><div class="st-title">Mean</div>
-<p>หาค่าคาดหมายทั้งสองข้าง: \(E(X_t)=\phi E(X_{t-1})+E(w_t)\) ให้ \(\mu\) เป็นค่าเฉลี่ย ซึ่งเท่ากันทุกเวลา</p>
-\[\mu=\phi\mu+0\ \Rightarrow\ \mu(1-\phi)=0\ \Rightarrow\ \mu=0\]
-<p>เพราะ \(\phi\ne1\)</p></li>
-<li><div class="st-title">Variance</div>
-<p>หาความแปรปรวนทั้งสองข้าง \(X_{t-1}\) และ \(w_t\) ไม่สัมพันธ์กัน จึงบวกกันได้</p>
-\[\mathrm{Var}(X_t)=\phi^2\mathrm{Var}(X_{t-1})+\sigma^2\]
-<p>ให้ \(\gamma(0)\) เป็นความแปรปรวน ซึ่งเท่ากันทุกเวลา</p>
-\[\gamma(0)=\phi^2\gamma(0)+\sigma^2\ \Rightarrow\ \gamma(0)(1-\phi^2)=\sigma^2\ \Rightarrow\ \gamma(0)=\frac{\sigma^2}{1-\phi^2}\]</li>
-<li><div class="st-title">Autocovariance ที่ lag h</div>
-<p>คูณสมการของโมเดลด้วย \(X_{t-h}\) โดย \(h\ge1\) แล้วหาค่าคาดหมาย</p>
-\[E(X_tX_{t-h})=\phi E(X_{t-1}X_{t-h})+E(w_tX_{t-h})\]
-<p>พจน์ซ้ายคือ \(\gamma(h)\) พจน์กลางคือ \(\phi\gamma(h-1)\) เพราะ \(X_{t-1}\) กับ \(X_{t-h}\) ห่างกัน \(h-1\) ช่วง พจน์ท้ายเป็น 0 ตามข้อ (2)</p>
-\[\gamma(h)=\phi\gamma(h-1)\]</li>
-<li><div class="st-title">ไล่ย้อนกลับ</div>
-\[\gamma(1)=\phi\gamma(0),\quad \gamma(2)=\phi\gamma(1)=\phi^2\gamma(0),\quad\dots,\quad \gamma(h)=\phi^h\gamma(0)=\frac{\sigma^2\phi^h}{1-\phi^2}\]</li>
-<li><div class="st-title">ACF</div>
-\[\rho(h)=\frac{\gamma(h)}{\gamma(0)}=\phi^h\]</li>
-</ol>
-<div class="answer">AR(1): \(E(X_t)=0\), \(\gamma(0)=\dfrac{\sigma^2}{1-\phi^2}\), \(\gamma(h)=\dfrac{\sigma^2\phi^h}{1-\phi^2}\), \(\rho(h)=\phi^h\)</div>
-<p>สูตรของ \(\gamma(0)\) บอกเหตุผลของเงื่อนไข \(|\phi|&lt;1\): ถ้า \(\phi^2\ge1\) ตัวหารเป็นศูนย์หรือลบ ซึ่งเป็นความแปรปรวนไม่ได้ และยิ่ง \(\phi\) ใกล้ 1 ความแปรปรวนยิ่งมาก เพราะแรงกระแทกเก่าสะสมอยู่นาน เช่น \(\phi=0.9\), \(\sigma^2=1\) ได้ \(\gamma(0)=1/(1-0.81)=5.26\) ส่วน \(\phi=0.5\) ได้ \(1/0.75=1.33\)</p>
-</div>
-
-<div class="calc">
-<div class="calc-title">อีกวิธี: เขียน AR(1) เป็นผลรวมของ w แล้วใช้วิธีเดียวกับ MA</div>
-<p>แทน \(X_{t-1}=\phi X_{t-2}+w_{t-1}\) ลงในโมเดลซ้ำไปเรื่อย ๆ</p>
-\[X_t=\phi(\phi X_{t-2}+w_{t-1})+w_t=\phi^2X_{t-2}+\phi w_{t-1}+w_t=\dots=w_t+\phi w_{t-1}+\phi^2w_{t-2}+\phi^3w_{t-3}+\dots\]
-<p>เมื่อ \(|\phi|&lt;1\) พจน์ \(\phi^kX_{t-k}\) หายไปเมื่อ k มากขึ้น AR(1) จึงเป็น MA ที่มีอันดับไม่จำกัด โดยน้ำหนักของ \(w_{t-j}\) คือ \(\phi^j\) นี่คือสิ่งที่การเปรียบเทียบเรื่องความจำหมายถึง: แรงกระแทกเมื่อ j วันก่อนยังมีผลอยู่ด้วยน้ำหนัก \(\phi^j\) ซึ่งเล็กลงเรื่อย ๆ แต่ไม่เป็นศูนย์ ความแปรปรวนจากรูปนี้คือ \(\sigma^2(1+\phi^2+\phi^4+\dots)=\sigma^2/(1-\phi^2)\) ตรงกับวิธีแรก</p>
-</div>
-
-<figure>
-<img src="../assets/slides/ts5-p33.png" alt="Slide 5 หน้า 33: AR(1) process: รูปแบบของ ACF" loading="lazy">
-<figcaption>Slide 5 หน้า 33 — AR(1) process: รูปแบบของ ACF</figcaption>
-</figure>
-
-<p>สำหรับ AR(1) เนื่องจาก \(-1&lt;\phi&lt;1\) <mark class="src" data-p="33">(population)</mark> ACF \(\rho(h)=\phi^h\) ลดลงแบบ <mark class="src" data-p="33">exponentially</mark> เมื่อ h เพิ่มขึ้น สไลด์แจกแจงสี่กรณี ถ้า \(\phi\) ใกล้ ±1 การลดลงจะช้า ถ้า \(\phi\) ไม่ใกล้ ±1 การลดลงจะเร็ว ถ้า \(\phi&gt;0\) autocorrelation เป็นบวกทั้งหมด ถ้า \(\phi&lt;0\) autocorrelation สลับจากลบที่ \(h=1\) เป็นบวกที่ \(h=2\) เป็นลบที่ \(h=3\) ต่อไปเรื่อย ๆ การสลับเกิดจากการยกกำลังของจำนวนลบ: กำลังคี่ได้ลบ กำลังคู่ได้บวก สไลด์ปิดด้วยคำแนะนำให้จำรูปแบบทางทฤษฎีเหล่านี้ เพื่อให้ตัดสินใจเลือกโมเดลได้อย่างสมเหตุสมผลเมื่อเห็น sample ACF จากข้อมูลจริง</p>
-
-<table class="compact">
-<tr><th>\(\phi\)</th><th>\(\rho(1)\)</th><th>\(\rho(2)\)</th><th>\(\rho(3)\)</th><th>\(\rho(5)\)</th><th>\(\rho(10)\)</th><th>ลักษณะ</th></tr>
-<tr><td>0.9</td><td>0.900</td><td>0.810</td><td>0.729</td><td>0.590</td><td>0.349</td><td>บวกทั้งหมด ลดช้า</td></tr>
-<tr><td>0.7</td><td>0.700</td><td>0.490</td><td>0.343</td><td>0.168</td><td>0.028</td><td>บวกทั้งหมด ลดเร็ว</td></tr>
-<tr><td>−0.9</td><td>−0.900</td><td>0.810</td><td>−0.729</td><td>−0.590</td><td>0.349</td><td>สลับเครื่องหมาย ลดช้า</td></tr>
-<tr><td>−0.7</td><td>−0.700</td><td>0.490</td><td>−0.343</td><td>−0.168</td><td>0.028</td><td>สลับเครื่องหมาย ลดเร็ว</td></tr>
-</table>
-
-<figure>
-<img src="../assets/slides/ts5-p34.png" alt="Slide 5 หน้า 34: AR(1): Population ACF และ Sample ACF เมื่อ φ = 0.9" loading="lazy">
-<figcaption>Slide 5 หน้า 34 — AR(1): Population ACF และ Sample ACF เมื่อ φ = 0.9</figcaption>
-</figure>
-
-<p>หน้านี้วาง ACF สองชนิดของ AR(1) ที่ <mark class="src" data-p="34">φ = 0.9</mark> ไว้เทียบกัน Population ACF คือค่าทางทฤษฎี \(0.9^h\): เริ่มที่ 1 ที่ lag 0 แล้วเป็น 0.9, 0.81, 0.729 ลดลงเรียบเป็นเส้นโค้งและยังเป็นบวกที่ lag 20 (\(0.9^{20}=0.12\)) Sample ACF คำนวณจากข้อมูลจำลอง 100 ค่า มีรูปร่างเดียวกันคือลดลงช้าและเป็นบวก แต่ไม่เรียบเท่า และลงไปอยู่ในเส้นประตั้งแต่ประมาณ lag 14 ความต่างระหว่างสองกราฟคือความคลาดเคลื่อนจากการสุ่มตัวอย่าง ในงานจริงเห็นได้เฉพาะ sample ACF แล้วต้องเดาว่ามาจาก population ACF แบบใด</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 6</span><span>AR(1)</span></div>
-<div class="qtext">AR(1) มี \(\phi=-0.8\) ค่า \(\rho(3)\) คือเท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. กำลังคี่ของจำนวนลบได้ค่าลบ">\(\rho(3)=0.512\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. (−0.8)³ = −0.512">\(\rho(3)=-0.512\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. −0.640 มาจากกำลังสองและใส่ลบ ρ(3) ใช้กำลังสาม">\(\rho(3)=-0.640\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 0.640 คือ ρ(2)">\(\rho(3)=0.640\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 7</span><span>AR(1)</span></div>
-<div class="qtext">AR(1) มี \(\phi=0.6\) และ \(\sigma^2=1\) ความแปรปรวนของ \(X_t\) คือเท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ 1 − φ² ไม่ใช่ 1 − φ">\(\gamma(0)=2.5000\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. 1 ÷ (1 − 0.36) = 1.5625">\(\gamma(0)=1.5625\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 1.36 คือ 1 + φ² ซึ่งเป็นสูตรของ MA(1)">\(\gamma(0)=1.3600\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 0.64 คือตัวหาร ต้องนำไปหาร σ²">\(\gamma(0)=0.6400\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 8</span><span>AR(1)</span></div>
-<div class="qtext">AR(1) ที่ \(\phi=1\) คือ process ใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. white noise คือกรณี φ = 0">white noise ซึ่ง stationary</button>
-<button class="opt" data-correct="false" data-note="ผิด. random walk ไม่ stationary เพราะความแปรปรวนโตตามเวลา">random walk ซึ่ง stationary</button>
-<button class="opt" data-correct="false" data-note="ผิด. white noise คือกรณี φ = 0 และ stationary">white noise ซึ่งไม่ stationary</button>
-<button class="opt" data-correct="true" data-note="ถูก. X_t = X_{t−1} + w_t คือ random walk">random walk ซึ่งไม่ stationary</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="box exam">
-<div class="label">จุดสอบ — AR(p) และ AR(1)</div>
-<ul>
-<li>เขียน AR(p) ได้ทั้งรูปกระจายและรูป \(\Phi(B)X_t=w_t\) โดยเครื่องหมายใน \(\Phi(B)\) เป็นลบ</li>
-<li>แปลงระหว่างค่าเฉลี่ย \(\mu\) กับค่าคงที่ \(a=\mu(1-\phi_1-\dots-\phi_p)\) ได้</li>
-<li>พิสูจน์ mean, \(\gamma(0)\), \(\gamma(h)\), \(\rho(h)\) ของ AR(1) ได้ และบอกได้ว่าใช้ stationarity กับข้อ uncorrelated ตรงขั้นใด</li>
-<li>บอกรูปแบบ ACF จากค่า \(\phi\): บวกหรือสลับ ลดช้าหรือเร็ว</li>
-<li>รู้ว่า \(\phi=1\) คือ random walk และ \(\phi=0\) คือ white noise</li>
-</ul>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s11">11. Theorem: characteristic polynomial และ stationarity</h2>
-
-<p>MA stationary เสมอ แต่ AR ไม่เป็นเช่นนั้น AR(1) ต้องมี \(|\phi|&lt;1\) สำหรับ AR(p) ทั่วไป เงื่อนไขเขียนผ่านรากของพหุนาม \(\Phi(B)\)</p>
-
-<figure>
-<img src="../assets/slides/ts5-p35.png" alt="Slide 5 หน้า 35: Theorem: characteristic polynomial" loading="lazy">
-<figcaption>Slide 5 หน้า 35 — Theorem: characteristic polynomial</figcaption>
-</figure>
-
-<p>หน้านี้ทวนนิยาม \(\Phi(B)=1-\phi_1B-\phi_2B^2-\dots-\phi_pB^p\) และโมเดล <mark class="src" data-p="35">Φ(B)X_t = w_t</mark> แนวคิดคือมอง B เป็นตัวแปรธรรมดาตัวหนึ่ง แล้ว \(\Phi\) เป็นพหุนามกำลัง p ซึ่งมีราก p ตัว</p>
-
-<figure>
-<img src="../assets/slides/ts5-p36.png" alt="Slide 5 หน้า 36: Theorem: reciprocal roots" loading="lazy">
-<figcaption>Slide 5 หน้า 36 — Theorem: reciprocal roots</figcaption>
-</figure>
-
-<p>พหุนามกำลัง p แยกตัวประกอบได้เป็น \(\Phi(B)=\prod_{i=1}^{p}(1-\alpha_iB)\) โดย \(\alpha\) แต่ละตัวเรียกว่า <mark class="src" data-p="36">the reciprocal roots</mark> ส่วนรากของพหุนามคือ \(\beta_1,\dots,\beta_p\) ที่ทำให้ \(\Phi(\beta_i)=0\) สองชุดนี้เป็นส่วนกลับกัน: \(\beta_i=1/\alpha_i\) เหตุผล: ตัวประกอบ \((1-\alpha_iB)\) เป็นศูนย์เมื่อ \(B=1/\alpha_i\) ค่านั้นจึงเป็นราก</p>
-
-<figure>
-<img src="../assets/slides/ts5-p37.png" alt="Slide 5 หน้า 37: Theorem: เงื่อนไข stationarity" loading="lazy">
-<figcaption>Slide 5 หน้า 37 — Theorem: เงื่อนไข stationarity</figcaption>
-</figure>
-
-<p>Theorem: ถ้า \(X_t\sim AR(p)\) แล้ว \(X_t\) เป็น stationary process ก็ต่อเมื่อ modulus ของรากทุกตัวของ characteristic polynomial มากกว่าหนึ่ง คือ \(|\beta_i|&gt;1\) ทุก i หรือเทียบเท่ากับ \(|\alpha_i|&lt;1\) ทุก i สไลด์เพิ่มว่า \(\alpha\) เรียกอีกชื่อว่า poles ของ AR process และ theorem นี้มาจาก general linear process theory คำว่า modulus คือค่าสัมบูรณ์ ถ้ารากเป็นจำนวนเชิงซ้อน \(a+bi\) modulus คือ \(\sqrt{a^2+b^2}\)</p>
-
-<div class="calc">
-<div class="calc-title">ใช้ theorem กับ AR(1) และ AR(2)</div>
-<ol class="steps">
-<li><div class="st-title">AR(1): \(X_t=\phi X_{t-1}+w_t\)</div>
-<p>\(\Phi(B)=1-\phi B\) มีตัวประกอบเดียว จึงได้ \(\alpha=\phi\) และราก \(\beta=1/\phi\) เงื่อนไข \(|\alpha|&lt;1\) คือ \(|\phi|&lt;1\) ตรงกับที่ได้จากสูตรความแปรปรวนในหัวข้อ 10</p></li>
-<li><div class="st-title">AR(2): \(X_t=0.5X_{t-1}+0.24X_{t-2}+w_t\)</div>
-<p>\(\Phi(B)=1-0.5B-0.24B^2\) แยกตัวประกอบได้ \((1-0.8B)(1+0.3B)\) ตรวจโดยคูณกลับ: \(1+0.3B-0.8B-0.24B^2=1-0.5B-0.24B^2\)</p>
-<p>reciprocal roots: \(\alpha_1=0.8\), \(\alpha_2=-0.3\) ทั้งสองมีค่าสัมบูรณ์น้อยกว่า 1</p>
-<p>roots: \(\beta_1=1/0.8=1.25\), \(\beta_2=1/(-0.3)=-3.33\) ทั้งสองมีค่าสัมบูรณ์มากกว่า 1</p>
-<p>สรุป: stationary</p></li>
-<li><div class="st-title">AR(2) ที่ไม่ stationary: \(X_t=1.5X_{t-1}-0.5X_{t-2}+w_t\)</div>
-<p>\(\Phi(B)=1-1.5B+0.5B^2=(1-B)(1-0.5B)\) ได้ \(\alpha_1=1\), \(\alpha_2=0.5\) และ \(\beta_1=1\), \(\beta_2=2\) มีรากหนึ่งตัวเท่ากับ 1 พอดี ไม่มากกว่า 1 จึงไม่ stationary</p></li>
-</ol>
-<p>วิธีจำ: \(\alpha\) ทำหน้าที่เหมือน \(\phi\) ของ AR(1) ย่อยแต่ละตัว ต้องเล็กกว่า 1 ส่วนราก \(\beta\) เป็นส่วนกลับ ต้องใหญ่กว่า 1 เมื่อแยกตัวประกอบไม่ออก ให้หารากด้วยสูตรกำลังสอง ซึ่ง Lecture 6 ทำกับ AR(2) โดยละเอียด</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 9</span><span>Theorem</span></div>
-<div class="qtext">AR(2) มีรากของ characteristic polynomial เป็น 1.25 และ −3.33 ข้อสรุปคือข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. เงื่อนไขใช้ค่าสัมบูรณ์ และ |−3.33| มากกว่า 1">ไม่ stationary เพราะมีรากที่เป็นค่าลบ</button>
-<button class="opt" data-correct="false" data-note="ผิด. เงื่อนไขของรากคือมากกว่า 1 ส่วน reciprocal roots จึงน้อยกว่า 1">ไม่ stationary เพราะรากมากกว่าหนึ่ง</button>
-<button class="opt" data-correct="true" data-note="ถูก. |1.25| และ |−3.33| มากกว่า 1 ทั้งคู่">stationary เพราะทุกรากมี modulus เกิน 1</button>
-<button class="opt" data-correct="false" data-note="ผิด. ต้องดูทุกราก ไม่ใช่รากเดียว และเกณฑ์คือ modulus เกิน 1">stationary เพราะมีรากหนึ่งตัวเป็นบวก</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s12">12. Population ACF กับ Sample ACF ใน R</h2>
-
-<p>ACF มีสองชนิดที่ต้องแยกให้ออก Population ACF (หรือ theoretical ACF) คำนวณจากสูตรของโมเดลโดยไม่ใช้ข้อมูล ส่วน Sample ACF คำนวณจากข้อมูลชุดหนึ่ง เปรียบได้กับความน่าจะเป็นของเหรียญที่เท่ากับ 0.5 ตามทฤษฎี กับสัดส่วนหัวที่นับได้จริงจากการโยน 100 ครั้ง ซึ่งใกล้ 0.5 แต่ไม่เท่าพอดี</p>
-
-<figure>
-<img src="../assets/slides/ts5-p38.png" alt="Slide 5 หน้า 38: Population ACF ของ AR(1)" loading="lazy">
-<figcaption>Slide 5 หน้า 38 — Population ACF ของ AR(1)</figcaption>
-</figure>
-
-<p>สไลด์ใช้ R คำนวณ <mark class="src" data-p="38">population ACFs</mark> ของ AR(1) สี่กรณี คือ <mark class="src" data-p="38">φ = 0.9, −0.9, 0.7, −0.7</mark> สี่ค่านี้เลือกมาเพื่อเทียบสองคู่: เครื่องหมายบวกกับลบ และขนาด 0.9 กับ 0.7 ตรงกับสี่กรณีในหน้า 33</p>
-
-<figure>
-<img src="../assets/slides/ts5-p39.png" alt="Slide 5 หน้า 39: Population ACF: สี่กรณี" loading="lazy">
-<figcaption>Slide 5 หน้า 39 — Population ACF: สี่กรณี</figcaption>
-</figure>
-
-<p>กรณี \(\phi=0.9\) แท่งเป็นบวกทั้งหมดและลดลงช้า จาก 0.9 ที่ lag 1 เหลือ 0.35 ที่ lag 10 และ 0.12 ที่ lag 20 กรณี \(\phi=-0.9\) ขนาดของแท่งเท่ากับกรณีแรกทุก lag แต่สลับเครื่องหมาย: −0.9, 0.81, −0.729 กรณี \(\phi=0.7\) เป็นบวกทั้งหมดแต่ลดลงเร็ว จาก 0.7 เหลือ 0.028 ที่ lag 10 จนแทบมองไม่เห็นหลังจากนั้น กรณี \(\phi=-0.7\) สลับเครื่องหมายและลดลงเร็ว สรุปได้ว่าเครื่องหมายของ \(\phi\) กำหนดว่าแท่งสลับหรือไม่ และขนาดของ \(\phi\) กำหนดความเร็วของการลดลง</p>
-
-<pre data-p="38"><code>par(mfrow=c(2,2))
-
-acf = ARMAacf(ar = c(0.9), lag.max = 20)
-plot(acf, x = 0:20, type = "h", ylim = c(-1,1), xlab = "lag", ylab = "Autocorrelation", main = "Population ACF (phi=0.9)")
+<p>R มีสองคำสั่งที่ต้องแยกให้ออก (Class 6, 0:22:47–0:28:11) <code>ARMAacf()</code> คำนวณ ACF ตามทฤษฎีจากสูตร "เป็น Theory เลย ... เอามาจากสูตรจริง ๆ" ไม่มีความสุ่ม รันกี่ครั้งก็ได้ค่าเดิม ส่วน <code>arima.sim()</code> สร้างข้อมูลสุ่มจากโมเดล แล้วใช้ <code>acf()</code> หา sample ACF ซึ่งเปลี่ยนทุกครั้งที่รัน</p>
+<pre><code>acf = ARMAacf(ar = c(0.9), lag.max = 20)
+plot(acf, x = 0:20, type = "h", ylim = c(-1,1), xlab = "lag",
+     ylab = "Autocorrelation", main = "Population ACF (phi=0.9)")
 abline(h = 0)</code></pre>
 <table class="codeexp compact">
 <tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>ARMAacf(ar = c(0.9), lag.max = 20)</td><td>คำนวณ ACF ทางทฤษฎีของโมเดลที่มี φ = 0.9 ตั้งแต่ lag 0 ถึง 20 ได้เวกเตอร์ 21 ค่า: 1, 0.9, 0.81, 0.729, ... ไม่มีการสุ่ม รันกี่ครั้งได้ค่าเดิม</td></tr>
-<tr><td>plot(acf, x = 0:20, type = "h", ylim = c(-1,1), ...)</td><td>วาดกราฟเอง <code>x = 0:20</code> กำหนดแกนนอนเป็น lag 0 ถึง 20, <code>type = "h"</code> วาดเป็นแท่งตั้ง, <code>ylim = c(-1,1)</code> กำหนดแกนตั้งจาก −1 ถึง 1</td></tr>
-<tr><td>abline(h = 0)</td><td>ลากเส้นแนวนอนที่ 0</td></tr>
+<tr><td>ARMAacf(ar = c(0.9), lag.max = 20)</td><td>คืนเวกเตอร์ ρ₀ ถึง ρ₂₀ = 1, 0.9, 0.81, … ใส่ ma = ... สำหรับ MA ได้เช่นกัน</td></tr>
+<tr><td>x = 0:20</td><td>แกนนอนเริ่มที่ lag 0 เพราะ ARMAacf คืนค่า ρ₀ = 1 มาด้วย</td></tr>
+<tr><td>type = "h"</td><td>วาดเป็นแท่งแนวตั้งเหมือนกราฟ ACF</td></tr>
+<tr><td>ylim = c(-1,1)</td><td>ให้แกนตั้งครบ −1 ถึง 1 เพื่อเห็นค่าติดลบของ φ = −0.9</td></tr>
+<tr><td>abline(h = 0)</td><td>เส้นอ้างอิงที่ศูนย์ ไม่มีเส้นประ ±2/√n เพราะเป็นค่าทฤษฎี ไม่มี sampling error</td></tr>
 </table>
-<p>อีกสามกรณีเปลี่ยนเฉพาะค่าใน <code>ar = c(...)</code> และชื่อกราฟ ไฟล์ Codes2 มีหมายเหตุสามข้อ: theoretical ACF บางครั้งเรียก “Population ACF”, ใช้ฟังก์ชัน <code>ARMAacf</code>, และต้องวาดกราฟ ACF เอง เพราะ <code>ARMAacf</code> ให้เฉพาะตัวเลข ไม่วาดกราฟและไม่มีเส้นประ เส้นประเป็นขอบเขตความคลาดเคลื่อนของตัวอย่าง จึงมีเฉพาะใน sample ACF</p>
 
 <figure>
-<img src="../assets/slides/ts5-p40.png" alt="Slide 5 หน้า 40: Sample ACF ของ AR(1)" loading="lazy">
-<figcaption>Slide 5 หน้า 40 — Sample ACF ของ AR(1)</figcaption>
+<img src="../assets/slides/ts5-p39.png" alt="Slide 5 หน้า 39: Population ACF สี่กรณี" loading="lazy">
+<figcaption>Slide 5 หน้า 39 — Population ACF สี่กรณี</figcaption>
 </figure>
 
-<p>จากนั้นสไลด์จำลอง AR(1) สี่ชุดด้วยค่า \(\phi\) เดิม โดย \(w_t\) เป็น iid \(N(0,1)\) และ \(n=100\) โค้ดอยู่ในสไลด์: <code>arima.sim(list(order = c(1,0,0), ar = 0.9), n = 100)</code> ในที่นี้ <code>order = c(1,0,0)</code> คือ p = 1, d = 0, q = 0 และ <code>ar = 0.9</code> คือ φ ต่างจากการจำลอง MA ตรงที่ใช้ <code>ar</code> แทน <code>ma</code> และย้ายเลข 1 ไปตำแหน่งแรกของ <code>order</code></p>
+<p>สี่กราฟตรงกับตารางในหัวข้อ 9: φ = 0.9 ลดช้าและบวกทั้งหมด (0.9, 0.81, 0.729), φ = −0.9 สลับเครื่องหมายและลดช้า (−0.9, 0.81, −0.729), φ = 0.7 ลดเร็วกว่า (0.7, 0.49, 0.343) และ φ = −0.7 สลับเครื่องหมายและลดเร็ว (−0.7, 0.49, −0.343) สังเกตว่า lag 2 ของ φ = 0.7 และ −0.7 เท่ากันที่ 0.49 เพราะกำลังคู่ลบเครื่องหมายทิ้ง</p>
 
 <figure>
-<img src="../assets/slides/ts5-p41.png" alt="Slide 5 หน้า 41: Sample ACF: สี่กรณี" loading="lazy">
-<figcaption>Slide 5 หน้า 41 — Sample ACF: สี่กรณี</figcaption>
+<img src="../assets/slides/ts5-p40.png" alt="Slide 5 หน้า 40: Sample ACF: simulate AR(1) สี่กรณีด้วย arima.sim, n = 100" loading="lazy">
+<figcaption>Slide 5 หน้า 40 — Sample ACF: simulate AR(1) สี่กรณีด้วย arima.sim, n = 100</figcaption>
 </figure>
 
-<p>Sample ACF ทั้งสี่มีรูปแบบหลักเหมือน population ACF ของกรณีเดียวกัน แต่ไม่ตรงทุกแท่ง กรณี \(\phi=0.9\) เริ่มที่ประมาณ 0.8 ที่ lag 1 และลดลงเข้าเส้นประที่ประมาณ lag 5 เร็วกว่าค่าทางทฤษฎี กรณี \(\phi=-0.9\) สลับเครื่องหมายชัดเจนและยังเกินเส้นประถึง lag 20 กรณี \(\phi=0.7\) เริ่มที่ประมาณ 0.58 แล้วลดลง และมีแท่งลบขนาดเล็กช่วง lag 9 ถึง 20 ซึ่งไม่มีในทฤษฎี กรณี \(\phi=-0.7\) มีแท่งลบประมาณ −0.45 ที่ lag 1 แท่งบวกที่ lag 2 แล้วเข้าเส้นประ ความคลาดเคลื่อนเหล่านี้เกิดจากตัวอย่างมีเพียง 100 ค่า บทเรียนที่ได้คือ เมื่ออ่าน sample ACF ให้ดูรูปแบบรวม ได้แก่ ลดลงหรือตัด สลับหรือไม่ ช้าหรือเร็ว และไม่ตีความแท่งเล็ก ๆ ที่อยู่ใกล้เส้นประทีละแท่ง</p>
+<p>สไลด์ simulate สี่อนุกรมด้วย <code>arima.sim(list(order = c(1,0,0), ar = φ), n = 100)</code> โดย <code>order = c(1,0,0)</code> คือ p = 1, d = 0, q = 0 ถ้าใส่ φ ที่ทำให้ไม่นิ่ง เช่น ar = 1.2 R จะแจ้ง error ว่า 'ar' part of model is not stationary เพราะ arima.sim ตรวจรากตามทฤษฎีบทในหัวข้อ 10 ก่อนสร้างข้อมูล อาจารย์บอกประโยชน์ของ simulation ว่าใช้ทำ simulation study ใน IS หรือ thesis "ขึ้นอยู่กับ advisor" (Class 6, 0:26:41)</p>
 
-<pre data-p="40"><code>par(mfrow=c(2,2))
-ar.sim.1 &lt;- arima.sim(list(order = c(1,0,0), ar = 0.9), n = 100)
-ar.sim.2 &lt;- arima.sim(list(order = c(1,0,0), ar = -0.9), n = 100)
-ar.sim.3 &lt;- arima.sim(list(order = c(1,0,0), ar = 0.7), n = 100)
-ar.sim.4 &lt;- arima.sim(list(order = c(1,0,0), ar = -0.7), n = 100)
+<figure>
+<img src="../assets/slides/ts5-p41.png" alt="Slide 5 หน้า 41: Sample ACF สี่กรณี" loading="lazy">
+<figcaption>Slide 5 หน้า 41 — Sample ACF สี่กรณี</figcaption>
+</figure>
 
-acf(ar.sim.1,main="Sample ACF (phi=0.9)")
-acf(ar.sim.2,main="Sample ACF (phi=-0.9)")
-acf(ar.sim.3,main="Sample ACF (phi=0.7)")
-acf(ar.sim.4,main="Sample ACF (phi=-0.7)")</code></pre>
-
-<table>
-<tr><th></th><th>Population ACF</th><th>Sample ACF</th></tr>
-<tr><td>มาจาก</td><td>สูตรของโมเดล</td><td>ข้อมูลหนึ่งชุด</td></tr>
-<tr><td>คำสั่ง R</td><td><code>ARMAacf(ar = , ma = , lag.max = )</code></td><td><code>acf(ข้อมูล)</code></td></tr>
-<tr><td>ต้องมีข้อมูลหรือไม่</td><td>ไม่ต้อง</td><td>ต้อง ใช้ข้อมูลจริงหรือจาก <code>arima.sim</code></td></tr>
-<tr><td>กราฟ</td><td>ต้องวาดเองด้วย <code>plot(..., type = "h")</code></td><td>วาดให้อัตโนมัติ</td></tr>
-<tr><td>เส้นประ ±2/√n</td><td>ไม่มี</td><td>มี</td></tr>
-<tr><td>รันซ้ำ</td><td>ได้ค่าเดิมทุกครั้ง</td><td>เปลี่ยนทุกครั้งถ้าจำลองข้อมูลใหม่</td></tr>
-</table>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 10</span><span>R</span></div>
-<div class="qtext">คำสั่งใดให้ ACF ทางทฤษฎีของ AR(1) ที่ \(\phi=0.7\) ถึง lag 20</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. arima.sim จำลองข้อมูล ไม่ได้คำนวณ ACF">arima.sim(list(order = c(1,0,0), ar = 0.7), n = 20)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ma = คือ MA(1) ไม่ใช่ AR(1)">ARMAacf(ma = c(0.7), lag.max = 20)</button>
-<button class="opt" data-correct="false" data-note="ผิด. acf ต้องรับข้อมูล และให้ sample ACF">acf(ar = c(0.7), lag.max = 20)</button>
-<button class="opt" data-correct="true" data-note="ถูก. ARMAacf กับ ar = ให้ค่าทางทฤษฎี 1, 0.7, 0.49, ...">ARMAacf(ar = c(0.7), lag.max = 20)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 11</span><span>R</span></div>
-<div class="qtext">คำสั่ง <code>arima.sim(list(order = c(0,0,2), ma = c(-0.9,0.7)), n = 100)</code> ทำอะไร</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. order = c(0,0,2) คือ q = 2 และ ma ให้ θ₁, θ₂ ตามลำดับ">จำลอง MA(2) ที่ θ₁ = −0.9, θ₂ = 0.7 จำนวน 100 ค่า</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตำแหน่งที่สามของ order คือ q ของ MA">จำลอง AR(2) ที่ φ₁ = −0.9, φ₂ = 0.7 จำนวน 100 ค่า</button>
-<button class="opt" data-correct="false" data-note="ผิด. ค่าใน ma เรียงเป็น θ₁ แล้ว θ₂">จำลอง MA(2) ที่ θ₁ = 0.7, θ₂ = −0.9 จำนวน 100 ค่า</button>
-<button class="opt" data-correct="false" data-note="ผิด. arima.sim จำลองข้อมูล ไม่ได้คำนวณ ACF">คำนวณ ACF ของ MA(2) ที่ θ₁ = −0.9, θ₂ = 0.7 ถึง lag 100</button>
-</div>
-<div class="feedback"></div>
-</div>
+<p>sample ACF ทั้งสี่มีรูปแบบเดียวกับ population ACF: บวกลดช้า สลับเครื่องหมาย และลดเร็ว แต่แท่งที่ lag สูงไม่เป็นศูนย์พอดี บางแท่งแตะเส้นประ ±0.2 ทั้งที่ค่าทฤษฎีเล็กมาก นี่คือ sampling error จากข้อมูลแค่ 100 ค่า อาจารย์เตือนว่า AR(1) φ = 0.7 บางคน "อาจจะคิดว่าเป็น MA(2)" ถ้าดูจาก simulation (Class 6, 0:23:56) เพราะ ρ₁ = 0.7 และ ρ₂ = 0.49 ทะลุเส้น ส่วน ρ₃ = 0.343 กับ ρ₄ = 0.24 อาจตกลงมาในเส้นเมื่อมี noise ดูเผิน ๆ จึงเหมือน "ตัดหลัง lag 2" วิธีแยกคือดูว่าค่าลดลงทีละสัดส่วนเดิม (0.7 → 0.49 → 0.34) หรือไม่ และใช้ PACF ใน Lesson 6</p>
 
 <!-- ===================================================== -->
-<h2 id="s13">13. โค้ด Codes2 ทั้งไฟล์</h2>
+<h2 id="s12">12. ARMA(p,q) และสรุปเทียบ MA กับ AR</h2>
 
-<p>ไฟล์ Codes2 มีหกส่วน สี่ส่วนแรกอธิบายแล้วในหัวข้อ 5, 6 และ 12 ตารางนี้รวมทั้งไฟล์และชี้ส่วนที่เหลือ</p>
-
-<table>
-<tr><th>ส่วนของไฟล์</th><th>ทำอะไร</th><th>อธิบายที่</th></tr>
-<tr><td>MA(1) simulation, theta = 0.9</td><td>จำลอง วาดข้อมูล sample ACF และ lag scatterplot</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
-<tr><td>MA(1) simulation, theta = −0.9</td><td>เหมือนส่วนแรก เปลี่ยน <code>ma = -0.9</code></td><td><a href="#s5">หัวข้อ 5</a></td></tr>
-<tr><td>MA(2) simulation</td><td><code>ma = c(-0.9,0.7)</code> วาดสี่รูปในหน้าเดียว</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
-<tr><td>AR(1), Phi = 0.9</td><td>population ACF เทียบ sample ACF ได้กราฟหน้า 34</td><td>ด้านล่าง</td></tr>
-<tr><td>AR(1) when phi = 0.9, −0.9, 0.7, −0.7</td><td>population ACF สี่กรณี และ sample ACF สี่กรณี</td><td><a href="#s12">หัวข้อ 12</a></td></tr>
-<tr><td>AR(2) และ Example 3.10</td><td>population และ sample ACF ของ AR(2)</td><td>ด้านล่าง เนื้อหาอยู่ใน Lecture 6</td></tr>
-</table>
-
-<h3>ส่วน AR(1), Phi = 0.9 (กราฟหน้า 34)</h3>
-<pre data-p="34"><code>par(mfrow=c(2,1))
-
-acf &lt;- ARMAacf(ar = c(0.9), lag.max = 20)
-plot(acf, x = 0:20, type = "h", ylim = c(-1,1), xlab = "h", ylab = "Autocorrelation", main = "Population ACF")
-abline(h = 0)
-
-ar.sim &lt;- arima.sim(list(order = c(1,0,0), ar = 0.9), n = 100)
-acf(ar.sim,main="Sample ACF")</code></pre>
-<p>บรรทัด <code>acf &lt;- ARMAacf(...)</code> เก็บผลไว้ในตัวแปรชื่อ <code>acf</code> ซึ่งซ้ำกับชื่อฟังก์ชัน <code>acf()</code> โค้ดยังทำงานได้ เพราะเมื่อเรียก <code>acf(ar.sim, ...)</code> แบบฟังก์ชัน R จะค้นหาฟังก์ชันชื่อนั้น ไม่ใช้ตัวแปรที่เป็นเวกเตอร์ตัวเลข</p>
-
-<h3>ส่วน AR(2) และ Example 3.10</h3>
-<pre><code>y = ARMAacf(ar = c(0.5,-0.5), lag.max = 20)
-plot(y, x = 0:20, type = "h", ylim = c(-1,1), xlab = "h", ylab = "Autocorrelation", main = "ACF (0.5,-0.5)")
-abline(h = 0)
-
-ar2.sim.1 &lt;- arima.sim(list(order = c(2,0,0), ar = c(0.5,-0.5)), n = 100)
-acf(ar2.sim.1,main="Sample ACF (0.5,-0.5)")
-
-acf &lt;- ARMAacf(ar = c(1.5,-0.75), ma=0, 50)
-ar2&lt;- arima.sim(list(order = c(2,0,0), ar = c(1.5,-0.75)), n = 144)</code></pre>
-<p>AR(2) ใช้ <code>ar = c(φ₁, φ₂)</code> สองค่า และ <code>order = c(2,0,0)</code> ไฟล์ทำสี่กรณี: (0.5, −0.5), (1.1, −0.3), (−0.5, 0.25) และ (1, −0.5) มีจุดที่ไม่ตรงกันหนึ่งจุด: กรณีที่สามในส่วน population ACF ใช้ <code>c(-0.5,0.25)</code> แต่ส่วน sample ACF ใช้ <code>c(-0.5,-0.25)</code> เครื่องหมายของ φ₂ ต่างกัน สองบรรทัดนี้จึงไม่ใช่โมเดลเดียวกัน ส่วน Example 3.10 ใช้ <code>ar = c(1.5,-0.75)</code> ซึ่งมีรากเชิงซ้อน และ <code>ARMAacf(ar = ..., ma = 0, 50)</code> คำนวณถึง lag 50 เนื้อหาของ AR(2) อยู่ใน Lecture 6</p>
-
-<div class="box exam">
-<div class="label">จุดสอบ — โค้ด R ของบทนี้</div>
-<table class="compact">
-<tr><th>ต้องการ</th><th>คำสั่ง</th></tr>
-<tr><td>จำลอง MA(1)</td><td><code>arima.sim(list(order = c(0,0,1), ma = θ), n = 100)</code></td></tr>
-<tr><td>จำลอง MA(2)</td><td><code>arima.sim(list(order = c(0,0,2), ma = c(θ₁,θ₂)), n = 100)</code></td></tr>
-<tr><td>จำลอง AR(1)</td><td><code>arima.sim(list(order = c(1,0,0), ar = φ), n = 100)</code></td></tr>
-<tr><td>จำลอง AR(2)</td><td><code>arima.sim(list(order = c(2,0,0), ar = c(φ₁,φ₂)), n = 100)</code></td></tr>
-<tr><td>ACF ทางทฤษฎี</td><td><code>ARMAacf(ar = , ma = , lag.max = 20)</code> แล้ว <code>plot(..., x = 0:20, type = "h")</code></td></tr>
-<tr><td>Sample ACF</td><td><code>acf(ข้อมูล)</code></td></tr>
-<tr><td>Lag scatterplot</td><td><code>plot(y = x, x = zlag(x, 1), type = 'p')</code> ต้องมี <code>library(TSA)</code></td></tr>
-<tr><td>หลายกราฟในหน้าเดียว</td><td><code>par(mfrow = c(แถว, คอลัมน์))</code></td></tr>
-</table>
-<p>จำลำดับใน <code>order = c(p, d, q)</code>: ตำแหน่งแรกเป็น AR ตำแหน่งกลางเป็น differencing ตำแหน่งท้ายเป็น MA</p>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s14">14. โค้ด Codes1: XBOX sales</h2>
-
-<p>ไฟล์ Codes1 อยู่ในโฟลเดอร์ Lecture 5 แต่เนื้อหาเป็นการประยุกต์ smoothing และ decomposition จาก Lecture 4 กับข้อมูลจริง คือยอดขาย XBOX รายเดือน 110 เดือน ตั้งแต่พฤศจิกายน 2005 ถึงธันวาคม 2014 ไฟล์พยากรณ์ 3 เดือนถัดไปด้วยสามวิธี ผลลัพธ์ทั้งหมดในหัวข้อนี้ได้จากการรันโค้ดกับ xbox.txt</p>
-
-<h3>ส่วนที่ 1: โหลดข้อมูลและสร้าง ts</h3>
-<pre><code>data &lt;- read.table("xbox.txt", h=T)
-data$date &lt;- as.Date(data$date, format = "%m/%d/%Y")
-data[1:5,]
-
-library(lubridate)
-sales_ts &lt;- ts(data$sales, start = c(year(min(data$date)), month(min(data$date))), frequency = 12)
-plot(sales_ts, main = "Sales", ylab = "Sales")</code></pre>
-<table class="codeexp compact">
-<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>read.table("xbox.txt", h=T)</td><td>อ่านไฟล์ <code>h=T</code> คือบรรทัดแรกเป็นชื่อคอลัมน์ (date, sales)</td></tr>
-<tr><td>as.Date(data$date, format = "%m/%d/%Y")</td><td>แปลงข้อความ เช่น 11/01/2005 เป็นวันที่ <code>%m/%d/%Y</code> คือ เดือน/วัน/ปีสี่หลัก</td></tr>
-<tr><td>data[1:5,]</td><td>แสดง 5 แถวแรก แถวแรกคือ 2005-11-01 ยอดขาย 305237</td></tr>
-<tr><td>ts(data$sales, start = c(ปี, เดือน), frequency = 12)</td><td>สร้าง time series รายเดือน <code>year(min(...))</code> และ <code>month(min(...))</code> จาก package lubridate ดึงปีและเดือนของวันแรก ได้ <code>start = c(2005, 11)</code></td></tr>
-</table>
-
-<h3>ส่วนที่ 2: Exponential smoothing</h3>
-<pre><code>library(forecast)
-etssales &lt;- ets(sales_ts)
-etssales
-forecast(etssales, h = 3) #forecast next 3 months</code></pre>
-<p><code>ets()</code> เลือกโมเดล exponential smoothing ให้อัตโนมัติ ผลที่ได้คือ ETS(M,A,M) หมายถึง error แบบคูณ trend แบบบวก และ seasonal แบบคูณ ตามสัญกรณ์ใน <a href="0004-smoothing-methods.html">Lesson 4</a> ค่า smoothing parameters คือ alpha = 0.3619, beta = 0.0156, gamma = 0.419 ค่า beta ที่ใกล้ศูนย์แสดงว่า trend แทบไม่ถูกปรับระหว่างทาง <code>forecast(etssales, h = 3)</code> พยากรณ์ มกราคม ถึง มีนาคม 2015 ได้ 42942, 42531 และ 33242</p>
-
-<h3>ส่วนที่ 3: Decomposition แบบคูณ ด้วย trend จาก linear regression</h3>
-<pre><code>y &lt;- sales_ts
-t &lt;- 1:length(y)
-trend_fit &lt;- lm(y ~ t)
-trend_hat &lt;- fitted(trend_fit)
-
-detrended &lt;- y / trend_hat
-month_index &lt;- cycle(y) # create 1..12
-seasonal &lt;- tapply(detrended, month_index, mean, na.rm = TRUE)
-seasonal &lt;- seasonal / mean(seasonal) # normalize to mean 1
-seasonal_full &lt;- seasonal[month_index]
-
-h &lt;- 3
-freq &lt;- frequency(y)
-last_m &lt;- as.integer(cycle(y)[length(y)]) # scalar 1..12
-future_months &lt;- ((last_m + seq_len(h) - 1) %% freq) + 1
-seasonal_future &lt;- seasonal[future_months]
-
-t_future &lt;- (length(y) + 1):(length(y) + h)
-trend_future &lt;- predict(trend_fit, newdata = data.frame(t = t_future))
-forecast &lt;- trend_future * seasonal_future</code></pre>
-<table class="codeexp compact">
-<tr><th>โค้ด</th><th>ทำอะไร และผลที่ได้</th></tr>
-<tr><td>t &lt;- 1:length(y)
-trend_fit &lt;- lm(y ~ t)</td><td>สร้างตัวแปรเวลา 1 ถึง 110 แล้ว fit เส้นตรง ได้ intercept = 388917.89 และ slope = 249.72 ต่อเดือน</td></tr>
-<tr><td>trend_hat &lt;- fitted(trend_fit)</td><td>ค่า trend ของแต่ละเดือนตามเส้นตรง</td></tr>
-<tr><td>detrended &lt;- y / trend_hat</td><td>โมเดลแบบคูณ: ข้อมูล = trend × seasonal × random จึงกำจัด trend ด้วยการหาร</td></tr>
-<tr><td>month_index &lt;- cycle(y)</td><td>ให้เลขเดือน 1 ถึง 12 ของแต่ละค่า</td></tr>
-<tr><td>tapply(detrended, month_index, mean, na.rm = TRUE)</td><td>เฉลี่ยค่าที่กำจัด trend แล้วแยกตามเดือน ได้ดัชนี seasonal 12 ค่า</td></tr>
-<tr><td>seasonal &lt;- seasonal / mean(seasonal)</td><td>ปรับให้ดัชนีเฉลี่ยเท่ากับ 1 ตามหลักของ seasonal แบบคูณ ได้ ม.ค. 0.822, ก.พ. 0.762, มี.ค. 0.666, ..., พ.ย. 2.307, ธ.ค. 3.127</td></tr>
-<tr><td>last_m &lt;- as.integer(cycle(y)[length(y)])</td><td>เลขเดือนของค่าสุดท้าย ได้ 12 (ธันวาคม)</td></tr>
-<tr><td>((last_m + seq_len(h) - 1) %% freq) + 1</td><td>หาเลขเดือนของ 3 เดือนถัดไป <code>%%</code> คือเศษจากการหาร ใช้วนจากเดือน 12 กลับไปเดือน 1 ได้ 1, 2, 3</td></tr>
-<tr><td>t_future &lt;- (length(y) + 1):(length(y) + h)</td><td>ค่าเวลาของอนาคต ได้ 111, 112, 113</td></tr>
-<tr><td>predict(trend_fit, newdata = data.frame(t = t_future))</td><td>ค่า trend ของ 3 เดือนถัดไป ได้ 416637, 416887, 417136</td></tr>
-<tr><td>forecast &lt;- trend_future * seasonal_future</td><td>พยากรณ์ = trend × ดัชนี seasonal ได้ 342461, 317605, 277801</td></tr>
-</table>
-
-<div class="calc">
-<div class="calc-title">ตรวจการหาเดือนถัดไปและค่าพยากรณ์ของเดือนแรก</div>
-<ol class="steps">
-<li><div class="st-title">เดือนถัดไป</div><p><code>last_m</code> = 12 และ <code>seq_len(3)</code> = 1, 2, 3 จึงได้ \(12+1-1=12\), \(12+2-1=13\), \(12+3-1=14\) เศษจากการหารด้วย 12 คือ 0, 1, 2 บวก 1 ได้ 1, 2, 3</p></li>
-<li><div class="st-title">Trend ของเดือนที่ 111</div><p>\(388917.89+249.72\times111=416637\)</p></li>
-<li><div class="st-title">คูณดัชนีของมกราคม</div><p>\(416637\times0.822=342476\) ใกล้กับ 342461 ที่ R ให้ ส่วนต่างมาจากการปัดดัชนีเหลือสามตำแหน่ง</p></li>
-</ol>
-</div>
-
-<h3>ส่วนที่ 4: Decomposition แบบคูณ ด้วย trend จาก smoothing</h3>
-<pre><code>y &lt;- sales_ts
-dcmp &lt;- decompose(y, type = "multiplicative")
-y_sa &lt;- y / dcmp$seasonal # Seasonally Adjusted
-
-season_by_month &lt;- tapply(dcmp$seasonal, cycle(y), mean, na.rm = TRUE)
-
-library(forecast)
-h &lt;- 3
-fit &lt;- auto.arima(y_sa)
-fc_sa &lt;- forecast(fit, h = h)
-
-freq &lt;- frequency(y)
-last_m &lt;- as.integer(cycle(y)[length(y)])
-future_m &lt;- ((last_m + seq_len(h) - 1) %% freq) + 1
-season_future &lt;- season_by_month[future_m]
-
-forecast  &lt;- fc_sa$mean  * season_future</code></pre>
-<table class="codeexp compact">
-<tr><th>โค้ด</th><th>ทำอะไร และผลที่ได้</th></tr>
-<tr><td>decompose(y, type = "multiplicative")</td><td>แยกข้อมูลเป็น trend (จาก centered moving average), seasonal และ random แบบคูณ ตามวิธีใน Lesson 4</td></tr>
-<tr><td>y_sa &lt;- y / dcmp$seasonal</td><td>หารด้วยดัชนี seasonal ได้ข้อมูล seasonally adjusted คือข้อมูลที่ถอดผลของฤดูกาลออกแล้ว</td></tr>
-<tr><td>tapply(dcmp$seasonal, cycle(y), mean, na.rm = TRUE)</td><td>ดึงดัชนี seasonal ของแต่ละเดือน ได้ ม.ค. 0.755, ก.พ. 0.720, มี.ค. 0.643, ..., พ.ย. 2.394, ธ.ค. 3.326</td></tr>
-<tr><td>fit &lt;- auto.arima(y_sa)</td><td>ให้ R เลือกโมเดล ARIMA ของข้อมูลที่ปรับฤดูกาลแล้วโดยอัตโนมัติ ได้ ARIMA(0,1,2)(0,0,1)[12] โดย ma1 = −0.4013, ma2 = −0.2820, sma1 = 0.2091</td></tr>
-<tr><td>fc_sa &lt;- forecast(fit, h = h)</td><td>พยากรณ์ข้อมูลที่ปรับฤดูกาลแล้ว 3 เดือน ได้ 86077, 98136, 101104</td></tr>
-<tr><td>forecast &lt;- fc_sa$mean * season_future</td><td>คูณดัชนี seasonal กลับเข้าไป ได้ 64964, 70639, 64994</td></tr>
-</table>
-<p>ผลของ <code>auto.arima</code> มีส่วน MA อันดับ 2 และ d = 1 ซึ่งคือโมเดลในตระกูลที่บทนี้และ Lecture 6 กำลังสร้าง ส่วน (0,0,1)[12] เป็น seasonal MA ที่ยังไม่ได้เรียน</p>
-
-<h3>เทียบผลพยากรณ์ของสามวิธี</h3>
-<table>
-<tr><th>วิธี</th><th>ม.ค. 2015</th><th>ก.พ. 2015</th><th>มี.ค. 2015</th></tr>
-<tr><td>ETS(M,A,M)</td><td>42,942</td><td>42,531</td><td>33,242</td></tr>
-<tr><td>Linear trend × seasonal</td><td>342,461</td><td>317,605</td><td>277,801</td></tr>
-<tr><td>decompose แล้ว auto.arima × seasonal</td><td>64,964</td><td>70,639</td><td>64,994</td></tr>
-</table>
-<p>สามวิธีให้ค่าต่างกันมาก วิธีเส้นตรงให้ค่าสูงกว่าอีกสองวิธีราว 5 ถึง 8 เท่า สาเหตุอยู่ที่ trend: เส้นตรงเส้นเดียวที่ fit กับทั้ง 110 เดือนมีระดับประมาณ 417,000 ที่ปลายข้อมูล แต่ยอดขายจริงช่วงท้ายต่ำกว่านั้นมาก เช่น ตุลาคม 2014 มียอด 63,374 เส้นตรงจึงไม่สะท้อนระดับล่าสุดของข้อมูล ส่วน ETS และ ARIMA ปรับระดับตามข้อมูลช่วงหลัง ข้อนี้ตรงกับประโยคในสไลด์หน้า 4 ที่ว่า classical regression บางครั้งไม่เพียงพอ</p>
-
-<!-- ===================================================== -->
-<h2 id="s15">15. เทียบ MA กับ AR และแบบฝึก</h2>
+<p>ท้าย Class 5 อาจารย์รวมสองโมเดลเป็นหนึ่ง (Class 5, 2:07:30–2:10:13): \(\Phi(B)X_t=\theta(B)w_t\) เรียกว่า ARMA(p,q) ด้านซ้ายคือส่วน AR ด้านขวาคือส่วน MA ARMA(1,0) คือ AR(1) และ ARMA(0,2) คือ MA(2) "ถ้าเกิดนิสิตเซิร์ชคำว่า Box-Jenkins มันจะเขียนโมเดลอันนี้อันเดียว เพราะอันนี้ cover ทุกอย่าง" สิ่งที่ยังขาดคือ I (differencing) "แต่มันไม่ได้ยากหรอก ไอแค่เติมนิดเดียว" ซึ่งจะเติมใน Lesson 6</p>
+<p>ตัวอย่างการเขียน: \(X_t=0.5X_{t-1}+w_t+0.4w_{t-1}\) ย้าย X ไปซ้ายได้ \((1-0.5B)X_t=(1+0.4B)w_t\) จึงเป็น ARMA(1,1)</p>
 
 <table>
 <tr><th></th><th>MA(q)</th><th>AR(p)</th></tr>
-<tr><td>แนวคิด</td><td>ค่าปัจจุบันขึ้นกับแรงกระแทกสุ่มในอดีต q ช่วง</td><td>ค่าปัจจุบันขึ้นกับค่าของตัวเองในอดีต p ช่วง</td></tr>
-<tr><td>สมการ</td><td>\(X_t=w_t+\theta_1w_{t-1}+\dots+\theta_qw_{t-q}\)</td><td>\(X_t=\phi_1X_{t-1}+\dots+\phi_pX_{t-p}+w_t\)</td></tr>
-<tr><td>รูป lag operator</td><td>\(X_t=\theta(B)w_t\), เครื่องหมายบวก</td><td>\(\Phi(B)X_t=w_t\), เครื่องหมายลบ</td></tr>
-<tr><td>ผลของแรงกระแทกหนึ่งครั้ง</td><td>อยู่ q ช่วงแล้วหมดทันที</td><td>ค่อย ๆ จางลง ไม่หมดทันที</td></tr>
-<tr><td>ACF</td><td>ไม่เป็นศูนย์ถึง lag q แล้วตัดเป็นศูนย์</td><td>ค่อย ๆ ลดลง ไม่ตัด (AR(1): \(\phi^h\))</td></tr>
-<tr><td>Stationary</td><td>เสมอ</td><td>เมื่อรากของ \(\Phi\) ทุกตัวมี modulus มากกว่า 1</td></tr>
-<tr><td>เมื่อมีค่าเฉลี่ย \(\mu\)</td><td>ค่าคงที่ในสมการคือ \(\mu\)</td><td>ค่าคงที่คือ \(a=\mu(1-\phi_1-\dots-\phi_p)\)</td></tr>
-<tr><td>ใน <code>arima.sim</code></td><td><code>order = c(0,0,q), ma = </code></td><td><code>order = c(p,0,0), ar = </code></td></tr>
+<tr><td>สมการ</td><td>\(X_t=\theta(B)w_t\)</td><td>\(\Phi(B)X_t=w_t\)</td></tr>
+<tr><td>ค่าวันนี้มาจาก</td><td>shock วันนี้และย้อนหลัง q วัน</td><td>ค่าของตัวเองย้อนหลัง p วัน บวก shock</td></tr>
+<tr><td>Mean (ไม่มีค่าคงที่)</td><td>0</td><td>0</td></tr>
+<tr><td>γ₀ ของอันดับ 1</td><td>\(\sigma^2(1+\theta^2)\)</td><td>\(\sigma^2/(1-\phi^2)\)</td></tr>
+<tr><td>ACF ของอันดับ 1</td><td>\(\rho_1=\theta/(1+\theta^2)\), \(\rho_h=0\) เมื่อ h ≥ 2</td><td>\(\rho_h=\phi^h\)</td></tr>
+<tr><td>รูปร่าง ACF</td><td>ตัดเป็นศูนย์หลัง lag q</td><td>tail off (ลดแบบเลขชี้กำลัง หรือสลับเครื่องหมาย)</td></tr>
+<tr><td>นิ่งเมื่อ</td><td>เสมอ</td><td>รากของ Φ(B) มี modulus มากกว่า 1 ทุกตัว</td></tr>
+<tr><td>ACF ใช้หา order ได้ไหม</td><td>ได้ q = lag สุดท้ายที่ทะลุเส้น</td><td>ไม่ได้ ใช้ PACF (Lesson 6)</td></tr>
 </table>
 
-<table>
-<tr><th>โมเดล</th><th>\(\gamma(0)\)</th><th>\(\rho(1)\)</th><th>\(\rho(2)\)</th><th>\(\rho(h)\) ถัดไป</th></tr>
-<tr><td>MA(1)</td><td>\((1+\theta^2)\sigma^2\)</td><td>\(\dfrac{\theta}{1+\theta^2}\)</td><td>0</td><td>0</td></tr>
-<tr><td>MA(2)</td><td>\((1+\theta_1^2+\theta_2^2)\sigma^2\)</td><td>\(\dfrac{\theta_1+\theta_1\theta_2}{1+\theta_1^2+\theta_2^2}\)</td><td>\(\dfrac{\theta_2}{1+\theta_1^2+\theta_2^2}\)</td><td>0 เมื่อ \(h\ge3\)</td></tr>
-<tr><td>AR(1)</td><td>\(\dfrac{\sigma^2}{1-\phi^2}\)</td><td>\(\phi\)</td><td>\(\phi^2\)</td><td>\(\phi^h\)</td></tr>
-</table>
+<!-- ===================================================== -->
+<h2 id="s13">13. แบบฝึกห้าแบบ</h2>
+
+<p>ไฟล์ R_codes_1.txt, R_codes_2.txt และ XBOX.txt อยู่ในโฟลเดอร์ CLASS 5 บน myCourseVille ข้อที่ต้องใช้ <code>zlag()</code> ต้องติดตั้ง package TSA ก่อน</p>
+
+<h3>กลุ่ม A: คำนวณ</h3>
 
 <div class="quiz">
-<div class="qhead"><span>ข้อ 12</span><span>ระบุโมเดล</span></div>
-<div class="qtext">Sample ACF ของข้อมูล stationary ชุดหนึ่ง (n = 100) มีค่า 0.82, 0.66, 0.55, 0.43, 0.36 ที่ lag 1 ถึง 5 และลดลงต่อเนื่อง โมเดลใดเข้ากับรูปแบบนี้ที่สุด</div>
+<div class="qhead"><span>ข้อ 1</span><span>MA(1)</span></div>
+<div class="qtext">MA(1) \(X_t=w_t+0.5w_{t-1}\) มีค่า \(\rho_1\) เท่าใด</div>
 <div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. MA(1) มี ρ(1) ไม่เกิน 0.5 และ ACF ตัดหลัง lag 1">MA(1) ที่ θ เป็นค่าบวก</button>
-<button class="opt" data-correct="false" data-note="ผิด. φ ลบให้ ACF ที่สลับเครื่องหมาย">AR(1) ที่ φ เป็นค่าลบ</button>
-<button class="opt" data-correct="true" data-note="ถูก. ACF บวกทั้งหมดและลดลงแบบ φ ยกกำลัง h โดย φ ประมาณ 0.8">AR(1) ที่ φ เป็นค่าบวก</button>
-<button class="opt" data-correct="false" data-note="ผิด. MA(2) มี ACF ตัดเป็นศูนย์หลัง lag 2">MA(2) ที่ θ เป็นค่าบวก</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ θ ไม่ได้หารด้วย 1 + θ²">\(\rho_1=0.50\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.5/(1 + 0.25) = 0.5/1.25 = 0.4">\(\rho_1=0.40\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ θ² เป็นตัวเศษ">\(\rho_1=0.20\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คำนวณ 1/(1 + θ²) ลืมคูณ θ">\(\rho_1=0.80\)</button>
 </div>
 <div class="feedback"></div>
 </div>
 
-<p>ข้อต่อไปนี้ให้เขียนคำตอบเองก่อน แล้วจึงเปิดเฉลย</p>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 13</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">ให้ \(X_t=w_t+\theta w_{t-1}\) โดย \(w_t\) เป็น white noise ที่มีความแปรปรวน \(\sigma^2\) จงหา mean function, autocovariance function และ ACF</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>\(E(X_t)=E(w_t)+\theta E(w_{t-1})=0\)</p>
-<p>\(\gamma(0)=\mathrm{Var}(w_t)+\theta^2\mathrm{Var}(w_{t-1})=(1+\theta^2)\sigma^2\)</p>
-<p>\(\gamma(1)=E[(w_{t+1}+\theta w_t)(w_t+\theta w_{t-1})]=\theta E(w_t^2)=\theta\sigma^2\) เพราะคู่อื่นเป็น w คนละตัว</p>
-<p>\(\gamma(h)=0\) เมื่อ \(h\ge2\) เพราะไม่มี w ร่วมกัน</p>
-<p>\(\rho(1)=\theta/(1+\theta^2)\) และ \(\rho(h)=0\) เมื่อ \(h\ge2\)</p>
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>MA(2)</span></div>
+<div class="qtext">MA(2) ที่ θ₁ = 0.5, θ₂ = 0.4 มีค่า \(\rho_1\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมพจน์ θ₁θ₂ ในตัวเศษ">\(\rho_1=0.355\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมหารด้วย 1 + θ₁² + θ₂²">\(\rho_1=0.700\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ₂ = 0.4/1.41">\(\rho_1=0.284\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. (0.5 + 0.2)/(1 + 0.25 + 0.16) = 0.7/1.41 = 0.496">\(\rho_1=0.496\)</button>
 </div>
+<div class="feedback"></div>
 </div>
 
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 14</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">ให้ \(X_t=\phi X_{t-1}+w_t\) เป็น stationary process โดย \(|\phi|&lt;1\) จงหา \(E(X_t)\), \(\mathrm{Var}(X_t)\), \(\gamma(h)\) และ \(\rho(h)\)</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>Mean: \(\mu=\phi\mu\) จึงได้ \(\mu(1-\phi)=0\) และ \(\mu=0\)</p>
-<p>Variance: \(\gamma(0)=\phi^2\gamma(0)+\sigma^2\) เพราะ \(w_t\) ไม่สัมพันธ์กับ \(X_{t-1}\) จึงได้ \(\gamma(0)=\sigma^2/(1-\phi^2)\)</p>
-<p>คูณโมเดลด้วย \(X_{t-h}\) แล้วหาค่าคาดหมาย: \(\gamma(h)=\phi\gamma(h-1)+E(w_tX_{t-h})=\phi\gamma(h-1)\) เมื่อ \(h\ge1\)</p>
-<p>ไล่ย้อนกลับ: \(\gamma(h)=\phi^h\gamma(0)=\sigma^2\phi^h/(1-\phi^2)\) และ \(\rho(h)=\phi^h\)</p>
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>AR(1)</span></div>
+<div class="qtext">AR(1) \(X_t=-0.6X_{t-1}+w_t\) มีค่า \(\rho_3\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. (−0.6)³ = −0.216 กำลังคี่จึงติดลบ">\(\rho_3=-0.216\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายผิด กำลังคี่ของจำนวนลบต้องติดลบ">\(\rho_3=+0.216\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ γ₃ = −0.216 × γ₀ เมื่อ σ² = 1 (γ₀ = 1.5625)">\(\rho_3=-0.338\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ₂ ใส่เครื่องหมายผิด">\(\rho_3=-0.360\)</button>
 </div>
-</div>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 15</span><span>คำนวณ</span></div>
-<div class="qtext">โมเดล \(X_t=w_t+0.5w_{t-1}-0.4w_{t-2}\) โดย \(\sigma^2=1\) จงหา \(\gamma(0)\), \(\rho(1)\), \(\rho(2)\) และ \(\rho(3)\)</div>
-<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>\(\gamma(0)=1+0.5^2+(-0.4)^2=1+0.25+0.16=1.41\)</p>
-<p>\(\rho(1)=\dfrac{\theta_1+\theta_1\theta_2}{1.41}=\dfrac{0.5+(0.5)(-0.4)}{1.41}=\dfrac{0.30}{1.41}=0.213\)</p>
-<p>\(\rho(2)=\dfrac{\theta_2}{1.41}=\dfrac{-0.4}{1.41}=-0.284\)</p>
-<p>\(\rho(3)=0\) เพราะเป็น MA(2)</p>
-</div>
+<div class="feedback"></div>
 </div>
 
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 16</span><span>อธิบาย</span></div>
-<div class="qtext">จงตรวจว่า \(X_t=1.1X_{t-1}-0.3X_{t-2}+w_t\) stationary หรือไม่ โดยใช้ characteristic polynomial</div>
-<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>\(\Phi(B)=1-1.1B+0.3B^2\) แยกตัวประกอบได้ \((1-0.5B)(1-0.6B)\) ตรวจ: \(1-0.6B-0.5B+0.3B^2\)</p>
-<p>reciprocal roots: \(\alpha_1=0.5\), \(\alpha_2=0.6\) ทั้งสองน้อยกว่า 1</p>
-<p>roots: \(\beta_1=2\), \(\beta_2=1.667\) ทั้งสองมากกว่า 1</p>
-<p>สรุป: stationary โมเดลนี้คือกรณี (1.1, −0.3) ในไฟล์ Codes2</p>
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Theorem</span></div>
+<div class="qtext">AR(2) \(X_t=0.9X_{t-1}-0.2X_{t-2}+w_t\) มี \(\Phi(B)=1-0.9B+0.2B^2=(1-0.4B)(1-0.5B)\) ข้อใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 0.4 กับ 0.5 คือ α (reciprocal roots) ไม่ใช่ราก และ α < 1 แปลว่านิ่ง">ราก 0.4, 0.5 น้อยกว่า 1 จึงไม่นิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. รากต้องทำให้ 1 − 0.4B = 0 คือ B = 2.5 เป็นบวก">ราก −2.5, −2 มากกว่า 1 จึงนิ่ง</button>
+<button class="opt" data-correct="true" data-note="ถูก. ราก 1/0.4 = 2.5 และ 1/0.5 = 2 มากกว่า 1 ทั้งคู่">ราก 2.5, 2 มากกว่า 1 จึงนิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. เงื่อนไขของทฤษฎีบทคือรากต้องมากกว่า 1">ราก 2.5, 2 มากกว่า 1 จึงไม่นิ่ง</button>
 </div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>Mean ของ AR(1)</span></div>
+<div class="qtext">อนุกรมนิ่ง \(X_t=3+0.4X_{t-1}+w_t\) มี mean เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. μ = 3 + 0.4μ จึงได้ 0.6μ = 3 และ μ = 5">\(\mu=5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 3 คือ intercept a ไม่ใช่ mean">\(\mu=3\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย φ แทน 1 − φ">\(\mu=7.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คูณ a ด้วย 1 − φ ซึ่งเป็นการกลับสูตร">\(\mu=1.8\)</button>
+</div>
+<div class="feedback"></div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 17</span><span>อธิบาย</span></div>
-<div class="qtext">จงอธิบายความต่างระหว่าง population ACF กับ sample ACF และบอกคำสั่ง R ของแต่ละชนิด</div>
-<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 6</span><span>คำนวณมือ</span></div>
+<div class="qtext">MA(2) \(X_t=w_t+0.4w_{t-1}-0.3w_{t-2}\) โดย \(\sigma^2=2\) จงหา \(\gamma_0,\gamma_1,\gamma_2,\gamma_3\) และ \(\rho_1,\rho_2\)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<p>Population ACF คือค่าทางทฤษฎีที่คำนวณจากสูตรของโมเดล ไม่ใช้ข้อมูล ได้จาก <code>ARMAacf(ar = , ma = , lag.max = )</code> และต้องวาดกราฟเอง ไม่มีเส้นประ</p>
-<p>Sample ACF คือค่าที่คำนวณจากข้อมูลหนึ่งชุด ได้จาก <code>acf(ข้อมูล)</code> มีเส้นประ ±2/√n และเปลี่ยนไปเมื่อข้อมูลเปลี่ยน</p>
-<p>Sample ACF มีรูปแบบหลักตาม population ACF แต่คลาดเคลื่อนได้เพราะตัวอย่างมีขนาดจำกัด</p>
+<p>\(\gamma_0=2(1+0.16+0.09)=2(1.25)=2.5\)</p>
+<p>\(\gamma_1=2(\theta_1+\theta_1\theta_2)=2(0.4-0.12)=0.56\)</p>
+<p>\(\gamma_2=2\theta_2=-0.6\) และ \(\gamma_3=0\)</p>
+<p>\(\rho_1=0.56/2.5=0.224\), \(\rho_2=-0.6/2.5=-0.24\) σ² ไม่มีผลต่อ ρ เพราะตัดกัน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>คำนวณมือ</span></div>
+<div class="qtext">AR(1) \(X_t=6+0.8X_{t-1}+w_t\) โดย \(\sigma^2=9\) จงหา mean, \(\gamma_0\), \(\rho_2\) และ \(\gamma_2\)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\mu=6/(1-0.8)=30\)</p>
+<p>\(\gamma_0=9/(1-0.64)=9/0.36=25\) ค่าคงที่ 6 ไม่มีผลต่อ variance</p>
+<p>\(\rho_2=0.8^2=0.64\) และ \(\gamma_2=0.64\times25=16\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 8</span><span>ข้อสอบเก่า</span></div>
+<div class="qtext">จงพิสูจน์ว่า MA(1) \(X_t=w_t+\theta w_{t-1}\) มี \(|\rho_1|\le\tfrac12\) ทุกค่า θ และบอกว่าเท่ากับ 1/2 เมื่อใด</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\rho_1=\theta/(1+\theta^2)\) และ \((1-|\theta|)^2\ge0\) กระจายได้ \(1+\theta^2\ge2|\theta|\)</p>
+<p>หารด้วย \(2(1+\theta^2)&gt;0\) ได้ \(|\theta|/(1+\theta^2)\le1/2\) คือ \(|\rho_1|\le1/2\)</p>
+<p>เท่ากันเมื่อ \(|\theta|=1\): θ = 1 ได้ ρ₁ = 1/2 และ θ = −1 ได้ ρ₁ = −1/2</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>พิสูจน์</span></div>
+<div class="qtext">ให้ AR(1) \(X_t=\phi X_{t-1}+w_t\) นิ่ง จงหา \(\gamma_0\), \(\gamma_1\) และแสดงว่า \(\rho_h=\phi^h\) พร้อมบอกว่าใช้สมมุติฐานอะไรในแต่ละขั้น</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\gamma_0=\mathrm{Var}(\phi X_{t-1}+w_t)=\phi^2\mathrm{Var}(X_{t-1})+\sigma^2\) ใช้ \(\mathrm{Cov}(X_{t-1},w_t)=0\) (shock ใหม่ไม่สัมพันธ์กับอดีต)</p>
+<p>ความนิ่งทำให้ \(\mathrm{Var}(X_{t-1})=\gamma_0\) จึงได้ \(\gamma_0(1-\phi^2)=\sigma^2\) และ \(\gamma_0=\sigma^2/(1-\phi^2)\) ต้องมี |φ| &lt; 1</p>
+<p>\(\gamma_1=\mathrm{Cov}(X_t,\phi X_t+w_{t+1})=\phi\gamma_0\) ใช้ \(\mathrm{Cov}(X_t,w_{t+1})=0\)</p>
+<p>ทำซ้ำ \(\gamma_h=\phi\gamma_{h-1}=\phi^h\gamma_0\) หารด้วย γ₀ ได้ \(\rho_h=\phi^h\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>พิสูจน์</span></div>
+<div class="qtext">จงแสดงว่า MA(1) ที่ θ = 4 และ θ = 0.25 มี ACF เหมือนกันทุก lag แล้วอธิบายว่าทำไมจึงต้องเลือกค่าใดค่าหนึ่ง และอาจารย์เลือกค่าไหน</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>θ = 4: ρ₁ = 4/17 = 0.235 และ θ = 0.25: ρ₁ = 0.25/1.0625 = 0.235 ส่วน ρ_h = 0 เมื่อ h ≥ 2 ทั้งคู่ ทั่วไป \((1/\theta)/(1+1/\theta^2)=\theta/(\theta^2+1)\)</p>
+<p>ข้อมูลให้เพียง ACF จึงแยกสองโมเดลไม่ออก ถ้าไม่กำหนดเงื่อนไข การประมาณ θ จะไม่มีคำตอบเดียว อาจารย์เลือกค่าที่ |θ| &lt; 1 คือ 0.25 ("อันที่ใช้ได้คือ 1/7 ไม่ใช่ 7") เงื่อนไขนี้คือ invertibility ใน Lesson 7</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>ควิซข้อสอบเก่า</span></div>
+<div class="qtext">sample ACF ของอนุกรมหนึ่งมีแท่ง lag 0 = 1, lag 1 = 0.42, lag 2 = −0.15, lag 3 = −0.38, lag 4 = −0.26 และ lag 5 ถึง 20 อยู่ในเส้นประ ±0.2 ควรเป็น MA อันดับใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นับแท่งที่ทะลุเส้นได้ 3 แท่ง แต่ order คือ lag สุดท้ายที่ทะลุ">MA(3)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นับ lag 0 ด้วย ซึ่งมีค่า 1 ทุกอนุกรม">MA(5)</button>
+<button class="opt" data-correct="true" data-note="ถูก. lag สุดท้ายที่ทะลุเส้นคือ lag 4 แม้ lag 2 จะอยู่ในเส้นก็ตาม">MA(4)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หยุดนับที่ lag แรกที่อยู่ในเส้น">MA(1)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>ETS ของ Xbox</span></div>
+<div class="qtext"><code>ets(sales_ts)</code> ของ Xbox ได้ ETS(M,A,M) ข้อใดอธิบายโมเดลนี้ถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ตำแหน่งแรกคือ error ไม่ใช่ trend">trend คูณ seasonal บวก error คูณ</button>
+<button class="opt" data-correct="true" data-note="ถูก. ลำดับคือ (Error, Trend, Seasonal) = Holt-Winters แบบคูณ มี α, β, γ">error คูณ trend บวก seasonal คูณ</button>
+<button class="opt" data-correct="false" data-note="ผิด. A ตรงกลางคือ trend แบบบวก ไม่ใช่ damped (Ad)">error คูณ trend หน่วง seasonal คูณ</button>
+<button class="opt" data-correct="false" data-note="ผิด. M ตัวสุดท้ายคือมี seasonal แบบคูณ">error คูณ trend บวก ไม่มี seasonal</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) MA ในบทนี้ต่างจาก moving average ใน Lesson 4 อย่างไร (ข) ทำไม ACF ใช้หา q ของ MA ได้ แต่ใช้หา p ของ AR ไม่ได้ (ค) ทำไม AR(1) ที่ φ = 0.7 อาจถูกอ่านผิดเป็น MA(2)</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) moving average ใน Lesson 4 เฉลี่ยค่าที่สังเกตได้ X เพื่อทำให้เรียบ MA(q) เป็นโมเดลที่ X_t เป็นผลรวมถ่วงน้ำหนักของ shock w ที่สังเกตไม่ได้</p>
+<p>(ข) X_t ของ MA(q) กับ X_{t+h} ไม่มี shock ร่วมเมื่อ h &gt; q ACF จึงเป็นศูนย์ทันทีหลัง lag q ส่วน AR ส่งผลต่อกันเป็นทอด ๆ ρ_h = φ^h ไม่เป็นศูนย์ที่ lag ใด ACF ของ AR(1) กับ AR(2) จึงลดลงช้า ๆ เหมือนกัน แยก p ไม่ได้</p>
+<p>(ค) ρ₁ = 0.7, ρ₂ = 0.49 ทะลุเส้น 0.2 ชัด ส่วน ρ₃ = 0.343, ρ₄ = 0.24 อยู่ใกล้เส้น sampling error จาก n = 100 อาจดึงให้ตกลงมาในเส้น จึงดูเหมือนตัดหลัง lag 2 ต้องดูว่าค่าลดลงทีละสัดส่วนเดิมหรือไม่ และใช้ PACF</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 14</span><span>อ่าน arima()</span></div>
+<div class="qtext"><p>ฟิต MA(1) กับข้อมูล 100 ค่าได้ผลดังนี้ ข้อใดถูก</p>
+<pre class="out">Coefficients:
+         ma1  intercept
+      0.8676    -0.1834
+s.e.  0.0500     0.1965
+sigma^2 estimated as 1.117</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ma1 คือ θ̂ ไม่ใช่ ρ₁ และ ρ₁ ของ MA(1) เกิน 0.5 ไม่ได้">\(\hat\rho_1\) ตามโมเดลเท่ากับ 0.868</button>
+<button class="opt" data-correct="false" data-note="ผิด. −0.1834/0.1965 ≈ −0.93 ขนาดน้อยกว่า 2 จึงไม่ต่างจากศูนย์">intercept ต่างจากศูนย์อย่างมีนัยสำคัญ</button>
+<button class="opt" data-correct="false" data-note="ผิด. γ₀ = σ²(1 + θ²) = 1.117 × 1.753 ≈ 1.96 ไม่ใช่ 1.117">variance ของ X_t ประมาณ 1.117</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.8676/(1 + 0.8676²) = 0.8676/1.7527 = 0.495">\(\hat\rho_1\) ตามโมเดลเท่ากับ 0.495</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>อ่าน output</span></div>
+<div class="qtext"><p>อนุกรมยาว 100 ค่า ได้ sample ACF ดังนี้ จงเลือกโมเดลและให้เหตุผล และอธิบายว่าทำไม lag 1 จึงไม่เท่ากับ 0.497 ถ้าข้อมูลมาจาก MA(1) θ = 0.9 จริง</p>
+<pre class="out">lag:   1      2      3      4      5
+ACF: 0.412 -0.047  0.156  0.156 -0.002</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>เส้นประคือ \(\pm2/\sqrt{100}=\pm0.2\) มีแค่ lag 1 = 0.412 ที่ทะลุเส้น lag 3 และ 4 = 0.156 ยังอยู่ในเส้น จึงตัดหลัง lag 1 เลือก MA(1) และ ρ₁ บวกจึงคาดว่า θ เป็นบวก</p>
+<p>0.412 เป็นค่าจาก sample ที่มีความคลาดเคลื่อน ค่าทฤษฎี 0.497 เป็นค่าเฉลี่ยระยะยาว แต่ละชุดข้อมูล 100 ค่าให้ค่าต่างกันไป ข้อมูลชุดนี้คือ arima.sim ด้วย set.seed(2603630)</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันโค้ดนี้แล้วเทียบผลกับค่าทฤษฎี</p>
+<pre><code>round(ARMAacf(ma = c(-0.9, 0.7), lag.max = 4), 3)
+round(ARMAacf(ar = 0.7, lag.max = 5), 3)
+set.seed(2603630); m &lt;- arima.sim(list(order=c(0,0,1), ma=0.9), n=100)
+round(acf(m, plot=FALSE, lag.max=5)$acf[2:6], 3)
+arima(m, order = c(0,0,1))
+set.seed(2603630); a &lt;- arima.sim(list(order=c(1,0,0), ar=0.9), n=100)
+arima(a, order = c(1,0,0))
+try(arima.sim(list(ar = 1.2), n = 10))</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">1 -0.665  0.304  0  0                (MA(2) ตรงกับสูตรหัวข้อ 6)
+1  0.7  0.49  0.343  0.24  0.168     (AR(1) = 0.7^h)
+0.412 -0.047 0.156 0.156 -0.002      (sample ACF ของ MA(1))
+ma1 0.8676 (s.e. 0.0500)  intercept -0.1834  sigma^2 1.117  aic 302.23
+ar1 0.9105 (s.e. 0.0391)  intercept  0.3129  sigma^2 1.069  aic 298.26
+Error: 'ar' part of model is not stationary</pre>
+<p>ค่าประมาณ θ̂ = 0.868 และ φ̂ = 0.911 ใกล้ค่าจริง 0.9 ทั้งคู่ บรรทัดสุดท้ายยืนยันทฤษฎีบทในหัวข้อ 10: φ = 1.2 มีราก 1/1.2 = 0.83 น้อยกว่า 1 R จึงไม่ยอมสร้างข้อมูล ตัวเลขของ arima.sim อาจต่างเล็กน้อยถ้าใช้ R คนละเวอร์ชัน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 17</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รัน R_codes_1.txt กับ XBOX.txt (แก้ชื่อไฟล์ให้ตรง) แล้วตอบ: ค่าพยากรณ์มกราคม 2015 ของ ETS กับของ decomposition แบบ regression เป็นเท่าใด ต่างกันกี่เท่า และเพราะอะไร</p></div>
+<textarea placeholder="จดผลและอธิบาย"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">ETS(M,A,M)  alpha 0.3619  beta 0.0156  gamma 0.419
+ETS:            Jan 42941.97  Feb 42531.02  Mar 33242.12
+trend:          388917.9 + 249.72 t
+regression:     Jan 342461.0  Feb 317604.6  Mar 277801.0
+decompose+ARIMA: Jan 64964.23 Feb 70638.84  Mar 64994.34</pre>
+<p>regression สูงกว่า ETS ราว 8 เท่า ยอดขายขึ้นถึงปี 2011 (7.97 ล้าน) แล้วลดลงเหลือ 1.45 ล้านในปี 2014 เส้นตรงที่ฟิตทั้ง 110 เดือนยังมีความชันบวก จึงพยากรณ์สูงเกินจริงมาก (มกราคม 2014 ขายได้ 108,003) ETS ปรับ level ตามข้อมูลล่าสุดจึงตามขาลงทัน decomposition ด้วย regression เหมาะเมื่อ trend เป็นเส้นตรงจริง</p>
 </div>
 </div>
 
@@ -1108,30 +844,44 @@ forecast  &lt;- fc_sa$mean  * season_future</code></pre>
 <div class="box win">
 <div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
 <ul>
-<li>เขียนนิยามของ MA(q) และ AR(p) ได้ทั้งรูปกระจายและรูป lag operator</li>
-<li>พิสูจน์ mean, autocovariance และ ACF ของ MA(1), MA(2) และ AR(1) ได้เอง</li>
-<li>บอกรูปแบบ ACF ของแต่ละโมเดล และอ่านโมเดลจาก sample ACF ได้</li>
-<li>ตรวจ stationarity ของ AR ด้วยรากของ characteristic polynomial ได้</li>
-<li>อ่านและเขียนโค้ด <code>arima.sim</code>, <code>ARMAacf</code>, <code>acf</code> และโค้ด decomposition ของ XBOX ได้</li>
+<li>เขียน MA(q) และ AR(p) ได้สามระดับ รวมถึง \(X_t=\theta(B)w_t\) และ \(\Phi(B)X_t=w_t\) และจัดรูปสมการให้อยู่ในรูป backshift</li>
+<li>หา mean, γ_h และ ρ_h ของ MA(1), MA(2) ด้วยการจับคู่ดัชนี และของ AR(1) ด้วยทริกความนิ่ง</li>
+<li>พิสูจน์ |ρ₁| ≤ 1/2 และอธิบายเรื่อง θ กับ 1/θ</li>
+<li>อ่าน order ของ MA จาก ACF โดยไม่นับ lag 0 และอ่าน scatter plot ได้</li>
+<li>หา mean ของ AR ที่มี intercept และรู้ว่า intercept ใน arima() คือ μ</li>
+<li>ใช้ทฤษฎีบทรากของ Φ(B) ตรวจว่า AR(p) นิ่งหรือไม่ และไม่สับสน α กับ β</li>
+<li>แยก ARMAacf (ทฤษฎี) กับ arima.sim + acf (ตัวอย่าง)</li>
 </ul>
 </div>
 
-<!-- ===================================================== -->
+<p>บทถัดไป: <a href="0006-ar2-pacf-and-arima.html">Lesson 6 — AR(2), PACF และ ARIMA</a></p>
+
 <h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 41 หน้าอยู่ในหัวข้อใด</h2>
 <table>
 <tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
 <tr data-pages="1" class="etc"><td>1</td><td>ปก Model for Stationary Time Series (Part 1)</td><td>etc — ปก</td></tr>
-<tr data-pages="2-5"><td>2–5</td><td>Review: Detrending, Differencing, Looking ahead</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
-<tr data-pages="6-8"><td>6–8</td><td>Moving Average Model</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
-<tr data-pages="9-10"><td>9–10</td><td>MA(1) process</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
-<tr data-pages="11-16"><td>11–16</td><td>MA(1) R-simulation</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
-<tr data-pages="17-21"><td>17–21</td><td>MA(2) process และ R-simulation</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
-<tr data-pages="22-25"><td>22–25</td><td>MA(q), Box-Jenkins, Summary</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
-<tr data-pages="26"><td>26</td><td>QUIZ: Moving average process</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
-<tr data-pages="27-31"><td>27–31</td><td>Autoregressive Models</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
-<tr data-pages="32-34"><td>32–34</td><td>AR(1) process</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
-<tr data-pages="35-37"><td>35–37</td><td>Theorem</td><td><a href="#s11">หัวข้อ 11</a></td></tr>
-<tr data-pages="38-41"><td>38–41</td><td>Population ACF และ Sample ACF</td><td><a href="#s12">หัวข้อ 12</a></td></tr>
+<tr data-pages="2-5"><td>2–5</td><td>Review detrending, differencing, Looking ahead</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="6-8"><td>6–8</td><td>นิยาม MA(q), Σ, θ(B)</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="9-10"><td>9–10</td><td>MA(1) property</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="11-16"><td>11–16</td><td>MA(1) simulation θ = ±0.9</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="17-21"><td>17–21</td><td>MA(2) และ simulation</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
+<tr data-pages="22"><td>22</td><td>MA(q) process</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="23"><td>23</td><td>Box-Jenkins Model</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="24-25"><td>24–25</td><td>Summary MA(q) ที่มี μ</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="26"><td>26</td><td>QUIZ Moving average process</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="27-31"><td>27–31</td><td>AR(p), Φ(B), mean และ intercept</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+<tr data-pages="32-34"><td>32–34</td><td>AR(1) และ ACF</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+<tr data-pages="35-37"><td>35–37</td><td>Theorem รากของ characteristic polynomial</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
+<tr data-pages="38-41"><td>38–41</td><td>Population ACF และ sample ACF ใน R</td><td><a href="#s11">หัวข้อ 11</a></td></tr>
+</table>
+
+<h3>คลิปและเอกสารที่ใช้ในบทนี้</h3>
+<table>
+<tr><th>แหล่ง</th><th>ช่วงที่ใช้</th><th>หัวข้อ</th></tr>
+<tr><td>Class 5</td><td>0:46–1:04 Xbox, 1:04–2:10 Box-Jenkins, MA, AR, ARMA</td><td>1–8, 12</td></tr>
+<tr><td>Class 6</td><td>0:00–0:30 γ ของ AR(1), รูปร่าง ACF, ARMAacf กับ arima.sim; 1:15–1:26 เงื่อนไขของ φ</td><td>9–11</td></tr>
+<tr><td>Class 7-2</td><td>0:16–0:20 modulus ของราก</td><td>10</td></tr>
+<tr><td>R_codes_1.txt, R_codes_2.txt, XBOX.txt (CLASS 5)</td><td>ทั้งไฟล์</td><td>1, 5, 6, 11, 13</td></tr>
 </table>
 
 <script src="../assets/quiz.js"></script>

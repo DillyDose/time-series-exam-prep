@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 3: Estimating Means and Covariances, Correlogram, Detrending, Differencing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 3: ACF จากข้อมูล, Correlogram, ADF Test, Detrending และ Differencing</title>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -16,227 +17,184 @@
   <span><a href="0004-smoothing-methods.html">Lesson 4 →</a></span>
 </nav>
 
-<p class="kicker">Slide_3 — Time Series Analysis · Estimating means and covariances · 37 หน้า</p>
-<h1>การประมาณค่าจากข้อมูล correlogram และการกำจัด trend</h1>
+<p class="kicker">Slide 3 — Estimating means and covariances · 37 หน้า · คลิป Class 3 · Exercise 1 ข้อ 5–8</p>
+<h1>ประมาณ ACF จากข้อมูลจริง ตรวจว่านิ่งไหม และกำจัด trend</h1>
 
 <div class="box">
-<div class="label">วิธีใช้บทเรียนนี้</div>
-<p>บทนี้แสดงสไลด์ Lecture 3 เกือบทุกหน้าตามลำดับ พร้อมคำอธิบายใต้แต่ละหน้า ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ บทนี้มีสองส่วน ส่วนแรกคือการประมาณ mean, autocovariance และ ACF จากข้อมูลจริง และการอ่าน correlogram ส่วนที่สองคือการกำจัด trend ด้วย detrending และ differencing โจทย์ Shumway problem 1.6 ทั้งสามส่วนมีการพิสูจน์เต็ม และโค้ด R ทุกชุดมีคำอธิบายทีละบรรทัด</p>
-<p>บทนี้ยังไม่ได้รวมสิ่งที่อาจารย์พูดในวิดีโอ Class 3 จะเพิ่มภายหลังพร้อมระบุคลิปและเวลา</p>
+<div class="label">บทนี้ตอบคำถามอะไร</div>
+<p>Lesson 1 และ 2 เริ่มจากโมเดลที่รู้สมการ แล้วคำนวณ ACF ทางทฤษฎี แต่ในงานจริงไม่มีใครบอกสมการ มีแค่ตัวเลขชุดหนึ่ง บทนี้กลับทิศ: เริ่มจากข้อมูล แล้วตอบสามคำถาม</p>
+<ol>
+<li>คำนวณ ACF จากข้อมูลอย่างไร และอ่าน correlogram อย่างไร</li>
+<li>จะรู้ได้อย่างไรว่าข้อมูลจริงนิ่งหรือไม่ ด้วยกราฟหรือด้วย ADF test</li>
+<li>ถ้าไม่นิ่งเพราะมี trend จะกำจัดอย่างไร ด้วย detrending หรือ differencing</li>
+</ol>
+<p>อาจารย์บอกว่าสามสัปดาห์แรกเป็นการปูพื้น และสามเรื่องนี้ "เป็นตัวหลัก ต้องใช้" ตั้งแต่คาบหน้าจะเป็น application (Class 3, 1:53:23) เฉลยการบ้าน random walk with drift ที่อาจารย์ทำตอนต้นคาบอยู่ใน <a href="0001-basic-knowledge-and-stochastic-process.html#s11">Lesson 1 หัวข้อ 11</a></p>
 </div>
 
-<div class="box source">
-<div class="label">แหล่งอ่านหลัก</div>
-<p>Shumway &amp; Stoffer สไลด์อ้างหน้า 28–29 (sample estimators), หน้า 40 (problem 1.6), หน้า 57–62 (exploratory data analysis, detrending, differencing, global temperature) อ่านเสริมเรื่อง ACF plot ได้ที่ <a href="https://www.itl.nist.gov/div898/handbook/eda/section3/autocopl.htm" target="_blank" rel="noopener">NIST Handbook: Autocorrelation Plot</a></p>
+<div class="box exam">
+<div class="label">สิ่งที่อาจารย์พูดถึงข้อสอบในคลาสนี้</div>
+<ul>
+<li>"ที่มาสอบช่วงแรก ๆ จะง่าย ข้อสอบก็จะออกเหมือนที่ผมสอนเนี่ยแหละ ก็จะมีโมเดลมาให้หา mean function กับ autocovariance function" (Class 3, 0:09:39)</li>
+<li>ข้อสอบเก่า: "ถ้ามี trend ช่วยพรูฟหน่อยสิครับว่าทำไมมันไม่ stationary" คือ Shumway problem 1.6 (Class 3, 1:19:32) เฉลยใน<a href="#s7">หัวข้อ 7</a></li>
+<li>การบ้าน: พิสูจน์ว่า differencing ทำให้ข้อมูลนิ่ง (Class 3, 1:30:36, 1:47:01) และคำนวณ \(\hat\rho(3),\hat\rho(4)\) ของ in-class example เอง (Class 3, 1:45:20)</li>
+<li>มีสอบย่อยทุกคาบ และวิชานี้ไม่มีสอบกลางภาค (Class 3, 0:11:19, 0:21:48)</li>
+</ul>
 </div>
 
 <table>
 <tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
-<tr><td><a href="#s1">1</a></td><td>ทำไมต้องประมาณ: population กับ sample</td><td>2–3</td></tr>
-<tr><td><a href="#s2">2</a></td><td>ตัวประมาณสามตัว</td><td>4–6</td></tr>
-<tr><td><a href="#s3">3</a></td><td>Correlogram และ large sample distribution</td><td>7–9</td></tr>
-<tr><td><a href="#s4">4</a></td><td>In-class example: คำนวณด้วยมือ</td><td>10</td></tr>
-<tr><td><a href="#s5">5</a></td><td>ตัวอย่างใน R และ ADF test</td><td>11–16</td></tr>
-<tr><td><a href="#s6">6</a></td><td>Deterministic trend และ problem 1.6</td><td>18–21</td></tr>
-<tr><td><a href="#s7">7</a></td><td>Detrending</td><td>22–25</td></tr>
-<tr><td><a href="#s8">8</a></td><td>Example: Global temperature</td><td>26–31</td></tr>
-<tr><td><a href="#s9">9</a></td><td>Differencing</td><td>32–37</td></tr>
-<tr><td><a href="#s10">10</a></td><td>แบบฝึกท้ายบท</td><td>—</td></tr>
+<tr><td><a href="#s1">1</a></td><td>จาก population สู่ sample: ทำไมต้องประมาณ</td><td>2–6</td></tr>
+<tr><td><a href="#s2">2</a></td><td>In-class example: คำนวณ ACF ด้วยมือ</td><td>10</td></tr>
+<tr><td><a href="#s3">3</a></td><td>Correlogram และเส้นขอบ ±2/√n</td><td>7–9, 11–12</td></tr>
+<tr><td><a href="#s4">4</a></td><td>ใช้ correlogram ตรวจความนิ่ง: global temperature</td><td>13–14</td></tr>
+<tr><td><a href="#s5">5</a></td><td>ADF test</td><td>15–16</td></tr>
+<tr><td><a href="#s6">6</a></td><td>Deterministic trend และวิธีจัดการสองวิธี</td><td>18–21</td></tr>
+<tr><td><a href="#s7">7</a></td><td>Detrending และ problem 1.6</td><td>22–25</td></tr>
+<tr><td><a href="#s8">8</a></td><td>ตัวอย่าง global temperature: fit เส้นตรงด้วย R</td><td>26–31</td></tr>
+<tr><td><a href="#s9">9</a></td><td>Differencing และ backshift operator</td><td>32–37</td></tr>
+<tr><td><a href="#s10">10</a></td><td>Exercise 1 ข้อ 5–8 (ACF มือ และงาน R)</td><td>—</td></tr>
+<tr><td><a href="#s11">11</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
-<h2 id="s1">1. ทำไมต้องประมาณ: population กับ sample</h2>
+<h2 id="s1">1. จาก population สู่ sample: ทำไมต้องประมาณ</h2>
 
 <figure>
 <img src="../assets/slides/ts3-p02.png" alt="Slide 3 หน้า 2: Estimation from data (Shumway หน้า 28)" loading="lazy">
 <figcaption>Slide 3 หน้า 2 — Estimation from data (Shumway หน้า 28)</figcaption>
 </figure>
 
-<p>โจทย์ใน Lesson 1 และ 2 เริ่มจากโมเดลที่รู้แล้ว เช่น \(X_t=w_t+0.3w_{t-1}+0.4w_{t-2}\) แล้วคำนวณ ACF สไลด์เตือนว่า โดยปกติไม่รู้ <mark class="src" data-p="2">this model</mark> ในทางปฏิบัติ การคำนวณเช่นนั้นเป็นแบบฝึกเชิงทฤษฎีเพื่อให้เข้าใจสมบัติของโมเดล เช่น ACF และ stationarity งานจริงคือประมาณ <mark class="src" data-p="2">this model</mark> จากข้อมูลจริง ในข้อมูลจริงมีเพียงตัวเลขชุดหนึ่ง ไม่มีใครบอกว่าสัมประสิทธิ์คือ 0.3 และ 0.4 ต้องย้อนหาจากข้อมูล เปรียบได้กับการรู้สูตรอาหารแล้วทำอาหาร กับการชิมอาหารแล้วเดาสูตร บทก่อนหน้าทำอย่างแรก บทนี้เริ่มทำอย่างหลัง</p>
+<p>โจทย์ในสองบทแรกเริ่มจากสมการ เช่น \(X_t=w_t+0.3w_{t-1}+0.4w_{t-2}\) แล้วคำนวณ ACF สไลด์เตือนว่าในทางปฏิบัติเราไม่รู้สมการแบบนี้ การคำนวณจากสมการเป็นแบบฝึกเพื่อเข้าใจสมบัติของโมเดล งานจริงคือย้อนจากข้อมูลไปหาโมเดล อาจารย์อธิบายว่า "โมเดลนี้เหมือนกับเป็น f(x)" ของ Lesson 1 ซึ่งในชีวิตจริงไม่รู้ ต้อง estimate จาก real data (Class 3, 0:22:48–0:23:33) เปรียบได้กับการรู้สูตรแล้วทำอาหาร กับการชิมอาหารแล้วเดาสูตร สองบทแรกทำแบบแรก บทนี้เริ่มทำแบบหลัง</p>
 
 <figure>
 <img src="../assets/slides/ts3-p03.png" alt="Slide 3 หน้า 3: Population autocorrelation function" loading="lazy">
 <figcaption>Slide 3 หน้า 3 — Population autocorrelation function</figcaption>
 </figure>
 
-<p>ACF ที่นิยามว่า \(\rho_h=\mathrm{corr}(X_t,X_{t+h})=\gamma_h/\gamma_0\) เป็น <mark class="src" data-p="3">population</mark> autocorrelation function เพราะขึ้นกับพารามิเตอร์จริงของ process ในข้อมูลจริง พารามิเตอร์เหล่านี้ <mark class="src" data-p="3">unknown</mark> จึงไม่รู้ค่า \(\rho_h\) ที่แท้จริง แต่ <mark class="src" data-p="3">estimate</mark> จากข้อมูลได้</p>
+<p>ACF ที่นิยามว่า \(\rho(h)=\gamma(h)/\gamma(0)\) เป็นค่าของ <mark class="src" data-p="3">population</mark> คือค่าจริงของ process ซึ่ง <mark class="src" data-p="3">unknown</mark> ในข้อมูลจริง แต่ <mark class="src" data-p="3">estimate</mark> ได้จากข้อมูล อาจารย์อธิบายสัญลักษณ์ว่า "นิสิตเรียน data science น่าจะรู้ว่าเติม hat คือ estimator" \(\rho(h)\) คือค่าจริงที่ไม่รู้ \(\hat\rho(h)\) คือ sample ACF ที่คำนวณได้ (Class 3, 0:24:19–0:25:20)</p>
 
 <table>
 <tr><th></th><th>Population</th><th>Sample</th></tr>
-<tr><td>คืออะไร</td><td>ค่าจริงของ process ซึ่งมองไม่เห็น</td><td>ค่าที่คำนวณจากข้อมูลที่มี</td></tr>
+<tr><td>คืออะไร</td><td>ค่าจริงของ process มองไม่เห็น</td><td>ค่าที่คำนวณจากข้อมูลที่มี</td></tr>
 <tr><td>สัญลักษณ์</td><td>\(\mu,\ \gamma(h),\ \rho(h)\)</td><td>\(\bar X,\ \hat\gamma(h),\ \hat\rho(h)\)</td></tr>
-<tr><td>เปลี่ยนตามชุดข้อมูลหรือไม่</td><td>ไม่</td><td>เปลี่ยน</td></tr>
+<tr><td>เปลี่ยนตามชุดข้อมูลไหม</td><td>ไม่</td><td>เปลี่ยน</td></tr>
 </table>
-<p>เครื่องหมายหมวกเหนือสัญลักษณ์หมายถึงค่าประมาณ</p>
 
-<!-- ===================================================== -->
-<h2 id="s2">2. ตัวประมาณสามตัว</h2>
-
-<p>ตัวประมาณทั้งสามใช้ได้เมื่อ process เป็น weakly stationary เหตุผลคือ ถ้า \(\mu_t\) เปลี่ยนทุกเวลา แต่ละเวลามีข้อมูลเพียงค่าเดียว จึงประมาณค่าเฉลี่ยของแต่ละเวลาไม่ได้ แต่ถ้า stationary ค่าเฉลี่ยเท่ากันทุกเวลา จึงนำทุกจุดมาเฉลี่ยรวมกันได้ เหตุผลเดียวกันใช้กับ covariance: คู่ของค่าที่ห่างกัน h ช่วงเวลาทุกคู่มี covariance เดียวกัน จึงนำมาเฉลี่ยรวมกันได้</p>
+<p>ตัวประมาณทุกตัวในบทนี้ใช้ได้เมื่อข้อมูล stationary เหตุผลมาจาก Lesson 2: ถ้าค่าเฉลี่ยเปลี่ยนทุกเวลา แต่ละเวลามีข้อมูลค่าเดียว จะประมาณค่าเฉลี่ยของเวลานั้นไม่ได้ แต่ถ้านิ่ง ค่าเฉลี่ยเท่ากันทุกเวลา ทุกจุดจึงช่วยกันประมาณได้ covariance ก็เช่นกัน ทุกคู่ที่ห่างกัน h ช่วงมี covariance เดียวกัน จึงเฉลี่ยรวมกันได้</p>
 
 <figure>
 <img src="../assets/slides/ts3-p04.png" alt="Slide 3 หน้า 4: Estimation of the mean (Shumway หน้า 28)" loading="lazy">
 <figcaption>Slide 3 หน้า 4 — Estimation of the mean (Shumway หน้า 28)</figcaption>
 </figure>
 
-<p>ถ้า process เป็น weakly stationary ค่าเฉลี่ย \(\mu\) ประมาณด้วย sample mean: \(\bar X=n^{-1}\sum_{t=1}^{n}X_t\) คือผลรวมของทุกค่าหารด้วยจำนวนค่า เป็นค่าเฉลี่ยเลขคณิตตามปกติ</p>
+<p>ค่าเฉลี่ยประมาณด้วย sample mean \(\bar X=\frac1n\sum_{t=1}^{n}X_t\) อาจารย์บอกว่า "ง่ายมาก มันไม่ค่อยมีประโยชน์เท่าไหร่หรอก มันแค่ดูเฉย ๆ" (Class 3, 0:26:01) แต่ต้องใช้เป็นขั้นแรกของการคำนวณ \(\hat\gamma\)</p>
 
 <figure>
 <img src="../assets/slides/ts3-p05.png" alt="Slide 3 หน้า 5: Estimation of covariance structure (Shumway หน้า 29)" loading="lazy">
 <figcaption>Slide 3 หน้า 5 — Estimation of covariance structure (Shumway หน้า 29)</figcaption>
 </figure>
 
-<p>Sample autocovariance function คือ \(\hat\gamma(h)=n^{-1}\sum_{t=1}^{n-h}(X_{t+h}-\bar X)(X_t-\bar X)\) โดย \(\hat\gamma(h)=\hat\gamma(-h)\) สำหรับ \(h=0,1,\dots,n-1\) วิธีคำนวณมีสามขั้น ขั้นแรกลบค่าเฉลี่ยออกจากทุกค่า ขั้นที่สองจับคู่ค่าที่ห่างกัน h ช่วงเวลาแล้วคูณกัน ขั้นที่สามรวมผลคูณแล้วหารด้วย n มีสองจุดที่ต้องสังเกต ผลรวมมีเพียง \(n-h\) พจน์ เพราะคู่ที่ห่างกัน h มีจำนวนเท่านั้น แต่ตัวหารเป็น n เสมอ ไม่ใช่ \(n-h\) และเมื่อ \(h=0\) สูตรนี้ให้ sample variance</p>
+<p>หน้านี้คือ <mark class="src" data-p="5">Estimation of covariance structure (Shumway – page 29)</mark> sample autocovariance คือ \(\hat\gamma(h)=\frac1n\sum_{t=1}^{n-h}(X_{t+h}-\bar X)(X_t-\bar X)\) และ \(\hat\gamma(-h)=\hat\gamma(h)\) อาจารย์ชี้สามจุด (Class 3, 0:27:09–0:29:36)</p>
+<ol>
+<li><b>หารด้วย n ไม่ใช่ n − 1</b> ต่างจาก sample covariance ในวิชาสถิติ แต่ "ต่อไปมันจะแปลงเป็น correlation ... n − 1 กับ n ก็ตัดกัน" จึงไม่มีผลต่อ \(\hat\rho\)</li>
+<li><b>ตัวเศษมี n − h เทอม</b> lag 0 มี n เทอม (เป็น sample variance) lag 1 มี n − 1 เทอม เพราะคู่ที่ห่างกัน h ช่วงมีเท่านั้น</li>
+<li><b>lag h กับ −h ถือว่าเหมือนกัน</b></li>
+</ol>
 
 <figure>
 <img src="../assets/slides/ts3-p06.png" alt="Slide 3 หน้า 6: Estimation of correlation structure (Shumway หน้า 29)" loading="lazy">
 <figcaption>Slide 3 หน้า 6 — Estimation of correlation structure (Shumway หน้า 29)</figcaption>
 </figure>
 
-<p>Sample autocorrelation function คือ \(\hat\rho(h)=\hat\gamma_h/\hat\gamma_0\) ตัว \(n^{-1}\) ในเศษและส่วนตัดกัน จึงเขียนเป็นผลรวมหารผลรวมได้: \(\hat\rho(h)=\dfrac{\sum_{t=1}^{n-h}(X_{t+h}-\bar X)(X_t-\bar X)}{\sum_{t=1}^{n}(X_t-\bar X)^2}\) สไลด์ให้ข้อควรระวัง: ตัวประมาณเหล่านี้ใช้ได้เมื่อ h ไม่ใหญ่เมื่อเทียบกับ n กฎโดยประมาณคือ \(|h|&lt;n/2\) เพราะเมื่อ h ใหญ่ จำนวนคู่ที่ใช้คำนวณเหลือน้อย เช่น ที่ \(h=n-1\) เหลือเพียงคู่เดียว ค่าที่ได้จึงไม่น่าเชื่อถือ</p>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 1 และ 2</div>
-<ul>
-<li>ความต่างระหว่าง population กับ sample และความหมายของเครื่องหมายหมวก</li>
-<li>ตัวประมาณต้องการ weakly stationary</li>
-<li>สูตรของ \(\bar X\), \(\hat\gamma(h)\) และ \(\hat\rho(h)\)</li>
-<li>\(\hat\gamma(h)\) มี \(n-h\) พจน์ แต่หารด้วย n</li>
-<li>กฎโดยประมาณ \(|h|&lt;n/2\)</li>
-</ul>
-</div>
+<p>หน้านี้คือ <mark class="src" data-p="6">Estimation of correlation structure (Shumway – page 29)</mark> sample ACF คือ \(\hat\rho(h)=\hat\gamma(h)/\hat\gamma(0)\) เมื่อ \(\frac1n\) ตัดกัน จะได้ \(\hat\rho(h)=\dfrac{\sum_{t=1}^{n-h}(X_{t+h}-\bar X)(X_t-\bar X)}{\sum_{t=1}^{n}(X_t-\bar X)^2}\) อาจารย์สรุปว่า "ตัวส่วนมี n เทอมเสมอ ตัวเศษเปลี่ยนตาม lag" (Class 3, 0:29:58–0:30:46) สไลด์เตือนว่าตัวประมาณใช้ได้ดีเมื่อ h ไม่ใหญ่เมื่อเทียบกับ n กฎคร่าว ๆ คือ \(|h|&lt;n/2\) เพราะ h ใหญ่ จำนวนคู่ที่ใช้คำนวณเหลือน้อย ที่ h = n − 1 เหลือคู่เดียว ค่าที่ได้จึงไม่น่าเชื่อถือ</p>
 
 <!-- ===================================================== -->
-<h2 id="s3">3. Correlogram และ large sample distribution</h2>
+<h2 id="s2">2. In-class example: คำนวณ ACF ด้วยมือ</h2>
 
-<figure>
-<img src="../assets/slides/ts3-p07.png" alt="Slide 3 หน้า 7: Correlogram" loading="lazy">
-<figcaption>Slide 3 หน้า 7 — Correlogram</figcaption>
-</figure>
-
-<p>Sample correlogram คือกราฟของ ACF เทียบกับ lag h เนื่องจาก ACF อยู่ระหว่าง −1 ถึง 1 correlogram จึงอยู่ในช่วงเดียวกัน Correlogram ใช้ตรวจ stationarity ได้: ถ้า ACF ลดจาก 1 เป็น 0 ทันที แล้วเท่ากับประมาณ 0 หลังจากนั้น <mark class="src" data-p="7">the series is stationary</mark> ถ้า ACF ลดลงทีละน้อยจาก 1 เป็น 0 ในช่วงเวลายาว <mark class="src" data-p="7">then it is not stationary</mark> เหตุผลของข้อหลัง: ข้อมูลที่มี trend มีค่าใกล้เคียงกันในช่วงเวลาที่อยู่ใกล้กัน ไม่ว่าห่างกัน 1 หรือ 10 ช่วง ความสัมพันธ์จึงสูงต่อเนื่องหลาย lag</p>
-
-<figure>
-<img src="../assets/slides/ts3-p08.png" alt="Slide 3 หน้า 8: Correlogram: ตัวอย่าง" loading="lazy">
-<figcaption>Slide 3 หน้า 8 — Correlogram: ตัวอย่าง</figcaption>
-</figure>
-
-<p>Correlogram รู้จักในอีกชื่อว่า <mark class="src" data-p="8">autocorrelation plot (ACF)</mark> เป็นกราฟของ <mark class="src" data-p="8">sample autocorrelations</mark> \(\hat\rho_h\) เทียบกับ h และใช้ในขั้น model selection ของ Box-Jenkins models ตัวอย่างในสไลด์เป็นข้อมูลแผ่นดินไหว: ACF ที่ lag 1 ประมาณ 0.55, lag 2 ประมาณ 0.42, lag 3 ประมาณ 0.41, lag 4 ประมาณ 0.33, lag 5 ประมาณ 0.23 และลดลงจนติดลบเล็กน้อยช่วง lag 9 ถึง 12 ขอบ 5% significance limits เริ่มที่ประมาณ ±0.2 ค่าที่ lag 1 ถึง 3 เกินขอบ จึงมี autocorrelation อย่างมีนัยสำคัญ ส่วนตั้งแต่ lag 5 อยู่ภายในขอบ ค่าที่ลดลงทีละระดับแทนการตกเป็น 0 ทันที แสดงว่าค่าที่อยู่ใกล้กันสัมพันธ์กันยาวหลายช่วงเวลา</p>
-
-<div class="box beginner">
-<div class="label">อ่าน correlogram อย่างไร</div>
-<ol>
-<li>แกนนอนคือ lag h แกนตั้งคือ \(\hat\rho(h)\) แต่ละแท่งคือค่าของหนึ่ง lag</li>
-<li>ถ้ากราฟเริ่มที่ lag 0 แท่งแรกสูง 1 เสมอ ไม่ต้องนับ</li>
-<li>เส้นประคือขอบ \(\pm1.96/\sqrt n\) แท่งที่เกินขอบมีนัยสำคัญ</li>
-<li>ดูรูปทรง: เข้าขอบทันทีหลัง lag 0 คือ stationary ลดลงช้าและเกินขอบหลาย lag คือไม่ stationary</li>
-</ol>
-</div>
-
-<figure>
-<img src="../assets/slides/ts3-p09.png" alt="Slide 3 หน้า 9: Large sample distribution (หน้า 29)" loading="lazy">
-<figcaption>Slide 3 หน้า 9 — Large sample distribution (หน้า 29)</figcaption>
-</figure>
-
-<p>ถ้า \(X_t\) เป็น white noise และ <mark class="src" data-p="9">n is large</mark> พร้อมเงื่อนไขเบื้องต้นบางข้อ แล้วสำหรับ h แต่ละค่า \(\hat\rho_h\) มีการแจกแจงประมาณปกติ ที่มีค่าเฉลี่ยศูนย์และส่วนเบี่ยงเบนมาตรฐาน \(1/\sqrt n\) จึงมองหา autocorrelation ที่อยู่นอก \(\pm1.96/\sqrt n\) หรือประมาณ \(\pm2/\sqrt n\) เป็นหลักฐานของ autocorrelation ที่ไม่เป็นศูนย์ ที่มาของเส้นประคือข้อนี้: แม้ข้อมูลไม่มี autocorrelation จริง ค่า \(\hat\rho\) ที่คำนวณจากตัวอย่างก็ไม่เป็น 0 พอดี เพราะความบังเอิญของการสุ่ม ขอบนี้บอกว่าความบังเอิญทำให้ค่าเบี่ยงจาก 0 ได้เพียงใดใน 95% ของกรณี</p>
-
-<div class="calc">
-<div class="calc-title">คำนวณขอบนัยสำคัญ</div>
-<table class="compact">
-<tr><th>n</th><th>\(1.96/\sqrt n\)</th><th>ที่มาของ n</th></tr>
-<tr><td>100</td><td>\(1.96/10=0.196\)</td><td>white noise ในหน้า 12</td></tr>
-<tr><td>98</td><td>\(1.96/9.90=0.198\)</td><td>global temperature ปี 1900 ถึง 1997</td></tr>
-<tr><td>5</td><td>\(1.96/2.236=0.877\)</td><td>in-class example</td></tr>
-</table>
-<p>ค่า 1.96 มาจากการแจกแจงปกติมาตรฐาน ซึ่ง 95% ของค่าอยู่ภายใน ±1.96 เท่าของส่วนเบี่ยงเบนมาตรฐาน เมื่อ n น้อย ขอบจะกว้างมาก จึงสรุปได้ยาก และเมื่อดูหลาย lag พร้อมกัน เช่น 20 lag คาดว่าประมาณ 1 แท่งจะเกินหรือแตะขอบโดยบังเอิญ เพราะ 5% ของ 20 คือ 1</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 1</span><span>ขอบนัยสำคัญ</span></div>
-<div class="qtext">ข้อมูลมี n = 400 ค่า \(\hat\rho\) ที่ lag ใดต่อไปนี้ถือว่ามีนัยสำคัญตามขอบ \(\pm1.96/\sqrt n\)</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ขอบคือ 1.96/20 = 0.098 ค่า 0.05 อยู่ภายใน">\(\hat\rho=0.05\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ค่าสัมบูรณ์ 0.08 น้อยกว่า 0.098">\(\hat\rho=-0.08\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. ค่าสัมบูรณ์ 0.12 มากกว่า 0.098">\(\hat\rho=-0.12\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 0.09 น้อยกว่า 0.098">\(\hat\rho=0.09\)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<!-- ===================================================== -->
-<h2 id="s4">4. In-class example: คำนวณด้วยมือ</h2>
+<p>อาจารย์ใช้ตัวอย่างนี้สอนวิธีคำนวณและบอกว่า "อันนี้สำคัญนะครับ เพราะว่าเป็นทูลอันนึงเลยในการดีเทคความสัมพันธ์ระหว่างจุดเวลา" (Class 3, 0:32:36) และใน Class 6 ย้ำว่า \(\hat\rho(h)\) "ควรจะต้องคำนวณเป็นบ้าง" (Class 6, 1:14:44) ข้อมูลมีห้าจุดเพื่อให้คำนวณมือได้ อาจารย์บอกว่า "สมัยก่อนผมจะทำคอลัมน์สองอันสุดท้าย แต่นิสิตไม่ต้องทำขนาดนั้น" และ "ถ้าคุณเข้าใจ idea คุณไม่ต้องจำสูตรก็ได้" (Class 3, 0:31:36, 0:38:16)</p>
 
 <figure>
 <img src="../assets/slides/ts3-p10.png" alt="Slide 3 หน้า 10: In-class example" loading="lazy">
 <figcaption>Slide 3 หน้า 10 — In-class example</figcaption>
 </figure>
 
-<p>ข้อมูลมี 5 จุด คือ 12, 10, 11, 14, 15 และตารางเว้นสองคอลัมน์ให้เติม คือ \((X_t-\bar X)\) และ \((X_{t+1}-\bar X)\) คอลัมน์ที่สองคือคอลัมน์แรกที่เลื่อนขึ้นหนึ่งแถว ซึ่งเป็นการจับคู่ค่าที่ห่างกันหนึ่งช่วงเวลา</p>
+<p>สไลด์ให้ข้อมูล 5 จุดและเว้นคอลัมน์ \((X_t-\bar X)\) กับ \((X_{t+1}-\bar X)\) ไว้ให้เติม คอลัมน์ที่สองคือคอลัมน์แรกเลื่อนขึ้นหนึ่งแถว ซึ่งเป็นการจับคู่ค่าที่ห่างกันหนึ่งช่วงเวลา ผลคูณของสองคอลัมน์รวมกันคือตัวเศษของ \(\hat\rho(1)\) การ์ดต่อไปนี้ทำครบถึง lag 4 รวมสองค่าที่อาจารย์ให้เป็นการบ้าน</p>
 
-<div class="calc" id="s4-calc">
-<div class="calc-title">เติมตารางและหา \(\hat\gamma(0)\), \(\hat\gamma(1)\), \(\hat\rho(1)\) และ \(\hat\rho(2)\)</div>
+<div class="calc" id="s2-calc">
+<div class="calc-title">ข้อมูล 12, 10, 11, 14, 15 (n = 5): หา \(\hat\rho(1)\) ถึง \(\hat\rho(4)\)</div>
 <ol class="steps">
 <li><div class="st-title">ค่าเฉลี่ย</div><p>\(\bar X=(12+10+11+14+15)/5=62/5=12.4\)</p></li>
-<li><div class="st-title">เติมตาราง</div>
-<table class="compact">
-<tr><th>t</th><th>\(X_t\)</th><th>\(X_t-\bar X\)</th><th>\(X_{t+1}-\bar X\)</th><th>ผลคูณ</th><th>\((X_t-\bar X)^2\)</th></tr>
-<tr><td>1</td><td>12</td><td>−0.4</td><td>−2.4</td><td>0.96</td><td>0.16</td></tr>
-<tr><td>2</td><td>10</td><td>−2.4</td><td>−1.4</td><td>3.36</td><td>5.76</td></tr>
-<tr><td>3</td><td>11</td><td>−1.4</td><td>1.6</td><td>−2.24</td><td>1.96</td></tr>
-<tr><td>4</td><td>14</td><td>1.6</td><td>2.6</td><td>4.16</td><td>2.56</td></tr>
-<tr><td>5</td><td>15</td><td>2.6</td><td>ไม่มี \(X_6\)</td><td></td><td>6.76</td></tr>
-<tr><th>รวม</th><th></th><th>0</th><th></th><th>6.24</th><th>17.2</th></tr>
-</table>
-<p>ผลรวมของคอลัมน์ \(X_t-\bar X\) ต้องเป็น 0 เสมอ ใช้ตรวจการคำนวณ</p></li>
-<li><div class="st-title">\(\hat\gamma(0)\)</div><p>\(17.2/5=3.44\)</p></li>
-<li><div class="st-title">\(\hat\gamma(1)\)</div><p>\(6.24/5=1.248\) ผลรวมมี 4 พจน์ แต่หารด้วย n = 5</p></li>
-<li><div class="st-title">\(\hat\rho(1)\)</div><p>\(1.248/3.44=0.363\) หรือ \(6.24/17.2\) ได้ค่าเดียวกัน</p></li>
-<li><div class="st-title">\(\hat\rho(2)\)</div><p>คู่ที่ห่างกันสองช่วง: \((-0.4)(-1.4)+(-2.4)(1.6)+(-1.4)(2.6)=0.56-3.84-3.64=-6.92\) จึงได้ \(\hat\rho(2)=-6.92/17.2=-0.402\)</p></li>
+<li><div class="st-title">ลบค่าเฉลี่ยออกจากทุกจุด</div><p>−0.4, −2.4, −1.4, 1.6, 2.6 (ผลรวมต้องเป็น 0 ใช้ตรวจการคำนวณ)</p></li>
+<li><div class="st-title">ตัวส่วน: ผลรวมกำลังสองทั้ง 5 เทอม</div><p>\(0.16+5.76+1.96+2.56+6.76=17.2\)</p></li>
+<li><div class="st-title">\(\hat\rho(1)\): คู่ที่ห่างกัน 1 ช่วง มี 4 เทอม</div><p>\((-2.4)(-0.4)+(-1.4)(-2.4)+(1.6)(-1.4)+(2.6)(1.6)=0.96+3.36-2.24+4.16=6.24\) จึงได้ \(6.24/17.2=0.3628\)</p></li>
+<li><div class="st-title">\(\hat\rho(2)\): คู่ที่ห่างกัน 2 ช่วง มี 3 เทอม</div><p>\((-1.4)(-0.4)+(1.6)(-2.4)+(2.6)(-1.4)=0.56-3.84-3.64=-6.92\) จึงได้ \(-6.92/17.2=-0.4023\)</p></li>
+<li><div class="st-title">\(\hat\rho(3)\) (การบ้าน): 2 เทอม</div><p>\((1.6)(-0.4)+(2.6)(-2.4)=-0.64-6.24=-6.88\) จึงได้ \(-6.88/17.2=-0.4000\)</p></li>
+<li><div class="st-title">\(\hat\rho(4)\) (การบ้าน): 1 เทอม</div><p>\((2.6)(-0.4)=-1.04\) จึงได้ \(-1.04/17.2=-0.0605\)</p></li>
 </ol>
-<div class="answer">\(\bar X=12.4\), \(\hat\gamma(0)=3.44\), \(\hat\gamma(1)=1.248\), \(\hat\rho(1)=0.363\), \(\hat\rho(2)=-0.402\)</div>
-<p>ค่าที่อยู่ติดกันไปทางเดียวกันระดับปานกลาง และค่าที่ห่างกันสองช่วงไปคนละทาง แต่ n = 5 น้อยมาก ขอบนัยสำคัญคือ ±0.877 ทั้งสองค่าจึงยังไม่มีนัยสำคัญ</p>
+<div class="answer">\(\hat\rho(0)=1\), \(\hat\rho(1)=0.363\), \(\hat\rho(2)=-0.402\), \(\hat\rho(3)=-0.400\), \(\hat\rho(4)=-0.060\)</div>
 </div>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 2</span><span>ตัวประมาณ</span></div>
-<div class="qtext">ข้อมูลมี n = 5 และผลรวมของ \((X_{t+1}-\bar X)(X_t-\bar X)\) ทั้ง 4 คู่เท่ากับ 6.24 ค่า \(\hat\gamma(1)\) คือเท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ n = 5 ไม่ใช่จำนวนคู่ 4">\(6.24/4=1.560\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. หารด้วย n เสมอ แม้ผลรวมมี n − h พจน์">\(6.24/5=1.248\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ n ไม่ใช่ n + 1">\(6.24/6=1.040\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ n ไม่ใช่ n − h − 1">\(6.24/3=2.080\)</button>
-</div>
-<div class="feedback"></div>
-</div>
+<p>อาจารย์ตีความ \(\hat\rho(1)=0.36\) เป็นภาษาธุรกิจ: "ถ้าเวลาห่างกัน 1 จุด เช่น มีนาไปเมษา ก็จะสัมพันธ์ไปทางเดียวกัน มีนามาก เมษาก็จะมาก ... แต่อาจจะไม่แรง เพราะ 0.36 ก็ถือว่าไม่ได้มาก" (Class 3, 0:38:55) และไม่ต้องคำนวณ \(\hat\rho(0)\) เพราะตัวเศษกับตัวส่วนเท่ากัน ได้ 1 เสมอ (Class 3, 0:34:17) ข้อควรระวัง: ในคลิปอาจารย์พูดสลับว่า "ตัวส่วน 6.24 ตัวเศษ 17.2" ที่ถูกคือตัวเศษ 6.24 ตัวส่วน 17.2 ตามที่เขียนบนกระดาษ (Class 3, 0:37:52) และเมื่อ n = 5 เส้นขอบในหัวข้อ 3 คือ \(2/\sqrt5=0.894\) ค่าทั้งหมดอยู่ในเส้น จึงยังสรุปไม่ได้ว่าไม่เป็นศูนย์</p>
 
 <!-- ===================================================== -->
-<h2 id="s5">5. ตัวอย่างใน R และ ADF test</h2>
+<h2 id="s3">3. Correlogram และเส้นขอบ ±2/√n</h2>
 
-<h3>5.1 White noise</h3>
+<figure>
+<img src="../assets/slides/ts3-p07.png" alt="Slide 3 หน้า 7: Correlogram" loading="lazy">
+<figcaption>Slide 3 หน้า 7 — Correlogram</figcaption>
+</figure>
+
+<p>Correlogram คือกราฟของ \(\hat\rho(h)\) (แกนตั้ง) กับ lag h (แกนนอน) อาจารย์บอกว่า "ไม่ว่าใช้โปรแกรมไหนก็จะเรียกว่า correlogram" (Class 3, 0:43:23) ใช้ตรวจความนิ่งได้ ถ้า ACF ตกจาก 1 เป็นประมาณ 0 ทันทีแล้วอยู่แถว 0 แปลว่า <mark class="src" data-p="7">the series is stationary</mark> ถ้า ACF ค่อย ๆ ลดจาก 1 ไป 0 ในช่วงยาว <mark class="src" data-p="7">then it is not stationary</mark> เหตุผลของข้อหลัง: ข้อมูลที่มี trend ค่าที่อยู่ใกล้กันในเวลามีขนาดใกล้กันเสมอ จะห่างกัน 1 หรือ 10 ช่วงก็ยังอยู่ฝั่งเดียวกันของค่าเฉลี่ย ผลคูณของส่วนเบี่ยงเบนจึงเป็นบวกต่อเนื่องหลาย lag</p>
+
+<figure>
+<img src="../assets/slides/ts3-p08.png" alt="Slide 3 หน้า 8: Correlogram: ตัวอย่างจาก Minitab" loading="lazy">
+<figcaption>Slide 3 หน้า 8 — Correlogram: ตัวอย่างจาก Minitab</figcaption>
+</figure>
+
+<p>Correlogram รู้จักในชื่อ <mark class="src" data-p="8">autocorrelation plot (ACF)</mark> เป็นกราฟของ <mark class="src" data-p="8">sample autocorrelations</mark> เทียบกับ h และใช้ในขั้นเลือกโมเดลของ Box-Jenkins ตัวอย่างเป็นข้อมูลแผ่นดินไหวจาก Minitab: lag 1 ราว 0.55, lag 2 ราว 0.42, lag 3 ราว 0.41, lag 4 ราว 0.33 แล้วลดลงจนติดลบเล็กน้อยที่ lag 9–12 อาจารย์บอกว่าบางโปรแกรมอย่าง Minitab ไม่แสดง lag 0 เริ่มที่ lag 1 เลย (Class 3, 0:43:58–0:46:46) สังเกตว่าเส้นขอบของ Minitab ไม่คงที่ เริ่มราว ±0.2 ที่ lag 1 แล้วกว้างขึ้นเป็นราว ±0.33 เพราะ Minitab ใช้สูตรที่เผื่อความสัมพันธ์ของ lag ก่อนหน้า ส่วน R ใช้เส้นคงที่ ±2/√n ค่าที่ lag 1–3 เกินขอบ จึงมีความสัมพันธ์อย่างมีนัยสำคัญ</p>
+
+<figure>
+<img src="../assets/slides/ts3-p09.png" alt="Slide 3 หน้า 9: Large sample distribution (หน้า 29)" loading="lazy">
+<figcaption>Slide 3 หน้า 9 — Large sample distribution (หน้า 29)</figcaption>
+</figure>
+
+<p>ที่มาของเส้นขอบ: ถ้า \(X_t\) เป็น white noise และ n ใหญ่ \(\hat\rho(h)\) แต่ละ lag มีการแจกแจงประมาณปกติ ค่าเฉลี่ย 0 ส่วนเบี่ยงเบนมาตรฐาน \(1/\sqrt n\) แม้ข้อมูลไม่มีความสัมพันธ์จริง \(\hat\rho\) ที่คำนวณได้ก็ไม่เป็น 0 พอดีเพราะความบังเอิญ เส้นขอบบอกว่าความบังเอิญดันค่าออกจาก 0 ได้ไกลแค่ไหนใน 95% ของกรณี อาจารย์อธิบายว่า R ใช้ \(\pm2/\sqrt n\) "ซึ่งมาจาก ±1.96/√n ที่ความเชื่อมั่น 95%" แท่งที่อยู่ในเส้น "ถือว่าน้อย ignore ได้" แท่งที่ทะลุเส้น "มีนัยสำคัญ ไม่เป็นศูนย์" (Class 3, 0:49:30–0:51:28)</p>
+
+<table>
+<tr><th>n</th><th>\(2/\sqrt n\)</th><th>ข้อมูล</th></tr>
+<tr><td>5</td><td>0.894</td><td>in-class example ทุกค่าอยู่ในเส้น</td></tr>
+<tr><td>98</td><td>0.202</td><td>global temperature 1900–1997</td></tr>
+<tr><td>100</td><td>0.200</td><td>white noise ใน R ตามสไลด์หน้า 11–12</td></tr>
+<tr><td>400</td><td>0.100</td><td>ข้อมูลยิ่งมาก เส้นยิ่งแคบ แยกความสัมพันธ์เล็ก ๆ ได้</td></tr>
+</table>
+
+<p>เมื่อดู 20 lag พร้อมกัน คาดว่าราว 1 แท่ง (5% ของ 20) จะเกินหรือแตะเส้นโดยบังเอิญ จึงไม่ควรตื่นเต้นกับแท่งเดียวที่ปริ่มเส้นใน lag ไกล ๆ ให้ดูรูปแบบรวม</p>
+
+<div class="box beginner">
+<div class="label">อ่าน correlogram สี่ขั้น</div>
+<ol>
+<li>แกนนอนคือ lag แกนตั้งคือ \(\hat\rho(h)\) แท่งที่ lag 0 สูง 1 เสมอ ไม่ต้องนับ (R แสดง Minitab ไม่แสดง)</li>
+<li>เส้นประคือ \(\pm2/\sqrt n\) แท่งที่เกินเส้นคือไม่เป็นศูนย์อย่างมีนัยสำคัญ</li>
+<li>ดูรูปทรง: ตกเข้าเส้นทันทีหลัง lag 0 คือนิ่ง ลดลงช้าและเกินเส้นหลาย lag คือไม่นิ่ง</li>
+<li>ถ้านิ่ง ดูว่าตัดหลัง lag ไหน หรือค่อย ๆ ลดลง ใช้เลือกโมเดลใน Lesson 5–7</li>
+</ol>
+</div>
+
 <figure>
 <img src="../assets/slides/ts3-p11.png" alt="Slide 3 หน้า 11: R-Example: White noise (โค้ด)" loading="lazy">
 <figcaption>Slide 3 หน้า 11 — R-Example: White noise (โค้ด)</figcaption>
 </figure>
 
-<p>โค้ดหน้านี้สร้าง white noise 100 ค่า แล้วดู ACF ทั้งเป็นตัวเลขและเป็นกราฟ</p>
+<p>โค้ดนี้สร้าง white noise 100 ค่าแล้วดู ACF ทั้งเป็นตัวเลขและเป็นกราฟ อาจารย์รันในห้องและได้ lag 1 = −0.078 แล้วสรุปว่าไม่มี lag ไหนทะลุเส้น "เพราะคุณสมบัติของ white noise covariance ระหว่างแต่ละจุดถ้าคนละจุดจะเป็น 0" (Class 3, 0:51:28–0:55:45)</p>
 
-<pre data-p="11"><code>w &lt;- rnorm(100,0,1)
-timew &lt;- ts(w)
-acf(timew, plot=F)
-par(mfrow=c(1,2))
-plot(timew,ylab="White noise process")
-acf(timew, main = "SAMPLE ACF")
-
-acf(ts(rnorm(100,0,1)),main="Sample ACF")</code></pre>
 <table class="codeexp compact">
 <tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>rnorm(100,0,1)</td><td>สุ่ม 100 ค่าจากการแจกแจงปกติที่มีค่าเฉลี่ย 0 และส่วนเบี่ยงเบนมาตรฐาน 1 คือ Gaussian white noise ที่ \(\sigma_w^2=1\)</td></tr>
-<tr><td>ts(w)</td><td>แปลงเป็น time series</td></tr>
-<tr><td>acf(timew, plot=F)</td><td>คำนวณ \(\hat\rho(h)\) แล้วพิมพ์เป็นตัวเลข ไม่วาดกราฟ</td></tr>
-<tr><td>par(mfrow=c(1,2))</td><td>แบ่งหน้ากราฟเป็น 1 แถว 2 คอลัมน์</td></tr>
-<tr><td>plot(timew, ylab=...)</td><td>วาดข้อมูลตามเวลา</td></tr>
-<tr><td>acf(timew, main = "SAMPLE ACF")</td><td>วาด correlogram พร้อมเส้นประของขอบนัยสำคัญ</td></tr>
-<tr><td>acf(ts(rnorm(100,0,1)), ...)</td><td>ทำทุกขั้นในบรรทัดเดียว สไลด์เชื่อมสองแบบด้วยคำว่า or</td></tr>
+<tr><td>w &lt;- rnorm(100, 0, 1)</td><td>สุ่ม 100 ค่าจาก N(0, 1)</td></tr>
+<tr><td>timew &lt;- ts(w)</td><td>แปลงเป็นอนุกรมเวลา</td></tr>
+<tr><td>acf(timew, plot = F)</td><td>พิมพ์ \(\hat\rho(h)\) เป็นตัวเลข ไม่วาดกราฟ</td></tr>
+<tr><td>par(mfrow = c(1, 2))</td><td>แบ่งหน้าจอกราฟเป็น 1 แถว 2 คอลัมน์ วาดสองกราฟคู่กัน</td></tr>
+<tr><td>acf(timew, main = "SAMPLE ACF")</td><td>วาด correlogram พร้อมเส้นประ</td></tr>
+<tr><td>acf(ts(rnorm(100, 0, 1)), ...)</td><td>ทำทุกขั้นในบรรทัดเดียว ได้ white noise ชุดใหม่</td></tr>
 </table>
 
 <figure>
@@ -244,28 +202,33 @@ acf(ts(rnorm(100,0,1)),main="Sample ACF")</code></pre>
 <figcaption>Slide 3 หน้า 12 — R-Example: White noise (ผลลัพธ์)</figcaption>
 </figure>
 
-<p>ข้อมูล 100 จุดแกว่งระหว่างประมาณ −2.2 ถึง 2.9 รอบ 0 ใน sample ACF แท่งที่ lag 0 เท่ากับ 1 และตั้งแต่ lag 1 ถึง 20 ทุกแท่งอยู่ระหว่างประมาณ −0.2 ถึง 0.16 เส้นประอยู่ที่ ±0.2 ตรงกับ \(1.96/\sqrt{100}\) แท่งที่ lag 9 เกือบถึง −0.2 ซึ่งเป็นไปตามที่คาดเมื่อดู 20 lag ACF เข้าขอบทันทีหลัง lag 0 ตรงกับทฤษฎีของ white noise ที่ \(\rho(h)=0\) ทุก \(h\ne0\)</p>
+<p>ข้อมูล 100 จุดแกว่งระหว่างราว −2.2 ถึง 2.9 รอบ 0 ใน correlogram แท่ง lag 0 สูง 1 และ lag 1–20 อยู่ระหว่างราว −0.2 ถึง 0.16 ทั้งหมด แท่งที่ lag 9 ปริ่มเส้น −0.2 ซึ่งเป็นไปตามที่คาดเมื่อดู 20 lag อาจารย์อธิบายว่าเส้นที่ราว 0.2 มาจาก \(2/\sqrt{100}=0.2\) (จริง ๆ \(1.96/\sqrt{100}=0.196\)) (Class 3, 0:55:17) รูปแบบที่ตกเข้าเส้นทันทีหลัง lag 0 คือหน้าตาของ white noise ในข้อมูลจริง</p>
 
-<h3>5.2 Global temperature</h3>
+<!-- ===================================================== -->
+<h2 id="s4">4. ใช้ correlogram ตรวจความนิ่ง: global temperature</h2>
+
+<p>อาจารย์อธิบายว่าในชีวิตจริงมีแค่ข้อมูล ไม่มีโมเดลให้หา mean function "ทูลในการตรวจความนิ่งคือ correlogram" (Class 3, 0:57:44) ถ้าอนุกรมไม่นิ่ง ไม่ว่าเพราะมี trend หรือความแปรปรวนไม่คงที่ correlogram "จะลงแบบช้ามาก ๆ" แต่ "มันไม่ได้บอก" ว่าไม่นิ่งเพราะอะไร (Class 3, 0:56:04–0:57:34) ภาพที่อาจารย์วาดบนกระดาษคือแท่งที่ lag 1, 2, 3 ยังสูงเกือบเท่า lag 0 แล้วลดลงช้า ๆ เป็นแนวทแยงต่อเนื่องหลายสิบ lag</p>
+
 <figure>
 <img src="../assets/slides/ts3-p13.png" alt="Slide 3 หน้า 13: R-Example: Global temperature from 1900 (โค้ด)" loading="lazy">
 <figcaption>Slide 3 หน้า 13 — R-Example: Global temperature from 1900 (โค้ด)</figcaption>
 </figure>
 
-<p>โค้ดหน้านี้ทำขั้นตอนเดียวกันกับข้อมูลจริง คืออุณหภูมิโลกตั้งแต่ปี 1900</p>
+<p>โค้ดนี้ใช้ข้อมูลอุณหภูมิโลกชุดเดียวกับ Lesson 2 แต่ตัดเฉพาะปี 1900 เป็นต้นไป</p>
 
-<pre data-p="13"><code>temp &lt;- read.table("temp.txt")
-newtemp &lt;- ts(temp,start=1856)
-newtemp.1900 &lt;- window(newtemp,start=1900)
-par(mfrow=c(1,2))
-plot(newtemp.1900,ylab="Global temperature",xlab="Year",type="o")
-acf(newtemp.1900,main="Sample ACF for global temperature")</code></pre>
+<pre><code>temp &lt;- read.table("temp.txt")
+newtemp &lt;- ts(temp, start = 1856)
+newtemp.1900 &lt;- window(newtemp, start = 1900)
+par(mfrow = c(1, 2))
+plot(newtemp.1900, ylab = "Global temperature", xlab = "Year", type = "o")
+acf(newtemp.1900, main = "Sample ACF for global temperature")</code></pre>
 <table class="codeexp compact">
 <tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>ts(temp,start=1856)</td><td>กำหนดให้ค่าแรกตรงกับปี 1856 ข้อมูลเป็นรายปี</td></tr>
-<tr><td>window(newtemp,start=1900)</td><td>ตัดเฉพาะปี 1900 เป็นต้นไป</td></tr>
-<tr><td>plot(..., type="o")</td><td>วาดทั้งจุดและเส้น</td></tr>
-<tr><td>acf(newtemp.1900, ...)</td><td>วาด correlogram ของช่วงปี 1900 ถึง 1997</td></tr>
+<tr><td>ts(temp, start = 1856)</td><td>อนุกรมรายปี เริ่มปี 1856</td></tr>
+<tr><td>window(newtemp, start = 1900)</td><td>ตัดเหลือปี 1900–1997 จำนวน 98 ปี</td></tr>
+<tr><td>par(mfrow = c(1, 2))</td><td>วาดสองกราฟเคียงกัน</td></tr>
+<tr><td>plot(..., type = "o")</td><td>วาดเส้นพร้อมจุด</td></tr>
+<tr><td>acf(newtemp.1900)</td><td>correlogram เส้นประอยู่ที่ \(\pm2/\sqrt{98}=\pm0.202\)</td></tr>
 </table>
 
 <figure>
@@ -273,217 +236,189 @@ acf(newtemp.1900,main="Sample ACF for global temperature")</code></pre>
 <figcaption>Slide 3 หน้า 14 — R-Example: Global temperature from 1900 (ผลลัพธ์)</figcaption>
 </figure>
 
-<p>อุณหภูมิเพิ่มจากประมาณ −0.5 ในปี 1910 เป็นประมาณ 0.43 ในปี 1997 ค่า ACF ที่ lag 1 ประมาณ 0.82, lag 2 ประมาณ 0.72, lag 5 ประมาณ 0.63, lag 10 ประมาณ 0.43 และ lag 15 ประมาณ 0.25 ยังเกินขอบ 0.2 จนถึงประมาณ lag 16 นี่คือรูปทรงที่ลดลงทีละน้อยในช่วงยาว จึงไม่ stationary เมื่อเทียบกับ white noise ในหน้า 12 ซึ่งเข้าขอบทันที ความต่างชัดเจน</p>
+<p>กราฟซ้ายมี trend ขาขึ้นชัด จากราว −0.5 ช่วงปี 1910 ขึ้นไปถึง 0.43 ในปี 1997 กราฟขวาลดลงช้ามาก ค่าที่รันจริง: lag 1 = 0.819, lag 2 = 0.720, lag 5 = 0.632, lag 10 = 0.430, lag 15 = 0.246 และยังเกินเส้น 0.202 จนถึง lag 16 (0.228) ก่อนลดเหลือ 0.187 ที่ lag 17 อาจารย์สรุปว่า "ค่อย ๆ ลง" จึงไม่นิ่ง และบอกว่ากรณีนี้เห็น trend ด้วยตาอยู่แล้ว "แต่บางทีมันมี variance กระจายต่างกันนิดนึง ดีเทคด้วยตาไม่เจอ กราฟนี้ก็อาจจะมีประโยชน์" (Class 3, 1:00:30–1:01:08) เมื่อเทียบกับ white noise ในหัวข้อ 3 ซึ่งตกเข้าเส้นทันที ความต่างชัดมาก</p>
 
-<h3>5.3 Augmented Dickey Fuller test</h3>
+<!-- ===================================================== -->
+<h2 id="s5">5. ADF test</h2>
+
+<p>การอ่าน correlogram ใช้สายตาตัดสิน อาจารย์บอกว่า "subjective นิดนึง" (Class 3, 1:09:00) ทางเลือกที่ให้คำตอบเป็นตัวเลขคือการทดสอบทางสถิติ อาจารย์บอกว่า "การเทสที่ผมชอบใช้ในวิชานี้คือ ADF test" และจะใช้อีกตอนทำโมเดลขั้นสูง อีกตัวที่ "เด็ก ป.โท ชอบใช้" คือ KPSS (Class 3, 1:01:46–1:02:08)</p>
+
 <figure>
 <img src="../assets/slides/ts3-p15.png" alt="Slide 3 หน้า 15: Augmented Dickey Fuller (ADF) test" loading="lazy">
 <figcaption>Slide 3 หน้า 15 — Augmented Dickey Fuller (ADF) test</figcaption>
 </figure>
 
-<p>ADF test เป็นการทดสอบทางสถิติที่ใช้ทั่วไปเพื่อตัดสินว่า time series เป็น stationary หรือไม่ สมมติฐานคือ \(H_0\): time series ไม่ stationary และ \(H_a\): time series stationary ใน R ใช้ <code>library(tseries)</code> แล้วเรียก <code>adf.test(x)</code> โดย x เป็นเวกเตอร์ตัวเลขหรือ univariate time series การอ่าน correlogram เป็นการตัดสินด้วยสายตา ADF test ให้การตัดสินด้วยตัวเลข</p>
+<p>ADF test (Augmented Dickey-Fuller) ตั้งสมมติฐานดังนี้ \(H_0\): อนุกรมไม่นิ่ง และ \(H_a\): อนุกรมนิ่ง ใน R ใช้ <code>library(tseries)</code> แล้วเรียก <code>adf.test(x)</code> อาจารย์ถามในห้องว่าอยากให้ p-value มากหรือน้อย และตอบว่า "จริง ๆ แล้วคงอยากให้มัน reject H0 ... เพราะถ้ามันไม่นิ่งเราต้องไปปรับ data" p-value น้อยกว่า 0.05 จึงแปลว่านิ่ง มากกว่า 0.05 แปลว่าไม่นิ่ง (Class 3, 1:02:15–1:04:31) เหตุผลที่ H0 เป็น "ไม่นิ่ง" มาจากโครงสร้างของการทดสอบ ซึ่งอธิบายใน Lesson 7: ทดสอบว่าสัมประสิทธิ์ของค่าเมื่อวานเท่ากับ 1 (random walk) หรือไม่</p>
 
 <figure>
 <img src="../assets/slides/ts3-p16.png" alt="Slide 3 หน้า 16: R-Example: ผล ADF test ของ global temperature" loading="lazy">
 <figcaption>Slide 3 หน้า 16 — R-Example: ผล ADF test ของ global temperature</figcaption>
 </figure>
 
-<p>ผลของการทดสอบกับข้อมูลอุณหภูมิตั้งแต่ปี 1900 มีค่าสถิติ Dickey-Fuller เท่ากับ −2.2512 ที่ Lag order 4 และ p-value เท่ากับ 0.4726 ค่าที่ใช้ตัดสินคือ p-value</p>
+<p>ผลกับข้อมูลอุณหภูมิตั้งแต่ปี 1900: Dickey-Fuller = −2.2512, Lag order = 4 และ <mark class="src" data-p="16">p-value = 0.4726</mark> ซึ่งมากกว่า 0.05 จึงไม่ปฏิเสธ \(H_0\) อาจารย์สรุปว่า "ไม่นิ่ง มันมี trend ไง" (Class 3, 1:05:31) ตรงกับ correlogram ในหัวข้อ 4 ค่า Lag order = 4 มาจากสูตรค่าเริ่มต้น \(\lfloor(n-1)^{1/3}\rfloor=\lfloor97^{1/3}\rfloor=\lfloor4.6\rfloor=4\)</p>
 
-<pre class="out" data-p="16"><code>&gt; library(tseries)
-&gt; adf.test(newtemp.1900)
-
-        Augmented Dickey-Fuller Test
-
-data:  newtemp.1900
-Dickey-Fuller = -2.2512, Lag order = 4, p-value = 0.4726
-alternative hypothesis: stationary</code></pre>
-
-<div class="calc">
-<div class="calc-title">อ่านผล ADF test ที่ระดับนัยสำคัญ 0.05</div>
-<ol class="steps">
-<li><div class="st-title">หา p-value</div><p><mark class="src" data-p="16">p-value = 0.4726</mark></p></li>
-<li><div class="st-title">เทียบกับ 0.05</div><p>0.4726 มากกว่า 0.05 จึงไม่ปฏิเสธ \(H_0\)</p></li>
-<li><div class="st-title">สรุป</div><p>ไม่มีหลักฐานเพียงพอว่า stationary จึงสรุปว่า global temperature ไม่ stationary ตรงกับ correlogram ในหน้า 14</p></li>
-</ol>
-<table class="compact">
-<tr><th>p-value</th><th>การตัดสิน</th><th>ข้อสรุป</th></tr>
-<tr><td>น้อยกว่า 0.05</td><td>ปฏิเสธ \(H_0\)</td><td>stationary</td></tr>
-<tr><td>ตั้งแต่ 0.05 ขึ้นไป</td><td>ไม่ปฏิเสธ \(H_0\)</td><td>ไม่ stationary</td></tr>
+<table>
+<tr><th>p-value</th><th>การตัดสิน</th><th>ข้อสรุป</th><th>ทำอะไรต่อ</th></tr>
+<tr><td>&lt; 0.05</td><td>ปฏิเสธ \(H_0\)</td><td>นิ่ง</td><td>สร้างโมเดลกับข้อมูลได้เลย</td></tr>
+<tr><td>≥ 0.05</td><td>ไม่ปฏิเสธ \(H_0\)</td><td>ไม่นิ่ง</td><td>กำจัด trend ก่อน (หัวข้อ 6–9)</td></tr>
 </table>
-<p>ทิศของการทดสอบนี้ต้องระวัง: \(H_0\) คือไม่ stationary p-value ที่ต่ำจึงหมายถึง stationary บรรทัด alternative hypothesis: stationary ในผลลัพธ์ช่วยเตือน ค่า Dickey-Fuller ที่ติดลบมากสนับสนุน stationary เทียบได้กับ −6.128 และ −2.0251 ใน Lesson 2 หน้า 21</p>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 3</span><span>ADF test</span></div>
-<div class="qtext">adf.test ให้ p-value = 0.4726 ข้อสรุปที่ระดับ 0.05 คือข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. 0.4726 มากกว่า 0.05 จึงไม่ปฏิเสธ">ปฏิเสธ \(H_0\) ข้อมูล stationary</button>
-<button class="opt" data-correct="false" data-note="ผิด. 0.4726 มากกว่า 0.05 จึงไม่ปฏิเสธ">ปฏิเสธ \(H_0\) ข้อมูลไม่ stationary</button>
-<button class="opt" data-correct="false" data-note="ผิด. H₀ คือไม่ stationary เมื่อไม่ปฏิเสธจึงสรุปว่าไม่ stationary">ไม่ปฏิเสธ \(H_0\) ข้อมูล stationary</button>
-<button class="opt" data-correct="true" data-note="ถูก. H₀ คือไม่ stationary และ p-value มากกว่า 0.05">ไม่ปฏิเสธ \(H_0\) ข้อมูลไม่ stationary</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 4</span><span>Correlogram</span></div>
-<div class="qtext">Correlogram ของข้อมูลชุดหนึ่ง (n = 100) มีค่า 0.82, 0.72, 0.68, 0.63 ที่ lag 1 ถึง 4 และยังเกินขอบที่ lag 15 ข้อสรุปคือข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. ACF ลดลงทีละน้อยในช่วงยาว">ไม่ stationary เพราะ ACF ลดลงช้า</button>
-<button class="opt" data-correct="false" data-note="ผิด. ACF ที่เป็นบวกไม่ได้บอก stationarity">stationary เพราะ ACF เป็นบวกทั้งหมด</button>
-<button class="opt" data-correct="false" data-note="ผิด. white noise มี ACF ภายในขอบทุก lag">เป็น white noise เพราะ ACF ลดลง</button>
-<button class="opt" data-correct="false" data-note="ผิด. ค่าเหล่านี้เกินขอบ 0.196 ทั้งหมด">stationary เพราะ ACF อยู่ในขอบ</button>
-</div>
-<div class="feedback"></div>
-</div>
 
 <div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 3 ถึง 5</div>
-<ul>
-<li>อ่าน correlogram: เข้าขอบทันทีคือ stationary ลดลงช้าคือไม่ stationary</li>
-<li>ขอบนัยสำคัญ \(\pm1.96/\sqrt n\) และที่มาจาก large sample distribution ของ white noise</li>
-<li>คำนวณ \(\bar X\), \(\hat\gamma\), \(\hat\rho\) ด้วยมือจากข้อมูลสั้น</li>
-<li>โค้ด <code>rnorm</code>, <code>ts</code>, <code>window</code>, <code>acf</code>, <code>adf.test</code></li>
-<li>สมมติฐานของ ADF test และการอ่าน p-value</li>
-</ul>
+<div class="label">อาจารย์ถามในคลิป: ใช้กราฟหรือใช้เทสดี</div>
+<p>อาจารย์บอกว่า "ทำสักอันเดียวพอ ไม่ต้องทำสองอย่าง" แล้วถามว่ามีข้อดีข้อเสียอย่างไร (Class 3, 1:05:51–1:06:06) คำตอบที่สรุปในห้องถอดเสียงไม่ได้ สรุปตามเนื้อหาได้ดังนี้ correlogram ใช้ง่าย เห็นรูปแบบทั้งหมดและบอกได้ว่าควรใช้โมเดลแบบไหนต่อ แต่ขึ้นกับสายตาของผู้ดู ส่วน ADF ให้คำตอบเป็นตัวเลขที่ทุกคนได้ตรงกัน แต่บอกแค่นิ่งหรือไม่นิ่ง และตรวจเฉพาะ trend แบบ unit root ไม่ได้ตรวจความแปรปรวนที่ไม่คงที่</p>
 </div>
 
 <!-- ===================================================== -->
-<h2 id="s6">6. Deterministic trend และ problem 1.6</h2>
+<h2 id="s6">6. Deterministic trend และวิธีจัดการสองวิธี</h2>
 
-<p>ครึ่งหลังของบทตอบคำถามว่า เมื่อข้อมูลไม่ stationary เพราะมี trend จะทำอย่างไร</p>
+<p>ครึ่งหลังของคาบตอบคำถามว่า เมื่อพบว่าไม่นิ่งเพราะมี trend จะทำอย่างไร อาจารย์บอกว่าอนุกรมที่ไม่นิ่งที่เจอบ่อยที่สุดคือแบบมี trend เริ่มจาก linear trend (เส้นตรง) ก่อน แล้วจึง quadratic (เส้นโค้ง) (Class 3, 1:10:10) และวาดภาพบนกระดาษว่าข้อมูลที่ขึ้นแบบซิกแซกคือเส้นตรงที่ถูก "ดึงขึ้นดึงลง" ด้วย noise (Class 3, 1:12:20)</p>
 
 <figure>
 <img src="../assets/slides/ts3-p18.png" alt="Slide 3 หน้า 18: Systematic Pattern" loading="lazy">
 <figcaption>Slide 3 หน้า 18 — Systematic Pattern</figcaption>
 </figure>
 
-<p>สมมติว่า time series มี <mark class="src" data-p="18">one systematic pattern</mark> อย่างน้อยหนึ่งแบบ แบบที่พบบ่อยที่สุดคือ <mark class="src" data-p="18">trends and seasonality.</mark> Trend โดยทั่วไปเป็น linear หรือ quadratic และการหา trend มักใช้ <mark class="src" data-p="18">moving averages or regression analysis</mark> ส่วน seasonality คือ trend ที่ซ้ำอย่างเป็นระบบตามเวลา คำว่า deterministic trend หมายถึง trend ที่เป็นฟังก์ชันที่แน่นอนของเวลา เช่น เส้นตรง \(\beta_1+\beta_2t\) ไม่มีส่วนสุ่มอยู่ในตัว trend</p>
+<p>สไลด์สมมติว่าอนุกรมมีรูปแบบที่เป็นระบบอย่างน้อยหนึ่งแบบ ที่พบบ่อยที่สุดคือ trend และ seasonality trend มักเป็นเส้นตรงหรือเส้นโค้งกำลังสอง และหาได้ด้วย moving average หรือ regression คำว่า deterministic trend หมายถึง trend ที่เป็นฟังก์ชันแน่นอนของเวลา เช่น เส้นตรง \(\beta_1+\beta_2t\) ไม่มีส่วนสุ่มในตัว trend ต่างจาก random walk ใน Lesson 1 ซึ่งเดินออกไปเพราะผลรวมของแรงกระแทกสุ่ม (stochastic trend)</p>
 
 <figure>
 <img src="../assets/slides/ts3-p19.png" alt="Slide 3 หน้า 19: Shumway problem 1.6 (หน้า 40)" loading="lazy">
 <figcaption>Slide 3 หน้า 19 — Shumway problem 1.6 (หน้า 40)</figcaption>
 </figure>
 
-<p>โจทย์พิจารณา \(X_t=\beta_1+\beta_2t+w_t\) โดย \(\beta_1\) และ \(\beta_2\) เป็นค่าคงที่ที่รู้ค่า และ \(w_t\) เป็น white noise ที่มีความแปรปรวน \(\sigma^2\) ให้ตัดสินว่า \(X_t\) stationary หรือไม่ โมเดลนี้คือเส้นตรงที่มี noise บวกเข้าไป</p>
+<p>โจทย์ในสไลด์ให้ตัดสินว่า \(X_t\) นิ่งหรือไม่ โดย \(\beta_1,\beta_2\) เป็นค่าคงที่ที่รู้ค่า และ \(w_t\) เป็น white noise ที่มีความแปรปรวน \(\sigma^2\) คำตอบอยู่ในกล่องข้างล่าง ข้อต่อ ๆ ไปของโจทย์เดียวกันอยู่ในหัวข้อ 7 (detrending) และหัวข้อ 9 (differencing)</p>
 
-<div class="calc" id="s6-calc">
-<div class="calc-title">Problem 1.6 ส่วนที่ 1: \(X_t\) stationary หรือไม่</div>
-<ol class="steps">
-<li><div class="st-title">Mean</div><p>\(E(X_t)=\beta_1+\beta_2t+E(w_t)=\beta_1+\beta_2t\)</p></li>
-<li><div class="st-title">ตรวจเงื่อนไขข้อแรก</div><p>ค่าเฉลี่ยมี t อยู่ เมื่อ \(\beta_2\ne0\) จึงขึ้นกับเวลา</p></li>
-<li><div class="st-title">Autocovariance (ดูประกอบ)</div><p>ค่าคงที่ไม่มีผลต่อ covariance: \(\mathrm{cov}(X_t,X_{t+h})=\mathrm{cov}(w_t,w_{t+h})\) เท่ากับ \(\sigma^2\) เมื่อ \(h=0\) และ 0 เมื่อ \(h\ne0\) ส่วนนี้ขึ้นกับ h เท่านั้น แต่ไม่ช่วย เพราะไม่ผ่านข้อแรกแล้ว</p></li>
+
+<div class="box exam">
+<div class="label">ข้อสอบเก่า: "ช่วยพรูฟหน่อยสิครับว่าทำไมมันไม่ stationary" (Class 3, 1:19:32)</div>
+<p>โมเดล \(X_t=\beta_1+\beta_2t+w_t\) (อาจารย์เขียนบนกระดาษเป็น \(\beta_0+\beta_1t\) และบอกว่า "ผมแค่เปลี่ยนชื่อ" บทเรียนนี้ใช้ตามสไลด์)</p>
+<ol>
+<li>\(E(X_t)=\beta_1+\beta_2t+E(w_t)=\beta_1+\beta_2t\) เพราะ \(\beta_1+\beta_2t\) "เป็นแค่ค่า ไม่ใช่ตัวแปรสุ่ม" (Class 3, 1:20:45)</li>
+<li>\(\gamma(h)=\mathrm{cov}(w_t,w_{t+h})\) เท่ากับ \(\sigma^2\) เมื่อ h = 0 และ 0 เมื่อ h ≠ 0 ไม่ขึ้นกับ t อาจารย์บอกว่า "variance ผ่าน autocovariance ผ่าน"</li>
+<li>แต่ mean ขึ้นกับ t เมื่อ \(\beta_2\ne0\) จึงไม่นิ่ง</li>
 </ol>
-<div class="answer">\(X_t\) ไม่ stationary สาเหตุคือ deterministic trend \(\beta_2t\) ใน mean เท่านั้น</div>
-<p>ตัวอย่างตัวเลข: \(\beta_1=10\), \(\beta_2=2\) ได้ \(E(X_1)=12\) และ \(E(X_{50})=110\) ค่าเฉลี่ยต่างกันชัดเจน เนื่องจากปัญหาอยู่ที่ mean อย่างเดียว ถ้ากำจัด trend ออกได้ ส่วนที่เหลือจะ stationary</p>
+<p>อาจารย์สรุปว่า "เวลาจะแก้ปัญหาตรงนี้ แก้ที่ mean" (Class 3, 1:22:34) ตัวอย่างตัวเลข: \(\beta_1=10,\beta_2=2\) ได้ \(E(X_1)=12\) แต่ \(E(X_{50})=110\) ปัญหาอยู่ที่ค่าเฉลี่ยอย่างเดียว ถ้าเอา trend ออกได้ ส่วนที่เหลือจะนิ่ง</p>
 </div>
+
 
 <figure>
 <img src="../assets/slides/ts3-p20.png" alt="Slide 3 หน้า 20: Exploratory Data Analysis (หน้า 57)" loading="lazy">
 <figcaption>Slide 3 หน้า 20 — Exploratory Data Analysis (หน้า 57)</figcaption>
 </figure>
 
-<p>เมื่อได้ข้อมูล time series วัตถุประสงค์หลักของ EDA คือตัดสินว่าโมเดลใดอธิบายข้อมูลได้อย่างสมเหตุสมผล เมื่อข้อมูลดู stationary คำนวณ <mark class="src" data-p="20">sample autocorrelations,</mark> แล้วใช้เลือกโมเดลได้ แต่ <mark class="src" data-p="20">many time series do not appear stationary</mark> เช่น Johnson and Johnson earning และ global temperature เนื่องจากต้องการใช้โมเดล stationary ถ้ามี deterministic trend จึงต้องนำออก ซึ่งทำได้ <mark class="src" data-p="20">two ways</mark></p>
+<p>เป้าหมายของการสำรวจข้อมูลคือตัดสินว่าโมเดลแบบไหนอธิบายข้อมูลได้ ถ้าข้อมูลดูนิ่ง ให้คำนวณ <mark class="src" data-p="20">sample autocorrelations,</mark> แล้วใช้เลือกโมเดล แต่ <mark class="src" data-p="20">many time series do not appear stationary</mark> เช่น กำไรของ Johnson and Johnson และ global temperature เมื่อต้องการใช้โมเดลที่นิ่ง และข้อมูลมี deterministic trend จึงต้องเอา trend ออก ซึ่งทำได้ <mark class="src" data-p="20">two ways</mark></p>
 
 <figure>
 <img src="../assets/slides/ts3-p21.png" alt="Slide 3 หน้า 21: 2 ways to deal with deterministic trend" loading="lazy">
 <figcaption>Slide 3 หน้า 21 — 2 ways to deal with deterministic trend</figcaption>
 </figure>
 
-<p>วิธีแรก <mark class="src" data-p="21">1. Detrending: estimate the trend and then subtract the estimated trend from data (perhaps after transforming data). We can use regression methods in this approach.</mark> วิธีที่สอง <mark class="src" data-p="21">2. Differencing: developed by Box and Jenkins. The concept is to apply differencing repeatedly to the series X_t until the differenced observation resemble a realization of a stationary time series</mark> เปรียบเทียบได้กับการกำจัดความลาดเอียงของถนนออกจากข้อมูลความสูง Detrending วัดความลาดเอียงก่อนแล้วลบออก ส่วน differencing ดูเฉพาะความต่างระหว่างก้าวที่ติดกัน โดยไม่ต้องรู้ว่าความลาดเอียงเป็นเท่าใด</p>
-
-<table>
-<tr><th></th><th>Detrending</th><th>Differencing</th></tr>
-<tr><td>แนวคิด</td><td>ประมาณ trend แล้วลบออก</td><td>ลบค่าก่อนหน้าออกจากค่าปัจจุบัน</td></tr>
-<tr><td>เครื่องมือ</td><td>regression</td><td>\(\nabla X_t=X_t-X_{t-1}\)</td></tr>
-<tr><td>ผู้พัฒนาแนวทาง</td><td></td><td>Box และ Jenkins</td></tr>
-<tr><td>อธิบายที่</td><td><a href="#s7">หัวข้อ 7</a> และ <a href="#s8">8</a></td><td><a href="#s9">หัวข้อ 9</a></td></tr>
-</table>
+<p>วิธีแรก detrending: ประมาณ trend แล้วลบออกจากข้อมูล ใช้ regression ได้ วิธีที่สอง differencing ที่ Box และ Jenkins พัฒนา: ทำผลต่างซ้ำจนผลต่างดูเหมือนอนุกรมที่นิ่ง อาจารย์บอกว่า "ในวิชานี้เราจะจัดการ trend อยู่สองวิธี" และใน decomposition (Lesson 4) จะใช้ regression หรือ moving average หา trend (Class 3, 1:19:02, 1:24:07) เปรียบเทียบกับการเอาความลาดชันของถนนออกจากข้อมูลความสูง detrending วัดความลาดชันก่อนแล้วลบออก differencing ดูแค่ความต่างของก้าวที่ติดกัน โดยไม่ต้องรู้ความลาดชัน</p>
 
 <!-- ===================================================== -->
-<h2 id="s7">7. Detrending</h2>
+<h2 id="s7">7. Detrending และ problem 1.6</h2>
 
 <figure>
 <img src="../assets/slides/ts3-p22.png" alt="Slide 3 หน้า 22: 1. Detrending" loading="lazy">
 <figcaption>Slide 3 หน้า 22 — 1. Detrending</figcaption>
 </figure>
 
-<p>แนวทางที่ใช้ทั่วไปอิง <mark class="src" data-p="22">decomposition</mark> ในรูป \(X_t=\mu_t+Y_t\) โดย time series ที่สังเกตได้เป็นผลรวมของส่วน mean \(\mu_t\) และ process \(\{Y_t\}\) ที่มีค่าเฉลี่ยศูนย์ รูปนี้ตรงกับ signal บวก noise ใน Lesson 1 โดย \(\mu_t\) คือ signal</p>
+<p>แนวคิดของ detrending คือมองข้อมูลเป็น \(X_t=\mu_t+Y_t\) ส่วนแรก \(\mu_t\) คือค่าเฉลี่ยที่เปลี่ยนตามเวลา (trend) ส่วนหลัง \(Y_t\) คือส่วนสุ่มที่มีค่าเฉลี่ย 0 รูปนี้คือ signal บวก noise ใน Lesson 1</p>
 
 <figure>
 <img src="../assets/slides/ts3-p23.png" alt="Slide 3 หน้า 23: 1. Detrending (ต่อ)" loading="lazy">
 <figcaption>Slide 3 หน้า 23 — 1. Detrending (ต่อ)</figcaption>
 </figure>
 
-<p>\(\mu_t\) เป็น deterministic “trend” function ซึ่งมักเป็น “truth” หรือ “signal” ส่วน error \(\{Y_t\}\) เป็นส่วนสุ่มที่ <mark class="src" data-p="23">may or may not</mark> be stationary แต่สมมติว่ามีค่าเฉลี่ยศูนย์ ขั้นตอนคือหาค่าประมาณที่สมเหตุสมผลของ trend เขียนว่า \(\hat\mu_t\) แล้วทำงานกับ residuals \(\hat Y_t=X_t-\hat\mu_t\) จุดที่ต้องสังเกตคือ การลบ trend ออกไม่ได้รับประกันว่า residual จะ stationary ต้องตรวจอีกครั้ง</p>
+<p>\(\mu_t\) เป็น deterministic trend ซึ่งมักถือเป็น "truth" หรือ "signal" ส่วน \(Y_t\) อาจนิ่งหรือไม่นิ่งก็ได้ แต่มีค่าเฉลี่ย 0 ขั้นตอนคือหาค่าประมาณ \(\hat\mu_t\) แล้วทำงานกับ residual \(\hat Y_t=X_t-\hat\mu_t\) ข้อควรระวัง: การลบ trend ออกไม่ได้รับประกันว่า residual จะนิ่ง ต้องตรวจซ้ำเสมอ ซึ่งเป็นสิ่งที่เกิดกับข้อมูลอุณหภูมิในหัวข้อ 8</p>
 
 <figure>
 <img src="../assets/slides/ts3-p24.png" alt="Slide 3 หน้า 24: Back to problem 1.6: detrending" loading="lazy">
 <figcaption>Slide 3 หน้า 24 — Back to problem 1.6: detrending</figcaption>
 </figure>
 
-<p>โจทย์ให้แสดงว่า process \(Y_t\) <mark class="src" data-p="24">(i.e. detrending)</mark> ที่นิยามว่า \(Y_t=X_t-E(X_t)=X_t-(\beta_1+\beta_2t)\) เป็น stationary process</p>
+<p>โจทย์ให้แสดงว่า <mark class="src" data-p="24">(i.e. detrending)</mark> \(Y_t=X_t-(\beta_1+\beta_2t)\) เป็นอนุกรมที่นิ่ง อาจารย์ทำข้อนี้ในห้อง และบอกว่า differencing ให้เป็นการบ้าน (Class 3, 1:30:36)</p>
 
-<div class="calc" id="s7-calc">
-<div class="calc-title">Problem 1.6 ส่วนที่ 2: detrending</div>
+<div class="calc" id="s7-detrend">
+<div class="calc-title">Problem 1.6 ส่วนที่ 2: detrending ทำให้นิ่ง (Class 3, 1:30:36–1:32:03)</div>
 <ol class="steps">
-<li><div class="st-title">แทน \(X_t\)</div><p>\(Y_t=(\beta_1+\beta_2t+w_t)-(\beta_1+\beta_2t)\)</p></li>
-<li><div class="st-title">ตัดพจน์</div><p>\(Y_t=w_t\)</p></li>
-<li><div class="st-title">Mean</div><p>\(E(Y_t)=0\) ไม่ขึ้นกับ t</p></li>
-<li><div class="st-title">Autocovariance</div><p>\(\gamma(h)=\sigma^2\) เมื่อ \(h=0\) และ 0 เมื่อ \(h\ne0\) ขึ้นกับ h เท่านั้น</p></li>
+<li><div class="st-title">แทน \(X_t\)</div><p>\(Y_t=(\beta_1+\beta_2t+w_t)-(\beta_1+\beta_2t)=w_t\)</p></li>
+<li><div class="st-title">Mean</div><p>\(E(Y_t)=(\beta_1+\beta_2t)-(\beta_1+\beta_2t)+E(w_t)=0\) ไม่ขึ้นกับ t</p></li>
+<li><div class="st-title">Autocovariance</div><p>covariance เหมือนเดิม: \(\sigma^2\) เมื่อ h = 0 และ 0 เมื่อ h ≠ 0</p></li>
 </ol>
-<div class="answer">\(Y_t\) คือ white noise จึง stationary</div>
-<p>ในโจทย์นี้รู้ค่า \(\beta_1\) และ \(\beta_2\) จริง เมื่อลบ trend ออกจึงเหลือ white noise พอดี ในข้อมูลจริงต้องประมาณ \(\beta\) และ noise ก็ไม่จำเป็นต้องเป็น white noise ตามตัวอย่างในหัวข้อ 8</p>
+<div class="answer">\(Y_t\) คือ white noise จึงนิ่ง</div>
 </div>
+
+<p>อาจารย์เทียบกับ regression ว่า residual คือ \(Y-\hat Y\) "พอตอนนี้เป็น time series คุณแค่เอา residual ไปวิเคราะห์ต่อ" (Class 3, 1:33:18) และย้ำว่าไม่ได้ทิ้ง trend: "เอาเก็บไว้ก่อน วิเคราะห์ \(D_t\) แล้วสุดท้ายบวกกลับ" (Class 3, 1:28:53) เช่นถ้าพยากรณ์ residual ปีหน้าได้ 0.05 และ trend ปีหน้าเท่ากับ 0.20 ค่าพยากรณ์ของข้อมูลเดิมคือ 0.25 ในโจทย์นี้ผลออกมาเป็น white noise พอดีเพราะรู้ \(\beta\) จริง ในข้อมูลจริงต้องประมาณ \(\beta\) และ residual ไม่จำเป็นต้องเป็น white noise</p>
 
 <figure>
 <img src="../assets/slides/ts3-p25.png" alt="Slide 3 หน้า 25: 1. Detrending: การประมาณ trend" loading="lazy">
 <figcaption>Slide 3 หน้า 25 — 1. Detrending: การประมาณ trend</figcaption>
 </figure>
 
-<p>ถ้า \(\mu_t\) มีรูปแบบที่เป็นพารามิเตอร์ ประมาณได้ เช่น ด้วย least squares แล้วลบออกเพื่อได้ residuals รูปแบบของ trend อาจเป็น <mark class="src" data-p="25">linear, higher degree polynomial</mark> หรือ basis functions ที่เหมาะสม หรือฟังก์ชันอื่นตามทฤษฎี Residuals เป็นตัวแทนของค่า \(Y_t\) ที่สังเกตไม่ได้ จึงใช้ residuals ตัดสินโครงสร้างหรือโมเดลของ \(Y_t\) residuals อาจ weakly stationary อยู่แล้ว ถ้ายังไม่ ต้องสร้างโมเดลต่อ</p>
+<p>ถ้า \(\mu_t\) มีรูปแบบที่เขียนด้วยพารามิเตอร์ได้ ให้ประมาณด้วย least squares แล้วลบออก รูปแบบของ trend อาจเป็น <mark class="src" data-p="25">linear, higher degree polynomial</mark> หรือฟังก์ชันอื่นตามทฤษฎี residual เป็นตัวแทนของ \(Y_t\) ที่มองไม่เห็น จึงใช้ residual ตัดสินว่า \(Y_t\) มีโครงสร้างอะไร ถ้า residual นิ่งแล้วก็ใช้ได้ ถ้ายังไม่นิ่ง ต้องทำต่อ</p>
 
 <!-- ===================================================== -->
-<h2 id="s8">8. Example: Global temperature</h2>
+<h2 id="s8">8. ตัวอย่าง global temperature: fit เส้นตรงด้วย R</h2>
 
 <figure>
 <img src="../assets/slides/ts3-p26.png" alt="Slide 3 หน้า 26: Example: Global Temperature (หน้า 58)" loading="lazy">
 <figcaption>Slide 3 หน้า 26 — Example: Global Temperature (หน้า 58)</figcaption>
 </figure>
 
-<p><mark class="src" data-p="26">Global temperature data</mark> “Global warming” หมายถึงการเพิ่มขึ้นของอุณหภูมิเฉลี่ยของอากาศใกล้ผิวโลกและมหาสมุทรตั้งแต่กลางศตวรรษที่ 20 ข้อมูลเป็น annual temperature deviations ตั้งแต่ <mark class="src" data-p="26">1900</mark> ถึง 1997 มี 98 ค่า วัดปีละครั้ง ค่าเริ่มที่ประมาณ −0.2 ถึง −0.5 ในทศวรรษ 1900 และเพิ่มถึงประมาณ 0.4 ในปลายทศวรรษ 1990</p>
+<p>ข้อมูล <mark class="src" data-p="26">Global temperature data</mark> คือค่าเบี่ยงเบนของอุณหภูมิเฉลี่ยโลกรายปีตั้งแต่ <mark class="src" data-p="26">1900</mark> ถึง 1997 รวม 98 ค่า ("global warming" หมายถึงการที่อุณหภูมิเฉลี่ยใกล้ผิวโลกและมหาสมุทรเพิ่มขึ้นตั้งแต่กลางศตวรรษที่ 20) ในคลิปอาจารย์พูดว่า 97 จุด แต่ปี 1900 ถึง 1997 นับได้ 98 ปี และ output ของ R มี residual 96 องศาอิสระ ซึ่งเท่ากับ 98 − 2 ข้อมูลจึงมี 98 จุด</p>
 
 <figure>
 <img src="../assets/slides/ts3-p27.png" alt="Slide 3 หน้า 27: การ fit เส้นตรง และสมมติฐานของ regression" loading="lazy">
 <figcaption>Slide 3 หน้า 27 — การ fit เส้นตรง และสมมติฐานของ regression</figcaption>
 </figure>
 
-<p>ข้อมูลมี <mark class="src" data-p="27">apparent upward trend</mark> จึงประมาณ trend ด้วยการ fit straight line regression model \(X_t=\beta_1+\beta_2t+Y_t\) สำหรับ \(t=1900,1901,\dots,1997\) สไลด์ทวนสมมติฐานสี่ข้อของ error ใน <mark class="src" data-p="27">standard regression setting</mark> คือ zero mean, independence, homoscedasticity และ normality แต่ในข้อมูล time series ส่วนใหญ่ อย่างน้อยหนึ่งข้อจะไม่เป็นจริง ข้อที่ไม่เป็นจริงบ่อยที่สุดคือ independence เพราะข้อมูล time series มี autocorrelation</p>
+<p>ข้อมูลมี <mark class="src" data-p="27">apparent upward trend</mark> จึงประมาณ trend ด้วยการ fit เส้นตรง \(X_t=\beta_1+\beta_2t+Y_t\) สำหรับ t = 1900, …, 1997 อาจารย์ย้ำว่าเป็น simple linear regression ตัวแปรต้นคือ t ซึ่งเป็นแค่ตัวบอกเวลา และวัตถุประสงค์ต่างจากวิชา regression: "ในวิชาอื่นสนใจ causal effect ของ X ต่อ Y แต่ในวิชานี้เราแค่อยากจะได้ intercept กับ slope แค่นั้นเอง ... มันจะมีนัยสำคัญ R² จะสูง กูไม่สนใจ" (Class 3, 1:15:46–1:17:49) สไลด์ทวนสมมติฐานสี่ข้อของ error ใน <mark class="src" data-p="27">standard regression setting</mark> คือค่าเฉลี่ย 0, อิสระต่อกัน, ความแปรปรวนคงที่ และแจกแจงปกติ ในอนุกรมเวลา ข้อที่มักไม่จริงคือความเป็นอิสระ เพราะข้อมูลมี autocorrelation</p>
 
 <figure>
 <img src="../assets/slides/ts3-p28.png" alt="Slide 3 หน้า 28: ผลของสมมติฐานที่ไม่เป็นจริง" loading="lazy">
 <figcaption>Slide 3 หน้า 28 — ผลของสมมติฐานที่ไม่เป็นจริง</figcaption>
 </figure>
 
-<p>ผลคือ standard errors ของตัวประมาณ, confidence intervals, t-tests และ probability values ที่โปรแกรมเช่น R ให้มา จะไม่มีความหมาย ค่าเหล่านี้ถูกต้องเฉพาะเมื่อ \(Y_t\) เป็น zero-mean white noise ดังนั้นเพื่อให้ใช้ผลของ lm-fit ได้ ต้องมี white noise errors คือ <mark class="src" data-p="28">the ACF of the residuals must be approximately zero</mark> ที่ทุก lag \(|h|\ge1\) ค่าประมาณของเส้นตรงเองยังใช้เป็น trend ได้ สิ่งที่เชื่อไม่ได้คือค่าที่บอกความแม่นของค่าประมาณ</p>
+<p>เมื่อ error ไม่อิสระต่อกัน standard error, ช่วงความเชื่อมั่น, t-test และ p-value ที่ R พิมพ์ออกมาจะไม่มีความหมาย ค่าเหล่านี้ถูกต้องเฉพาะเมื่อ \(Y_t\) เป็น white noise เงื่อนไขที่ต้องตรวจจึงเป็น <mark class="src" data-p="28">the ACF of the residuals must be approximately zero</mark> ที่ทุก lag ≥ 1 ค่าประมาณของเส้นตรงยังใช้เป็น trend ได้ สิ่งที่เชื่อไม่ได้คือตัวเลขที่บอกความแม่นของค่าประมาณ นี่สอดคล้องกับที่อาจารย์บอกว่าไม่ต้องสนใจ p-value ในวิชานี้</p>
+
+<pre><code>temp.1900 &lt;- window(ts(read.table("temp.txt"), start = 1856), start = 1900)
+fit &lt;- lm(temp.1900 ~ time(temp.1900))     # หรือ t &lt;- 1900:1997; fit &lt;- lm(temp.1900 ~ t)
+summary(fit)
+plot(temp.1900, type = "o"); abline(fit)
+plot(resid(fit), type = "o")
+par(mfrow = c(2, 1))
+acf(temp.1900); acf(resid(fit))</code></pre>
+<pre class="out">Coefficients:
+                 Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)    -1.219e+01  9.032e-01  -13.49   &lt;2e-16
+time(temp.1900) 6.209e-03  4.635e-04   13.40   &lt;2e-16
+Residual standard error: 0.1298 on 96 degrees of freedom
+Multiple R-squared:  0.6515</pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>lm(temp.1900 ~ time(temp.1900))</td><td>fit เส้นตรงด้วย OLS ซึ่งทำให้ผลรวมกำลังสองของ error ต่ำสุด <code>time()</code> ให้ปี 1900, 1901, … เป็นตัวแปรต้น (Class 3, 1:37:15)</td></tr>
+<tr><td>t &lt;- 1900:1997</td><td>ทางเลือกที่สองในไฟล์ของอาจารย์ สร้างตัวแปรเวลาเอง ได้ผลเท่ากัน</td></tr>
+<tr><td>abline(fit)</td><td>วาดเส้น trend ทับกราฟข้อมูล</td></tr>
+<tr><td>resid(fit)</td><td>residual = ข้อมูลลบเส้น trend คือ \(\hat Y_t\)</td></tr>
+<tr><td>par(mfrow = c(2, 1)); acf(...)</td><td>วาด ACF ของข้อมูลเดิมกับของ residual ซ้อนกันเพื่อเทียบ</td></tr>
+</table>
 
 <figure>
 <img src="../assets/slides/ts3-p29.png" alt="Slide 3 หน้า 29: เส้น trend ที่ fit ได้" loading="lazy">
 <figcaption>Slide 3 หน้า 29 — เส้น trend ที่ fit ได้</figcaption>
 </figure>
 
-<p>เส้นตรงที่ fit ได้คือ \(\hat\mu_t=-12.19+0.0062t\) เส้นนี้ผ่านกลางกลุ่มจุดจากประมาณ −0.4 ในปี 1900 ถึงประมาณ 0.2 ในปี 1997 จุดจริงหลายช่วงอยู่เหนือเส้นติดกันยาว เช่น ปี 1937 ถึง 1945 และอยู่ใต้เส้นติดกันยาว เช่น ปี 1904 ถึง 1912 เป็นสัญญาณแรกว่า residual จะยังมี autocorrelation</p>
+<p>เส้นที่ได้คือ \(\hat\mu_t=-12.19+0.0062t\) อาจารย์อ่าน output นี้ในคลิป (Class 3, 1:39:18) เส้นผ่านกลางกลุ่มจุดจากราว −0.4 ในปี 1900 ถึงราว 0.2 ในปี 1997 จุดจริงหลายช่วงอยู่เหนือเส้นติดกันยาว เช่น ปี 1937 ถึง 1945 และอยู่ใต้เส้นติดกันยาว เช่น ปี 1904 ถึง 1912 ซึ่งเป็นสัญญาณแรกว่า residual ยังมี autocorrelation</p>
 
-<div class="calc">
+<div class="calc" id="s8-read">
 <div class="calc-title">อ่านสมการ \(\hat\mu_t=-12.19+0.0062t\)</div>
 <ol class="steps">
-<li><div class="st-title">ความชัน</div><p>0.0062 หมายถึงอุณหภูมิเฉลี่ยเพิ่ม 0.0062 องศาต่อปี หรือ 0.62 องศาต่อ 100 ปี</p></li>
-<li><div class="st-title">ค่า trend ของปี 1900</div><p>\(-12.19+0.0062(1900)=-12.19+11.78=-0.41\)</p></li>
-<li><div class="st-title">ค่า trend ของปี 1997</div><p>\(-12.19+0.0062(1997)=-12.19+12.38=0.19\)</p></li>
-<li><div class="st-title">Residual</div><p>\(\hat Y_t=X_t-\hat\mu_t\) เช่น ปี 1997 ที่ \(X_t=0.43\) ได้ \(0.43-0.19=0.24\)</p></li>
+<li><div class="st-title">ความชัน</div><p>อุณหภูมิเฉลี่ยเพิ่ม 0.0062 องศาต่อปี หรือ 0.62 องศาต่อ 100 ปี</p></li>
+<li><div class="st-title">ค่า trend ปี 1900</div><p>\(-12.19+0.0062(1900)=-12.19+11.78=-0.41\)</p></li>
+<li><div class="st-title">ค่า trend ปี 1997</div><p>\(-12.19+0.0062(1997)=-12.19+12.38=0.19\)</p></li>
+<li><div class="st-title">Residual ปี 1997</div><p>ค่าจริง 0.43 จึงได้ \(\hat Y=0.43-0.19=0.24\)</p></li>
+<li><div class="st-title">ค่าคงที่ −12.19</div><p>คือค่าของเส้นที่ปี 0 ดูแปลกเพราะ t เป็นเลขปีจริง ไม่มีความหมายเชิงอุณหภูมิ ถ้าใช้ t = 1, 2, …, 98 แทนเลขปี ค่าคงที่จะเป็นราว −0.40 แต่ความชันเท่าเดิม (ค่าในข้อ 2–4 ใช้สัมประสิทธิ์ที่ปัดแล้ว ถ้าใช้ค่าเต็ม −12.18641 และ 0.006209 ค่า trend ปี 1900 คือ −0.389)</p></li>
 </ol>
-<p>ค่าคงที่ −12.19 ดูผิดปกติเพราะ t เป็นเลขปีจริง ไม่ใช่ 1, 2, 3 ค่านี้คือค่าของเส้นที่ปี 0 ซึ่งไม่มีความหมายเชิงอุณหภูมิ</p>
 </div>
 
 <figure>
@@ -491,55 +426,41 @@ alternative hypothesis: stationary</code></pre>
 <figcaption>Slide 3 หน้า 30 — Residuals หลัง detrending</figcaption>
 </figure>
 
-<p>Residual แกว่งระหว่างประมาณ −0.3 ถึง 0.33 รอบ 0 ตลอด 98 ปี trend หายไป สไลด์ระบุว่าดู stationary มากกว่าข้อมูลเดิม แต่เตือนว่าค่อนข้างแน่ใจได้ว่า residuals ไม่ใช่ white noise ค่าเกาะกลุ่มเป็นช่วงยาว เช่น ประมาณปีที่ 1 ถึง 15 ส่วนใหญ่ติดลบระหว่าง −0.1 ถึง −0.2 และปีที่ 38 ถึง 48 ส่วนใหญ่เป็นบวกระหว่าง 0.1 ถึง 0.33 ค่าที่อยู่ติดกันไปทางเดียวกัน จึงยังมี autocorrelation</p>
+<p>residual แกว่งระหว่างราว −0.3 ถึง 0.33 รอบ 0 ตลอด 98 ปี trend หายไป อาจารย์บอกว่า "residual จะนิ่งแล้ว แต่มันจะมี seasonal อะไร เดี๋ยวว่ากันทีหลัง" (Class 3, 1:33:53) สไลด์เตือนว่าค่อนข้างแน่ใจว่า residual ไม่ใช่ white noise เพราะค่าเกาะกลุ่มเป็นช่วงยาว ช่วงต้นส่วนใหญ่ติดลบ ช่วงปีที่ 38 ถึง 48 ส่วนใหญ่เป็นบวก ค่าที่อยู่ติดกันไปทางเดียวกัน</p>
 
 <figure>
 <img src="../assets/slides/ts3-p31.png" alt="Slide 3 หน้า 31: ACF ก่อนและหลัง detrending" loading="lazy">
 <figcaption>Slide 3 หน้า 31 — ACF ก่อนและหลัง detrending</figcaption>
 </figure>
 
-<p>ACF ของข้อมูลเดิมมีค่าประมาณ 0.82 ที่ lag 1 และเกินขอบ 0.2 จนถึงประมาณ lag 16 ส่วน ACF ของ residuals หลัง detrending มีค่าประมาณ 0.54 ที่ lag 1, 0.28 ที่ lag 2, 0.3 ที่ lag 4, 0.28 ที่ lag 6 และเข้าขอบตั้งแต่ประมาณ lag 7 การ detrend ทำให้ค่าที่ lag 1 ลดจาก 0.82 เหลือ 0.54 และ lag สุดท้ายที่เกินขอบลดจากประมาณ 16 เหลือประมาณ 6 แต่ค่าที่ lag 1 ยังเกินขอบชัดเจน เงื่อนไขที่ ACF ของ residuals ต้องประมาณศูนย์ที่ทุก lag จึงไม่ผ่าน standard error และ p-value ของ <code>lm()</code> ยังเชื่อถือไม่ได้ และ detrending อย่างเดียวไม่เพียงพอสำหรับข้อมูลชุดนี้</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 5</span><span>Detrending</span></div>
-<div class="qtext">หลัง fit เส้นตรงให้ global temperature ACF ของ residuals ที่ lag 1 ยังเป็น 0.54 (ขอบคือ 0.2) ข้อสรุปใดถูก</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. residuals ยังมี autocorrelation จึงไม่ใช่ white noise">residuals เป็น white noise ใช้ p-value ของ lm ได้</button>
-<button class="opt" data-correct="false" data-note="ผิด. ค่าประมาณของเส้นยังใช้เป็น trend ได้ สิ่งที่เชื่อไม่ได้คือ standard error">เส้นตรงที่ได้ผิด ต้องทิ้งค่าประมาณทั้งหมด</button>
-<button class="opt" data-correct="true" data-note="ถูก. เงื่อนไข ACF ของ residuals ประมาณศูนย์ไม่ผ่าน">residuals ไม่ใช่ white noise ใช้ p-value ของ lm ไม่ได้</button>
-<button class="opt" data-correct="false" data-note="ผิด. trend ลดลงแล้ว ACF ที่ lag 1 ลดจาก 0.82 เหลือ 0.54">detrending ไม่ได้ลด trend ของข้อมูลเลยแม้แต่น้อย</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 6 ถึง 8</div>
-<ul>
-<li>พิสูจน์ว่า \(X_t=\beta_1+\beta_2t+w_t\) ไม่ stationary และ \(Y_t=X_t-(\beta_1+\beta_2t)\) stationary</li>
-<li>สองวิธีกำจัด deterministic trend: detrending และ differencing</li>
-<li>รูป \(X_t=\mu_t+Y_t\) และ residuals \(\hat Y_t=X_t-\hat\mu_t\)</li>
-<li>สมมติฐานสี่ข้อของ error ใน regression และเหตุผลที่ผลของ lm ใช้ไม่ได้เมื่อ residuals ไม่ใช่ white noise</li>
-<li>อ่านสมการ trend และเทียบ ACF ก่อนกับหลัง detrending</li>
-</ul>
-</div>
+<p>ค่าที่รันจริงเทียบกันดังนี้ อาจารย์สรุปว่า ACF ของข้อมูลเดิม "ลงช้า ๆ" ส่วนของ residual "ดีขึ้น" (Class 3, 1:41:17–1:42:20)</p>
+<table>
+<tr><th>lag</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>lag สุดท้ายที่เกินเส้น 0.202</th></tr>
+<tr><td>ข้อมูลเดิม</td><td>0.819</td><td>0.720</td><td>0.657</td><td>0.666</td><td>0.632</td><td>0.613</td><td>0.559</td><td>16</td></tr>
+<tr><td>residual</td><td>0.530</td><td>0.273</td><td>0.184</td><td>0.293</td><td>0.278</td><td>0.278</td><td>0.192</td><td>6</td></tr>
+</table>
+<p>การ detrend ลด lag 1 จาก 0.819 เหลือ 0.530 และลด lag สุดท้ายที่เกินเส้นจาก 16 เหลือ 6 แต่ lag 1 ยังเกินเส้นมาก เงื่อนไขที่ ACF ของ residual ต้องเป็นศูนย์จึงไม่ผ่าน มีข้อสังเกตเพิ่มอีกข้อ: ถ้ารัน <code>adf.test(resid(fit))</code> จะได้ Dickey-Fuller = −2.2512 และ p-value = 0.4726 เท่ากับข้อมูลเดิมทุกหลัก เพราะ <code>adf.test</code> ของ tseries ใส่เส้นตรงตามเวลาไว้ในสมการทดสอบอยู่แล้ว การลบเส้นตรงออกก่อนจึงไม่เปลี่ยนผล และผลบอกว่ายังมีลักษณะไม่นิ่งเหลืออยู่ นี่คือเหตุผลที่ข้อมูลชุดนี้ต้องใช้ differencing</p>
 
 <!-- ===================================================== -->
-<h2 id="s9">9. Differencing</h2>
+<h2 id="s9">9. Differencing และ backshift operator</h2>
+
+<p>อาจารย์บอกว่า "ตัวที่ popular กว่าคือ differencing ตัวที่เข้าใจง่ายกว่าสำหรับคนที่ไม่เคยเรียนเลยคือ detrend" และ "ผมเน้น differencing" (Class 3, 1:28:39, 1:42:51) บนกระดาษอาจารย์เขียนเทียบสองวิธีไว้ชัด: detrending คือ \(D_t=Y_t-T_t\) ลบเส้น trend ที่เวลาเดียวกัน ส่วน differencing คือ \(\nabla Y_t=Y_t-Y_{t-1}\) ลบตัวที่ติดกัน "สองตัวนี้ remove แก้ไขปัญหา non-stationary ทั้งคู่" (Class 3, 1:26:58–1:28:39)</p>
 
 <figure>
 <img src="../assets/slides/ts3-p32.png" alt="Slide 3 หน้า 32: 2. Differencing" loading="lazy">
 <figcaption>Slide 3 หน้า 32 — 2. Differencing</figcaption>
 </figure>
 
-<p>ข้อมูลบางชุด เช่น global temperature ยังดูไม่ stationary หลัง <mark class="src" data-p="32">detrending</mark> แนวทางที่เป็นไปได้คือ differencing แทนที่จะ fit deterministic model เพื่อกำจัด linear trend ให้พิจารณา <mark class="src" data-p="32">the first difference process ∇X_t</mark> โดย \(\nabla X_t=X_t-X_{t-1}\) การหาผลต่างเป็นวิธีที่ได้ผลในการกำจัดรูปแบบที่ไม่ stationary</p>
+<p>ข้อมูลบางชุด เช่น global temperature ยังดูไม่นิ่งหลัง <mark class="src" data-p="32">detrending</mark> ทางเลือกคือ differencing แทนการ fit โมเดล trend ให้พิจารณา <mark class="src" data-p="32">the first differenceprocess ∇𝑋𝑡</mark> คือ \(\nabla X_t=X_t-X_{t-1}\) อาจารย์ให้ "จดคำว่า differencing" และบอกว่าต่างประเทศใช้สัญลักษณ์ ∇ (nabla) ส่วน "คนไทยใช้" Δ ซึ่งหมายถึงสิ่งเดียวกัน (Class 3, 1:43:06–1:43:44)</p>
 
-<div class="calc">
-<div class="calc-title">ตัวอย่างตัวเลข: differencing กำจัด trend เส้นตรง</div>
+<div class="calc" id="s9-table">
+<div class="calc-title">ตารางผลต่างแบบที่อาจารย์เขียน (Class 3, 1:44:22–1:46:55)</div>
 <table class="compact">
+<tr><th>t</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr>
 <tr><th>\(X_t\)</th><td>12</td><td>14</td><td>17</td><td>18</td><td>21</td><td>23</td></tr>
-<tr><th>\(\nabla X_t\)</th><td></td><td>2</td><td>3</td><td>1</td><td>3</td><td>2</td></tr>
+<tr><th>\(\nabla X_t\)</th><td>ไม่มี</td><td>2</td><td>3</td><td>1</td><td>3</td><td>2</td></tr>
 </table>
-<p>ข้อมูลเดิมเพิ่มขึ้นต่อเนื่อง ผลต่างคือ 2, 3, 1, 3, 2 ซึ่งแกว่งรอบ 2.2 และไม่เพิ่มขึ้น ข้อมูล 6 จุดเหลือ 5 จุด Differencing เปลี่ยนระดับของข้อมูลเป็นขนาดของการเปลี่ยนแปลง trend เส้นตรงจึงกลายเป็นค่าคงที่ซึ่งเท่ากับความชัน</p>
+<p>\(\nabla X_1\) หาไม่ได้เพราะไม่มี \(X_0\) อาจารย์บอกว่า "time series ของ differencing จะหายไปตัวหนึ่ง" ข้อมูลเดิมเพิ่มขึ้นต่อเนื่อง ผลต่างแกว่งรอบ 2.2 และไม่เพิ่มขึ้น trend เส้นตรงจึงกลายเป็นค่าคงที่ซึ่งเท่ากับความชัน ใน R ใช้ <code>diff(x)</code></p>
 </div>
 
 <figure>
@@ -547,37 +468,38 @@ alternative hypothesis: stationary</code></pre>
 <figcaption>Slide 3 หน้า 33 — Back to problem 1.6: differencing</figcaption>
 </figure>
 
-<p>โจทย์ให้แสดงว่า process \(Y_t\) <mark class="src" data-p="33">(i.e. differencing)</mark> ที่นิยามว่า \(Y_t=\nabla X_t=X_t-X_{t-1}\) เป็น stationary process โดย \(X_t=\beta_1+\beta_2t+w_t\)</p>
+<p>โจทย์ให้แสดงว่า <mark class="src" data-p="33">(i.e. differencing)</mark> \(Y_t=\nabla X_t=X_t-X_{t-1}\) นิ่ง ข้อนี้อาจารย์ให้เป็นการบ้าน "ผมจะโชว์เฉพาะดีเทรนด์ให้คุณดูนะ ดิฟเฟอเรนซิงให้เป็นการบ้าน" (Class 3, 1:30:36)</p>
 
-<div class="calc" id="s9-calc">
-<div class="calc-title">Problem 1.6 ส่วนที่ 3: differencing</div>
+<div class="calc" id="s9-proof">
+<div class="calc-title">Problem 1.6 ส่วนที่ 3: differencing ทำให้นิ่ง (การบ้าน)</div>
 <ol class="steps">
 <li><div class="st-title">แทน \(X_t\) และ \(X_{t-1}\)</div><p>\(Y_t=(\beta_1+\beta_2t+w_t)-(\beta_1+\beta_2(t-1)+w_{t-1})\)</p></li>
 <li><div class="st-title">กระจายและตัดพจน์</div><p>\(\beta_1-\beta_1=0\) และ \(\beta_2t-\beta_2t+\beta_2=\beta_2\) จึงได้ \(Y_t=\beta_2+w_t-w_{t-1}\)</p></li>
 <li><div class="st-title">Mean</div><p>\(E(Y_t)=\beta_2\) ไม่ขึ้นกับ t</p></li>
-<li><div class="st-title">Variance</div><p>\(\gamma(0)=\mathrm{Var}(w_t)+\mathrm{Var}(w_{t-1})=2\sigma^2\)</p></li>
-<li><div class="st-title">Lag 1</div><p>\(Y_{t+1}=\beta_2+w_{t+1}-w_t\) และ \(Y_t=\beta_2+w_t-w_{t-1}\) ตัวที่ตรงกันคือ \(w_t\) มีสัมประสิทธิ์ −1 และ +1: \(\gamma(1)=-\sigma^2\)</p></li>
-<li><div class="st-title">Lag 2 ขึ้นไป</div><p>ไม่มี w ที่ตรงกัน: \(\gamma(h)=0\)</p></li>
+<li><div class="st-title">\(\gamma(0)\)</div><p>\(\mathrm{Var}(w_t)+\mathrm{Var}(w_{t-1})=2\sigma^2\)</p></li>
+<li><div class="st-title">\(\gamma(1)\)</div><p>\(Y_{t+1}=\beta_2+w_{t+1}-w_t\) ตัวที่ตรงกันคือ \(w_t\) (+1 ใน \(Y_t\) และ −1 ใน \(Y_{t+1}\)): \(\gamma(1)=-\sigma^2\)</p></li>
+<li><div class="st-title">\(\gamma(h)\) เมื่อ \(|h|\ge2\)</div><p>ไม่มีตัวที่ตรงกัน: 0</p></li>
 </ol>
-<div class="answer">\(\mu=\beta_2\), \(\gamma(0)=2\sigma^2\), \(\gamma(\pm1)=-\sigma^2\), \(\gamma(h)=0\) เมื่อ \(|h|\ge2\) จึง stationary และ \(\rho(1)=-1/2\)</div>
-<p>เมื่อเทียบกับ detrending ซึ่งเหลือ white noise การ differencing กำจัด trend ได้เช่นกัน แต่สร้าง correlation ที่ lag 1 เท่ากับ −0.5 ขึ้นมา เพราะผลต่างที่ติดกันใช้ \(w_t\) ร่วมกันด้วยเครื่องหมายตรงข้าม ผลที่ได้มีรูปของ MA(1) ใน Lesson 5 โดย \(\theta=-1\)</p>
+<div class="answer">\(\mu=\beta_2\), \(\gamma(0)=2\sigma^2\), \(\gamma(\pm1)=-\sigma^2\), อื่น ๆ เป็น 0 → นิ่ง และ \(\rho(1)=-1/2\)</div>
 </div>
+
+<p>เทียบกับ detrending ซึ่งเหลือ white noise พอดี differencing ก็กำจัด trend ได้ แต่สร้าง correlation −0.5 ที่ lag 1 ขึ้นมาเอง เพราะผลต่างที่ติดกันใช้ \(w_t\) ร่วมกันด้วยเครื่องหมายตรงข้าม หน้าตานี้คือโมเดล MA(1) ใน Lesson 5 ที่ θ = −1 และเป็นที่มาของคำเตือนใน Lesson 7 ว่าถ้า diff เกินจำเป็น ACF ที่ lag 1 จะเข้าใกล้ −0.5</p>
 
 <figure>
 <img src="../assets/slides/ts3-p34.png" alt="Slide 3 หน้า 34: 2. Differencing: backshift operator" loading="lazy">
 <figcaption>Slide 3 หน้า 34 — 2. Differencing: backshift operator</figcaption>
 </figure>
 
-<p>หลัง differencing ใช้ทฤษฎีของ stationary processes สร้างโมเดล วิเคราะห์ และพยากรณ์ series ที่ stationary แล้ว <mark class="src" data-p="34">transform this analysis back in terms of the original series {X_t}</mark> เช่น ถ้าพยากรณ์ผลต่างถัดไปได้ 2 และค่าล่าสุดคือ 23 ค่าพยากรณ์ของ series เดิมคือ \(23+2=25\) สไลด์แนะนำ backshift operator B ซึ่งนิยามว่า \(BX_t=X_{t-1}\) จึงเขียนได้ว่า \(\nabla X_t=(1-B)X_t\) และผลต่างอันดับสูงเขียนด้วย B ได้: \(\nabla^2X_t=(1-B)^2X_t=(1-2B+B^2)X_t=X_t-2X_{t-1}+X_{t-2}\)</p>
+<p>หลัง differencing ใช้ทฤษฎีของอนุกรมที่นิ่งสร้างโมเดลและพยากรณ์ แล้ว <mark class="src" data-p="34">transform this analysis back in terms of the original series {𝑋𝑡}</mark> เช่น ถ้าพยากรณ์ผลต่างถัดไปได้ 2 และค่าล่าสุดคือ 23 ค่าพยากรณ์ของข้อมูลเดิมคือ 23 + 2 = 25 สไลด์แนะนำ backshift operator ซึ่งอาจารย์ย้ำว่า "B ไม่ใช่ alphabet เป็น operator" นิยามว่า \(BX_t=X_{t-1}\) จึงเขียน \(\nabla X_t=X_t-X_{t-1}=(1-B)X_t\) "หลัง ๆ ผมจะเขียนไปแนวนี้ คือดึง \(X_t\) ออก" และ \(B^2X_t=X_{t-2}\) "เผื่อไว้ก่อน เดี๋ยวจะโผล่มาใหม่" (Class 3, 1:48:37–1:50:47) B คือสัญลักษณ์หลักของ ARIMA ใน Lesson 5–7</p>
 
-<div class="calc">
+<div class="calc" id="s9-b2">
 <div class="calc-title">ทำไม \((1-B)^2X_t=X_t-2X_{t-1}+X_{t-2}\)</div>
 <ol class="steps">
-<li><div class="st-title">กระจายแบบพหุนาม</div><p>\((1-B)^2=1-2B+B^2\)</p></li>
-<li><div class="st-title">ความหมายของ \(B^2\)</div><p>\(B^2X_t=B(BX_t)=BX_{t-1}=X_{t-2}\) คือถอยสองช่วงเวลา</p></li>
-<li><div class="st-title">แทนกลับ</div><p>\(X_t-2X_{t-1}+X_{t-2}\)</p></li>
+<li><div class="st-title">กระจายพหุนาม</div><p>\((1-B)^2=1-2B+B^2\)</p></li>
+<li><div class="st-title">ความหมายของ \(B^2\)</div><p>\(B^2X_t=B(BX_t)=BX_{t-1}=X_{t-2}\)</p></li>
+<li><div class="st-title">แทนกลับ</div><p>\((1-2B+B^2)X_t=X_t-2X_{t-1}+X_{t-2}\)</p></li>
+<li><div class="st-title">ตรวจกับตารางข้างบนที่ t = 4</div><p>\(\nabla^2X_4=\nabla X_4-\nabla X_3=1-3=-2\) และ \(18-2(17)+14=-2\) ตรงกัน</p></li>
 </ol>
-<p>ตรวจกับตัวอย่างข้างบนที่ \(t=4\): \(\nabla^2X_4=\nabla X_4-\nabla X_3=1-3=-2\) และ \(18-2(17)+14=-2\) ตรงกัน</p>
 </div>
 
 <figure>
@@ -585,15 +507,17 @@ alternative hypothesis: stationary</code></pre>
 <figcaption>Slide 3 หน้า 35 — ข้อดีและข้อเสียของ differencing</figcaption>
 </figure>
 
-<p>ทั้ง detrending และ differencing ช่วยแปลง nonstationary process ให้เป็น process ที่ stationary <mark class="src" data-p="35">(or at least appears)</mark> ข้อดีของ differencing เหนือ detrending คือ ไม่ต้องประมาณพารามิเตอร์ใดในการหาผลต่าง ข้อเสียของ differencing คือ ไม่ให้ “estimate” ของ error process \(Y_t\)</p>
+<p>ทั้งสองวิธีแปลงอนุกรมที่ไม่นิ่งให้นิ่ง <mark class="src" data-p="35">(or at least appears)</mark> ข้อดีของ differencing คือไม่ต้องประมาณพารามิเตอร์ใด ข้อเสียคือไม่ได้ค่าประมาณของ error process \(Y_t\) และไม่ได้เส้น trend ออกมาให้ตีความ</p>
 
 <table>
 <tr><th></th><th>Detrending</th><th>Differencing</th></tr>
-<tr><td>ต้องประมาณพารามิเตอร์</td><td>ต้อง เช่น \(\beta_1,\beta_2\)</td><td>ไม่ต้อง</td></tr>
-<tr><td>ให้ค่าประมาณของ \(Y_t\)</td><td>ให้ คือ residuals</td><td>ไม่ให้</td></tr>
-<tr><td>ให้ค่าประมาณของ trend</td><td>ให้ คือ \(\hat\mu_t\)</td><td>ไม่ให้</td></tr>
-<tr><td>จำนวนข้อมูลหลังทำ</td><td>เท่าเดิม</td><td>ลดลงครั้งละหนึ่งจุด</td></tr>
-<tr><td>ผลกับ problem 1.6</td><td>white noise</td><td>\(\beta_2+w_t-w_{t-1}\) มี \(\rho(1)=-0.5\)</td></tr>
+<tr><td>สูตร</td><td>\(D_t=X_t-\hat\mu_t\)</td><td>\(\nabla X_t=X_t-X_{t-1}\)</td></tr>
+<tr><td>ต้องประมาณพารามิเตอร์</td><td>ต้อง (\(\beta_1,\beta_2\))</td><td>ไม่ต้อง</td></tr>
+<tr><td>ได้ค่าประมาณของ trend และ \(Y_t\)</td><td>ได้</td><td>ไม่ได้</td></tr>
+<tr><td>จำนวนข้อมูลหลังทำ</td><td>เท่าเดิม</td><td>ลดครั้งละหนึ่งจุด</td></tr>
+<tr><td>ผลกับ problem 1.6</td><td>white noise</td><td>\(\beta_2+w_t-w_{t-1}\), \(\rho(1)=-0.5\)</td></tr>
+<tr><td>ผลกับ temperature</td><td>residual lag 1 = 0.530 ยังไม่ผ่าน</td><td>ดีกว่า (ดูด้านล่าง)</td></tr>
+<tr><td>ความนิยม (อาจารย์)</td><td>เข้าใจง่ายกว่า</td><td>popular กว่า อาจารย์เน้น</td></tr>
 </table>
 
 <figure>
@@ -601,137 +525,281 @@ alternative hypothesis: stationary</code></pre>
 <figcaption>Slide 3 หน้า 36 — 2. Differencing: หมายเหตุ</figcaption>
 </figure>
 
-<p>ข้อมูลหลัง differencing มีจุดน้อยกว่าข้อมูลเดิมหนึ่งจุด สไลด์เน้นว่า <mark class="src" data-p="36">Although you can difference the data more than once, one difference is usually sufficient.</mark> สำหรับ detrending มักใช้ simple fit เช่น เส้นตรง ข้อมูลบางชุดต้องแปลงก่อนเพื่อให้การแจกแจง stationary: เมื่อ variance ไม่คงที่ การใช้ logarithm หรือ square root อาจทำให้ variance คงที่ และ seasonal differencing เช่น \(X_t-X_{t-12}\) จะพิจารณาภายหลัง เรื่องการแปลงข้อมูลอยู่ใน Lesson 7</p>
+<p>สไลด์เน้นว่า <mark class="src" data-p="36">Although you can difference the data more than once, one differenceis usually sufficient.</mark> ส่วน detrending มักใช้เส้นตรงง่าย ๆ ข้อมูลบางชุดต้องแปลงก่อน เช่น ความแปรปรวนไม่คงที่ใช้ log หรือ square root (Lesson 7) และ seasonal differencing เช่น \(X_t-X_{t-12}\) จะเรียนในบท SARIMA</p>
+
+<pre><code>diff1 &lt;- diff(temp.1900)
+plot(diff1, ylab = "Global temperature first differences")
+acf(diff1)
+library(tseries); adf.test(diff1)</code></pre>
+<pre class="out">length(diff1) = 97    mean(diff1) = 0.0058
+ACF lag 1–4:  -0.196  -0.191  -0.195   0.162      (เส้นขอบ ±2/√97 = ±0.203)
+Dickey-Fuller = -6.8589, Lag order = 4, p-value = 0.01   (p-value smaller than printed)</pre>
+<p>ผลต่างของอุณหภูมิไม่มี trend แล้ว ค่าเฉลี่ย 0.0058 องศาต่อปีใกล้กับความชัน 0.0062 ของเส้นตรง ตรงกับที่ differencing เปลี่ยน trend เส้นตรงเป็นค่าคงที่ ACF "ไม่ได้ลงช้า ๆ แล้ว มีแพทเทิร์นที่ดีขึ้น" (Class 3, 1:52:45) lag 1–3 ปริ่มเส้นลบเล็กน้อย และ ADF ให้ p-value ≤ 0.01 จึงสรุปว่านิ่ง ต่างจากข้อมูลเดิมและ residual หลัง detrend ที่ได้ 0.4726 differencing จึงเหมาะกับข้อมูลชุดนี้มากกว่า</p>
 
 <figure>
 <img src="../assets/slides/ts3-p37.png" alt="Slide 3 หน้า 37: Example: Global Temperature (หน้า 62)" loading="lazy">
 <figcaption>Slide 3 หน้า 37 — Example: Global Temperature (หน้า 62)</figcaption>
 </figure>
 
-<p>หน้าสุดท้ายนำกราฟ residuals หลัง detrending กลับมาอีกครั้งเพื่อปิดเรื่อง residuals ยังเกาะกลุ่มเป็นช่วงยาว เช่น ปีที่ 38 ถึง 48 เป็นบวก และปีที่ 70 ถึง 80 ติดลบถึงประมาณ −0.3 ค่าที่อยู่ติดกันไปทางเดียวกัน จึงไม่ใช่ white noise ในตำราหน้า 62 เทียบกับ first difference ของข้อมูลเดียวกัน ซึ่ง ACF เข้าขอบเร็วกว่า เป็นเหตุผลที่ differencing เหมาะกับ global temperature ข้อความเรื่องตำราหน้า 62 นี้มาจากบทเรียนฉบับก่อนซึ่งอ้างตำรา สไลด์หน้านี้แสดงเฉพาะกราฟ residuals</p>
+<p>หน้าสุดท้ายนำกราฟ residual หลัง detrending กลับมาอีกครั้ง residual ยังเกาะกลุ่มเป็นช่วงยาว เช่น ปีที่ 38 ถึง 48 เป็นบวก และปีที่ 70 ถึง 80 ติดลบถึงราว −0.3 ค่าที่อยู่ติดกันไปทางเดียวกันจึงไม่ใช่ white noise เมื่อเทียบกับผลของ differencing ข้างบน จึงสรุปได้ตรงกับที่อาจารย์เน้นว่า differencing เป็นวิธีหลักของวิชา และเป็นตัว d ใน ARIMA(p, d, q)</p>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 6</span><span>Differencing</span></div>
-<div class="qtext">\(X_t=\beta_1+\beta_2t+w_t\) หลังทำ first difference ได้ process ที่มี mean และ \(\rho(1)\) เท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. mean คือ β₂ ไม่ใช่ 0 และ ρ(1) = −σ²/2σ²">mean = 0 และ \(\rho(1)=0\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายของ ρ(1) เป็นลบ">mean = \(\beta_2\) และ \(\rho(1)=0.5\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. β₁ ตัดกันหมด เหลือ β₂">mean = \(\beta_1\) และ \(\rho(1)=-0.5\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. Y_t = β₂ + w_t − w_{t−1}">mean = \(\beta_2\) และ \(\rho(1)=-0.5\)</button>
-</div>
-<div class="feedback"></div>
-</div>
+<!-- ===================================================== -->
+<h2 id="s10">10. Exercise 1 ข้อ 5–8 (ACF มือ และงาน R)</h2>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 7</span><span>Backshift</span></div>
-<div class="qtext">\((1-B)^2X_t\) เท่ากับข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. (1 − B)² = 1 − 2B + B²">\(X_t-2X_{t-1}+X_{t-2}\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้คือ (1 − B²)X_t">\(X_t-X_{t-2}\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. พจน์กลางคือ −2B">\(X_t-X_{t-1}+X_{t-2}\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. พจน์ท้ายคือ +B² ไม่ใช่ −B²">\(X_t-2X_{t-1}-X_{t-2}\)</button>
-</div>
-<div class="feedback"></div>
+<p>Exercise 1 ที่อาจารย์แจกใน CLASS 2 มีส่วนทฤษฎี (ข้อ 1–4 อยู่ใน Lesson 2) และส่วนที่ใช้เนื้อหาของบทนี้ ข้อ 5 คำนวณมือ ข้อ 6–8 ใช้ R ไฟล์ข้อมูล <code>earthquake.txt</code> และ <code>ventilation.txt</code> อยู่ในโฟลเดอร์ CLASS 3 ส่วน <code>prescrip</code> อยู่ใน package TSA ผลด้านล่างได้จากการรันจริง</p>
+
+<div class="calc" id="s10-q5">
+<div class="calc-title">ข้อ 5: ยอดขายพลาสติก ม.ค.–มิ.ย. 2013 คือ 781, 780, 782, 1109, 1115, 1107</div>
+<ol class="steps">
+<li><div class="st-title">ค่าเฉลี่ยและส่วนเบี่ยงเบน</div><p>\(\bar X=5674/6=945.667\) ส่วนเบี่ยงเบนคือ −164.667, −165.667, −163.667, 163.333, 169.333, 161.333</p></li>
+<li><div class="st-title">ตัวส่วน</div><p>ผลรวมกำลังสองทั้ง 6 เทอม ≈ 162,727</p></li>
+<li><div class="st-title">(a) sample ACF</div><p>\(\hat\rho(0)=1\), \(\hat\rho(1)=0.508\), \(\hat\rho(2)=-0.009\), \(\hat\rho(3)=-0.500\), \(\hat\rho(4)=-0.336\), \(\hat\rho(5)=-0.163\) ตัวอย่างการคิด \(\hat\rho(3)\): คู่ที่ห่าง 3 ช่วงมี 3 คู่ คือ (เม.ย., ม.ค.), (พ.ค., ก.พ.), (มิ.ย., มี.ค.) ทุกคู่เป็นบวกคูณลบ ผลรวมราว −81,350 หารด้วย 162,727 ได้ −0.500</p></li>
+<li><div class="st-title">(b) correlogram</div><p>เส้นขอบคือ \(2/\sqrt6=0.816\) ทุกแท่งอยู่ในเส้น เพราะข้อมูลมีแค่ 6 จุด รูปทรงคือบวกที่ lag 1 แล้วกลายเป็นลบที่ lag 3 สะท้อนการกระโดดของระดับครั้งเดียวระหว่างมีนาคมกับเมษายน</p></li>
+<li><div class="st-title">(c) first differences</div><p>\(\nabla X_2=-1\), \(\nabla X_3=2\), \(\nabla X_4=327\), \(\nabla X_5=6\), \(\nabla X_6=-8\)</p></li>
+<li><div class="st-title">(d) correlogram ของผลต่าง</div><p>\(\hat\rho(1)=-0.274\), \(\hat\rho(2)=-0.382\), \(\hat\rho(3)=0.100\), \(\hat\rho(4)=0.057\) เส้นขอบ \(2/\sqrt5=0.894\) ทุกค่าอยู่ในเส้น การทำผลต่างเปลี่ยนการกระโดดของระดับให้กลายเป็นค่าโดดค่าเดียว (327)</p></li>
+</ol>
 </div>
 
-<div class="quiz">
-<div class="qhead"><span>ข้อ 8</span><span>เปรียบเทียบ</span></div>
-<div class="qtext">ข้อใดเป็นข้อดีของ differencing เหนือ detrending ตามสไลด์</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้เป็นข้อเสียของ differencing">ให้ค่าประมาณของ error process</button>
-<button class="opt" data-correct="true" data-note="ถูก. no parameters are estimated in taking differences">ไม่ต้องประมาณพารามิเตอร์ใด</button>
-<button class="opt" data-correct="false" data-note="ผิด. differencing ทำให้ข้อมูลลดลงหนึ่งจุดต่อครั้ง">ไม่ทำให้จำนวนข้อมูลลดลง</button>
-<button class="opt" data-correct="false" data-note="ผิด. differencing ไม่ให้ค่าประมาณของ trend">ให้สมการของเส้น trend</button>
-</div>
-<div class="feedback"></div>
+<div class="calc" id="s10-q6">
+<div class="calc-title">ข้อ 6: แผ่นดินไหวขนาด 7.0 ขึ้นไปต่อปี 1900–1998 (n = 99) — เขียนรายงานสั้น</div>
+<pre><code>eq &lt;- ts(read.table("earthquake.txt"), start = 1900)
+plot(eq, type = "o"); acf(eq); library(tseries); adf.test(eq)</code></pre>
+<ol class="steps">
+<li><div class="st-title">ระดับ</div><p>ค่าอยู่ระหว่าง 6 ถึง 41 ครั้งต่อปี ค่าเฉลี่ย 20.0 ค่าสูงสุดปี 1943 ต่ำสุดปี 1986 ค่าเฉลี่ยราย 20 ปี: 21.1, 18.6, 25.4, 20.4, 14.3 สูงช่วง 1940–1959 และต่ำช่วงท้าย ไม่มี trend ทิศเดียวที่ชัด</p></li>
+<li><div class="st-title">ความสัมพันธ์ตามเวลา</div><p>ACF lag 1–6 คือ 0.419, 0.398, 0.324, 0.237, 0.172, 0.190 เส้นขอบ 0.201 lag 1–4 เกินเส้น ลดลงทีละน้อย ปีที่มีแผ่นดินไหวมากมักตามด้วยปีที่มากด้วย</p></li>
+<li><div class="st-title">ADF</div><p>Dickey-Fuller = −3.2364, p-value = 0.0858 มากกว่า 0.05 จึงยังไม่ปฏิเสธว่าไม่นิ่งที่ระดับ 5% แต่ใกล้เส้น</p></li>
+<li><div class="st-title">ข้อสรุป</div><p>ไม่มี seasonal (ข้อมูลรายปี) ไม่มี trend ชัด ความแปรปรวนค่อนข้างคงที่ แต่มี autocorrelation บวกหลาย lag และระดับเปลี่ยนเป็นช่วง ๆ เป็นข้อมูลที่เกือบนิ่ง ต้องใช้โมเดลที่จับความสัมพันธ์ระหว่างปี เช่น AR ใน Lesson 5</p></li>
+</ol>
 </div>
 
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 9</div>
-<ul>
-<li>นิยาม \(\nabla X_t=X_t-X_{t-1}\) และคำนวณจากตัวเลขได้</li>
-<li>พิสูจน์ว่า first difference ของ \(\beta_1+\beta_2t+w_t\) stationary โดยได้ \(\gamma(0)=2\sigma^2\), \(\gamma(1)=-\sigma^2\)</li>
-<li>Backshift operator: \(BX_t=X_{t-1}\), \(\nabla=(1-B)\), \(\nabla^2=(1-B)^2\)</li>
-<li>ข้อดีและข้อเสียของ differencing เทียบกับ detrending</li>
-<li>one difference is usually sufficient และ variance ไม่คงที่แก้ด้วย log หรือ square root</li>
-</ul>
+<div class="calc" id="s10-q7">
+<div class="calc-title">ข้อ 7: ventilation (n = 195) — plot, fit เส้นตรง, ตรวจ residual</div>
+<pre><code>v &lt;- ts(read.table("ventilation.txt"))
+plot(v, type = "o")
+fit &lt;- lm(v ~ time(v)); summary(fit)
+r &lt;- resid(fit); plot(r, type = "o"); acf(r)
+shapiro.test(r); Box.test(r, lag = 10, type = "Ljung")</code></pre>
+<ol class="steps">
+<li><div class="st-title">(a) ลักษณะ</div><p>ค่าเพิ่มจากราว 15 (ค่าเฉลี่ย 10 จุดแรก 15.31) ถึงราว 76 (10 จุดสุดท้าย 76.07) ช่วงทั้งหมด 10.93–90.33 มี trend ขาขึ้นแรงเกือบเป็นเส้นตรง</p></li>
+<li><div class="st-title">(b) เส้นตรง</div><p>\(\hat\mu_t=15.51+0.2791t\) (t = 1, …, 195) เพิ่ม 0.28 หน่วยต่อจุดเวลา</p></li>
+<li><div class="st-title">(c) residual</div><p>ACF lag 1–5 คือ 0.452, 0.412, 0.407, 0.342, 0.279 เกินเส้น 0.143 ทุก lag Ljung-Box (lag 10) ได้ Q = 260.09, p &lt; 2.2e-16 และ Shapiro-Wilk W = 0.956, p = 9.3e-06</p></li>
+<li><div class="st-title">ข้อสรุป</div><p>residual <b>ไม่ใช่</b> white noise ค่าเฉลี่ยศูนย์ ยังมี autocorrelation สูงหลาย lag และไม่แจกแจงปกติ เส้นตรงอธิบาย trend ได้ แต่ยังเหลือโครงสร้างที่ต้องสร้างโมเดลต่อ (Ljung-Box อธิบายใน Lesson 8: H0 คือไม่มี autocorrelation ค่า p ต่ำจึงปฏิเสธ)</p></li>
+</ol>
+</div>
+
+<div class="calc" id="s10-q8">
+<div class="calc-title">ข้อ 8: prescrip (ค่ายาต่อใบสั่ง ส.ค. 1986–มี.ค. 1992, n = 68)</div>
+<pre><code>library(TSA); data(prescrip)
+plot(prescrip, type = "o")
+diff.1 &lt;- diff(prescrip); plot(diff.1, type = "o")
+acf(diff.1); shapiro.test(diff.1); mean(diff.1)</code></pre>
+<ol class="steps">
+<li><div class="st-title">(a) ข้อมูลเดิม</div><p>เพิ่มจากราว 14.3 เป็น 30.7 ดอลลาร์ trend ขาขึ้นชัด จึงไม่นิ่ง</p></li>
+<li><div class="st-title">(b) ผลต่าง</div><p>แกว่งรอบค่าเฉลี่ย 0.241 (ค่ายาเพิ่มเฉลี่ย 0.24 ดอลลาร์ต่อเดือน) trend หายไป</p></li>
+<li><div class="st-title">(c) white noise ไหม</div><p>เส้นขอบ \(2/\sqrt{67}=0.244\) ACF เกินเส้นที่ lag 4 (−0.379), 5 (−0.260), 9 (0.311) และ 11 (0.319) Ljung-Box (lag 12) p = 4.5e-06 ส่วน Shapiro-Wilk W = 0.993, p = 0.964 แจกแจงปกติ</p></li>
+<li><div class="st-title">ข้อสรุป</div><p>ผลต่างแจกแจงปกติและไม่มี trend แต่ยังมี autocorrelation ที่บาง lag จึงไม่ใช่ white noise ค่าเฉลี่ยก็ไม่เป็นศูนย์ (0.24) แบบแผนที่เหลือต้องใช้โมเดล ARIMA ในบทต่อไป</p></li>
+</ol>
 </div>
 
 <!-- ===================================================== -->
-<h2 id="s10">10. แบบฝึกท้ายบท</h2>
+<h2 id="s11">11. แบบฝึกห้าแบบ</h2>
+
+<h3>กลุ่ม A: คำนวณ</h3>
 
 <div class="quiz">
-<div class="qhead"><span>ข้อ 9</span><span>นิยาม</span></div>
-<div class="qtext">ทำไมตัวประมาณ \(\bar X\), \(\hat\gamma(h)\) และ \(\hat\rho(h)\) จึงต้องการ weakly stationary</div>
+<div class="qhead"><span>ข้อ 1</span><span>Sample ACF</span></div>
+<div class="qtext">ข้อมูล 2, 4, 6, 4, 4 ค่า \(\hat\rho(1)\) คือเท่าใด</div>
 <div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. การแจกแจงปกติไม่ใช่เหตุผล">เพราะสูตรใช้ได้กับการแจกแจงปกติเท่านั้น</button>
-<button class="opt" data-correct="false" data-note="ผิด. จำนวนข้อมูลไม่ใช่เหตุผลของเงื่อนไขนี้">เพราะข้อมูล stationary มีจำนวนมากกว่า</button>
-<button class="opt" data-correct="false" data-note="ผิด. stationary ไม่ได้หมายถึงอิสระต่อกัน">เพราะข้อมูล stationary เป็นอิสระต่อกัน</button>
-<button class="opt" data-correct="true" data-note="ถูก. เมื่อ mean และ covariance เท่ากันทุกเวลา จึงเฉลี่ยข้ามเวลาได้">เพราะค่าต่างเวลาใช้ประมาณค่าเดียวกันได้</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมลบค่าเฉลี่ย 4 ก่อนคูณ">\(\hat\rho(1)=0.83\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย n − 1 ในตัวเศษแต่ n ในตัวส่วน">\(\hat\rho(1)=0.25\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ส่วนเบี่ยงเบน −2, 0, 2, 0, 0 ผลคูณคู่ติดกันรวมเป็น 0">\(\hat\rho(1)=0.00\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้คู่ที่ห่างกัน 2 ช่วง">\(\hat\rho(1)=-0.50\)</button>
 </div>
 <div class="feedback"></div>
 </div>
 
 <div class="quiz">
-<div class="qhead"><span>ข้อ 10</span><span>R</span></div>
-<div class="qtext">คำสั่งใดตัดข้อมูล <code>newtemp</code> ให้เหลือเฉพาะปี 1900 เป็นต้นไป</div>
+<div class="qhead"><span>ข้อ 2</span><span>\(\hat\gamma\)</span></div>
+<div class="qtext">ข้อมูล n = 5 มีผลรวมของ \((X_{t+1}-\bar X)(X_t-\bar X)\) ทั้ง 4 คู่เท่ากับ 6.24 ค่า \(\hat\gamma(1)\) ตามสูตรของสไลด์คือเท่าใด</div>
 <div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ts กำหนดปีเริ่มของข้อมูลทั้งชุด ไม่ได้ตัดข้อมูล">ts(newtemp, start=1900)</button>
-<button class="opt" data-correct="false" data-note="ผิด. acf คำนวณ autocorrelation">acf(newtemp, start=1900)</button>
-<button class="opt" data-correct="true" data-note="ถูก. window ตัดช่วงของ time series ตามเวลา">window(newtemp, start=1900)</button>
-<button class="opt" data-correct="false" data-note="ผิด. diff หาผลต่าง ไม่ได้ตัดช่วง">diff(newtemp, start=1900)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วยจำนวนเทอม n − h = 4 แต่สูตรหารด้วย n">\(\hat\gamma(1)=1.560\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตัวเศษมี n − h เทอม แต่หารด้วย n = 5 เสมอ">\(\hat\gamma(1)=1.248\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ไม่ได้หาร">\(\hat\gamma(1)=6.240\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ̂(1) = 6.24/17.2">\(\hat\gamma(1)=0.363\)</button>
 </div>
 <div class="feedback"></div>
 </div>
 
-<p>ข้อต่อไปนี้ให้เขียนคำตอบเองก่อน แล้วจึงเปิดเฉลย</p>
-
-<div class="quiz free">
-<div class="qhead"><span>ข้อ 11</span><span>คำนวณ</span></div>
-<div class="qtext">ข้อมูลคือ 2, 4, 6, 4, 4 จงหา \(\bar X\), \(\hat\gamma(0)\), \(\hat\gamma(1)\) และ \(\hat\rho(1)\)</div>
-<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<p>\(\bar X=20/5=4\) ค่าที่ลบค่าเฉลี่ยแล้วคือ −2, 0, 2, 0, 0</p>
-<p>\(\hat\gamma(0)=(4+0+4+0+0)/5=1.6\)</p>
-<p>ผลคูณของคู่ที่ติดกัน: \((-2)(0)+(0)(2)+(2)(0)+(0)(0)=0\) จึงได้ \(\hat\gamma(1)=0/5=0\)</p>
-<p>\(\hat\rho(1)=0/1.6=0\)</p>
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>เส้นขอบ</span></div>
+<div class="qtext">ข้อมูล n = 400 ค่า \(\hat\rho\) ข้อใดเกินเส้นขอบ \(\pm2/\sqrt n\)</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 0.08 อยู่ในเส้น ±0.10">\(\hat\rho(2)=0.08\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. −0.09 อยู่ในเส้น">\(\hat\rho(5)=-0.09\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.05 อยู่ในเส้น">\(\hat\rho(7)=0.05\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 2/√400 = 0.10 และ |−0.12| เกิน">\(\hat\rho(3)=-0.12\)</button>
 </div>
+<div class="feedback"></div>
 </div>
 
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Differencing</span></div>
+<div class="qtext">\(X_t=\beta_1+\beta_2t+w_t\) หลังทำผลต่างครั้งที่หนึ่ง ได้ mean และ \(\rho(1)\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ∇X_t = β₂ + w_t − w_{t−1}">mean \(=\beta_2\), \(\rho(1)=-0.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. β₁ หักล้างกันหมด เหลือ β₂">mean \(=\beta_1\), \(\rho(1)=-0.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ผลต่างไม่ใช่ white noise ใช้ w_t ร่วมกันที่ lag 1">mean \(=\beta_2\), \(\rho(1)=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. mean ไม่เป็น 0 และ ρ(1) ติดลบ">mean \(=0\), \(\rho(1)=+0.5\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 12</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">ให้ \(X_t=\beta_1+\beta_2t+w_t\) จง (ก) แสดงว่า \(X_t\) ไม่ stationary (ข) แสดงว่า \(X_t-(\beta_1+\beta_2t)\) stationary (ค) แสดงว่า \(\nabla X_t\) stationary</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 5</span><span>ข้อสอบเก่า</span></div>
+<div class="qtext">ให้ \(X_t=\beta_1+\beta_2t+w_t\) จง (ก) พิสูจน์ว่า \(X_t\) ไม่ stationary (ข) พิสูจน์ว่า \(X_t-(\beta_1+\beta_2t)\) stationary (ค) พิสูจน์ว่า \(\nabla X_t\) stationary</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<p>(ก) \(E(X_t)=\beta_1+\beta_2t\) ขึ้นกับ t จึงไม่ stationary</p>
-<p>(ข) \(Y_t=w_t\) มี mean 0 และ \(\gamma(h)\) เท่ากับ \(\sigma^2\) เมื่อ \(h=0\) และ 0 เมื่อ \(h\ne0\) จึง stationary</p>
-<p>(ค) \(\nabla X_t=\beta_2+w_t-w_{t-1}\) มี mean \(\beta_2\), \(\gamma(0)=2\sigma^2\), \(\gamma(\pm1)=-\sigma^2\) และ 0 เมื่อ \(|h|\ge2\) ไม่ขึ้นกับ t จึง stationary</p>
+<p>(ก) \(E(X_t)=\beta_1+\beta_2t\) ขึ้นกับ t จึงไม่นิ่ง (แม้ \(\gamma(h)\) จะไม่ขึ้นกับ t)</p>
+<p>(ข) \(Y_t=w_t\) mean 0, \(\gamma(0)=\sigma^2\), \(\gamma(h)=0\) เมื่อ h ≠ 0 จึงนิ่ง</p>
+<p>(ค) \(\nabla X_t=\beta_2+w_t-w_{t-1}\) mean \(\beta_2\), \(\gamma(0)=2\sigma^2\), \(\gamma(\pm1)=-\sigma^2\), 0 เมื่อ \(|h|\ge2\) ไม่ขึ้นกับ t จึงนิ่ง</p>
 </div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 13</span><span>อ่านผล</span></div>
-<div class="qtext">เส้น trend ที่ fit ได้คือ \(\hat\mu_t=-12.19+0.0062t\) จงหาค่า trend ของปี 1950 และ residual ถ้าค่าจริงของปีนั้นคือ −0.15 และอธิบายความหมายของ 0.0062</div>
-<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 6</span><span>พิสูจน์ (แนวข้อสอบเก่า Class 6)</span></div>
+<div class="qtext">ให้ \(X_t=\beta_0+\beta_1t+\beta_2t^2+w_t\) จงแสดงว่า \(\nabla X_t\) ยังไม่นิ่ง แต่ \(\nabla^2X_t\) นิ่ง</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<p>\(\hat\mu_{1950}=-12.19+0.0062(1950)=-12.19+12.09=-0.10\)</p>
-<p>Residual \(=-0.15-(-0.10)=-0.05\)</p>
-<p>0.0062 คือความชัน อุณหภูมิเฉลี่ยเพิ่ม 0.0062 องศาต่อปี</p>
+<p>\(\nabla X_t=\beta_1+\beta_2(t^2-(t-1)^2)+w_t-w_{t-1}=\beta_1+\beta_2(2t-1)+w_t-w_{t-1}\) mean \(=\beta_1-\beta_2+2\beta_2t\) ยังขึ้นกับ t จึงไม่นิ่ง</p>
+<p>\(\nabla^2X_t=\nabla X_t-\nabla X_{t-1}=2\beta_2+w_t-2w_{t-1}+w_{t-2}\) mean \(=2\beta_2\) คงที่ \(\gamma(0)=6\sigma^2\), \(\gamma(1)=-4\sigma^2\), \(\gamma(2)=\sigma^2\), 0 เมื่อ \(|h|\ge3\) จึงนิ่ง</p>
+<p>อาจารย์บอกว่าข้อนี้เป็นข้อสอบเก่า "ทำไมต้อง diff สองครั้ง" (Class 6, 1:46:36)</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>ADF</span></div>
+<div class="qtext"><code>adf.test</code> ให้ p-value = 0.4726 ที่ระดับ 0.05 สรุปว่าอะไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. H0 ของ ADF คือไม่นิ่ง p-value สูงจึงไม่ปฏิเสธ">ปฏิเสธ H0 ข้อมูลนิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. p-value สูงไม่ได้พิสูจน์ว่านิ่ง">ไม่ปฏิเสธ H0 ข้อมูลนิ่ง</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.4726 > 0.05 ยังถือว่าไม่นิ่ง ต้องกำจัด trend">ไม่ปฏิเสธ H0 ข้อมูลไม่นิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. ปฏิเสธ H0 แปลว่านิ่ง ไม่ใช่ไม่นิ่ง">ปฏิเสธ H0 ข้อมูลไม่นิ่ง</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>Detrending กับ differencing</span></div>
+<div class="qtext">ข้อใดเป็นข้อดีของ differencing เหนือ detrending ตามสไลด์</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. differencing ไม่ให้เส้น trend ออกมา">ได้สมการ trend ออกมาให้ตีความ</button>
+<button class="opt" data-correct="true" data-note="ถูก. สไลด์หน้า 35: no parameters are estimated">ไม่ต้องประมาณพารามิเตอร์ใดเลย</button>
+<button class="opt" data-correct="false" data-note="ผิด. differencing ทำให้ข้อมูลลดลงครั้งละหนึ่งจุด">จำนวนข้อมูลเท่าเดิมหลังทำ</button>
+<button class="opt" data-correct="false" data-note="ผิด. differencing ไม่ให้ค่าประมาณของ Y_t">ได้ค่าประมาณของ error process</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>อธิบาย</span></div>
+<div class="qtext">จงอธิบายว่าทำไม correlogram ของข้อมูลที่มี trend ลดลงช้า และทำไมอาจารย์บอกว่าในวิชานี้ไม่ต้องสนใจ p-value ของ <code>lm()</code> ตอน fit trend</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ข้อมูลที่มี trend มีค่าใกล้กันในช่วงเวลาที่อยู่ใกล้กัน ช่วงต้นอยู่ต่ำกว่าค่าเฉลี่ยทั้งหมด ช่วงปลายอยู่สูงกว่า คู่ที่ห่างกัน 1 หรือ 10 ช่วงจึงอยู่ฝั่งเดียวกันของค่าเฉลี่ย ผลคูณเป็นบวกต่อเนื่อง ACF จึงลดลงช้า</p>
+<p>วัตถุประสงค์ของการ fit คือได้เส้น trend (intercept กับ slope) มาลบออก ไม่ได้ทดสอบผลของ t ต่อ Y อีกทั้ง p-value ของ lm ถูกต้องเฉพาะเมื่อ residual เป็น white noise ซึ่งในอนุกรมเวลามักไม่จริง (ACF ของ residual ไม่เป็นศูนย์) ตัวเลขเหล่านั้นจึงไม่มีความหมาย</p>
+</div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9a</span><span>Correlogram</span></div>
+<div class="qtext">Correlogram ของข้อมูล n = 100 มีค่า 0.82, 0.72, 0.68, 0.63 ที่ lag 1–4 และยังเกินเส้นที่ lag 15 ข้อสรุปใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ลดลงช้าและเกินเส้น ±0.2 หลาย lag คือลักษณะของข้อมูลที่ไม่นิ่ง">ไม่นิ่ง ACF ลดลงช้ามาก</button>
+<button class="opt" data-correct="false" data-note="ผิด. MA ตัดเป็นศูนย์หลัง lag q ไม่ลดลงช้าแบบนี้">นิ่ง เป็นโมเดล MA(15)</button>
+<button class="opt" data-correct="false" data-note="ผิด. white noise มี ACF อยู่ในเส้นทุก lag">นิ่ง ใกล้เคียง white noise</button>
+<button class="opt" data-correct="false" data-note="ผิด. correlogram บอกได้ว่าลดลงช้า แม้ไม่บอกสาเหตุ">ตัดสินไม่ได้ ต้องใช้ ADF เท่านั้น</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9b</span><span>Backshift</span></div>
+<div class="qtext">\((1-B)^2X_t\) เท่ากับข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมพจน์ไขว้ −2B">\(X_t-X_{t-2}\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายของพจน์สุดท้ายต้องเป็นบวก">\(X_t-2X_{t-1}-X_{t-2}\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. B² ถอยสองช่วง ไม่ใช่ยกกำลังค่า">\(X_t-2X_{t-1}+X_t^2\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. (1 − B)² = 1 − 2B + B² และ B²X_t = X_{t−2}">\(X_t-2X_{t-1}+X_{t-2}\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>อ่าน output</span></div>
+<div class="qtext"><p>จาก output นี้ จงเขียนสมการ trend หาค่า trend ของปี 1950 และ residual ถ้าค่าจริงปี 1950 คือ −0.15 แล้วบอกว่าค่า t value 13.40 ใช้ได้หรือไม่ ถ้า ACF ของ residual ที่ lag 1 คือ 0.53</p>
+<pre class="out">Coefficients:
+                 Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)    -1.219e+01  9.032e-01  -13.49   &lt;2e-16
+time(temp.1900) 6.209e-03  4.635e-04   13.40   &lt;2e-16</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\hat\mu_t=-12.19+0.006209t\)</p>
+<p>ปี 1950: \(-12.19+0.006209(1950)=-12.19+12.108=-0.08\) (ถ้าใช้ค่าเต็ม −12.18641 ได้ −0.079) residual \(=-0.15-(-0.08)=-0.07\)</p>
+<p>t value ใช้ไม่ได้ เพราะ ACF ของ residual ที่ lag 1 = 0.53 เกินเส้น 0.202 residual ไม่ใช่ white noise สมมติฐานความเป็นอิสระของ regression ไม่จริง standard error และ t value จึงไม่มีความหมาย ใช้ได้แค่ค่าประมาณของเส้น</p>
 </div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 14</span><span>อธิบาย</span></div>
-<div class="qtext">จงอธิบายว่าทำไม standard errors และ p-values จาก <code>lm()</code> จึงใช้ไม่ได้กับการ fit trend ของ time series และเงื่อนไขใดที่ทำให้ใช้ได้</div>
-<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 11</span><span>อ่าน output</span></div>
+<div class="qtext"><p>ข้อมูล 98 ปี ได้ผลนี้จากข้อมูลเดิมและจากผลต่าง สรุปว่าควรใช้ข้อมูลแบบไหนสร้างโมเดล เพราะอะไร</p>
+<pre class="out">&gt; adf.test(temp.1900)
+Dickey-Fuller = -2.2512, Lag order = 4, p-value = 0.4726
+&gt; adf.test(diff(temp.1900))
+Dickey-Fuller = -6.8589, Lag order = 4, p-value = 0.01
+Warning message: p-value smaller than printed p-value</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<p>Regression สมมติว่า error มี zero mean, independence, homoscedasticity และ normality ในข้อมูล time series อย่างน้อยหนึ่งข้อมักไม่เป็นจริง โดยเฉพาะ independence</p>
-<p>ค่า standard errors, confidence intervals, t-tests และ p-values จึงไม่มีความหมาย</p>
-<p>ใช้ได้เมื่อ \(Y_t\) เป็น zero-mean white noise คือ ACF ของ residuals ประมาณศูนย์ที่ทุก lag \(|h|\ge1\)</p>
+<p>ข้อมูลเดิม p = 0.4726 > 0.05 ไม่ปฏิเสธ H0 ยังไม่นิ่ง ผลต่าง p ≤ 0.01 (คำเตือนบอกว่าค่าจริงน้อยกว่าที่พิมพ์) ปฏิเสธ H0 นิ่ง จึงควรสร้างโมเดลกับผลต่าง (d = 1) แล้วแปลงผลพยากรณ์กลับด้วยการบวกค่าล่าสุด</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันโค้ดในหัวข้อ 8 และ 9 กับ <code>temp.txt</code> แล้วตอบว่า (ก) ACF lag 1 ของข้อมูลเดิม residual และผลต่างคือเท่าใด (ข) วิธีไหนทำให้ใกล้ white noise ที่สุด (ค) <code>mean(diff1)</code> ใกล้กับค่าใดใน output ของ lm</p></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<p>(ก) ข้อมูลเดิม 0.819, residual 0.530, ผลต่าง −0.196</p>
+<p>(ข) ผลต่าง เพราะ |−0.196| อยู่ในเส้น 0.203 และ ADF p ≤ 0.01 ส่วน residual ยังเกินเส้นที่ lag 1 และ ADF p = 0.4726</p>
+<p>(ค) <code>mean(diff1)</code> = 0.0058 ใกล้ความชัน 0.0062 เพราะผลต่างของเส้นตรงเท่ากับความชัน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>คำนวณ in-class example ด้วย R แล้วเทียบกับการคำนวณมือในหัวข้อ 2</p>
+<pre><code>x &lt;- c(12, 10, 11, 14, 15)
+acf(x, plot = FALSE)
+acf(x, type = "covariance", plot = FALSE)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">Autocorrelations:  1.000  0.363  -0.402  -0.400  -0.060
+Autocovariances:   3.440  1.248  -1.384  -1.376  -0.208</pre>
+<p>ตรงกับมือทุกค่า type = "covariance" ให้ \(\hat\gamma(h)\) ซึ่งหารด้วย n = 5 เช่น \(\hat\gamma(1)=6.24/5=1.248\) และ \(\hat\gamma(0)=17.2/5=3.44\) ยืนยันว่า R ใช้ตัวหาร n ตามสูตรของสไลด์</p>
 </div>
 </div>
 
@@ -740,30 +808,41 @@ alternative hypothesis: stationary</code></pre>
 <div class="box win">
 <div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
 <ul>
-<li>คำนวณ \(\bar X\), \(\hat\gamma(h)\) และ \(\hat\rho(h)\) ด้วยมือ</li>
-<li>อ่าน correlogram และใช้ขอบ \(\pm1.96/\sqrt n\)</li>
-<li>อ่านโค้ด R และผลของ ADF test</li>
-<li>พิสูจน์ problem 1.6 ทั้งสามส่วน</li>
-<li>อธิบาย detrending และ differencing พร้อมข้อดีข้อเสีย และใช้ backshift operator</li>
+<li>คำนวณ \(\bar X\), \(\hat\gamma(h)\), \(\hat\rho(h)\) ด้วยมือ (ตัวเศษ n − h เทอม หารด้วย n)</li>
+<li>อ่าน correlogram ใช้เส้นขอบ \(\pm2/\sqrt n\) และบอกได้ว่านิ่งหรือไม่จากรูปทรง</li>
+<li>อ่านผล ADF: H0 คือไม่นิ่ง p &lt; 0.05 คือนิ่ง</li>
+<li>พิสูจน์ problem 1.6 ทั้งสามส่วน และ quadratic trend ต้อง diff สองครั้ง</li>
+<li>ใช้ <code>lm</code>, <code>resid</code>, <code>diff</code>, <code>acf</code>, <code>adf.test</code> และอ่าน output</li>
+<li>เทียบ detrending กับ differencing และเขียน \(\nabla=(1-B)\), \(\nabla^2=(1-B)^2\)</li>
 </ul>
-<p>บทถัดไป: <a href="0004-smoothing-methods.html">Lesson 4 — Smoothing methods</a></p>
 </div>
 
-<!-- ===================================================== -->
+<p>บทถัดไป: <a href="0004-smoothing-methods.html">Lesson 4 — Moving average, exponential smoothing และ decomposition</a></p>
+
 <h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 37 หน้าอยู่ในหัวข้อใด</h2>
 <table>
 <tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
 <tr data-pages="1" class="etc"><td>1</td><td>ปก Estimating means and covariances</td><td>etc — ปก</td></tr>
-<tr data-pages="2-3"><td>2–3</td><td>Estimation from data</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
-<tr data-pages="4-6"><td>4–6</td><td>ตัวประมาณ mean, covariance, correlation</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
-<tr data-pages="7-9"><td>7–9</td><td>Correlogram และ large sample distribution</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
-<tr data-pages="10"><td>10</td><td>In-class example</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
-<tr data-pages="11-16"><td>11–16</td><td>R-Example white noise, global temperature, ADF test</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="2-6"><td>2–6</td><td>Estimation from data, population, ตัวประมาณ</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="7-9"><td>7–9</td><td>Correlogram, large sample distribution</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="10"><td>10</td><td>In-class example</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="11-12"><td>11–12</td><td>R-Example white noise</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="13-14"><td>13–14</td><td>R-Example global temperature</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="15-16"><td>15–16</td><td>ADF test</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
 <tr data-pages="17" class="etc"><td>17</td><td>หน้าคั่น Dealing with Deterministic Trend</td><td>etc — หน้าคั่น</td></tr>
 <tr data-pages="18-21"><td>18–21</td><td>Systematic pattern, problem 1.6, EDA, 2 ways</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
 <tr data-pages="22-25"><td>22–25</td><td>Detrending</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
 <tr data-pages="26-31"><td>26–31</td><td>Example: Global temperature</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
-<tr data-pages="32-37"><td>32–37</td><td>Differencing</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+<tr data-pages="32-37"><td>32–37</td><td>Differencing, backshift operator</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+</table>
+
+<h3>คลิปและเอกสารที่ใช้ในบทนี้</h3>
+<table>
+<tr><th>แหล่ง</th><th>ช่วงที่ใช้</th><th>หัวข้อ</th></tr>
+<tr><td>Class 3</td><td>0:21–1:54 ทั้งคาบ (0:00–0:21 เฉลย random walk อยู่ใน Lesson 1)</td><td>1–9</td></tr>
+<tr><td>Class 6</td><td>1:14 ρ̂ ต้องคำนวณเป็น, 1:46 quadratic trend</td><td>2, 11</td></tr>
+<tr><td>Exercise 1 (CLASS 2)</td><td>ข้อ 5–8</td><td>10</td></tr>
+<tr><td>R_codes, earthquake.txt, ventilation.txt (CLASS 3), temp.txt (CLASS 2), TSA::prescrip</td><td>ทั้งไฟล์</td><td>3–5, 8–10</td></tr>
 </table>
 
 <script src="../assets/quiz.js"></script>

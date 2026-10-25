@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 11: ARIMAX, Granger และ VAR</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body>
+
+<nav class="lesson-nav">
+  <span><a href="0010-auto-arima-ets-tscv.html">← Lesson 10</a> · Lesson 11 (Lecture 10)</span>
+  <span><a href="../index.html">สารบัญ</a></span>
+</nav>
+
+<p class="kicker">Slide 9 หน้า 17–77 — Multivariate Time Series · คลิป Class 10 (2:21:41)</p>
+<h1>Multivariate time series: GLS, ARIMAX, Granger, CCF และ VAR</h1>
+
+<div class="box">
+<div class="label">บทนี้ตอบคำถามอะไร</div>
+<p>ทุกบทก่อนหน้าพยากรณ์ Y จากอดีตของ Y เองเท่านั้น (univariate) แต่ยอดขายขึ้นกับงบโฆษณา การบริโภคขึ้นกับรายได้ บทนี้เพิ่มตัวแปรอื่นเข้ามา อาจารย์สรุปการเลือกโมเดลตามโครงสร้างข้อมูลไว้สามแบบ (สไลด์หน้า 50)</p>
+<ol>
+<li><b>Univariate</b>: ARIMA หรือ exponential smoothing (Lesson 4–10)</li>
+<li><b>Univariate ที่มีตัวแปรอธิบาย</b>: GLS, ARIMAX หรือ neural network ที่มี regressor มี Y ตัวเดียว สมการเดียว</li>
+<li><b>Multivariate</b>: VAR ทุกตัวแปรเป็น Y "ทุกตัว equally important" มี n ตัวแปรก็มี n สมการ (Class 10, 0:49:56)</li>
+</ol>
+<p>เครื่องมือประกอบคือ Granger causality test (X ช่วยพยากรณ์ Y ไหม) และ cross-correlation (X กับ Y สัมพันธ์กันที่ lag ไหน)</p>
+</div>
+
+<div class="box exam">
+<div class="label">สิ่งที่อาจารย์พูดถึงข้อสอบ</div>
+<ul>
+<li><b>Granger: H0 = X does not cause Y</b> (No Granger effect) ต้องการ p-value <b>ต่ำ</b> ถ้าจะใช้ X ใน ARIMAX (Class 10, 0:09:32, 0:25:23) ใน VAR ใช้ <code>causality()</code> และ "ดูเฉพาะ $Granger อย่าดู $Instant" (1:54:29)</li>
+<li><b>ห้ามปรับ α ให้ผลมีนัยสำคัญ</b> income→consumption p = 0.07491 อาจารย์ตำหนิการเปลี่ยน α เป็น 0.1 "ทำการแก้แบบโง่ ๆ" ปัญหาคือเลือก X, Y ผิด ต้องทำ literature review (0:24:42–0:27:44)</li>
+<li><b>เขียนสมการ ARIMAX จาก output ให้เป็น</b> (0:41:10–0:42:19)</li>
+<li><b>นับจำนวนพารามิเตอร์ของ VAR(p)</b> "ถ้า VAR 2 จะมีกี่พารามิเตอร์ครับ ... สำคัญนะ" (1:16:27–1:17:55)</li>
+<li><b>เขียนสมการ VAR จาก output</b> ข้อสอบคงไม่ให้เขียนครบทุก dummy แต่ต้องรู้ว่า seasonal คือ dummy sd1–sd51 และ trend คือ slope × t (2:01:36–2:03:55)</li>
+<li>Portmanteau: H0 = residual random = โมเดลเหมาะสม p ต่ำคือไม่ผ่าน (1:50:50–1:52:26)</li>
+<li>ARIMAX ต้องส่ง X ของช่วง test ตอนพยากรณ์ และถ้า Y difference แล้ว X ต้อง difference ด้วย (0:44:12)</li>
+<li>Final 40 คะแนน สอบ onsite 26 พฤศจิกายน และจะให้ข้อสอบเก่า (0:19:39, 1:10:34–1:10:50)</li>
+</ul>
+</div>
+
+<table>
+<tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
+<tr><td><a href="#s1">1</a></td><td>ภาพรวม multivariate</td><td>17–18, 50</td></tr>
+<tr><td><a href="#s2">2</a></td><td>GLS: regression ที่ error เป็น AR</td><td>19–26</td></tr>
+<tr><td><a href="#s3">3</a></td><td>ARIMAX และขั้นตอน</td><td>27–31</td></tr>
+<tr><td><a href="#s4">4</a></td><td>Granger causality และ uschange</td><td>32–39</td></tr>
+<tr><td><a href="#s5">5</a></td><td>MIDAS (แนวคิด)</td><td>40–41</td></tr>
+<tr><td><a href="#s6">6</a></td><td>Cross-correlation: Bsales</td><td>42–48</td></tr>
+<tr><td><a href="#s7">7</a></td><td>VAR: แนวคิด จำนวนพารามิเตอร์ และการเลือก p</td><td>49, 51–54</td></tr>
+<tr><td><a href="#s8">8</a></td><td>Dataset 1: var1</td><td>55–59</td></tr>
+<tr><td><a href="#s9">9</a></td><td>เงื่อนไขของ VAR และ EuStockMarkets</td><td>60–70</td></tr>
+<tr><td><a href="#s10">10</a></td><td>Dataset 3: Cardiac Mortality (seasonal VAR)</td><td>71–77</td></tr>
+<tr><td><a href="#s11">11</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="s1">1. ภาพรวม multivariate</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p17.png" alt="Slide 9 หน้า 17: Multivariate Time Series (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 17 — Multivariate Time Series (หน้าคั่น)</figcaption>
+</figure>
+
+<p>Class 10 อาจารย์บอกว่า "วันนี้ผมจะสอนคุณจนจบ VAR" (0:02:11) สมัยก่อนสอน GLS ด้วย แต่เทอมนี้ไม่สอน (0:01:02) และ "ตัวที่น่าจะมีประโยชน์กับนิสิตก็น่าจะเป็นตัว ARIMAX" (0:03:31)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p18.png" alt="Slide 9 หน้า 18: หัวข้อ: GLS, ARIMAX, NN with regressor, cross-correlation, VAR" loading="lazy">
+<figcaption>Slide 9 หน้า 18 — หัวข้อ: GLS, ARIMAX, NN with regressor, cross-correlation, VAR</figcaption>
+</figure>
+
+<p>รายการหัวข้อของส่วนนี้: time series ที่มีตัวแปรอธิบาย (GLS, ARIMAX และ neural network ซึ่งเลื่อนไปคาบหน้า), cross-correlation และ VAR ARIMAX คือ ARIMA with exogenous variable ตัวแปรภายนอกคือตัวแปรที่ใช้อธิบาย Y แต่ไม่ได้ถูกพยากรณ์ในโมเดล</p>
+
+<figure>
+<img src="../assets/slides/ts9-p50.png" alt="Slide 9 หน้า 50: เลือกโมเดลตามโครงสร้างข้อมูล" loading="lazy">
+<figcaption>Slide 9 หน้า 50 — เลือกโมเดลตามโครงสร้างข้อมูล</figcaption>
+</figure>
+
+<p>ตารางสามแถวนี้คือแผนที่ของทั้งวิชา ตัวอย่าง: ยอดขายรายเดือนอย่างเดียวใช้ ARIMA หรือ ETS ยอดขายกับงบโฆษณาที่บริษัทกำหนดเองใช้ ARIMAX (งบโฆษณาไม่ต้องพยากรณ์เพราะรู้ล่วงหน้า) ส่วนราคาหุ้นสี่ตลาดที่ต่างส่งผลต่อกันและต้องพยากรณ์ทุกตัวใช้ VAR (Class 10, 1:12:11)</p>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. GLS: regression ที่ error เป็น AR</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p19.png" alt="Slide 9 หน้า 19: Generalized Least Squares (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 19 — Generalized Least Squares (หน้าคั่น)</figcaption>
+</figure>
+
+<p>อาจารย์ไม่ได้สอนส่วนนี้ในเทอมนี้ แต่สไลด์และโค้ดยังอยู่ จึงอธิบายไว้เพราะเป็นฐานของ ARIMAX: ทั้งสองแก้ปัญหาเดียวกัน คือ regression ที่ error ไม่อิสระกัน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p20.png" alt="Slide 9 หน้า 20: ทำไมต้องใช้ GLS" loading="lazy">
+<figcaption>Slide 9 หน้า 20 — ทำไมต้องใช้ GLS</figcaption>
+</figure>
+
+<p>ใน regression ทั่วไป (OLS) สมมุติว่า error อิสระกัน แต่เมื่อตัวแปรเป็นอนุกรมเวลา residual มักสัมพันธ์ข้ามเวลา ผลคือค่าสัมประสิทธิ์และ standard error ผิด ถ้าไม่สนใจโครงสร้างนี้ โดยเฉพาะ s.e. ที่ผิดทำให้ t-test และ p-value ผิดไปด้วย</p>
+
+<figure>
+<img src="../assets/slides/ts9-p21.png" alt="Slide 9 หน้า 21: Regression ที่ error เป็น AR(p): Φ(B)ε_t = w_t" loading="lazy">
+<figcaption>Slide 9 หน้า 21 — Regression ที่ error เป็น AR(p): Φ(B)ε_t = w_t</figcaption>
+</figure>
+
+<p>โมเดลคือ \(y_t=\alpha+\beta x_t+\varepsilon_t\) และ \(\varepsilon_t=\phi_1\varepsilon_{t-1}+\dots+\phi_p\varepsilon_{t-p}+w_t\) หรือ \(\Phi(B)\varepsilon_t=w_t\) ส่วนแรกคือ regression ปกติ ส่วนที่สองคือ AR ของ error เหมือนที่เรียนใน Lesson 5 ทั้งหมด แค่ใช้กับ residual แทนข้อมูล</p>
+
+<figure>
+<img src="../assets/slides/ts9-p22.png" alt="Slide 9 หน้า 22: GLS: ขั้นตอนง่าย ๆ" loading="lazy">
+<figcaption>Slide 9 หน้า 22 — GLS: ขั้นตอนง่าย ๆ</figcaption>
+</figure>
+
+<p>ขั้นตอน: (1) ทำ OLS แล้วเก็บ residual (2) ดูว่า residual มีโครงสร้าง AR หรือไม่ด้วย ACF/PACF (3) ถ้ามี ประมาณโมเดลที่มี AR error แล้วตรวจความเหมาะสม ในทางปฏิบัติใช้ฟังก์ชัน <code>gls()</code> ของ package nlme ทำครั้งเดียว</p>
+
+<figure>
+<img src="../assets/slides/ts9-p23.png" alt="Slide 9 หน้า 23: Dataset: revenue.txt" loading="lazy">
+<figcaption>Slide 9 หน้า 23 — Dataset: revenue.txt</figcaption>
+</figure>
+
+<p>revenue.txt มี 76 จุดเวลา Y คือ revenue X คือ growth ปัญหาคือ error สัมพันธ์กัน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p24.png" alt="Slide 9 หน้า 24: ACF และ PACF ของ residual จาก OLS" loading="lazy">
+<figcaption>Slide 9 หน้า 24 — ACF และ PACF ของ residual จาก OLS</figcaption>
+</figure>
+
+<p>ACF ของ residual ทะลุเส้นที่ lag 1 (ราว 0.6) และ lag 2 แล้วลดลง ส่วน PACF ทะลุแค่ lag 1 จึงเป็น AR(1) ของ error <code>durbinWatsonTest(model)</code> ยืนยัน: autocorrelation lag 1 = 0.636, D-W statistic = 0.695 (ค่าที่ไม่มี autocorrelation คือราว 2) p-value ≈ 0</p>
+
+<figure>
+<img src="../assets/slides/ts9-p25.png" alt="Slide 9 หน้า 25: ผล GLS: Revenue = 35986.21 + 1.65 growth, ε(t) = 0.668 ε(t−1) + w(t)" loading="lazy">
+<figcaption>Slide 9 หน้า 25 — ผล GLS: Revenue = 35986.21 + 1.65 growth, ε(t) = 0.668 ε(t−1) + w(t)</figcaption>
+</figure>
+
+<p>output ของ gls() ให้ทั้งสัมประสิทธิ์ regression และ φ ของ AR(1) ใน error เทียบกับ OLS ได้ดังนี้</p>
+
+<div class="calc" id="s2-gls">
+<div class="calc-title">เทียบ OLS กับ GLS (รันจาก R_codes ของ Class 10)</div>
+<ol class="steps">
+<li><div class="st-title">OLS</div><p>revenue = 36001.83 + 1.610 growth, s.e. ของ growth = 0.202, t = 7.96</p></li>
+<li><div class="st-title">GLS ที่ error เป็น AR(1)</div><p><code>gls(revenue ~ growth, correlation = corAR1(form = ~time))</code>: revenue = 35986.21 + 1.652 growth, s.e. = 0.117, t = 14.15 และ φ = 0.668</p></li>
+<li><div class="st-title">เขียนโมเดล</div><p>\(\mathrm{Revenue}_t=35986.21+1.65\,\mathrm{growth}_t+\varepsilon_t\), \(\varepsilon_t=0.6681\varepsilon_{t-1}+w_t\)</p></li>
+</ol>
+<div class="answer">ค่าสัมประสิทธิ์เปลี่ยนเล็กน้อย แต่ s.e. ต่างกันเกือบสองเท่า OLS ที่ไม่สนใจ autocorrelation ให้ s.e. ที่ไม่ถูกต้อง ช่วงความเชื่อมั่นและ p-value จึงผิดตาม</div>
+</div>
+
+<figure>
+<img src="../assets/slides/ts9-p26.png" alt="Slide 9 หน้า 26: ตัวอย่างเพิ่มเติม: คลิป GLS ใน R" loading="lazy">
+<figcaption>Slide 9 หน้า 26 — ตัวอย่างเพิ่มเติม: คลิป GLS ใน R</figcaption>
+</figure>
+
+<p>หน้านี้แนะนำคลิป YouTube สอน GLS ใน R ด้วย nlme ตัวอย่างในคลิปใช้ <code>corAR1(form = ~ year)</code> แบบเดียวกับ revenue โดย form บอกตัวแปรที่เรียงลำดับเวลา</p>
+
+<!-- ===================================================== -->
+<h2 id="s3">3. ARIMAX และขั้นตอน</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p27.png" alt="Slide 9 หน้า 27: ARIMA model with an exogenous variable (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 27 — ARIMA model with an exogenous variable (หน้าคั่น)</figcaption>
+</figure>
+
+<p>ARIMAX ขยายจาก GLS: แทนที่ error จะเป็นแค่ AR ให้เป็น ARIMA ได้ทั้งหมด</p>
+
+<figure>
+<img src="../assets/slides/ts9-p28.png" alt="Slide 9 หน้า 28: ARIMAX(p,d,q,r): Φ(B)(1 − B)^d Y_t = θ(B)w_t + Σ α_i X_it" loading="lazy">
+<figcaption>Slide 9 หน้า 28 — ARIMAX(p,d,q,r): Φ(B)(1 − B)^d Y_t = θ(B)w_t + Σ α_i X_it</figcaption>
+</figure>
+
+<p>ARIMAX เสนอโดย Tiao และ Box (1981) คือ ARIMA ที่เติมตัวแปรอิสระ r ตัวทางขวามือ \(\Phi(B)(1-B)^dY_t=\theta(B)w_t+\sum_{i=1}^r\alpha_iX_{it}\) อาจารย์เขียนบนกระดานอีกรูปหนึ่ง \(y_t=\alpha_0+\sum\alpha_iX_{it}+w_t\) โดย \(w_t\) เป็น ARIMA(p,d,q) และ r คือจำนวนตัวแปรภายนอก "ไม่ใช่ parameter" (Class 10, 0:08:13, 0:11:49) สองรูปนี้ไม่เหมือนกันทุกประการ: R (<code>auto.arima(..., xreg = )</code>) ใช้รูปของกระดาน เรียกว่า regression with ARIMA errors ซึ่ง α คือผลของ X ต่อค่าเฉลี่ยของ Y โดยตรง ส่วนรูปบนสไลด์ ผลของ X ส่งต่อไปตามโครงสร้าง AR ด้วย</p>
+
+<figure>
+<img src="../assets/slides/ts9-p29.png" alt="Slide 9 หน้า 29: ARIMAX steps (1–5)" loading="lazy">
+<figcaption>Slide 9 หน้า 29 — ARIMAX steps (1–5)</figcaption>
+</figure>
+
+<p>ขั้นตอน: ตรวจความนิ่งของ Y (difference ถ้าจำเป็น), หา p, q จาก ACF/PACF, ประมาณสัมประสิทธิ์และตรวจ residual, ทำขั้นเดียวกันกับตัวแปร X และใช้ cross-correlation ระหว่าง Y กับ X กำหนดโครงสร้าง lag ปัจจุบัน auto.arima ทำขั้น p, q ให้</p>
+
+<figure>
+<img src="../assets/slides/ts9-p30.png" alt="Slide 9 หน้า 30: ARIMAX steps (Wanida Wongwattanabundit) ส่วนที่ 1" loading="lazy">
+<figcaption>Slide 9 หน้า 30 — ARIMAX steps (Wanida Wongwattanabundit) ส่วนที่ 1</figcaption>
+</figure>
+
+<p>ขั้นตอนฉบับภาษาไทยเพิ่มรายละเอียดที่ใช้ได้จริง: ตรวจ stationary ด้วย ADF, ตัวแปรภายนอกต้อง difference ระดับเดียวกับตัวแปรตาม, ใช้ Granger test คัดตัวแปรภายนอกที่ส่งผลต่อตัวแปรตาม <b>แต่ตัวแปรตามต้องไม่ส่งผลย้อนกลับ</b> ที่ระดับนัยสำคัญ 0.05 แล้วสร้าง regression ด้วย forward/backward stepwise</p>
+
+<figure>
+<img src="../assets/slides/ts9-p31.png" alt="Slide 9 หน้า 31: ARIMAX steps ส่วนที่ 2: residual, VIF, ความสัมพันธ์" loading="lazy">
+<figcaption>Slide 9 หน้า 31 — ARIMAX steps ส่วนที่ 2: residual, VIF, ความสัมพันธ์</figcaption>
+</figure>
+
+<p>ต่อด้วยการตรวจความนิ่งของ residual จาก regression, ตัดตัวแปรที่ไม่มีนัยสำคัญ, ถ้ามีตัวแปรภายนอกหลายตัวให้ตรวจ multicollinearity และตัดตัวที่ VIF เกิน 10 และตรวจว่า residual ไม่มี autocorrelation เหลือ ข้อที่ว่าตัวแปรตามต้องไม่ส่งผลย้อนกลับสำคัญ เพราะถ้า Y ส่งผลต่อ X ด้วย X ก็ไม่ใช่ตัวแปรภายนอกจริง ควรใช้ VAR แทน</p>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. Granger causality และ uschange</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p32.png" alt="Slide 9 หน้า 32: Granger causality test: H0 X ไม่ Granger-cause Y" loading="lazy">
+<figcaption>Slide 9 หน้า 32 — Granger causality test: H0 X ไม่ Granger-cause Y</figcaption>
+</figure>
+
+<p>Granger test ถามว่า "อดีตของ X ช่วยพยากรณ์ Y ได้ดีขึ้นกว่าใช้อดีตของ Y อย่างเดียวหรือไม่" ไม่ใช่เหตุเป็นผลในความหมายทางวิทยาศาสตร์ H0: X does not cause Y (No Granger effect) H1: X causes Y (Class 10, 0:09:32) วิธีทดสอบคือเทียบสอง regression ด้วย F-test: Model 1 มี lag ของทั้ง Y และ X, Model 2 มีแค่ lag ของ Y ถ้า Model 1 ดีขึ้นอย่างมีนัยสำคัญ (p ต่ำ) แปลว่า X มี Granger effect ขั้นที่ 3 บนสไลด์คือทดสอบย้อนทิศ ซึ่งเป็นทางเลือก</p>
+
+<figure>
+<img src="../assets/slides/ts9-p33.png" alt="Slide 9 หน้า 33: Granger test: ตัวแปรภายนอกต้องไม่ได้รับผลย้อนกลับจากตัวแปรตาม" loading="lazy">
+<figcaption>Slide 9 หน้า 33 — Granger test: ตัวแปรภายนอกต้องไม่ได้รับผลย้อนกลับจากตัวแปรตาม</figcaption>
+</figure>
+
+<p>ข้อความภาษาไทยบนสไลด์ย้ำเงื่อนไขเดียวกับหัวข้อ 3: ตัวแปรภายนอกต้องไม่แสดงว่าได้รับผลย้อนกลับจากตัวแปรตาม ถ้าเป็นเหตุเป็นผลกันสองทาง ต้องตัดตัวแปรนั้นออกจากตัวเลือกของ ARIMAX H0 คือตัวแปรภายนอกไม่ส่งผลต่อตัวแปรตาม H1 คือส่งผล "ควรจะเช็คนะครับ เดี๋ยวอันนี้จะใช้เยอะ" เพราะจะใช้ใน VAR ด้วย (Class 10, 0:10:41)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p34.png" alt="Slide 9 หน้า 34: Dataset: uschange" loading="lazy">
+<figcaption>Slide 9 หน้า 34 — Dataset: uschange</figcaption>
+</figure>
+
+<p>uschange คือการเปลี่ยนแปลงเป็นร้อยละรายไตรมาสของการบริโภค รายได้ การผลิต การออม และอัตราว่างงานของสหรัฐฯ 1960–2016 รวม 187 ไตรมาส Y คือ consumption และใช้ income เป็น X ตัวเดียวก่อน (Class 10, 0:18:23) ไฟล์ uschange.txt ไม่ได้อัปโหลดในโฟลเดอร์ ใช้ <code>fpp2::uschange</code> แทนได้ (ชื่อคอลัมน์ขึ้นต้นด้วยตัวใหญ่)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p35.png" alt="Slide 9 หน้า 35: กราฟ consumption และ income" loading="lazy">
+<figcaption>Slide 9 หน้า 35 — กราฟ consumption และ income</figcaption>
+</figure>
+
+<p>ทั้งสองอนุกรมแกว่งรอบค่าคงที่ ไม่มี trend เพราะเป็นร้อยละการเปลี่ยนแปลงอยู่แล้ว <code>adf.test(consumption)</code> ได้ Dickey-Fuller = −4.53, p = 0.01 จึงนิ่ง ไม่ต้อง difference (Class 10, 0:21:26) ช่วงประมาณปีที่ 40 (ราวปี 1980) consumption ลดลงแรงถึงราว −2.3 และ income มีค่าสุดโต่งช่วงท้าย</p>
+
+<figure>
+<img src="../assets/slides/ts9-p36.png" alt="Slide 9 หน้า 36: ARIMA ของ consumption อย่างเดียว" loading="lazy">
+<figcaption>Slide 9 หน้า 36 — ARIMA ของ consumption อย่างเดียว</figcaption>
+</figure>
+
+<p>แบ่ง test = 41 ไตรมาสสุดท้าย (Class 10, 0:33:20) auto.arima กับ training ได้ ARIMA(3,0,0) with non-zero mean: φ = 0.1769, 0.1240, 0.1870, mean = 0.8362, σ² = 0.4007, AICc = 287.39 test RMSE = 0.632 (Class 10, 0:35:41–0:38:41)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p37.png" alt="Slide 9 หน้า 37: Granger: income ไม่ cause consumption ที่ 5%" loading="lazy">
+<figcaption>Slide 9 หน้า 37 — Granger: income ไม่ cause consumption ที่ 5%</figcaption>
+</figure>
+
+<p><code>grangertest(consumption ~ income, data = data)</code> ได้ F = 3.21, p = 0.07491 (ใช้ lag 1) ไม่มีนัยสำคัญที่ 0.05 ส่วนทิศกลับ <code>grangertest(income ~ consumption)</code> ได้ F = 23.05, p = 3.3 × 10⁻⁶ แปลว่า consumption ช่วยพยากรณ์ income แต่ income ไม่ช่วยพยากรณ์ consumption ตามเงื่อนไขในหัวข้อ 3 income จึงไม่ควรเป็นตัวแปรภายนอกของ consumption และสไลด์ก็เขียนว่าอาจพิจารณาให้ income เป็นตัวแปรตามในอนาคต "ถ้า ARIMAX มันเหมาะ X มันควรจะมี Granger effect on y แต่นี่มันไม่ใช่" (Class 10, 0:25:23)</p>
+<p>สไลด์เขียนว่า "but does cause at 10%, so lets continue our analysis" แต่อาจารย์ตำหนิแนวทางนี้ในคลาส: การเปลี่ยน α หลังเห็นผลเป็น "การแก้แบบโง่ ๆ" ปัญหาจริงคือเลือก X กับ Y ผิด ต้องเริ่มจาก literature review (Class 10, 0:24:42–0:27:44) อาจารย์เทียบว่าวิทยาศาสตร์ใช้ Design of Experiment ควบคุมปัจจัยได้ แต่ data science และสังคมศาสตร์ต้องพึ่งทฤษฎีจากงานก่อน (0:29:08) ตัวอย่างนี้จึงทำต่อเพื่อสาธิตโค้ดเท่านั้น</p>
+
+<figure>
+<img src="../assets/slides/ts9-p38.png" alt="Slide 9 หน้า 38: ARIMAX model: consumption = 0.6168 + 0.2781 income + ε" loading="lazy">
+<figcaption>Slide 9 หน้า 38 — ARIMAX model: consumption = 0.6168 + 0.2781 income + ε</figcaption>
+</figure>
+
+<p>สไลด์เขียนสมการสามบรรทัดจาก output ของ auto.arima ที่มี xreg ขั้นการแปลงอยู่ในกล่องข้างล่าง</p>
+
+<div class="calc" id="s4-arimax">
+<div class="calc-title">เขียนสมการ ARIMAX จาก output (Class 10, 0:41:10–0:42:19)</div>
+<ol class="steps">
+<li><div class="st-title">output</div><p><code>auto.arima(con_training, xreg = inc_training)</code>: Regression with ARIMA(1,0,2) errors ar1 = 0.5819, ma1 = −0.5345, ma2 = 0.1843, intercept = 0.6168, xreg = 0.2781, σ² = 0.3543, AICc = 270.5</p></li>
+<li><div class="st-title">ส่วน regression</div><p>\(\mathrm{consumption}_t=0.6168+0.2781\,\mathrm{income}_t+\varepsilon_t\) "intercept = 0.6168, xreg = slope หน้า income"</p></li>
+<li><div class="st-title">ส่วน ARMA ของ error</div><p>\(\varepsilon_t=0.5819\varepsilon_{t-1}-0.5345w_{t-1}+0.1843w_{t-2}+w_t\)</p></li>
+<li><div class="st-title">white noise</div><p>\(w_t\sim N(0,\hat\sigma^2=0.3543)\)</p></li>
+</ol>
+<div class="answer">ความหมาย: รายได้เพิ่ม 1 จุดร้อยละ การบริโภคเพิ่มเฉลี่ย 0.278 จุดร้อยละในไตรมาสเดียวกัน ส่วนที่รายได้อธิบายไม่ได้ (ε) ยังมีโครงสร้าง ARMA(1,2) ข้ามเวลา</div>
+</div>
+
+<figure>
+<img src="../assets/slides/ts9-p39.png" alt="Slide 9 หน้า 39: accuracy ของ ARIMAX บน training และ test" loading="lazy">
+<figcaption>Slide 9 หน้า 39 — accuracy ของ ARIMAX บน training และ test</figcaption>
+</figure>
+
+<p>พยากรณ์ต้องส่ง income ของช่วง test เข้าไป <code>forecast(arimax, xreg = inc_test)</code> (Class 10, 0:44:12) test RMSE = 0.596 ต่ำกว่า ARIMA ที่ 0.632 ราว 0.04 (0:44:44) "ข้อสอบคงจะไม่ถามว่าคุณจะเติม X หรือไม่เติม X" อีกวิธีเทียบคือ F-test แบบเอา X ออก (0:46:39) ในงานจริง ARIMAX ใช้พยากรณ์ได้เมื่อรู้ X ของอนาคต เช่น งบโฆษณาที่วางแผนไว้แล้ว ถ้าต้องพยากรณ์ X ด้วยก็ควรใช้ VAR</p>
+<div class="box beginner">
+<div class="label">กับดักลำดับอาร์กิวเมนต์ของ accuracy()</div>
+<p>โค้ดเรียก <code>accuracy(con_test, forec_test$mean)</code> แต่ forecast::accuracy() รับ<b>ค่าพยากรณ์ก่อน ค่าจริงทีหลัง</b> ผลจึงกลับเครื่องหมายของ ME และ MPE: output ได้ ME = +0.4197 (ARIMA) และ +0.3294 (ARIMAX) ถ้าเรียกถูกลำดับ <code>accuracy(forec_test$mean, con_test)</code> จะได้ −0.4197 และ −0.3294 ส่วน RMSE และ MAE เท่ากันทั้งสองแบบ MAPE ก็เปลี่ยนเพราะหารด้วยค่าคนละชุด เป็นกับดักเดียวกับที่พบใน Lesson 2</p>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s5">5. MIDAS (แนวคิด)</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p40.png" alt="Slide 9 หน้า 40: Mixed Data Sampling (MIDAS) regression (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 40 — Mixed Data Sampling (MIDAS) regression (หน้าคั่น)</figcaption>
+</figure>
+
+<p>ส่วนนี้มีเฉพาะแนวคิด ไม่มีโค้ดและไม่ได้ลงรายละเอียดในคลิป</p>
+
+<figure>
+<img src="../assets/slides/ts9-p41.png" alt="Slide 9 หน้า 41: MIDAS: Y ความถี่ต่ำ อธิบายด้วย X ความถี่สูง" loading="lazy">
+<figcaption>Slide 9 หน้า 41 — MIDAS: Y ความถี่ต่ำ อธิบายด้วย X ความถี่สูง</figcaption>
+</figure>
+
+<p>MIDAS ใช้เมื่อ Y กับ X เก็บด้วยความถี่ต่างกัน เช่น GDP รายไตรมาส (ความถี่ต่ำ) กับดัชนีราคาหุ้นรายวันหรือยอดค้าปลีกรายเดือน (ความถี่สูง) แทนที่จะเฉลี่ย X รายเดือนสามเดือนให้เป็นรายไตรมาสแล้วเสียข้อมูล MIDAS ใช้ค่าปัจจุบันและค่าล่าช้าของ X ความถี่สูงทั้งหมดเป็นตัวอธิบาย จึงเป็น autoregressive distributed lag แบบทั่วไป ตัวอย่าง: ไตรมาสหนึ่งมีสามเดือน X ในไตรมาสนั้นจึงมีสามค่าที่แต่ละค่ามีน้ำหนักของตัวเอง</p>
+
+<!-- ===================================================== -->
+<h2 id="s6">6. Cross-correlation: Bsales</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p42.png" alt="Slide 9 หน้า 42: Cross Correlation (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 42 — Cross Correlation (หน้าคั่น)</figcaption>
+</figure>
+
+<p>autocorrelation วัดความสัมพันธ์ของอนุกรมกับอดีตของตัวเอง cross-correlation ขยายไปวัดความสัมพันธ์ของสองอนุกรมที่ lag ต่าง ๆ "CCF มันเป็นแค่ EDA ... ไม่ใช่ตัวโมเดลหลัก" (Class 10, 0:58:43) ใช้ช่วยตัดสินว่าควรใส่ X ที่ lag ไหน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p43.png" alt="Slide 9 หน้า 43: สูตร sample cross-correlation ρ̂_ij(k)" loading="lazy">
+<figcaption>Slide 9 หน้า 43 — สูตร sample cross-correlation ρ̂_ij(k)</figcaption>
+</figure>
+
+<p>cross-correlation ระหว่าง \(X_{t1}\) และ \(X_{t2}\) ที่ lag k คือ correlation ของ \(X_{t+k,1}\) กับ \(X_{t2}\) สูตรคือ \(\hat\rho_{12}(k)=\dfrac{\sum_{t=1}^{n-k}(X_{t+k,1}-\bar X_1)(X_{t2}-\bar X_2)}{\sqrt{\sum(X_{t1}-\bar X_1)^2}\sqrt{\sum(X_{t2}-\bar X_2)^2}}\) จุดต่างสำคัญจาก ACF: ACF ที่ lag k กับ −k เท่ากัน แต่ CCF ไม่เท่า "ลำดับของอนุกรมมีผล" (Class 10, 0:51:15–0:52:52)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p44.png" alt="Slide 9 หน้า 44: ความหมายของ k = 0, k = 2 และ k = −2" loading="lazy">
+<figcaption>Slide 9 หน้า 44 — ความหมายของ k = 0, k = 2 และ k = −2</figcaption>
+</figure>
+
+<p>k = 0 คือ Pearson correlation ของคู่เวลาเดียวกัน k = 2 จับคู่ \((X_{31},X_{12}),(X_{41},X_{22}),\dots\) คือตัวแปร 1 ในอนาคตสองช่วงกับตัวแปร 2 ปัจจุบัน k = −2 จับคู่ \((X_{11},X_{32}),\dots\) คือตัวแปร 1 ปัจจุบันกับตัวแปร 2 ในอนาคตสองช่วง หรือมองกลับว่าตัวแปร 1 นำตัวแปร 2 อยู่สองช่วง</p>
+
+<figure>
+<img src="../assets/slides/ts9-p45.png" alt="Slide 9 หน้า 45: Cross correlogram" loading="lazy">
+<figcaption>Slide 9 หน้า 45 — Cross correlogram</figcaption>
+</figure>
+
+<p>วาดเหมือน ACF แต่แกนนอนมีทั้ง lag ลบและบวก ความสูงของแท่งบอกความแรงของ cross-correlation ใน R ใช้ <code>ccf(x, y)</code> ซึ่งค่าที่ lag k คือ cor(x[t+k], y[t]) ดังนั้น lag ลบหมายถึง x ในอดีตเทียบกับ y ปัจจุบัน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p46.png" alt="Slide 9 หน้า 46: Dataset: Bsales 100 สัปดาห์" loading="lazy">
+<figcaption>Slide 9 หน้า 46 — Dataset: Bsales 100 สัปดาห์</figcaption>
+</figure>
+
+<p>Bsales มี 100 สัปดาห์ สี่ตัวแปร: sales (พันดอลลาร์, ตัวแปรตอบสนอง), ad_tv, ad_online (พันดอลลาร์) และ discount (ร้อยละ)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p47.png" alt="Slide 9 หน้า 47: ccf ของ ad_tv, ad_online, discount กับ sales" loading="lazy">
+<figcaption>Slide 9 หน้า 47 — ccf ของ ad_tv, ad_online, discount กับ sales</figcaption>
+</figure>
+
+<p><code>ccf(data$ad_tv, data$sales)</code> มีค่าสูงสุดที่ lag −1 = 0.848 รองลงมาคือ lag 0 = 0.695 และ lag −2 = 0.641 ad_online มีรูปแบบเดียวกัน สูงสุดที่ lag −1 = 0.788 ส่วน discount ค่าสัมบูรณ์สูงสุดเพียง 0.333 และไม่มีแท่งเด่นที่ lag ใด (Class 10, 1:00:05–1:04:10)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p48.png" alt="Slide 9 หน้า 48: ตีความ: โฆษณาสัปดาห์ก่อนสัมพันธ์กับยอดขายสัปดาห์นี้" loading="lazy">
+<figcaption>Slide 9 หน้า 48 — ตีความ: โฆษณาสัปดาห์ก่อนสัมพันธ์กับยอดขายสัปดาห์นี้</figcaption>
+</figure>
+
+<p>lag −1 ของ ccf(ad_tv, sales) หมายถึง ad_tv ที่เวลา t − 1 กับ sales ที่เวลา t ข้อสรุปคือยอดขายสัมพันธ์กับโฆษณาของสัปดาห์ก่อนมากที่สุด (ρ ≈ 0.8) ซึ่งสมเหตุสมผลเพราะลูกค้าต้องใช้เวลาตัดสินใจหลังเห็นโฆษณา ถ้าจะทำ ARIMAX จึงควรใส่ <code>ad_tv</code> ที่ lag 1 เป็นตัวอธิบาย ส่วนส่วนลดไม่มีความสัมพันธ์แบบล่าช้าที่ชัดเจน (Class 10, 1:04:10–1:06:41)</p>
+
+<!-- ===================================================== -->
+<h2 id="s7">7. VAR: แนวคิด จำนวนพารามิเตอร์ และการเลือก p</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p49.png" alt="Slide 9 หน้า 49: Vector Autoregressive (VAR) model (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 49 — Vector Autoregressive (VAR) model (หน้าคั่น)</figcaption>
+</figure>
+
+<p>VAR คือ "simultaneous model" (Class 10, 1:11:20) ทุกตัวแปรถูกพยากรณ์พร้อมกัน และทุกตัวใช้ lag ของตัวเองและของตัวอื่นเป็นตัวอธิบาย</p>
+
+<figure>
+<img src="../assets/slides/ts9-p51.png" alt="Slide 9 หน้า 51: VAR: ศึกษาความสัมพันธ์ระหว่างทุกตัวแปร ไม่แยก dependent/independent" loading="lazy">
+<figcaption>Slide 9 หน้า 51 — VAR: ศึกษาความสัมพันธ์ระหว่างทุกตัวแปร ไม่แยก dependent/independent</figcaption>
+</figure>
+
+<p>VAR ใช้เมื่อตัวแปรตั้งแต่สองตัวสัมพันธ์กัน และรวมกันอธิบายได้มากกว่าตัวเดียว เป้าหมายคือศึกษาความสัมพันธ์ระหว่างทุกตัวแปรเพื่อพยากรณ์ให้ดีขึ้น และเพราะ VAR ไม่แยกตัวแปรตามกับตัวแปรอิสระ จึงพยากรณ์ทุกตัวพร้อมกัน ต่างจาก ARIMAX ที่ต้องรู้ X ของอนาคต</p>
+
+<figure>
+<img src="../assets/slides/ts9-p52.png" alt="Slide 9 หน้า 52: Bivariate VAR(1)" loading="lazy">
+<figcaption>Slide 9 หน้า 52 — Bivariate VAR(1)</figcaption>
+</figure>
+
+<p>VAR(1) สองตัวแปร: \(X_{t1}=\phi_{11}X_{t-1,1}+\phi_{12}X_{t-1,2}+w_{t1}\) และ \(X_{t2}=\phi_{21}X_{t-1,1}+\phi_{22}X_{t-1,2}+w_{t2}\) แต่ละสมการคือ AR(1) ของตัวเองบวก lag 1 ของอีกตัว VAR ที่เรียนมีแค่ AR term ไม่มี MA (Class 10, 1:14:04) ตัวอย่างความหมาย: ถ้า φ₁₂ = 0.5 การโฆษณาสัปดาห์ก่อนเพิ่ม 1 หน่วยทำให้ยอดขายสัปดาห์นี้เพิ่ม 0.5 หน่วย</p>
+
+<figure>
+<img src="../assets/slides/ts9-p53.png" alt="Slide 9 หน้า 53: VAR(1) ในรูปเมทริกซ์: X_t = ΦX(t−1) + W_t" loading="lazy">
+<figcaption>Slide 9 หน้า 53 — VAR(1) ในรูปเมทริกซ์: X_t = ΦX(t−1) + W_t</figcaption>
+</figure>
+
+<p>เขียนเป็นเมทริกซ์ \(\mathbf X_t=\mathbf\Phi\mathbf X_{t-1}+\mathbf W_t\) โดย Φ เป็นเมทริกซ์ 2 × 2 และ error มี covariance matrix ที่มี Var(w₁), Var(w₂) และ Cov(w₁, w₂) (Class 10, 1:21:13–1:22:25) เมื่อ p หรือจำนวนตัวแปรเพิ่ม การเขียนแบบเต็มจะยาวมาก</p>
+
+<div class="calc" id="s7-params">
+<div class="calc-title">นับจำนวนพารามิเตอร์ของ VAR(p) (คำถามที่อาจารย์ย้ำ, Class 10, 1:16:27–1:17:55)</div>
+<ol class="steps">
+<li><div class="st-title">กฎ</div><p>k ตัวแปร VAR(p) มี k สมการ แต่ละสมการมี φ จำนวน p × k ตัว (p lag ของทุกตัวแปร) ถ้ามีค่าคงที่ (type = "const") บวกอีก 1 ต่อสมการ</p></li>
+<li><div class="st-title">2 ตัวแปร</div><p>VAR(1): 2 ต่อสมการ รวม 4 · VAR(2): 4 ต่อสมการ รวม 8 · VAR(3): 6 ต่อสมการ รวม 12</p></li>
+<li><div class="st-title">EuStockMarkets 4 ตัวแปร VAR(9)</div><p>9 × 4 = 36 ต่อสมการ รวม 144 φ</p></li>
+<li><div class="st-title">var1 VAR(5) type = "const"</div><p>5 × 2 + 1 = 11 ต่อสมการ ข้อมูลที่ใช้ได้มีแค่ 20 − 5 = 15 แถว เหลือ df = 15 − 11 = 4 ซึ่งตรงกับ "on 4 degrees of freedom" ใน output</p></li>
+</ol>
+<div class="answer">จำนวนพารามิเตอร์โตเป็น p × k² จึงต้องเลือก p อย่างระวัง สไลด์บอก "Keep your model as simple as possible, but as complex as required."</div>
+</div>
+
+<figure>
+<img src="../assets/slides/ts9-p54.png" alt="Slide 9 หน้า 54: เลือก p ด้วย AIC / BIC / HQ / FPE" loading="lazy">
+<figcaption>Slide 9 หน้า 54 — เลือก p ด้วย AIC / BIC / HQ / FPE</figcaption>
+</figure>
+
+<p>คำนวณ information criterion สี่ตัวสำหรับหลาย p แล้วเลือกค่าต่ำสุด: AIC, HQ (Hannan-Quinn), SC (Schwarz ซึ่ง "SC มันคือ BIC", Class 10, 1:28:17) และ FPE (final prediction error) สี่เกณฑ์อาจให้ p ต่างกันมาก "Results might vary hugely" ฟังก์ชันคือ <code>VARselect()</code> จาก package vars</p>
+
+<!-- ===================================================== -->
+<h2 id="s8">8. Dataset 1: var1</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p55.png" alt="Slide 9 หน้า 55: Dataset 1 (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 55 — Dataset 1 (หน้าคั่น)</figcaption>
+</figure>
+
+<p>var1 เป็นข้อมูลจำลองที่ออกแบบให้เห็นโครงสร้างของ VAR ชัด ๆ</p>
+
+<figure>
+<img src="../assets/slides/ts9-p56.png" alt="Slide 9 หน้า 56: var1: ข้อมูลจำลองสองตัวแปร และ cross-correlation สูงที่ k = 5" loading="lazy">
+<figcaption>Slide 9 หน้า 56 — var1: ข้อมูลจำลองสองตัวแปร และ cross-correlation สูงที่ k = 5</figcaption>
+</figure>
+
+<p>ไฟล์มี 25 แถว โค้ดใช้ 20 แถวแรก (สไลด์เขียนว่า length n = 5 ซึ่งน่าจะพิมพ์ผิด) <code>ccf(data$x1, data$x2)</code> มีค่าสูงสุดที่ lag 5 = 0.835 คือ correlation ของ \(X_{t+5,1}\) กับ \(X_{t2}\) หรือ x2 นำ x1 อยู่ 5 ช่วง "ในสมการ X_t,1 สัมประสิทธิ์หน้า X_{t−5,2} จะ significant" (Class 10, 1:24:41)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p57.png" alt="Slide 9 หน้า 57: VARselect(X, lag.max = 6, type = "const")" loading="lazy">
+<figcaption>Slide 9 หน้า 57 — VARselect(X, lag.max = 6, type = "const")</figcaption>
+</figure>
+
+<p>บนสไลด์ได้ AIC = 5, HQ = 5, SC = 5, FPE = 6 (Class 10, 1:28:17) แถว lag 6 ของ criteria เป็น NaN เพราะข้อมูลแค่ 20 แถวไม่พอประมาณ VAR(6) ที่มีพารามิเตอร์ 13 ตัวต่อสมการ เมื่อรันด้วย vars เวอร์ชันปัจจุบันได้ 6 ทุกเกณฑ์ เพราะวิธีจัดการ NaN ต่างกัน p = 5 สอดคล้องกับ CCF จึงเลือก VAR(5) อาจารย์อธิบาย type: "none" มีแต่ φ, "const" มี intercept, "both" มี intercept และ trend (Class 10, 1:32:04) และขั้นแรกต้องเช็คความนิ่งก่อน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p58.png" alt="Slide 9 หน้า 58: สมการ x1 ของ VAR(5)" loading="lazy">
+<figcaption>Slide 9 หน้า 58 — สมการ x1 ของ VAR(5)</figcaption>
+</figure>
+
+<p><code>VAR(X, p = 5, type = "const")</code> สมการ x1: x2.l5 = 2.0046 (s.e. 0.0170, t = 117.9, p = 3.1 × 10⁻⁸) ตัวอื่นไม่มีนัยสำคัญ const = −0.00016 (Class 10, 1:37:50) จึงสรุปได้ว่า \(x_{1,t}\approx2x_{2,t-5}\) ข้อมูลถูกสร้างมาแบบนี้ R² = 1 ด้วยเหตุนี้</p>
+
+<figure>
+<img src="../assets/slides/ts9-p59.png" alt="Slide 9 หน้า 59: สมการ x2 ของ VAR(5)" loading="lazy">
+<figcaption>Slide 9 หน้า 59 — สมการ x2 ของ VAR(5)</figcaption>
+</figure>
+
+<p>สมการ x2: const = 0.41631, x1.l1 = −0.19529 ไม่มีตัวไหนมีนัยสำคัญ (adjusted R² = 0.095, F p = 0.486) x2 จึงแทบเป็น noise ที่ไม่ขึ้นกับอดีต การพยากรณ์ <code>predict(fit, n.ahead = 5)</code> ให้ fcst, lower, upper แยกแต่ละตัวแปร (Class 10, 1:41:05) x1 ห้าก้าวถัดไปคือ 0.231, −1.905, 0.452, 3.613, −0.009 ซึ่งคือสองเท่าของ x2 ที่สังเกตแล้วเมื่อ 5 ช่วงก่อน จึงพยากรณ์ได้แม่นแม้ x2 จะเดาไม่ได้</p>
+
+<!-- ===================================================== -->
+<h2 id="s9">9. เงื่อนไขของ VAR และ EuStockMarkets</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p60.png" alt="Slide 9 หน้า 60: Prerequisite: ข้อมูลต้องนิ่ง ใช้ ADF ทีละคอลัมน์" loading="lazy">
+<figcaption>Slide 9 หน้า 60 — Prerequisite: ข้อมูลต้องนิ่ง ใช้ ADF ทีละคอลัมน์</figcaption>
+</figure>
+
+<p>ความนิ่งเป็นเงื่อนไขของ VAR ขั้นแรกจึงตรวจ ADF ของทุกคอลัมน์แยกกัน ถ้าไม่นิ่งให้ difference ใช้ <code>apply(data, 2, adf.test)</code> โดย 2 คือทำทีละคอลัมน์ (Class 10, 1:43:44)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p61.png" alt="Slide 9 หน้า 61: Prerequisite: ตัวแปร endogenous ต่อเนื่องและเป็นเชิงเส้น" loading="lazy">
+<figcaption>Slide 9 หน้า 61 — Prerequisite: ตัวแปร endogenous ต่อเนื่องและเป็นเชิงเส้น</figcaption>
+</figure>
+
+<p>ตัวแปรใน VAR ต้องเป็น endogenous คือส่งผลต่อกัน เป็นตัวเลขต่อเนื่อง และแต่ละตัวเป็นฟังก์ชันเชิงเส้นของ lag ของตัวเองและตัวอื่น ถ้ามีตัวแปรที่ไม่ได้รับผลจากตัวอื่นเลย ควรใช้เป็น exogenous แบบ ARIMAX</p>
+
+<figure>
+<img src="../assets/slides/ts9-p62.png" alt="Slide 9 หน้า 62: Dataset 2 (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 62 — Dataset 2 (หน้าคั่น)</figcaption>
+</figure>
+
+<p>ชุดที่สองเป็นข้อมูลจริงขนาดใหญ่ที่อยู่ใน base R</p>
+
+<figure>
+<img src="../assets/slides/ts9-p63.png" alt="Slide 9 หน้า 63: EuStockMarkets: ราคาปิดรายวันของ DAX, SMI, CAC, FTSE" loading="lazy">
+<figcaption>Slide 9 หน้า 63 — EuStockMarkets: ราคาปิดรายวันของ DAX, SMI, CAC, FTSE</figcaption>
+</figure>
+
+<p>ราคาปิดรายวันของดัชนีเยอรมนี (DAX), สวิตเซอร์แลนด์ (SMI), ฝรั่งเศส (CAC) และอังกฤษ (FTSE) เฉพาะวันทำการ 1,860 วัน สี่ตัวแปร</p>
+
+<figure>
+<img src="../assets/slides/ts9-p64.png" alt="Slide 9 หน้า 64: กราฟ EuStockMarkets: trend ขาขึ้นทั้งสี่ดัชนี" loading="lazy">
+<figcaption>Slide 9 หน้า 64 — กราฟ EuStockMarkets: trend ขาขึ้นทั้งสี่ดัชนี</figcaption>
+</figure>
+
+<p>ทั้งสี่ดัชนีมี trend ขาขึ้นชัดเจน โดยเฉพาะช่วง 1997–1998 ADF ของราคา: DAX p = 0.96, SMI p = 0.98, CAC p = 0.99, FTSE p = 0.59 ไม่นิ่งทั้งหมด (H0 ของ ADF คือไม่นิ่ง) จึง <code>stnry = diff(EuStockMarkets)</code> แล้ว ADF ทุกตัวได้ p = 0.01 (Class 10, 1:45:54–1:46:57) VARselect(type = "none", lag.max = 10) ได้ AIC = 9, HQ = 1, SC = 1, FPE = 9 สไลด์เลือก p = 9 เพราะ AIC "is the most popular one"</p>
+
+<figure>
+<img src="../assets/slides/ts9-p65.png" alt="Slide 9 หน้า 65: Diagnostic: portmanteau test" loading="lazy">
+<figcaption>Slide 9 หน้า 65 — Diagnostic: portmanteau test</figcaption>
+</figure>
+
+<p>วัดว่าโมเดลจับ pattern ไปได้แค่ไหนด้วยการดูว่า residual เป็น random หรือไม่ ใช้ Box-Pierce หรือ Ljung-Box แบบหลายตัวแปร เรียกรวมว่า portmanteau test H0 คือ residual เป็นอิสระ ใน R ใช้ <code>serial.test()</code></p>
+
+<figure>
+<img src="../assets/slides/ts9-p66.png" alt="Slide 9 หน้า 66: Granger test of causality ใน VAR" loading="lazy">
+<figcaption>Slide 9 หน้า 66 — Granger test of causality ใน VAR</figcaption>
+</figure>
+
+<p>Granger ใน VAR ใช้ตรวจว่ามีตัวแปรที่ไม่มีอิทธิพลต่อตัวอื่น ซึ่งตัดออกได้เพื่อลด overfitting ทำกับทุกตัวแปร R ให้สองผล Granger และ Instant ให้ดู Granger ถ้า p &gt; 0.05 อาจตัดตัวแปรนั้น "ดูเฉพาะ $Granger อย่าดู $Instant" (Class 10, 1:54:29)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p67.png" alt="Slide 9 หน้า 67: EuStockMarkets: เลือก p = 9 ด้วย AIC" loading="lazy">
+<figcaption>Slide 9 หน้า 67 — EuStockMarkets: เลือก p = 9 ด้วย AIC</figcaption>
+</figure>
+
+<p><code>vars::VAR(stnry, lag.max = 10, ic = "AIC", type = "none")</code> เลือก p = 9 ได้ 36 สัมประสิทธิ์ต่อสมการ รวม 144 ตัว ใช้ type = "none" เพราะผลต่างของราคามี mean ใกล้ศูนย์</p>
+
+<figure>
+<img src="../assets/slides/ts9-p68.png" alt="Slide 9 หน้า 68: Covariance/correlation ของ residual และ serial.test" loading="lazy">
+<figcaption>Slide 9 หน้า 68 — Covariance/correlation ของ residual และ serial.test</figcaption>
+</figure>
+
+<p>correlation ของ residual ระหว่างดัชนีสูง (DAX กับ SMI 0.749, DAX กับ CAC 0.743) แปลว่า shock ในวันเดียวกันเกิดพร้อมกันทั้งยุโรป ส่วน serial.test: Chi-squared = 183.36, df = 112, p = 2.4 × 10⁻⁵ จึง reject H0 residual ยังมี autocorrelation เหลือ "อาจจะต้องเปลี่ยน P" (Class 10, 1:52:07) df = 112 มาจาก k²(h − p) = 16 × (16 − 9) เมื่อใช้ lag 16 ในการทดสอบ ในคลิปช่วงหนึ่งอาจารย์พูด "อยากให้ p-value ต่ำ ๆ" ซึ่งขัดกับ H0 แล้วสรุปถูกว่า p ต่ำคือไม่ผ่าน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p69.png" alt="Slide 9 หน้า 69: วิธีปรับโมเดลเมื่อ residual ยังสัมพันธ์" loading="lazy">
+<figcaption>Slide 9 หน้า 69 — วิธีปรับโมเดลเมื่อ residual ยังสัมพันธ์</figcaption>
+</figure>
+
+<p>ทางเลือกคือเปลี่ยน p, เปลี่ยน type, difference ครั้งที่สอง หรือ take log ของข้อมูล (ราคาหุ้นมักใช้ผลต่างของ log คือผลตอบแทน) สไลด์ตัดสินใจใช้ VAR(9) ต่อ การบ้านของอาจารย์คือลอง p = 1 (Class 10, 1:55:59)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p70.png" alt="Slide 9 หน้า 70: causality(var.a, cause = "SMI")" loading="lazy">
+<figcaption>Slide 9 หน้า 70 — causality(var.a, cause = "SMI")</figcaption>
+</figure>
+
+<p>ผล Granger ของแต่ละดัชนี (H0: ดัชนีนั้นไม่ Granger-cause อีกสามตัว): DAX F = 1.73, p = 0.0107; SMI F = 2.65, p = 7.1 × 10⁻⁶; CAC F = 1.85, p = 0.0046; FTSE F = 1.94, p = 0.0024 ทุกตัวมีนัยสำคัญ จึงไม่ตัดตัวไหน (Class 10, 1:54:57) df1 = 27 คือ 9 lag × 3 ตัวแปรอื่น ส่วน $Instant ของ SMI ได้ χ² = 686.75 ซึ่งสะท้อน correlation ของ residual ในวันเดียวกันที่เห็นในหน้าก่อน พยากรณ์ <code>predict(var.a, n.ahead = 25)</code> ได้สี่ดัชนีพร้อมกัน แต่เป็นค่าของผลต่าง ต้อง undifference เอง (Class 10, 1:56:08)</p>
+
+<!-- ===================================================== -->
+<h2 id="s10">10. Dataset 3: Cardiac Mortality (seasonal VAR)</h2>
+
+<figure>
+<img src="../assets/slides/ts9-p71.png" alt="Slide 9 หน้า 71: Dataset 3 (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 9 หน้า 71 — Dataset 3 (หน้าคั่น)</figcaption>
+</figure>
+
+<p>ชุดสุดท้ายแสดง VAR ที่มีทั้ง trend และ seasonal โดยไม่ difference</p>
+
+<figure>
+<img src="../assets/slides/ts9-p72.png" alt="Slide 9 หน้า 72: Cardiac Mortality: cmort, tempr, part รายสัปดาห์ และ seasonal dummy" loading="lazy">
+<figcaption>Slide 9 หน้า 72 — Cardiac Mortality: cmort, tempr, part รายสัปดาห์ และ seasonal dummy</figcaption>
+</figure>
+
+<p><code>cardiac</code> จาก package tswge: อัตราการเสียชีวิตจากโรคหัวใจ (cmort), อุณหภูมิ (tempr) และมลพิษอนุภาค (part) รายสัปดาห์ 1970–1979 รวม 508 สัปดาห์ มี trend และ seasonal 52 สัปดาห์ (Class 10, 1:57:31) <code>season = 52</code> สร้าง dummy 51 ตัว (sd1–sd51) สัปดาห์สุดท้ายคือ dummy ทุกตัวเป็น 0 เพราะถ้าใช้ 52 ตัวจะเกิด linear dependence กับค่าคงที่ (Class 10, 1:59:04) และ <code>type = "both"</code> ใส่ intercept กับ slope × t แทนการ difference (2:00:05)</p>
+
+<figure>
+<img src="../assets/slides/ts9-p73.png" alt="Slide 9 หน้า 73: สมการ cmort ของ VAR(2) type = "both", season = 52" loading="lazy">
+<figcaption>Slide 9 หน้า 73 — สมการ cmort ของ VAR(2) type = "both", season = 52</figcaption>
+</figure>
+
+<p>output แสดงสัมประสิทธิ์ของสมการ cmort ทั้งหมด ส่วนที่ไฮไลต์คือค่าคงที่และ trend ที่มาจาก type = "both"</p>
+
+<div class="calc" id="s10-write">
+<div class="calc-title">เขียนสมการ cmort (Class 10, 2:02:04–2:03:37)</div>
+<ol class="steps">
+<li><div class="st-title">ค่าคงที่และ trend</div><p>const = 55.334, trend = −0.01462 ต่อสัปดาห์ (อัตราเสียชีวิตลดลงช้า ๆ)</p></li>
+<li><div class="st-title">lag 1</div><p>cmort.l1 = 0.2623, tempr.l1 = −0.1252, part.l1 = −0.0486</p></li>
+<li><div class="st-title">lag 2</div><p>cmort.l2 = 0.3330, tempr.l2 = −0.0437, part.l2 = −0.0203</p></li>
+<li><div class="st-title">สมการ</div><p>\(\mathrm{cmort}_t=55.334-0.0146t+0.2623\,\mathrm{cmort}_{t-1}-0.1252\,\mathrm{tempr}_{t-1}-0.0486\,\mathrm{part}_{t-1}+0.3330\,\mathrm{cmort}_{t-2}-0.0437\,\mathrm{tempr}_{t-2}-0.0203\,\mathrm{part}_{t-2}-4.378\,sd_1-2.528\,sd_2-\dots-0.669\,sd_{51}+w_t\)</p></li>
+</ol>
+<div class="answer">อาจารย์บอกว่าข้อสอบคงไม่ให้เขียน dummy ครบ 51 ตัว แต่ต้องรู้ว่าแต่ละ sd คือผลของสัปดาห์นั้นเทียบกับสัปดาห์ที่ 52 (2:01:36) ตัวอย่าง sd1 = −4.378 คือสัปดาห์แรกของปีมีอัตราต่ำกว่าสัปดาห์สุดท้ายราว 4.4 หน่วย เมื่อค่าอื่นเท่ากัน</div>
+</div>
+
+<figure>
+<img src="../assets/slides/ts9-p74.png" alt="Slide 9 หน้า 74: VARselect: seasonal (5, 2, 2, 5) และ non-seasonal (9, 5, 2, 9)" loading="lazy">
+<figcaption>Slide 9 หน้า 74 — VARselect: seasonal (5, 2, 2, 5) และ non-seasonal (9, 5, 2, 9)</figcaption>
+</figure>
+
+<p>แบบมี seasonal dummy ได้ AIC = 5, HQ = 2, SC = 2, FPE = 5 แบบไม่มีได้ 9, 5, 2, 9 สไลด์เลือก VAR(2) และ VAR(9) และเพิ่ม VAR(7) เพราะ CCF บอกว่า cmort สัมพันธ์กับ part ที่ lag 7 สัปดาห์ (Class 10, 2:04:25–2:05:48) แบ่ง train ถึงสัปดาห์ที่ 40 ของปี 1978 (456 สัปดาห์) และ test 52 สัปดาห์ถัดไป Ljung-Box ของ residual cmort: p = 0.087 (p = 2), 0.055 (p = 9), 0.011 (p = 7) VAR(7) แบบมี seasonal จึงไม่ผ่าน</p>
+
+<figure>
+<img src="../assets/slides/ts9-p75.png" alt="Slide 9 หน้า 75: RMSE ของ cmort ใน test: แบบมี trend และ seasonal" loading="lazy">
+<figcaption>Slide 9 หน้า 75 — RMSE ของ cmort ใน test: แบบมี trend และ seasonal</figcaption>
+</figure>
+
+<p>RMSE ของ cmort ใน test 52 สัปดาห์ (คำนวณเฉพาะตัวแปรที่สนใจ): VAR(2) = 6.35, VAR(9) = 6.44, VAR(7) = 6.41 VAR(2) ดีที่สุดเล็กน้อย ตรงกับที่รันได้ทุกค่า</p>
+
+<figure>
+<img src="../assets/slides/ts9-p76.png" alt="Slide 9 หน้า 76: RMSE แบบมีเฉพาะ trend" loading="lazy">
+<figcaption>Slide 9 หน้า 76 — RMSE แบบมีเฉพาะ trend</figcaption>
+</figure>
+
+<p>เมื่อตัด seasonal dummy: VAR(2) = 5.92, VAR(9) = 6.08, VAR(7) = 5.44 ดีกว่าทุกโมเดลแบบมี seasonal และ VAR(7) ดีที่สุด แปลว่า lag 7 ของมลพิษช่วยพยากรณ์จริง และ dummy 51 ตัวต่อสมการอาจทำให้ overfit</p>
+
+<figure>
+<img src="../assets/slides/ts9-p77.png" alt="Slide 9 หน้า 77: เทียบ VAR(7) with trend กับ VAR(2) with trend + seasonal" loading="lazy">
+<figcaption>Slide 9 หน้า 77 — เทียบ VAR(7) with trend กับ VAR(2) with trend + seasonal</figcaption>
+</figure>
+
+<p>VAR(7) with trend: AIC 11.15, BIC 11.73, RMSE 5.44 · VAR(2) with trend + seasonal: AIC 11.00, BIC 12.49, RMSE 6.38 VAR(7) ดีกว่าทั้ง BIC และ RMSE แต่ VAR(2) มี AIC ต่ำกว่าเล็กน้อย สไลด์สรุปว่า <mark class="src" data-p="77">these criteria do not tell the analyst which model is “right” or even “better”.</mark> อาจารย์เสริมว่าเทียบ AIC ระหว่าง VAR ด้วยกันได้ "ระดับหนึ่ง" แต่ห้ามเทียบข้ามตระกูล (Class 10, 2:11:58) RMSE ของ VAR(2) ในตารางนี้คือ 6.38 ต่างจาก 6.35 ในหน้า 75 เล็กน้อย น่าจะมาจากการรันคนละครั้ง</p>
+
+<!-- ===================================================== -->
+<h2 id="s11">11. แบบฝึกห้าแบบ</h2>
+
+<p>ไฟล์ R_codes.txt, revenue.txt, Bsales.txt, var1.txt อยู่ในโฟลเดอร์ CLASS 10 ใช้ package forecast, tseries, lmtest, vars, nlme, car และ tswge uschange ใช้ <code>fpp2::uschange</code></p>
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>นับพารามิเตอร์</span></div>
+<div class="qtext">VAR(3) ของ 3 ตัวแปร type = "const" มีสัมประสิทธิ์ต่อสมการและรวมทั้งโมเดลกี่ตัว</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นับแค่ lag ของตัวเอง p = 3 กับค่าคงที่">4 ต่อสมการ รวม 12</button>
+<button class="opt" data-correct="true" data-note="ถูก. 3 lag × 3 ตัวแปร + ค่าคงที่ = 10 ต่อสมการ มี 3 สมการ รวม 30">10 ต่อสมการ รวม 30</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมค่าคงที่">9 ต่อสมการ รวม 27</button>
+<button class="opt" data-correct="false" data-note="ผิด. คิดว่ามีสมการเดียว">10 ต่อสมการ รวม 10</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>อ่าน CCF</span></div>
+<div class="qtext"><code>ccf(promo, sales)</code> มีแท่งสูงสุดที่ lag −2 หมายความว่าอะไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. lag ลบหมายถึงตัวแปรแรกอยู่ในอดีต ไม่ใช่อนาคต">sales สองช่วงก่อนสัมพันธ์กับ promo ปัจจุบัน</button>
+<button class="opt" data-correct="false" data-note="ผิด. lag 0 คือเวลาเดียวกัน">promo กับ sales ในเวลาเดียวกันสัมพันธ์กันมากที่สุด</button>
+<button class="opt" data-correct="false" data-note="ผิด. CCF ที่ k กับ −k ไม่เท่ากัน ต่างจาก ACF">ผลเหมือน lag +2 ทุกประการ</button>
+<button class="opt" data-correct="true" data-note="ถูก. ccf(x, y) ที่ lag k คือ cor(x[t+k], y[t]) k = −2 คือ promo ที่ t − 2 กับ sales ที่ t">promo สองช่วงก่อนสัมพันธ์กับ sales ปัจจุบัน</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>คำนวณและเขียนโมเดล</span></div>
+<div class="qtext">VAR(1) สองตัวแปร type = "none" ได้สัมประสิทธิ์: สมการ y1: y1.l1 = 0.5, y2.l1 = 0.2 สมการ y2: y1.l1 = −0.1, y2.l1 = 0.7 (ก) เขียนสมการทั้งสองและรูปเมทริกซ์ (ข) ถ้าค่าล่าสุด y1 = 10, y2 = 20 จงพยากรณ์หนึ่งก้าวและสองก้าว</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(y_{1,t}=0.5y_{1,t-1}+0.2y_{2,t-1}+w_{1t}\), \(y_{2,t}=-0.1y_{1,t-1}+0.7y_{2,t-1}+w_{2t}\) หรือ \(\mathbf y_t=\begin{pmatrix}0.5&amp;0.2\\-0.1&amp;0.7\end{pmatrix}\mathbf y_{t-1}+\mathbf w_t\)</p>
+<p>(ข) หนึ่งก้าว: y1 = 0.5(10) + 0.2(20) = 9, y2 = −0.1(10) + 0.7(20) = 13 · สองก้าว: y1 = 0.5(9) + 0.2(13) = 7.1, y2 = −0.1(9) + 0.7(13) = 8.2 พยากรณ์ทั้งสองตัวพร้อมกันโดยใช้ค่าพยากรณ์ของกันและกัน</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Granger H0</span></div>
+<div class="qtext"><code>grangertest(Y ~ X)</code> ทดสอบสมมุติฐานใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. เทียบโมเดลที่มี lag ของ X กับไม่มี H0 คือ lag ของ X ไม่ช่วยพยากรณ์ Y">H0: X ไม่ Granger-cause Y</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือทิศกลับ ต้องใช้ grangertest(X ~ Y)">H0: Y ไม่ Granger-cause X</button>
+<button class="opt" data-correct="false" data-note="ผิด. Granger ไม่ได้ทดสอบ correlation ณ เวลาเดียวกัน">H0: X กับ Y ไม่สัมพันธ์กันที่ lag 0</button>
+<button class="opt" data-correct="false" data-note="ผิด. นั่นคือ ADF test">H0: Y ไม่นิ่ง</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>GLS</span></div>
+<div class="qtext">revenue: OLS ให้ s.e. ของ growth = 0.202 แต่ GLS ที่ error เป็น AR(1) (φ = 0.668) ให้ 0.117 ข้อใดอธิบายถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. GLS ไม่ได้ลบข้อมูล ใช้ทั้ง 76 จุดเหมือนเดิม">GLS ตัด outlier ออก s.e. จึงลดลง</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าสัมประสิทธิ์เปลี่ยนน้อย (1.61 กับ 1.65) ความต่างอยู่ที่ s.e.">GLS เปลี่ยนค่าสัมประสิทธิ์มาก</button>
+<button class="opt" data-correct="true" data-note="ถูก. OLS สมมุติ error อิสระซึ่งผิดเมื่อ error เป็น AR s.e. ที่ได้จึงไม่ถูกต้อง GLS ใช้โครงสร้าง AR(1) ในการประมาณ">OLS ไม่สนใจ autocorrelation ของ error s.e. จึงผิด</button>
+<button class="opt" data-correct="false" data-note="ผิด. D-W = 0.695 ห่างจาก 2 มาก แปลว่ามี autocorrelation">error ไม่มี autocorrelation ทั้งสองวิธีจึงถูก</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>ทฤษฎี</span></div>
+<div class="qtext">(ก) อธิบายว่า Granger test ด้วย F-test ทำอย่างไร (สองโมเดลที่เทียบคืออะไร) (ข) ทำไม df1 ของ causality(var.a, cause = "DAX") ใน VAR(9) สี่ตัวแปรจึงเท่ากับ 27 (ค) ทำไม season = 52 จึงสร้าง dummy 51 ตัว</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) Model 1 (unrestricted): Y บน lag ของ Y และ lag ของ X · Model 2 (restricted): Y บน lag ของ Y อย่างเดียว F-test ดูว่าการเพิ่ม lag ของ X ลด residual sum of squares อย่างมีนัยสำคัญหรือไม่ ใน output ของ grangertest คือ Model 1 กับ Model 2</p>
+<p>(ข) H0 คือ DAX ไม่ Granger-cause SMI, CAC, FTSE ต้องตั้งสัมประสิทธิ์ของ DAX ทุก lag (9) ในทุกสมการของตัวแปรอื่น (3) เป็นศูนย์ จึงมีข้อจำกัด 9 × 3 = 27 ข้อ</p>
+<p>(ค) ถ้าใช้ 52 ตัว ผลรวมของ dummy ทุกตัวเท่ากับ 1 ทุกแถว ซ้ำกับค่าคงที่ (linear dependence) ประมาณไม่ได้ จึงให้สัปดาห์สุดท้ายเป็นฐาน (dummy ทุกตัวเป็น 0) ค่าของ sd แต่ละตัวคือความต่างจากสัปดาห์ฐาน</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>เลือกโมเดล</span></div>
+<div class="qtext">ร้านค้าต้องการพยากรณ์ยอดขายรายสัปดาห์ งบโฆษณาของสัปดาห์หน้าถูกกำหนดไว้แล้วในแผนการตลาด และโฆษณาไม่ได้รับผลจากยอดขาย ควรใช้โมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. X เป็น exogenous และรู้ค่าในอนาคต จึงใช้ ARIMAX ส่งงบโฆษณาเป็น xreg">ARIMAX ที่ใช้งบโฆษณาเป็น xreg</button>
+<button class="opt" data-correct="false" data-note="ผิด. VAR ใช้เมื่อตัวแปรส่งผลต่อกันและต้องพยากรณ์ทุกตัว ที่นี่งบโฆษณารู้ค่าแล้ว">VAR ของยอดขายและงบโฆษณา</button>
+<button class="opt" data-correct="false" data-note="ผิด. ทิ้งข้อมูลโฆษณาที่มีประโยชน์">ARIMA ของยอดขายอย่างเดียวเท่านั้น</button>
+<button class="opt" data-correct="false" data-note="ผิด. CCF เป็นแค่ EDA ไม่ใช่โมเดลพยากรณ์">CCF ของงบโฆษณาและยอดขาย</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>ระดับนัยสำคัญ</span></div>
+<div class="qtext">Granger income→consumption ได้ p = 0.0749 นักศึกษาเปลี่ยน α เป็น 0.10 เพื่อใช้ income ต่อ อาจารย์มองว่าอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อาจารย์ตำหนิการเปลี่ยน α หลังเห็นผล">ยอมรับได้เพราะ p ใกล้ 0.05</button>
+<button class="opt" data-correct="true" data-note="ถูก. อาจารย์เรียกว่าการแก้แบบโง่ ๆ ปัญหาคือเลือก X, Y ผิด ต้องใช้ literature review">ไม่ควรทำ ควรทบทวนการเลือก X, Y จากทฤษฎี</button>
+<button class="opt" data-correct="false" data-note="ผิด. ปัญหาไม่ได้อยู่ที่จำนวน lag">ควรเพิ่ม lag จนได้ p &lt; 0.05</button>
+<button class="opt" data-correct="false" data-note="ผิด. Granger ทิศกลับมีนัยสำคัญ ซึ่งยิ่งบอกว่า income ไม่ควรเป็นตัวแปรภายนอก">ควรใช้ทิศกลับเป็นหลักฐานยืนยัน</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) ARIMAX ใน R (regression with ARIMA errors) ต่างจากรูปบนสไลด์ \(\Phi(B)(1-B)^dY_t=\theta(B)w_t+\sum\alpha_iX_{it}\) อย่างไรในการตีความ α (ข) ทำไมการพยากรณ์ด้วย ARIMAX จึงต้องรู้ X ของอนาคต และถ้าไม่รู้ควรทำอย่างไร</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) R: \(Y_t=\beta_0+\alpha X_t+\varepsilon_t\) และ ε เป็น ARIMA α คือผลของ X ต่อค่าเฉลี่ยของ Y ในเวลาเดียวกันโดยตรง รูปบนสไลด์ X อยู่ในสมการ AR ของ Y ผลของ X จะถูกส่งต่อไปยังเวลาถัดไปผ่าน Φ(B) ผลรวมระยะยาวจึงเป็น α/Φ(1) ไม่ใช่ α</p>
+<p>(ข) สมการมี X_t ของเวลาที่พยากรณ์ ต้องใส่ค่าจริงหรือค่าตามแผน (<code>forecast(fit, xreg = inc_test)</code>) ถ้าไม่รู้ต้องพยากรณ์ X ก่อน (ความคลาดเคลื่อนสะสม) หรือใช้ VAR ซึ่งพยากรณ์ทุกตัวพร้อมกัน</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>grangertest</span></div>
+<div class="qtext"><p>อ่านผลนี้</p>
+<pre class="out">Model 1: sales ~ Lags(sales, 1:1) + Lags(ad_tv, 1:1)
+Model 2: sales ~ Lags(sales, 1:1)
+  Res.Df Df      F   Pr(&gt;F)
+1     96
+2     97 -1  9.214  0.0031</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. p = 0.0031 < 0.05 จึง reject H0">ad_tv ไม่ช่วยพยากรณ์ sales</button>
+<button class="opt" data-correct="false" data-note="ผิด. การทดสอบนี้เป็นทิศ ad_tv → sales ทิศกลับต้องทดสอบแยก">sales ช่วยพยากรณ์ ad_tv</button>
+<button class="opt" data-correct="true" data-note="ถูก. reject H0 lag ของ ad_tv ช่วยพยากรณ์ sales (มี Granger effect)">ad_tv Granger-cause sales</button>
+<button class="opt" data-correct="false" data-note="ผิด. Granger ไม่ได้พิสูจน์เหตุเป็นผลทางวิทยาศาสตร์">พิสูจน์ได้ว่าโฆษณาเป็นสาเหตุของยอดขาย</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>causality ใน VAR</span></div>
+<div class="qtext"><p>อ่านผลนี้ ควรสรุปอย่างไร</p>
+<pre class="out">$Granger
+Granger causality H0: X3 do not Granger-cause X1 X2
+F-Test = 0.84, df1 = 6, df2 = 270, p-value = 0.541
+$Instant
+H0: No instantaneous causality between: X3 and X1 X2
+Chi-squared = 15.2, df = 2, p-value = 0.0005</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อาจารย์ให้ดูเฉพาะ $Granger">X3 ต้องอยู่ในโมเดลเพราะ $Instant มีนัยสำคัญ</button>
+<button class="opt" data-correct="false" data-note="ผิด. df1 = 6 คือ 3 lag × 2 ตัวแปรอื่น ไม่ใช่จำนวนตัวแปร">X3 มี 6 lag ในโมเดล</button>
+<button class="opt" data-correct="false" data-note="ผิด. p = 0.541 ไม่ reject H0">X3 Granger-cause X1 และ X2</button>
+<button class="opt" data-correct="true" data-note="ถูก. ดู $Granger p = 0.541 > 0.05 X3 ไม่ช่วยพยากรณ์ตัวอื่น อาจตัดออกได้">X3 อาจตัดออกจาก VAR ได้</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>เขียนสมการ ARIMAX</span></div>
+<div class="qtext"><p>เขียนสมการจาก output นี้ให้ครบสามบรรทัด</p>
+<pre class="out">Regression with ARIMA(1,0,2) errors
+         ar1      ma1     ma2  intercept    xreg
+      0.5819  -0.5345  0.1843     0.6168  0.2781
+sigma^2 = 0.3543</pre></div>
+<textarea placeholder="เขียนสมการ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\mathrm{consumption}_t=0.6168+0.2781\,\mathrm{income}_t+\varepsilon_t\)</p>
+<p>\(\varepsilon_t=0.5819\varepsilon_{t-1}-0.5345w_{t-1}+0.1843w_{t-2}+w_t\)</p>
+<p>\(w_t\sim N(0,\hat\sigma^2=0.3543)\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>รันโค้ด uschange</span></div>
+<div class="qtext"><p>รันส่วน uschange ของ R_codes (Class 10) โดยใช้ข้อมูลจาก fpp2</p>
+<pre><code>library(fpp2); library(forecast); library(lmtest)
+data &lt;- as.data.frame(uschange); names(data) &lt;- tolower(names(data))
+consumption &lt;- ts(data$consumption); income &lt;- ts(data$income)
+grangertest(consumption ~ income, data = data)
+con_training &lt;- window(consumption, end = length(consumption) - 41)
+con_test &lt;- window(consumption, start = length(consumption) - 40)
+inc_training &lt;- window(income, end = length(income) - 41)
+inc_test &lt;- window(income, start = length(income) - 40)
+arimax &lt;- auto.arima(con_training, stepwise = T, approximation = F, xreg = inc_training)
+arimax
+accuracy(forecast(arimax, xreg = inc_test)$mean, con_test)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">grangertest: F = 3.2085, Pr(&gt;F) = 0.07491
+Regression with ARIMA(1,0,2) errors
+ar1 0.5819  ma1 -0.5345  ma2 0.1843  intercept 0.6168  xreg 0.2781
+sigma^2 = 0.3543   AICc = 270.5
+accuracy: ME -0.3294  RMSE 0.5964  MAE 0.4398</pre>
+<p>ME ติดลบเพราะใส่ค่าพยากรณ์ก่อน ค่าจริงทีหลัง (ลำดับที่ถูก) ถ้าใช้ลำดับในโค้ดของอาจารย์จะได้ +0.3294</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>รันโค้ด cardiac</span></div>
+<div class="qtext"><p>รันส่วน Cardiac Mortality แล้วจด VARselect และ RMSE ของ cmort ใน test ทั้งหกโมเดล</p></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">VARselect season = 52: AIC 5  HQ 2  SC 2  FPE 5
+VARselect ไม่มี season: AIC 9  HQ 5  SC 2  FPE 9
+trend + seasonal: VAR(2) 6.35  VAR(9) 6.44  VAR(7) 6.41
+trend อย่างเดียว:  VAR(2) 5.92  VAR(9) 6.08  VAR(7) 5.44
+ljung.wge cmort (seasonal): p=2 0.087  p=9 0.055  p=7 0.011</pre>
+<p>VAR(7) แบบมีเฉพาะ trend ให้ RMSE ต่ำสุด ตรงกับสไลด์หน้า 76–77</p>
+</div>
+</div>
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>เลือกระหว่าง ARIMA/ETS, ARIMAX/GLS และ VAR ตามโครงสร้างข้อมูล</li>
+<li>อธิบาย GLS และอ่านผลเทียบกับ OLS</li>
+<li>ทำ Granger test ทั้งสองทิศ รู้ H0 และไม่เปลี่ยน α หลังเห็นผล</li>
+<li>เขียนสมการ ARIMAX (regression with ARIMA errors) จาก output และพยากรณ์ด้วย xreg ของอนาคต</li>
+<li>อ่าน CCF โดยรู้ทิศของ lag ใน ccf(x, y)</li>
+<li>นับพารามิเตอร์ของ VAR(p) เลือก p ด้วย VARselect และเขียนสมการจาก output</li>
+<li>ตรวจ VAR ด้วย serial.test และ causality ($Granger) และเทียบด้วย RMSE ใน test</li>
+</ul>
+</div>
+
+<p>บทนี้เป็นบทสุดท้ายที่สอนแล้วถึง Class 10 สไลด์ Slide 10 (ARCH/GARCH และ NNAR) จะสอนในคาบถัดไป</p>
+
+<h2 id="appendix">ภาคผนวก: ทุกหน้าของ Slide 9 (77 หน้า)</h2>
+<table>
+<tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
+<tr data-pages="1-16" class="etc"><td>1–16</td><td>auto.arima, ETS, tsCV</td><td>etc — สอนใน <a href="0010-auto-arima-ets-tscv.html">Lesson 10</a></td></tr>
+<tr data-pages="17-18"><td>17–18</td><td>Multivariate time series</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="19-26"><td>19–26</td><td>GLS และ revenue</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
+<tr data-pages="27-31"><td>27–31</td><td>ARIMAX และขั้นตอน</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="32-39"><td>32–39</td><td>Granger, uschange, ARIMAX</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
+<tr data-pages="40-41"><td>40–41</td><td>MIDAS</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="42-48"><td>42–48</td><td>Cross-correlation และ Bsales</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
+<tr data-pages="49"><td>49</td><td>VAR (หน้าคั่น)</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="50"><td>50</td><td>เลือกโมเดลตามโครงสร้าง</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
+<tr data-pages="51-54"><td>51–54</td><td>VAR, VAR(1), การเลือก p</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
+<tr data-pages="55-59"><td>55–59</td><td>var1</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+<tr data-pages="60-70"><td>60–70</td><td>เงื่อนไข VAR และ EuStockMarkets</td><td><a href="#s9">หัวข้อ 9</a></td></tr>
+<tr data-pages="71-77"><td>71–77</td><td>Cardiac Mortality</td><td><a href="#s10">หัวข้อ 10</a></td></tr>
+</table>
+
+<h3>คลิปและเอกสารที่ใช้ในบทนี้</h3>
+<table>
+<tr><th>แหล่ง</th><th>ช่วงที่ใช้</th><th>หัวข้อ</th></tr>
+<tr><td>Class 10</td><td>0:00–2:13</td><td>1–10</td></tr>
+<tr><td>R_codes.txt, revenue.txt, Bsales.txt, var1.txt (CLASS 10); fpp2::uschange; tswge::cardiac</td><td>ส่วน GLS ถึง VAR</td><td>2–11</td></tr>
+</table>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

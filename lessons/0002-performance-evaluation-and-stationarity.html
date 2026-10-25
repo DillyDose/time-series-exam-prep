@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Lesson 2: Performance Evaluation และ Stationary Time Series</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 2: วัดความแม่นยำของการพยากรณ์ และ Stationarity</title>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -16,235 +17,203 @@
   <span><a href="0003-estimation-correlogram-and-detrending.html">Lesson 3 →</a></span>
 </nav>
 
-<p class="kicker">Slide_2 — Time Series Analysis · Performance Evaluation + Stationary Time Series · 34 หน้า</p>
-<h1>การประเมินโมเดล และ stationarity</h1>
+<p class="kicker">Slide 2 — Performance Evaluation และ Stationary Time Series · 34 หน้า · คลิป Class 2 · Exercise 1</p>
+<h1>วัดว่าการพยากรณ์แม่นแค่ไหน และอนุกรมแบบไหนที่ "นิ่ง" พอจะสร้างโมเดลได้</h1>
 
 <div class="box">
-<div class="label">วิธีใช้บทเรียนนี้</div>
-<p>บทนี้แสดงสไลด์ Lecture 2 เกือบทุกหน้าตามลำดับ พร้อมคำอธิบายใต้แต่ละหน้า ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีในสไลด์ บทนี้มีสองส่วน ส่วนแรกคือการแบ่งข้อมูลและการวัดความคลาดเคลื่อนของการพยากรณ์ ส่วนที่สองคือ stationarity ซึ่งเป็นเงื่อนไขพื้นฐานของโมเดลในบทถัดไปทั้งหมด ตัวอย่างและ Exercise ท้ายสไลด์มีการพิสูจน์เต็มทุกข้อ</p>
-<p>บทนี้ยังไม่ได้รวมสิ่งที่อาจารย์พูดในวิดีโอ Class 2 จะเพิ่มภายหลังพร้อมระบุคลิปและเวลา</p>
+<div class="label">บทนี้ตอบคำถามอะไร</div>
+<p>บทนี้มีสองเรื่องที่ดูไม่เกี่ยวกัน แต่ทั้งสองเป็นคำถามแรกที่ต้องตอบก่อนสร้างโมเดลใดก็ตาม</p>
+<ol>
+<li><b>จะรู้ได้อย่างไรว่าโมเดลพยากรณ์ดี</b> ต้องแบ่งข้อมูลอย่างไร และใช้ตัวเลขอะไรวัด</li>
+<li><b>อนุกรมแบบไหนที่สร้างโมเดลได้ง่าย</b> คำตอบคืออนุกรมที่ stationary หรือ "นิ่ง" อาจารย์เรียกเรื่องนี้ว่า "จะเป็นตัวหลักเลย" (Class 2, 1:47:28) และตรวจได้ด้วยการหา mean function กับ autocovariance ซึ่งเป็นโจทย์แบบที่ออกสอบมากที่สุด</li>
+</ol>
+<p>บทนี้เรียงตามที่อาจารย์สอนใน Class 2 กล่องสีส้มคือสิ่งที่อาจารย์พูดในคลิป พร้อมนาที ข้อความที่<mark class="src">ไฮไลต์สีเหลือง</mark>คือข้อความที่อาจารย์ใส่สีบนสไลด์ ท้ายบทรวมโจทย์จาก Exercise 1 ที่อาจารย์แจก</p>
 </div>
 
-<div class="box source">
-<div class="label">แหล่งอ่านหลัก</div>
-<p>ส่วนการประเมิน: Hyndman &amp; Athanasopoulos, <em>Forecasting: Principles and Practice</em> <a href="https://otexts.com/fpp3/accuracy.html" target="_blank" rel="noopener">บทที่ 5.8</a> และ <a href="https://otexts.com/fpp3/tscv.html" target="_blank" rel="noopener">บทที่ 5.10</a> ส่วน stationarity: Shumway &amp; Stoffer หน้า 19–20 ซึ่งสไลด์อ้างที่หน้า 25</p>
+<div class="box exam">
+<div class="label">สิ่งที่อาจารย์พูดถึงข้อสอบในคลาสนี้</div>
+<ul>
+<li>ข้อสอบเก่า \(x_t=w_t-w_{t-3}\): "ข้อนี้จะพิสูจน์เลยว่าเด็กมีความพยายามไหม" คนที่เห็น lag 1, 2 เป็นศูนย์แล้วเดาว่า lag 3 ก็ศูนย์ด้วยทำผิด (Class 2, 2:24:51–2:26:46) เฉลยใน<a href="#s8">หัวข้อ 8</a></li>
+<li>ข้อยาก \(x_t=w_t-\theta w_{t-1}^2\): ต้องรู้ moment ของการแจกแจงปกติ "ถ้ามึงตอบว่า mean เป็น 0 จบไปก่อนเลย" (Class 2, 2:33:06) และอาจออกเป็นควิซ (Class 2, 2:21:14)</li>
+<li>อย่าเดาแบบแผน ต้องคูณกระจายจริง: นักศึกษาเดา \(\gamma(2)=2\sigma^2\) ของ \(w_{t-1}+2w_t+w_{t+1}\) แต่คำตอบคือ \(\sigma^2\) (Class 2, 2:12:31)</li>
+<li>ถ้าควิซให้คำนวณ RMSE หรือ MAE "ผมขอให้ใช้เฉพาะ test set" (Class 4, 0:21:01) ควิซเป็น open book ใช้คอมได้ แต่ไม่ใช้ AI (Class 4, 1:15:00)</li>
+<li>White noise "จะไม่ออกข้อสอบ เพราะมันง่ายที่สุดแล้ว" แต่ทุกข้อใช้สมบัติของมัน (Class 2, 2:01:55)</li>
+</ul>
 </div>
 
 <table>
 <tr><th>หัวข้อ</th><th>เนื้อหา</th><th>สไลด์</th></tr>
-<tr><td><a href="#s1">1</a></td><td>ทำไมต้องประเมินโมเดล และ overfitting</td><td>2–4</td></tr>
-<tr><td><a href="#s2">2</a></td><td>Data partitioning</td><td>5–12</td></tr>
-<tr><td><a href="#s3">3</a></td><td>Forecast errors ห้าสูตร</td><td>13–17</td></tr>
-<tr><td><a href="#s4">4</a></td><td>แนวคิดของ stationarity</td><td>19–23</td></tr>
+<tr><td><a href="#s1">1</a></td><td>ทำไมต้องวัดความแม่นยำ และ overfitting</td><td>2–4</td></tr>
+<tr><td><a href="#s2">2</a></td><td>แบ่งข้อมูลอย่างไร: fixed และ roll-forward</td><td>5–12</td></tr>
+<tr><td><a href="#s3">3</a></td><td>ตัววัด error ห้าตัว และการคำนวณจากตาราง</td><td>13–17</td></tr>
+<tr><td><a href="#s4">4</a></td><td>Stationarity คืออะไร และทำไมสำคัญ</td><td>19–23</td></tr>
 <tr><td><a href="#s5">5</a></td><td>Strictly stationary</td><td>24–29</td></tr>
-<tr><td><a href="#s6">6</a></td><td>Weakly stationary</td><td>30–32</td></tr>
-<tr><td><a href="#s7">7</a></td><td>Check stationarity: ตัวอย่างสามข้อ</td><td>33</td></tr>
-<tr><td><a href="#s8">8</a></td><td>Exercise: สามโมเดล</td><td>34</td></tr>
-<tr><td><a href="#s9">9</a></td><td>แบบฝึกท้ายบท</td><td>—</td></tr>
+<tr><td><a href="#s6">6</a></td><td>Weakly stationary และวิธีตรวจ</td><td>30–32</td></tr>
+<tr><td><a href="#s7">7</a></td><td>ตัวอย่างตรวจ stationarity สามข้อ</td><td>33</td></tr>
+<tr><td><a href="#s8">8</a></td><td>Exercise บนสไลด์ และโจทย์จาก Exercise 1</td><td>34</td></tr>
+<tr><td><a href="#s9">9</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
-<h2 id="s1">1. ทำไมต้องประเมินโมเดล และ overfitting</h2>
+<h2 id="s1">1. ทำไมต้องวัดความแม่นยำ และ overfitting</h2>
+
+<p>สมมติร้านค้าหนึ่งสร้างโมเดลพยากรณ์ยอดขาย จะรู้ได้อย่างไรว่าโมเดลใช้ได้ วิธีที่ตรงที่สุดคือรอให้เดือนหน้ามาถึงแล้วเทียบ อาจารย์เล่าว่าสมัยก่อนต้องทำแบบนั้น แต่ปัจจุบันข้อมูลมีมากพอ จึงแบ่งข้อมูลที่มีอยู่ส่วนหนึ่งออกมาแกล้งทำเป็นอนาคต แล้ววัดว่าโมเดลทายส่วนนั้นได้ใกล้แค่ไหน (Class 2, 0:41:28–0:42:27) หัวข้อนี้และหัวข้อถัดไปคือวิธีทำเช่นนั้นให้ถูกต้อง</p>
 
 <figure>
 <img src="../assets/slides/ts2-p02.png" alt="Slide 2 หน้า 2: Why we need to evaluate model accuracy" loading="lazy">
 <figcaption>Slide 2 หน้า 2 — Why we need to evaluate model accuracy</figcaption>
 </figure>
 
-<p>เมื่อสร้างโมเดลแล้วต้องประเมิน performance เพื่อป้องกัน overfitting และประเมินโมเดลอย่างมั่นคงกว่าการแบ่ง train กับ test แบบง่าย วิธีทางสถิติที่ใช้คือ cross-validation แผนภาพในสไลด์ใช้ข้อมูล 4 วัน วันที่ 1 เป็น training subset วันที่ 2 เป็น validate และวันที่ 3 ถึง 4 เป็น test ขั้น model selection ฝึกโมเดลด้วยวันที่ 1 แล้ววัดผลบนวันที่ 2 เพื่อเลือกพารามิเตอร์ ขั้น model evaluation ฝึกใหม่ด้วยวันที่ 1 และ 2 รวมกัน แล้ววัดบนวันที่ 3 ถึง 4 ซึ่งโมเดลไม่เคยเห็น ได้ค่า model error ข้อมูล test อยู่หลังสุดตามเวลาเสมอ เปรียบได้กับการเตรียมสอบ: ฝึกกับโจทย์ชุดหนึ่ง ลองทำโจทย์อีกชุดเพื่อปรับวิธีอ่าน แล้ววัดผลจริงด้วยข้อสอบที่ไม่เคยเห็น</p>
+<p>สไลด์บอกว่าต้องประเมินโมเดลเพื่อกันปัญหา overfitting และเพื่อให้การประเมินน่าเชื่อถือกว่าการแบ่งครั้งเดียว แผนภาพแบ่งข้อมูลสี่วัน วันที่ 1 ใช้ฝึก (train) วันที่ 2 ใช้ตรวจเพื่อเลือกพารามิเตอร์ (validate) และวันที่ 3–4 ใช้วัดผลสุดท้าย (test) ข้อสังเกตคือ test อยู่หลังสุดตามเวลาเสมอ เปรียบได้กับการเตรียมสอบ ฝึกทำโจทย์ชุดหนึ่ง ลองทำอีกชุดเพื่อปรับวิธีอ่าน แล้วจึงวัดผลจริงด้วยข้อสอบที่ไม่เคยเห็น</p>
 
 <figure>
 <img src="../assets/slides/ts2-p03.png" alt="Slide 2 หน้า 3: ลำดับของ cross-validation" loading="lazy">
 <figcaption>Slide 2 หน้า 3 — ลำดับของ cross-validation</figcaption>
 </figure>
 
-<p>ลำดับงานมีสี่ขั้น ขั้นแรกแยก dataset เป็น training data และ test data ตั้งแต่ต้น ขั้นที่สองนำพารามิเตอร์ที่เป็นไปได้ไปทำ cross-validation บน training data เพื่อหา best parameters ขั้นที่สามใช้ best parameters ฝึก retrained model บน training data ทั้งหมด ขั้นที่สี่ทำ final evaluation บน test data ข้อสำคัญคือ test data ถูกใช้ครั้งเดียวในตอนท้าย ถ้านำ test data มาช่วยเลือกพารามิเตอร์ด้วย ผลที่วัดได้จะดีเกินจริง เพราะโมเดลถูกปรับให้เข้ากับข้อมูลชุดนั้นแล้ว</p>
+<p>ลำดับงานมีสี่ขั้น แยกข้อมูลเป็น train กับ test ตั้งแต่ต้น ใช้ cross-validation บน train เพื่อหาพารามิเตอร์ที่ดีที่สุด ฝึกโมเดลใหม่บน train ทั้งหมดด้วยพารามิเตอร์นั้น แล้วประเมินครั้งเดียวบน test ถ้าเอา test มาช่วยเลือกพารามิเตอร์ด้วย ผลที่วัดได้จะดีเกินจริง เพราะโมเดลถูกปรับให้เข้ากับข้อมูลชุดนั้นไปแล้ว</p>
+
+<p>ในวิชานี้อาจารย์ทำให้ง่ายลง: "ไม่ต้องมี validation set เอาแค่ training set ไว้สร้างโมเดล กับ test set ไว้ทดสอบ" ส่วน validation set อาจต้องใช้ในงาน deep learning (Class 2, 0:42:27–0:43:13) อาจารย์ย้ำอีกครั้งใน Class 4 ว่าให้ "pretend ว่าไม่รู้ test set" คือห้ามใช้ข้อมูล test ในการสร้างโมเดล (Class 4, 0:15:37) ผลที่จะได้ใน 4 ครั้งแรกคือโมเดลสองแบบให้เทียบกัน ได้แก่ smoothing กับ decomposition (Class 2, 0:43:33)</p>
 
 <figure>
 <img src="../assets/slides/ts2-p04.png" alt="Slide 2 หน้า 4: Overfitting problem" loading="lazy">
 <figcaption>Slide 2 หน้า 4 — Overfitting problem</figcaption>
 </figure>
 
-<p>ปัญหาร้ายแรงเกิดได้กับเทคนิคที่ไม่กำหนดโครงสร้างเชิงเส้นหรือโครงสร้างอื่นให้ข้อมูล ซึ่งทำให้ overfit ข้อมูล Overfitting หมายความว่าโมเดลไม่ได้ fit เฉพาะ systematic component ของข้อมูล แต่ fit noise ด้วย โมเดลที่ overfit จึงมีแนวโน้มทำงานได้ไม่ดีกับข้อมูลใหม่ เปรียบได้กับนักเรียนที่ท่องเฉลยข้อสอบเก่าได้ทุกข้อ ได้คะแนนเต็มเมื่อสอบด้วยข้อสอบชุดเดิม แต่ทำข้อสอบใหม่ไม่ได้ เพราะจำคำตอบโดยไม่เข้าใจหลัก ตามภาษาของ Lesson 1 systematic component คือ trend และ seasonal ส่วน noise คือส่วนสุ่มที่ไม่ซ้ำในอนาคต โมเดลที่จำ noise จึงพยากรณ์พลาด</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 1</span><span>Overfitting</span></div>
-<div class="qtext">ข้อใดคือความหมายของ overfitting ตามสไลด์</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้คือ underfitting โมเดลง่ายเกินไป">โมเดล fit systematic component ไม่ได้</button>
-<button class="opt" data-correct="true" data-note="ถูก. fit ทั้ง systematic component และ noise จึงทำงานไม่ดีกับข้อมูลใหม่">โมเดล fit ทั้ง systematic component และ noise</button>
-<button class="opt" data-correct="false" data-note="ผิด. overfit ทำให้ผลบน training ดี แต่ผลบนข้อมูลใหม่แย่">โมเดลให้ error สูงบน training data</button>
-<button class="opt" data-correct="false" data-note="ผิด. การใช้ test data ครั้งเดียวเป็นวิธีที่ถูก ไม่ใช่ overfitting">โมเดลถูกวัดด้วย test data ครั้งเดียว</button>
-</div>
-<div class="feedback"></div>
-</div>
+<p>Overfitting คือโมเดลที่จำทั้งส่วนที่เป็นระบบ (systematic) และส่วนที่เป็น noise ของข้อมูล ส่วนระบบคือ trend และ seasonal ตามภาษาของ Lesson 1 ส่วน noise ไม่ซ้ำในอนาคต โมเดลที่จำ noise จึงทำงานแย่กับข้อมูลใหม่ เปรียบได้กับนักเรียนที่ท่องเฉลยข้อสอบเก่าได้ทุกข้อ ได้เต็มเมื่อสอบด้วยชุดเดิม แต่ทำชุดใหม่ไม่ได้ เพราะจำคำตอบโดยไม่เข้าใจหลัก นี่คือเหตุผลที่ต้องวัด error บนข้อมูลที่โมเดลไม่เคยเห็น: error บน train บอกแค่ว่าโมเดลจำเก่ง ไม่ได้บอกว่าพยากรณ์เก่ง</p>
 
 <!-- ===================================================== -->
-<h2 id="s2">2. Data partitioning</h2>
+<h2 id="s2">2. แบ่งข้อมูลอย่างไร: fixed และ roll-forward</h2>
 
 <figure>
 <img src="../assets/slides/ts2-p05.png" alt="Slide 2 หน้า 5: Data Partitioning" loading="lazy">
 <figcaption>Slide 2 หน้า 5 — Data Partitioning</figcaption>
 </figure>
 
-<p>Series ถูกแบ่งเป็นสองช่วง ช่วงหนึ่งใช้พัฒนาโมเดลหรือวิธีพยากรณ์ เมื่อได้โมเดลแล้วจึงทดลองกับอีกช่วงหนึ่งเพื่อดูว่าทำงานได้ดีเพียงใด สิ่งที่วัดคือ <mark class="src" data-p="5">forecast error.</mark> ซึ่งนิยามในหัวข้อ 3</p>
+<p>หลักการคือตัดอนุกรมเป็นสองช่วง ช่วงหนึ่งใช้พัฒนาโมเดล อีกช่วงใช้ทดสอบ สิ่งที่วัดคือ forecast error ซึ่งนิยามในหัวข้อ 3 อาจารย์อธิบายว่า "มันไม่ได้มีมาตรวัดความแม่นยำโดยตรง เราวัดความแม่นยำจาก error" (Class 2, 0:48:30)</p>
 
 <figure>
 <img src="../assets/slides/ts2-p06.png" alt="Slide 2 หน้า 6: Partitioning of Cross-sectional data" loading="lazy">
 <figcaption>Slide 2 หน้า 6 — Partitioning of Cross-sectional data</figcaption>
 </figure>
 
-<p>สำหรับ cross-sectional data การแบ่งเป็น training, validation และ test sets <mark class="src" data-p="6">is usually done randomly</mark> Training partition ซึ่งโดยปกติใหญ่ที่สุด เก็บข้อมูลที่ใช้สร้างโมเดลหลายตัว Validation partition ใช้ประเมินแต่ละโมเดลเพื่อเปรียบเทียบและ <mark class="src" data-p="6">pick the best one.</mark> Test partition ใช้ประเมินโมเดลที่เลือกแล้ว <mark class="src" data-p="6">with new data</mark> การสุ่มทำได้เพราะแต่ละแถวของ cross-sectional data เป็นอิสระต่อกัน ลำดับไม่มีความหมาย</p>
+<p>ข้อมูล cross-sectional แบ่งเป็น train, validation และ test โดย <mark class="src" data-p="6">is usually done randomly</mark> คือสุ่มเลือกแถว train ใหญ่ที่สุดและใช้สร้างโมเดล validation ใช้เทียบโมเดลเพื่อ <mark class="src" data-p="6">pick the best one.</mark> และ test ใช้ประเมินโมเดลที่เลือกแล้ว <mark class="src" data-p="6">with new data</mark> การสุ่มทำได้เพราะแถวเป็นอิสระต่อกัน อาจารย์ถามในห้องว่าข้อมูลแบบนี้แบ่งอย่างไร คำตอบคือสุ่ม แล้วถามต่อว่าอนุกรมเวลาสุ่มได้ไหม (Class 2, 0:44:02)</p>
 
 <figure>
 <img src="../assets/slides/ts2-p07.png" alt="Slide 2 หน้า 7: Partitioning of Time-series data" loading="lazy">
 <figcaption>Slide 2 หน้า 7 — Partitioning of Time-series data</figcaption>
 </figure>
 
-<p>Time series สุ่มแบ่งไม่ได้ ข้อมูลถูกตัดเป็นสองช่วง ช่วงแรกเป็น training period และช่วงหลังเป็น validation period เหตุผลคือ ถ้าสุ่ม จุดของปี 2003 อาจไปอยู่ใน training ขณะที่จุดของปี 2001 อยู่ใน validation ซึ่งเท่ากับใช้อนาคตพยากรณ์อดีต ในการใช้งานจริงไม่มีข้อมูลอนาคตให้ใช้ การแบ่งจึงต้องเลียนแบบสถานการณ์จริง คือรู้เฉพาะอดีตแล้วพยากรณ์ไปข้างหน้า การแบ่งมีสองชนิด คือ Fixed Partitioning และ Roll-forward Partitioning</p>
+<p>อนุกรมเวลาห้ามสุ่ม อาจารย์ให้เหตุผลว่า "เพราะคุณสมบัติของ time series คือมันมี order" (Class 2, 0:45:05) ถ้าสุ่ม จุดของปี 2003 อาจตกไปอยู่ใน train ขณะที่ปี 2001 อยู่ใน test ซึ่งเท่ากับใช้อนาคตทายอดีต ในงานจริงไม่มีข้อมูลอนาคตให้ใช้ การแบ่งจึงต้องเลียนแบบสถานการณ์จริง คือช่วงต้นเป็น train ช่วงท้ายเป็น test มีสองแบบ คือ fixed และ roll-forward</p>
 
 <figure>
-<img src="../assets/slides/ts2-p08.png" alt="Slide 2 หน้า 8: Fixed partitioning: Training period / Validation period" loading="lazy">
-<figcaption>Slide 2 หน้า 8 — Fixed partitioning: Training period / Validation period</figcaption>
+<img src="../assets/slides/ts2-p08.png" alt="Slide 2 หน้า 8: Fixed partitioning" loading="lazy">
+<figcaption>Slide 2 หน้า 8 — Fixed partitioning</figcaption>
 </figure>
 
-<p>ข้อมูลรายเดือนตั้งแต่ปี 2000 ถึงต้นปี 2002 เป็น training ค่าเพิ่มจาก 1 ถึงประมาณ 29 แล้วลดเหลือ 11 ช่วงท้ายปี 2002 เป็น validation ค่ากระโดดเป็น 36 และ 46 โมเดลที่เห็นเฉพาะ training ไม่เคยเห็นค่าที่เกิน 29 จึงเป็นการทดสอบว่าพยากรณ์ช่วงหลังได้หรือไม่ Fixed partitioning ตัดข้อมูลครั้งเดียวและวัด error ครั้งเดียว</p>
+<p>Fixed partitioning ตัดครั้งเดียว อาจารย์ยกตัวอย่าง 80% แรกเป็น train และ 20% ท้ายเป็น test แล้วเทียบเส้นพยากรณ์กับค่าจริงในช่วง test (Class 2, 0:46:00–0:49:09) ในกราฟ ช่วง 2000 ถึงต้นปี 2002 เป็น train ค่าขึ้นจาก 1 ไปราว 29 แล้วลงเหลือ 11 ช่วงท้ายปี 2002 เป็น test ค่ากระโดดเป็น 36 และ 46 โมเดลที่เห็นแค่ train ไม่เคยเห็นค่าเกิน 29 จึงเป็นการทดสอบที่ยาก ข้อเสียของ fixed คือได้ error ค่าเดียว ถ้าช่วง test บังเอิญผิดปกติ ผลก็ผิดปกติตาม</p>
 
 <figure>
 <img src="../assets/slides/ts2-p09.png" alt="Slide 2 หน้า 9: Roll-forward validation — Type 1 (Cumulative)" loading="lazy">
 <figcaption>Slide 2 หน้า 9 — Roll-forward validation — Type 1 (Cumulative)</figcaption>
 </figure>
 
-<p>ในแบบ cumulative รอบที่ 1 ใช้ช่วง 1 เป็น training และช่วง 2 เป็น test รอบที่ 2 ใช้ช่วง 1 ถึง 2 เป็น training และช่วง 3 เป็น test รอบที่ 3 ใช้ช่วง 1 ถึง 3 และรอบที่ 4 ใช้ช่วง 1 ถึง 4 โดย test คือช่วง 5 Training ยาวขึ้นทุกรอบเพราะสะสมข้อมูลเก่าไว้ทั้งหมด ส่วน test มีขนาดเท่าเดิมและอยู่ถัดจาก training เสมอ ได้ค่า error 4 ค่ามาเฉลี่ย ซึ่งเชื่อถือได้มากกว่าการตัดครั้งเดียว</p>
+<p>Roll-forward แบ่งหลายรอบ อาจารย์บอกว่า "ถ้าคุณทำ IS กับ thesis เขาใช้แบบนี้" (Class 2, 0:46:12) แบบสะสม (cumulative) รอบแรก train คือช่วง 1 และ test คือช่วง 2 รอบสอง train คือช่วง 1–2 และ test คือช่วง 3 ไปจนรอบสี่ train ยาวขึ้นทุกรอบเพราะเก็บข้อมูลเก่าไว้หมด ส่วน test ขนาดเท่าเดิมและอยู่ถัดจาก train เสมอ ได้ error สี่ค่ามาเฉลี่ย ซึ่งน่าเชื่อถือกว่าการตัดครั้งเดียว</p>
 
 <figure>
 <img src="../assets/slides/ts2-p10.png" alt="Slide 2 หน้า 10: Roll-forward validation — Type 2 (Moving window)" loading="lazy">
 <figcaption>Slide 2 หน้า 10 — Roll-forward validation — Type 2 (Moving window)</figcaption>
 </figure>
 
-<p>ในแบบ moving window กับข้อมูล 1,000 จุด รอบแรกใช้ training ประมาณจุดที่ 0 ถึง 150 และ test ประมาณ 150 ถึง 210 รอบถัดไป training ประมาณ 200 ถึง 350 ต่อเนื่องไปจนรอบสุดท้ายที่ประมาณ 800 ถึง 960 ความยาวของ training คงที่ หน้าต่างเลื่อนไปข้างหน้าและข้อมูลเก่าถูกทิ้ง แบบนี้เหมาะเมื่อพฤติกรรมในอดีตที่ไกลมากไม่เกี่ยวข้องกับปัจจุบันแล้ว</p>
+<p>แบบหน้าต่างเลื่อน (moving window) ขนาดของ train และ test คงที่ แต่เลื่อนไปทางขวาทุกรอบ ข้อมูลเก่าที่หลุดหน้าต่างถูกทิ้ง ในกราฟข้อมูล 1,000 จุด รอบแรก train ราวจุดที่ 0–150 test ราว 150–210 รอบสุดท้าย train ราว 800–960 แบบนี้เหมาะเมื่อพฤติกรรมในอดีตไกลมากไม่เกี่ยวกับปัจจุบันแล้ว เช่น ตลาดที่โครงสร้างเปลี่ยนไปหลังเหตุการณ์ใหญ่ อาจารย์อธิบายความต่างสองแบบว่า แบบแรก "test set เท่าเดิม train ค่อย ๆ เพิ่ม" แบบที่สอง "ขนาดคงที่แต่เลื่อนไปทางขวา" (Class 2, 0:49:34–0:51:20)</p>
 
-<div class="box beginner">
-<div class="label">แยก Type 1 กับ Type 2 จากแผนภาพ</div>
-<table class="compact">
+<table>
 <tr><th></th><th>Type 1 Cumulative</th><th>Type 2 Moving window</th></tr>
-<tr><td>จุดเริ่มของ training</td><td>จุดเดิมทุกรอบ</td><td>เลื่อนไปทุกรอบ</td></tr>
-<tr><td>ความยาวของ training</td><td>ยาวขึ้นทุกรอบ</td><td>คงที่</td></tr>
+<tr><td>จุดเริ่มของ train</td><td>จุดเดิมทุกรอบ</td><td>เลื่อนไปทุกรอบ</td></tr>
+<tr><td>ความยาวของ train</td><td>ยาวขึ้นทุกรอบ</td><td>คงที่</td></tr>
 <tr><td>ข้อมูลเก่า</td><td>เก็บไว้ทั้งหมด</td><td>ทิ้งไป</td></tr>
-<tr><td>ตำแหน่งของ test</td><td colspan="2">ถัดจาก training ทันที ทั้งสองแบบ</td></tr>
+<tr><td>ตำแหน่งของ test</td><td colspan="2">ถัดจาก train ทันที ทั้งสองแบบ</td></tr>
 </table>
-</div>
 
 <figure>
 <img src="../assets/slides/ts2-p11.png" alt="Slide 2 หน้า 11: Roll-forward validation — Cumulative (another way)" loading="lazy">
 <figcaption>Slide 2 หน้า 11 — Roll-forward validation — Cumulative (another way)</figcaption>
 </figure>
 
-<p>อีกวิธีของแบบ cumulative: training เริ่มที่ Jan 1991 ทุกรอบ และจบที่ Mar 2001, Apr 2001, May 2001 ไปจนถึง Feb 2003 รวม 36 partitions ส่วน validation คือทุกเดือนที่เหลือจนถึง Mar 2004 Partition แรกมี validation ตั้งแต่ Apr 2001 ถึง Mar 2004 รวม 36 เดือน partition ที่สองมี 35 เดือน และ partition สุดท้ายมี Mar 2004 เดือนเดียว ผลคือการพยากรณ์ 1 เดือนข้างหน้ามีให้วัด 36 ครั้ง แต่การพยากรณ์ 36 เดือนข้างหน้ามีให้วัดครั้งเดียว ตรงกับข้อความสีในสไลด์: <mark class="src" data-p="11">With roll-forward partitions, we therefore have more information about short-term forecasts, and amount of data decrease as we move further into future forecasting</mark></p>
+<p>อีกวิธีของแบบสะสม train เริ่มที่ Jan 1991 ทุกรอบ และจบที่ Mar 2001, Apr 2001, … ไปจนถึง Feb 2003 รวม 36 รอบ test คือทุกเดือนที่เหลือจนถึง Mar 2004 รอบแรกมี test 36 เดือน รอบที่สองมี 35 เดือน รอบสุดท้ายมีเดือนเดียว อาจารย์สรุปว่าทำแบบนี้แล้ว "เห็นตั้งแต่ long-term จนถึง short-term forecasting" และเขียนด้วย for loop (Class 2, 0:51:39–0:53:28) ผลคือการพยากรณ์ล่วงหน้า 1 เดือนมีให้วัด 36 ครั้ง แต่ล่วงหน้า 36 เดือนมีให้วัดครั้งเดียว ตรงกับข้อความบนสไลด์ <mark class="src" data-p="11">With roll-forward partitions, we therefore have more information about short-term forecasts, and amount of data decrease as we move further into future forecasting</mark></p>
 
 <figure>
 <img src="../assets/slides/ts2-p12.png" alt="Slide 2 หน้า 12: R-codes for data partition" loading="lazy">
 <figcaption>Slide 2 หน้า 12 — R-codes for data partition</figcaption>
 </figure>
 
-<p>โค้ดหน้านี้ทำ fixed partitioning กับข้อมูลอุณหภูมิ โดยกันจุดท้าย 36 จุดไว้เป็น validation</p>
+<p>โค้ดนี้ทำ fixed partitioning กับข้อมูลอุณหภูมิโลก <code>temp.txt</code> อาจารย์ย้ำว่าคำสั่ง <code>ts()</code> สำคัญมาก "ถ้าไม่บอก มันจะทรีตเป็น cross-sectional" (Class 2, 0:54:09) ข้อมูลมี 142 ปี (1856–1997) กัน 36 ปีท้ายไว้เป็น test จึงเหลือ train 106 ปี (1856–1961) และ test คือปี 1962–1997 ตามที่อาจารย์คำนวณในห้อง (Class 2, 1:14:55–1:15:57)</p>
 
-<pre data-p="12"><code>temperature &lt;- read.table("temp.txt")
-new_temperature &lt;- ts(temperature)
+<pre><code>temperature &lt;- read.table("temp.txt")
+new_temperature &lt;- ts(temperature, start = 1856)
 nValid &lt;- 36
 nTrain &lt;- length(new_temperature) - nValid
-train.ts &lt;- window(new_temperature, start = 1, end = nTrain)
-test.ts &lt;- window(new_temperature, start = nTrain+1, end = nTrain+nValid)</code></pre>
+train.ts &lt;- window(new_temperature, start = 1856, end = 1856 + nTrain - 1)
+test.ts  &lt;- window(new_temperature, start = 1856 + nTrain, end = 1856 + nTrain + nValid - 1)</code></pre>
 <table class="codeexp compact">
-<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>read.table("temp.txt")</td><td>อ่านไฟล์ข้อความเป็นตาราง</td></tr>
-<tr><td>ts(temperature)</td><td>แปลงเป็นวัตถุ time series เพื่อให้ R รู้ว่าลำดับคือเวลา</td></tr>
-<tr><td>nValid &lt;- 36</td><td>กำหนดให้ 36 จุดสุดท้ายเป็น validation</td></tr>
-<tr><td>nTrain &lt;- length(new_temperature) - nValid</td><td>จำนวนจุดที่เหลือเป็น training เช่น ถ้ามี 100 จุด ได้ nTrain = 64</td></tr>
-<tr><td>window(new_temperature, start = 1, end = nTrain)</td><td>ตัดช่วงแรก คือจุดที่ 1 ถึง 64 เป็น <code>train.ts</code></td></tr>
-<tr><td>window(new_temperature, start = nTrain+1, end = nTrain+nValid)</td><td>ตัดช่วงหลัง คือจุดที่ 65 ถึง 100 เป็น <code>test.ts</code></td></tr>
+<tr><th>โค้ด</th><th>ทำอะไร</th><th>ค่าที่ได้กับ temp.txt</th></tr>
+<tr><td>read.table("temp.txt")</td><td>อ่านไฟล์ข้อความเป็นตาราง</td><td>142 แถว</td></tr>
+<tr><td>ts(temperature, start = 1856)</td><td>บอก R ว่าเป็นอนุกรมรายปี เริ่มปี 1856 ถ้าไม่ใส่ <code>start</code> แกนเวลาจะเป็น 1, 2, 3</td><td>1856–1997</td></tr>
+<tr><td>nValid &lt;- 36</td><td>จำนวนจุดท้ายที่กันไว้เป็น test</td><td>36</td></tr>
+<tr><td>nTrain &lt;- length(...) - nValid</td><td>จำนวนจุดที่เหลือเป็น train</td><td>142 − 36 = 106</td></tr>
+<tr><td>window(..., start, end)</td><td>ตัดช่วงตามเวลา จึงรักษาลำดับไว้</td><td>train 1856–1961, test 1962–1997</td></tr>
 </table>
-<p>ฟังก์ชัน <code>window()</code> ตัดช่วงของ time series ตามเวลาเริ่มและเวลาจบ จึงรักษาลำดับเวลาไว้ ช่วงแรกเป็น training และช่วงหลังเป็น validation ตามหลักของหน้า 7</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 2</span><span>Partitioning</span></div>
-<div class="qtext">ทำไมจึงไม่สุ่มแบ่ง time series เป็น training กับ validation</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. จำนวนข้อมูลไม่ใช่เหตุผล">เพราะ time series มีข้อมูลน้อยเกินไป</button>
-<button class="opt" data-correct="false" data-note="ผิด. validation ไม่จำเป็นต้องใหญ่กว่า">เพราะ validation ต้องใหญ่กว่า training</button>
-<button class="opt" data-correct="true" data-note="ถูก. การสุ่มทำให้ข้อมูลอนาคตเข้าไปอยู่ใน training">เพราะจะใช้ข้อมูลอนาคตพยากรณ์อดีต</button>
-<button class="opt" data-correct="false" data-note="ผิด. time series มักมีตัวแปรเดียว และไม่เกี่ยวกับการสุ่ม">เพราะ time series มีตัวแปรหลายตัวเกิน</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 3</span><span>Roll-forward</span></div>
-<div class="qtext">ในแผนภาพ roll-forward ชุดหนึ่ง training ของทุกรอบเริ่มที่จุดเดียวกันและยาวขึ้นเรื่อย ๆ แผนภาพนี้เป็นแบบใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. fixed ตัดครั้งเดียว ไม่มีหลายรอบ">Fixed partitioning</button>
-<button class="opt" data-correct="false" data-note="ผิด. moving window มี training ยาวคงที่">Moving window</button>
-<button class="opt" data-correct="false" data-note="ผิด. การสุ่มไม่ใช้กับ time series">Random partition</button>
-<button class="opt" data-correct="true" data-note="ถูก. training สะสมข้อมูลเก่าไว้ทั้งหมด">Cumulative (Type 1)</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 1 และ 2</div>
-<ul>
-<li>ความหมายของ overfitting และลำดับสี่ขั้นของ cross-validation</li>
-<li>Cross-sectional แบ่งแบบสุ่ม ส่วน time series แบ่งตามเวลา ช่วงแรกเป็น training ช่วงหลังเป็น validation</li>
-<li>แยก fixed, cumulative และ moving window จากแผนภาพ</li>
-<li>Roll-forward ให้ข้อมูลเกี่ยวกับการพยากรณ์ระยะสั้นมากกว่าระยะยาว</li>
-<li>อ่านและเขียนโค้ด <code>window()</code> สำหรับแบ่งข้อมูล</li>
-</ul>
-</div>
+<p>ไฟล์ R ของอาจารย์มีสามแบบที่ให้ผลเดียวกัน แบบแรกใช้ <code>ts(temperature)</code> โดยไม่ใส่ปี แล้วตัดด้วยลำดับ <code>start = 1, end = nTrain</code> แบบที่สองใส่ปีและใช้รูป <code>c(1856, nTrain)</code> แบบที่สามใช้ปีตรง ๆ ดังโค้ดข้างบน สิ่งที่ต้องระวังคือถ้าใส่ <code>start = 1856</code> ใน <code>ts()</code> แล้ว แต่ไปตัดด้วย <code>start = 1, end = 106</code> R จะเตือนว่า <code>'start' value not changed</code> แล้วหยุดด้วย error <code>'start' cannot be after 'end'</code> เพราะเวลา 1 ถึง 106 อยู่ก่อนปี 1856 ทั้งหมด</p>
 
 <!-- ===================================================== -->
-<h2 id="s3">3. Forecast errors ห้าสูตร</h2>
+<h2 id="s3">3. ตัววัด error ห้าตัว และการคำนวณจากตาราง</h2>
 
-<p>ให้ \(Y_t\) เป็นค่าจริง \(F_t\) เป็นค่าพยากรณ์ และ n เป็นจำนวนจุดที่วัด ความคลาดเคลื่อนของแต่ละจุดคือ \(e_t=Y_t-F_t\) คือค่าจริงลบค่าพยากรณ์ สไลด์สามหน้าถัดไปให้ตัววัดห้าตัว ซึ่งต่างกันที่วิธีรวม \(e_t\) เข้าด้วยกัน</p>
+<p>ให้ \(Y_t\) เป็นค่าจริง \(F_t\) เป็นค่าพยากรณ์ error ของแต่ละจุดคือ \(e_t=Y_t-F_t\) ค่าจริงลบค่าพยากรณ์ อาจารย์ย้ำสองเรื่องก่อนเข้าสูตร เรื่องแรก error ต้องคำนวณบน test set เท่านั้น "error ใน training set ไม่มีประโยชน์" (Class 2, 0:55:22–0:56:07) เพราะเหตุผลเรื่อง overfitting ในหัวข้อ 1 เรื่องที่สอง ต้องยกกำลังสองหรือใส่ค่าสัมบูรณ์ เพราะ "เราไม่ได้แคร์ว่ามันจะต่ำหรือสูงกว่าค่าจริง" ถ้าบวกตรง ๆ ค่าบวกกับลบจะหักล้างกัน</p>
+
+<div class="box beginner">
+<div class="label">วิธีจำสูตรของอาจารย์: อ่านชื่อจากหลังมาหน้า</div>
+<p>"ผมไม่เคยจำสูตรเลย ผมดูจากชื่อ" (Class 2, 0:56:16) เช่น Root Mean Square Error อ่านจากหลัง: Error คือ \(Y-F\), Square คือยกกำลังสอง, Mean คือเฉลี่ย, Root คือถอดราก จึงได้ \(\sqrt{\text{mean}((Y-F)^2)}\) ส่วน Mean Absolute Percentage Error คือ error หารค่าจริงเป็นเปอร์เซ็นต์ ใส่ค่าสัมบูรณ์ แล้วเฉลี่ย</p>
+</div>
 
 <figure>
 <img src="../assets/slides/ts2-p13.png" alt="Slide 2 หน้า 13: Forecast Errors: RMSE และ MAE" loading="lazy">
 <figcaption>Slide 2 หน้า 13 — Forecast Errors: RMSE และ MAE</figcaption>
 </figure>
 
-<p>ตัววัดสองตัวแรกคือ <mark class="src" data-p="13">1. Root Mean Square Error (RMSE)</mark> ซึ่งเท่ากับ \(\sqrt{\tfrac1n\sum_{t=1}^{n}(Y_t-F_t)^2}\) และ <mark class="src" data-p="13">2. Mean Absolute Error (MAE)</mark> ซึ่งเท่ากับ \(\tfrac1n\sum_{t=1}^{n}|Y_t-F_t|\) ทั้งสองตัวกำจัดเครื่องหมายของ error เพื่อไม่ให้ค่าบวกและลบหักล้างกัน RMSE ใช้การยกกำลังสองแล้วถอดราก error ขนาดใหญ่จึงถูกขยายมากกว่า เช่น error ขนาด 8 กลายเป็น 64 ขณะที่ error ขนาด 1 ยังเป็น 1 ส่วน MAE ใช้ค่าสัมบูรณ์ ทุก error มีน้ำหนักตามขนาดจริง ทั้งสองตัวมีหน่วยเดียวกับข้อมูล</p>
+<p>สองตัวแรกคือ <mark class="src" data-p="13">1. Root Mean Square Error (RMSE)</mark> เท่ากับ \(\sqrt{\tfrac1n\sum(Y_t-F_t)^2}\) และ <mark class="src" data-p="13">2. Mean Absolute Error (MAE)</mark> เท่ากับ \(\tfrac1n\sum|Y_t-F_t|\) ถ้าไม่ถอดรากของ RMSE จะได้ MSE ทั้งสองตัวมีหน่วยเดียวกับข้อมูล ความต่างคือ RMSE ยกกำลังสองก่อน error ใหญ่จึงถูกขยายมาก เช่น error 8 กลายเป็น 64 ขณะที่ error 1 ยังเป็น 1 ส่วน MAE ให้น้ำหนักตามขนาดจริง RMSE จึงมากกว่าหรือเท่ากับ MAE เสมอ และถ้า RMSE ห่างจาก MAE มาก แปลว่ามี error ใหญ่บางจุดปนอยู่</p>
 
 <figure>
 <img src="../assets/slides/ts2-p14.png" alt="Slide 2 หน้า 14: Forecast Errors: MAPE และ MPE" loading="lazy">
 <figcaption>Slide 2 หน้า 14 — Forecast Errors: MAPE และ MPE</figcaption>
 </figure>
 
-<p>ตัววัดสองตัวถัดไปหาร error ด้วยค่าจริง จึงเป็นสัดส่วนและไม่มีหน่วย <mark class="src" data-p="14">3. Mean Absolute Percentage Error (MAPE)</mark> คือ \(\tfrac1n\sum\left|\dfrac{Y_t-F_t}{Y_t}\right|\) และ <mark class="src" data-p="14">4. Mean Percentage Error (MPE)</mark> คือ \(\tfrac1n\sum\dfrac{Y_t-F_t}{Y_t}\) เมื่อไม่มีหน่วย จึงเทียบความแม่นระหว่างข้อมูลที่มีสเกลต่างกันได้ เช่น ยอดขายหลักร้อยกับหลักล้าน MPE ไม่ใส่ค่าสัมบูรณ์ จึงคงเครื่องหมายไว้และบอกทิศของความเอนเอียงได้</p>
+<p>ตัวที่สามและสี่หาร error ด้วยค่าจริง จึงเป็นเปอร์เซ็นต์และไม่มีหน่วย <mark class="src" data-p="14">3. Mean Absolute Percentage Error (MAPE)</mark> คือ \(\tfrac1n\sum\left|\tfrac{Y_t-F_t}{Y_t}\right|\times100\) และ <mark class="src" data-p="14">4. Mean Percentage Error (MPE)</mark> คือแบบไม่ใส่ค่าสัมบูรณ์ อาจารย์บอกว่าธุรกิจใช้ MAPE มาก "เพราะคนเข้าใจง่าย คลาดเคลื่อนจากค่าจริงกี่เปอร์เซ็นต์" และย้ำว่าหารด้วยค่าจริง ไม่ใช่ค่าพยากรณ์ ข้อเสียคือ <b>ถ้าค่าจริงเป็น 0 หรือใกล้ 0 MAPE จะพุ่งเป็นอนันต์</b> (Class 2, 0:59:31–1:02:33) เช่น ข้อมูลกำไรที่บางเดือนเกือบเป็น 0 หรือติดลบ ใช้ MAPE ไม่ได้</p>
 
 <figure>
 <img src="../assets/slides/ts2-p15.png" alt="Slide 2 หน้า 15: Forecast Errors: ME" loading="lazy">
 <figcaption>Slide 2 หน้า 15 — Forecast Errors: ME</figcaption>
 </figure>
 
-<p>ตัวสุดท้ายคือ <mark class="src" data-p="15">5. Mean Error (ME)</mark> ซึ่งเท่ากับ \(\tfrac1n\sum(Y_t-F_t)\) เป็นค่าเฉลี่ยของ error โดยตรง เนื่องจาก error คือค่าจริงลบค่าพยากรณ์ ME ที่ติดลบหมายความว่าโดยเฉลี่ยพยากรณ์สูงกว่าค่าจริง และ ME ที่เป็นบวกหมายความว่าพยากรณ์ต่ำกว่าค่าจริง ME ที่ใกล้ 0 ไม่ได้แปลว่าแม่น เพราะ error บวกและลบหักล้างกันได้</p>
+<p>ตัวสุดท้ายคือ <mark class="src" data-p="15">5. Mean Error (ME)</mark> เท่ากับ \(\tfrac1n\sum(Y_t-F_t)\) เพราะ error คือค่าจริงลบค่าพยากรณ์ ME ติดลบแปลว่าโดยเฉลี่ยพยากรณ์สูงเกิน ME เป็นบวกแปลว่าพยากรณ์ต่ำเกิน แต่ ME ใกล้ 0 ไม่ได้แปลว่าแม่น เพราะบวกลบหักล้างกัน อาจารย์บอกว่า "ไม่ค่อยชอบ" ME กับ MPE ด้วยเหตุนี้ (Class 2, 1:05:03)</p>
 
 <table>
-<tr><th>ตัววัด</th><th>จัดการ error อย่างไร</th><th>บอกทิศของ bias</th><th>มีหน่วยของ Y</th></tr>
-<tr><td>RMSE</td><td>ยกกำลังสอง เฉลี่ย ถอดราก</td><td>ไม่</td><td>มี</td></tr>
-<tr><td>MAE</td><td>ค่าสัมบูรณ์ แล้วเฉลี่ย</td><td>ไม่</td><td>มี</td></tr>
-<tr><td>MAPE</td><td>หารด้วย Y ค่าสัมบูรณ์ แล้วเฉลี่ย</td><td>ไม่</td><td>ไม่มี</td></tr>
-<tr><td>MPE</td><td>หารด้วย Y แล้วเฉลี่ย</td><td>บอก</td><td>ไม่มี</td></tr>
-<tr><td>ME</td><td>เฉลี่ยโดยตรง</td><td>บอก</td><td>มี</td></tr>
+<tr><th>ตัววัด</th><th>จัดการ error อย่างไร</th><th>บอกทิศของความเอนเอียง</th><th>มีหน่วยของ Y</th><th>ข้อควรระวัง</th></tr>
+<tr><td>RMSE</td><td>ยกกำลังสอง เฉลี่ย ถอดราก</td><td>ไม่</td><td>มี</td><td>ไวต่อ error ใหญ่</td></tr>
+<tr><td>MAE</td><td>ค่าสัมบูรณ์ แล้วเฉลี่ย</td><td>ไม่</td><td>มี</td><td>—</td></tr>
+<tr><td>MAPE</td><td>หารด้วย Y ค่าสัมบูรณ์ เฉลี่ย</td><td>ไม่</td><td>ไม่มี (%)</td><td>ใช้ไม่ได้เมื่อ Y ใกล้ 0</td></tr>
+<tr><td>MPE</td><td>หารด้วย Y เฉลี่ย</td><td>บอก</td><td>ไม่มี (%)</td><td>บวกลบหักล้างกัน</td></tr>
+<tr><td>ME</td><td>เฉลี่ยตรง ๆ</td><td>บอก</td><td>มี</td><td>บวกลบหักล้างกัน</td></tr>
 </table>
 
 <figure>
-<img src="../assets/slides/ts2-p16.png" alt="Slide 2 หน้า 16: ตัวอย่างการคำนวณ forecast errors" loading="lazy">
-<figcaption>Slide 2 หน้า 16 — ตัวอย่างการคำนวณ forecast errors</figcaption>
+<img src="../assets/slides/ts2-p16.png" alt="Slide 2 หน้า 16: ตัวอย่างการคำนวณ forecast errors (ไฟล์ Excel ของอาจารย์)" loading="lazy">
+<figcaption>Slide 2 หน้า 16 — ตัวอย่างการคำนวณ forecast errors (ไฟล์ Excel ของอาจารย์)</figcaption>
 </figure>
 
-<p>ตารางในสไลด์มีค่าจริง 9 จุด คือ 18, 17, 20, 22, 25, 24, 23, 25, 30 และค่าพยากรณ์ 19, 17, 24, 19, 30, 32, 18, 19, 29 ผลที่สไลด์ให้คือ MSE = 19.66667, RMSE = 4.434712, ME = −0.33333, MAE = 3.666667 และ MAPE = 15.73308 การ์ดถัดไปคำนวณทุกค่าทีละคอลัมน์</p>
+<p>ตารางนี้มาจากไฟล์ Forecast Error Example ที่อาจารย์เปิดใน Excel ระหว่างสอน (Class 2, 1:02:36–1:06:22) ค่าจริง 9 จุดคือ 18, 17, 20, 22, 25, 24, 23, 25, 30 และค่าพยากรณ์คือ 19, 17, 24, 19, 30, 32, 18, 19, 29 อาจารย์อ่าน MAPE 15.73% ว่า "โดยเฉลี่ยมันบวกลบ 15%" การ์ดต่อไปนี้คำนวณทุกค่าทีละคอลัมน์</p>
 
-<div class="calc" id="s3-calc">
-<div class="calc-title">คำนวณตารางหน้า 16 ทีละขั้น (n = 9)</div>
+<div class="calc" id="s3-table">
+<div class="calc-title">คำนวณตาราง Excel ทีละขั้น (n = 9)</div>
 <table class="compact">
 <tr><th>Y</th><th>F</th><th>e = Y − F</th><th>e²</th><th>|e|</th><th>|e| ÷ Y × 100</th></tr>
 <tr><td>18</td><td>19</td><td>−1</td><td>1</td><td>1</td><td>5.556</td></tr>
@@ -256,106 +225,93 @@ test.ts &lt;- window(new_temperature, start = nTrain+1, end = nTrain+nValid)</co
 <tr><td>23</td><td>18</td><td>5</td><td>25</td><td>5</td><td>21.739</td></tr>
 <tr><td>25</td><td>19</td><td>6</td><td>36</td><td>6</td><td>24.000</td></tr>
 <tr><td>30</td><td>29</td><td>1</td><td>1</td><td>1</td><td>3.333</td></tr>
-<tr><th>ผลรวม</th><th></th><th>−3</th><th>177</th><th>33</th><th>141.598</th></tr>
+<tr><th colspan="2">ผลรวม</th><th>−3</th><th>177</th><th>33</th><th>141.598</th></tr>
 </table>
 <ol class="steps">
-<li><div class="st-title">ME</div><p>\(-3/9=-0.3333\) ติดลบเล็กน้อย โดยเฉลี่ยพยากรณ์สูงกว่าค่าจริงเล็กน้อย</p></li>
-<li><div class="st-title">MSE และ RMSE</div><p>\(\text{MSE}=177/9=19.6667\) และ \(\text{RMSE}=\sqrt{19.6667}=4.4347\)</p></li>
+<li><div class="st-title">ME</div><p>\(-3/9=-0.3333\) โดยเฉลี่ยพยากรณ์สูงกว่าค่าจริงเล็กน้อย</p></li>
+<li><div class="st-title">MSE และ RMSE</div><p>\(177/9=19.6667\) และ \(\sqrt{19.6667}=4.4347\)</p></li>
 <li><div class="st-title">MAE</div><p>\(33/9=3.6667\)</p></li>
-<li><div class="st-title">MAPE</div><p>\(141.598/9=15.733\) เปอร์เซ็นต์</p></li>
-<li><div class="st-title">MPE (สไลด์ไม่ได้ให้ค่า แต่คำนวณจากตารางเดียวกันได้)</div><p>ใส่เครื่องหมายตาม e: \((-5.556+0-20+13.636-20-33.333+21.739+24+3.333)/9=-16.181/9=-1.80\) เปอร์เซ็นต์</p></li>
+<li><div class="st-title">MAPE</div><p>\(141.598/9=15.733\%\)</p></li>
+<li><div class="st-title">MPE (สไลด์ไม่ได้ให้)</div><p>ใส่เครื่องหมายตาม e: \((-5.556+0-20+13.636-20-33.333+21.739+24+3.333)/9=-16.181/9=-1.80\%\)</p></li>
 </ol>
-<div class="answer">ME = −0.333, MSE = 19.667, RMSE = 4.435, MAE = 3.667, MAPE = 15.73%, MPE = −1.80% ตรงกับสไลด์ทุกค่า</div>
-<p>RMSE (4.43) มากกว่าหรือเท่ากับ MAE (3.67) เสมอ เพราะการยกกำลังสองขยาย error ขนาดใหญ่ ในที่นี้คือ −8 และ 6 ถ้า RMSE ห่างจาก MAE มาก แสดงว่ามี error ขนาดใหญ่ปนอยู่ และ ME ที่ −0.33 เทียบกับ MAE ที่ 3.67 แสดงว่า error ส่วนใหญ่หักล้างกัน โมเดลนี้ไม่เอนเอียงมากแต่คลาดเคลื่อนเฉลี่ยเกือบ 4 หน่วย</p>
+<div class="answer">ME = −0.333, MSE = 19.667, RMSE = 4.435, MAE = 3.667, MAPE = 15.73%, MPE = −1.80% ตรงกับ Excel ของอาจารย์ทุกค่า</div>
 </div>
+
+<p>อ่านผลรวมกัน: RMSE 4.43 มากกว่า MAE 3.67 เพราะมี error ใหญ่ −8 และ 6 ส่วน ME −0.33 เล็กมากเมื่อเทียบกับ MAE 3.67 แปลว่า error บวกลบหักล้างกันเกือบหมด โมเดลนี้ไม่เอนไปข้างใดข้างหนึ่ง แต่คลาดเฉลี่ยเกือบ 4 หน่วย อาจารย์แนะนำว่าในงานจริงให้เลือกตัววัดหนึ่งหรือสองตัว นิยม MSE กับ MAPE ผลที่ดีที่สุดคือทุกตัวชี้ไปทางเดียวกัน แต่บางครั้งไม่ตรงกัน เช่น โมเดลหนึ่ง MSE ต่ำสุดแต่ MAPE ไม่ต่ำสุด (Class 2, 1:08:45–1:09:43)</p>
 
 <figure>
 <img src="../assets/slides/ts2-p17.png" alt="Slide 2 หน้า 17: R-codes for performance evaluation" loading="lazy">
 <figcaption>Slide 2 หน้า 17 — R-codes for performance evaluation</figcaption>
 </figure>
 
-<p>ใน R ไม่ต้องคำนวณตัววัดทีละตัว ฟังก์ชัน <code>accuracy</code> ของ package forecast ให้ทั้งห้าค่าในคำสั่งเดียว ไฟล์ <code>accuracy.txt</code> มีสองคอลัมน์ คือค่าพยากรณ์และค่าจริงของตารางหน้า 16 ผลที่ได้จึงตรงกับที่คำนวณมือ: ME = −0.333, RMSE = 4.435, MAE = 3.667 และ MAPE = 15.73</p>
-
-<pre data-p="17"><code>library(forecast)
-test &lt;- read.table("accuracy.txt", h=T)
-test &lt;- ts(test)
-accuracy(test[,1],test[,2])</code></pre>
-<table class="codeexp compact">
-<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
-<tr><td>library(forecast)</td><td>เรียก package forecast ซึ่งมีฟังก์ชัน <code>accuracy</code></td></tr>
-<tr><td>read.table("accuracy.txt", h=T)</td><td>อ่านไฟล์ <code>h=T</code> คือบรรทัดแรกเป็นชื่อคอลัมน์</td></tr>
-<tr><td>ts(test)</td><td>แปลงเป็น time series</td></tr>
-<tr><td>accuracy(test[,1],test[,2])</td><td>อาร์กิวเมนต์แรกคือค่าพยากรณ์ อาร์กิวเมนต์ที่สองคือค่าจริง ผลที่ได้คือ ME, RMSE, MAE, MPE และ MAPE พร้อมกัน</td></tr>
-</table>
-<p><code>test[,1]</code> หมายถึงคอลัมน์ที่ 1 ของตาราง และ <code>test[,2]</code> หมายถึงคอลัมน์ที่ 2 ฟังก์ชัน <code>accuracy</code> คำนวณ error เป็นค่าจริงลบค่าพยากรณ์เช่นเดียวกับสูตรในสไลด์</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 4</span><span>Forecast error</span></div>
-<div class="qtext">ค่าจริงคือ 10, 20 และค่าพยากรณ์คือ 12, 16 ค่า ME และ MAE คือเท่าใด</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. e = −2 และ 4 จึงได้ ME = 2/2 = 1 และ MAE = 6/2 = 3">ME = 1 และ MAE = 3</button>
-<button class="opt" data-correct="false" data-note="ผิด. ME ใช้ค่าจริงลบค่าพยากรณ์ ได้ +1">ME = −1 และ MAE = 3</button>
-<button class="opt" data-correct="false" data-note="ผิด. MAE ใช้ค่าสัมบูรณ์ ได้ (2 + 4)/2 = 3">ME = 1 และ MAE = 1</button>
-<button class="opt" data-correct="false" data-note="ผิด. ME คงเครื่องหมายไว้ ได้ (−2 + 4)/2 = 1">ME = 3 และ MAE = 3</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 5</span><span>Forecast error</span></div>
-<div class="qtext">โมเดลหนึ่งมี ME = −5 ข้อสรุปใดถูก</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. error คือจริงลบพยากรณ์ ค่าลบแปลว่าพยากรณ์สูงกว่า">โดยเฉลี่ยพยากรณ์ต่ำกว่าค่าจริง 5 หน่วย</button>
-<button class="opt" data-correct="false" data-note="ผิด. ME บอกทิศของ bias ไม่ได้บอกขนาดของความคลาดเคลื่อนรวม">ความคลาดเคลื่อนเฉลี่ยไม่เกิน 5 หน่วย</button>
-<button class="opt" data-correct="false" data-note="ผิด. ME ติดลบได้ ไม่ใช่การคำนวณผิด">คำนวณผิด เพราะ error ติดลบไม่ได้</button>
-<button class="opt" data-correct="true" data-note="ถูก. Y − F ติดลบ แปลว่า F มากกว่า Y โดยเฉลี่ย">โดยเฉลี่ยพยากรณ์สูงกว่าค่าจริง 5 หน่วย</button>
-</div>
-<div class="feedback"></div>
-</div>
+<p>ใน R ฟังก์ชัน <code>accuracy()</code> ของ package forecast ให้ทุกตัววัดในคำสั่งเดียว ไฟล์ <code>accuracy.txt</code> มีสองคอลัมน์ ชื่อ <code>data</code> (ค่าจริง) และ <code>forecast</code> (ค่าพยากรณ์) ตรงกับตาราง Excel ข้างบน อาจารย์อธิบายว่า "คอลัมน์แรกค่าจริง คอลัมน์สองค่า forecast" (Class 2, 1:07:31–1:08:45)</p>
 
 <div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 3</div>
-<ul>
-<li>เขียนสูตรทั้งห้าได้ และคำนวณจากตารางได้ทุกค่า</li>
-<li>error คือค่าจริงลบค่าพยากรณ์ ค่าลบของ ME หรือ MPE หมายถึงพยากรณ์สูงเกิน</li>
-<li>RMSE ไวต่อ error ขนาดใหญ่ และไม่น้อยกว่า MAE</li>
-<li>MAPE และ MPE ไม่มีหน่วย จึงเทียบข้ามสเกลได้</li>
-<li>อ่านโค้ด <code>accuracy()</code> ได้</li>
-</ul>
+<div class="label">ข้อควรระวังที่พบเมื่อรันโค้ดบนสไลด์จริง</div>
+<p>ฟังก์ชัน <code>accuracy(f, x)</code> รับ<b>ค่าพยากรณ์ก่อน</b>แล้วจึงรับค่าจริง (อาร์กิวเมนต์ f คือ forecast และ x คือค่าจริง) แต่โค้ดบนสไลด์ส่ง <code>test[,1]</code> ซึ่งเป็นค่าจริงเข้าไปเป็นตัวแรก ผลจึงสลับบทบาทกัน</p>
+<pre class="out">&gt; accuracy(test[,1], test[,2])        # ตามสไลด์: ค่าจริงอยู่ตำแหน่ง forecast
+                ME     RMSE      MAE       MPE   MAPE
+Test set 0.3333333 4.434712 3.666667 -1.666443 15.799
+
+&gt; accuracy(test[,2], test[,1])        # ลำดับที่ถูก: forecast ก่อน ค่าจริงหลัง
+                 ME     RMSE      MAE       MPE     MAPE
+Test set -0.3333333 4.434712 3.666667 -1.797785 15.73308</pre>
+<p>RMSE และ MAE เท่ากันทั้งสองแบบ เพราะยกกำลังสองหรือใส่ค่าสัมบูรณ์แล้วเครื่องหมายไม่มีผล แต่ ME กลับเครื่องหมายเป็น +0.333 และ MAPE กลายเป็น 15.799 เพราะหารด้วยค่าพยากรณ์แทนค่าจริง ผลจากลำดับที่ถูกตรงกับ Excel (−0.333 และ 15.733) ถ้าข้อสอบให้รันหรืออ่าน output ของ <code>accuracy()</code> ให้ตรวจว่าค่าพยากรณ์อยู่ตำแหน่งแรก</p>
 </div>
 
-<!-- ===================================================== -->
-<h2 id="s4">4. แนวคิดของ stationarity</h2>
+<pre><code>library(forecast)
+test &lt;- read.table("accuracy.txt", h = T)
+test &lt;- ts(test)
+accuracy(test[,2], test[,1])      # forecast ก่อน ค่าจริงหลัง</code></pre>
+<table class="codeexp compact">
+<tr><th>โค้ด</th><th>ทำอะไร</th></tr>
+<tr><td>library(forecast)</td><td>เรียก package forecast ซึ่งมีฟังก์ชัน accuracy</td></tr>
+<tr><td>read.table("accuracy.txt", h = T)</td><td><code>h = T</code> คือบรรทัดแรกเป็นชื่อคอลัมน์ (data, forecast)</td></tr>
+<tr><td>ts(test)</td><td>แปลงเป็นอนุกรมเวลา</td></tr>
+<tr><td>test[,1], test[,2]</td><td>คอลัมน์ที่ 1 (ค่าจริง) และคอลัมน์ที่ 2 (ค่าพยากรณ์)</td></tr>
+<tr><td>accuracy(f, x)</td><td>คำนวณ ME, RMSE, MAE, MPE, MAPE จาก error = x − f</td></tr>
+</table>
 
-<p>ครึ่งหลังของ Lecture 2 เปลี่ยนเรื่องไปที่สมบัติของ process ที่ทำให้สร้างโมเดลได้ คำถามตั้งต้นคือ ถ้าข้อมูลไม่เป็นอิสระต่อกัน ยังเหลืออะไรที่คงที่ให้ยึดได้บ้าง</p>
+<!-- ===================================================== -->
+<h2 id="s4">4. Stationarity คืออะไร และทำไมสำคัญ</h2>
+
+<p>หลังพักครึ่งคาบ อาจารย์เปิดเรื่องนี้ว่า "นี่จะเป็นตัวหลักเลย อนุกรมเวลาของคุณนิ่งหรือเปล่า" (Class 2, 1:47:28) ปัญหาตั้งต้นคือ ใน Lesson 1 เราพบว่าแต่ละจุดเวลาเป็นตัวแปรสุ่มคนละตัว แต่ข้อมูลจริงมีแค่ค่าเดียวต่อเวลา ถ้าแต่ละเวลามีค่าเฉลี่ยและความแปรปรวนของตัวเองที่ต่างกันหมด จะประมาณค่าเหล่านั้นจากข้อมูลค่าเดียวไม่ได้ ทางออกคือหาอนุกรมที่ "กติกาไม่เปลี่ยนตามเวลา" ข้อมูลทุกจุดจึงช่วยกันประมาณค่าชุดเดียวกันได้ อนุกรมแบบนั้นเรียกว่า stationary</p>
+
+<p>อาจารย์อธิบายคำว่านิ่งด้วยการแจกแจง: นิ่งคือ distribution ไม่เปลี่ยนตามเวลา แล้วยกตัวอย่างอนุกรมที่ไม่นิ่งสามแบบ (Class 2, 1:48:27–1:52:40)</p>
+<ol>
+<li><b>มี trend</b> ถ้าตัดสองช่วงเวลามาเทียบ ค่าเฉลี่ยไม่เท่ากัน "อาจจะเป็น normal เหมือนกัน แต่ mean ไม่เท่ากันก็ถือว่าคนละ distribution"</li>
+<li><b>มี seasonal</b> ค่าเฉลี่ยของเดือนหน้าร้อนกับหน้าหนาวต่างกัน</li>
+<li><b>แกว่งไม่เท่ากัน</b> ความแปรปรวนต่างกันตามช่วงเวลา ในอนุกรมเวลาเรียกความแปรปรวนว่า volatility ซึ่งมีโมเดลเฉพาะ (ARCH/GARCH) ในบทท้าย</li>
+</ol>
+<p>และสรุปกลยุทธ์ของทั้งวิชาไว้ในประโยคเดียว: "ส่วนใหญ่อนุกรมเวลาของคุณจะไม่ stationary เราจะดึงพาร์ทที่ไม่นิ่งออกไปก่อน แล้วเอาส่วนที่นิ่งไปโมเดล แล้วค่อยปรับทีหลัง" (Class 2, 1:54:33–1:54:44) Lesson 3 ดึง trend ออกด้วย detrending และ differencing Lesson 7 ดึงความแปรปรวนที่ไม่คงที่ออกด้วย log</p>
 
 <figure>
 <img src="../assets/slides/ts2-p19.png" alt="Slide 2 หน้า 19: Consistency of Distribution" loading="lazy">
 <figcaption>Slide 2 หน้า 19 — Consistency of Distribution</figcaption>
 </figure>
 
-<p>ใน time series ค่าที่อยู่ติดกันสัมพันธ์กัน จึงไม่มีความเป็นอิสระ แต่การสร้างโมเดลยังต้องการ consistency บางอย่าง สไลด์ระบุสิ่งที่ต้องการ: การแจกแจงขึ้นกับ difference in time เท่านั้น ไม่ขึ้นกับ location in time หมายความว่าความสัมพันธ์ระหว่างค่าสองค่าที่ห่างกัน 3 ช่วงเวลา ต้องเหมือนกันไม่ว่าจะดูที่ต้นหรือปลายของข้อมูล กราฟในสไลด์มี 1,000 จุดที่แกว่งรอบ 0 และเกือบทั้งหมดอยู่ระหว่าง −5 ถึง 5 ตลอดช่วง ถ้าตัดช่วง 0 ถึง 200 มาเทียบกับช่วง 800 ถึง 1,000 ระดับกลางและความกว้างเท่ากัน</p>
+<p>สไลด์ตั้งคำถามว่า เมื่อค่าที่อยู่ติดกันสัมพันธ์กัน จึงไม่มีความเป็นอิสระ แล้วอะไรที่ยังคงที่ให้ยึดได้ คำตอบคือการแจกแจงต้องขึ้นกับ <b>ระยะห่างของเวลา</b> เท่านั้น ไม่ขึ้นกับ <b>ตำแหน่งของเวลา</b> หมายความว่าความสัมพันธ์ระหว่างสองค่าที่ห่างกัน 3 ช่วง ต้องเหมือนกันไม่ว่าจะอยู่ต้นหรือปลายข้อมูล กราฟ 1,000 จุดแกว่งรอบ 0 อยู่ระหว่าง −5 ถึง 5 ตลอด ถ้าตัดช่วง 0–200 มาเทียบกับ 800–1,000 ระดับกลางและความกว้างเท่ากัน</p>
 
 <figure>
 <img src="../assets/slides/ts2-p20.png" alt="Slide 2 หน้า 20: Stationarity" loading="lazy">
 <figcaption>Slide 2 หน้า 20 — Stationarity</figcaption>
 </figure>
 
-<p>Stationary เป็นแนวคิดสำคัญของการวิเคราะห์ time series กล่าวอย่างกว้าง time series เป็น stationary ถ้ามีสามข้อ คือ ไม่มีการเปลี่ยนแปลงอย่างเป็นระบบของ mean (ไม่มี trend) ไม่มีการเปลี่ยนแปลงอย่างเป็นระบบของ variance และ strictly periodic variations ถูกนำออกแล้ว (ไม่มี seasonal) กล่าวอีกแบบ สมบัติของข้อมูลช่วงหนึ่งคล้ายกับของช่วงอื่นใดก็ตาม เปรียบได้กับเกมที่กติกาไม่เปลี่ยน: ผลของแต่ละตายังสุ่ม แต่ลูกเต๋าเป็นลูกเดิมตลอด สถิติของ 100 ตาแรกจึงคล้ายกับของ 100 ตาสุดท้าย</p>
+<p>นิยามแบบกว้างมีสามข้อ ไม่มีการเปลี่ยนแปลงอย่างเป็นระบบของค่าเฉลี่ย (ไม่มี trend) ไม่มีการเปลี่ยนแปลงอย่างเป็นระบบของความแปรปรวน และไม่มีรูปแบบที่ซ้ำเป็นคาบ (ไม่มี seasonal) สามข้อนี้ตรงกับตัวอย่างไม่นิ่งสามแบบที่อาจารย์ยก เปรียบได้กับเกมทอยลูกเต๋าที่กติกาไม่เปลี่ยน ผลของแต่ละตายังสุ่ม แต่ลูกเต๋าเป็นลูกเดิมตลอด สถิติของ 100 ตาแรกจึงคล้ายของ 100 ตาสุดท้าย</p>
 
 <figure>
 <img src="../assets/slides/ts2-p21.png" alt="Slide 2 หน้า 21: Stationarity: ความหมายเชิงสัญชาตญาณ" loading="lazy">
 <figcaption>Slide 2 หน้า 21 — Stationarity: ความหมายเชิงสัญชาตญาณ</figcaption>
 </figure>
 
-<p>Stationarity หมายความว่าสมบัติทางสถิติของ process ที่สร้าง time series <mark class="src" data-p="21">do not change over time.</mark> สไลด์ย้ำว่าไม่ได้หมายความว่า series ไม่เปลี่ยนตามเวลา แต่หมายความว่าวิธีที่มันเปลี่ยนไม่เปลี่ยนตามเวลา กราฟแรกแกว่งรอบ 0 ระหว่าง −5 ถึง 5 ตลอดช่วง มีค่า ADF เท่ากับ −6.128 ค่าเปลี่ยนตลอดเวลาแต่ลักษณะของการเปลี่ยนเหมือนเดิม จึงเป็น stationary กราฟที่สองลดลงจาก 0 ไปถึงประมาณ −100 ที่เวลาประมาณ 850 แล้วกลับขึ้นมาประมาณ −55 มีค่า ADF เท่ากับ −2.0251 ระดับเฉลี่ยเปลี่ยนตามช่วงเวลา จึงไม่ stationary ค่า ADF มาจาก Augmented Dickey-Fuller test ซึ่งค่าที่ติดลบมากสนับสนุนว่า stationary รายละเอียดของการทดสอบอยู่ใน Lesson 7</p>
+<p>Stationarity หมายความว่าสมบัติทางสถิติของ process <mark class="src" data-p="21">do not change over time.</mark> สไลด์ย้ำว่าไม่ได้แปลว่าข้อมูลไม่เปลี่ยน แต่แปลว่า "วิธีที่มันเปลี่ยน" ไม่เปลี่ยน กราฟแรกแกว่งรอบ 0 ระหว่าง −5 ถึง 5 ตลอดช่วง ค่า ADF เท่ากับ −6.128 ค่าเปลี่ยนตลอดเวลาแต่ลักษณะการเปลี่ยนเหมือนเดิม จึงนิ่ง กราฟที่สองลดจาก 0 ลงไปราว −100 ที่เวลาประมาณ 850 แล้วกลับขึ้นมาราว −55 ค่า ADF เท่ากับ −2.0251 ระดับเฉลี่ยเปลี่ยนตามช่วงเวลา จึงไม่นิ่ง ADF คือการทดสอบ Augmented Dickey-Fuller ค่าที่ติดลบมากสนับสนุนว่านิ่ง สอนใน Lesson 3</p>
 
 <div class="box beginner">
-<div class="label">ตรวจ stationarity จากกราฟ</div>
+<div class="label">ตรวจความนิ่งจากกราฟสี่ขั้น</div>
 <ol>
-<li>แบ่งกราฟเป็น 3 ถึง 4 ช่วงเท่ากัน</li>
-<li>เทียบระดับกลางของแต่ละช่วง ถ้าต่างกัน mean ไม่คงที่</li>
-<li>เทียบความกว้างของการแกว่งของแต่ละช่วง ถ้าต่างกัน variance ไม่คงที่</li>
+<li>แบ่งกราฟเป็น 3–4 ช่วงเท่ากัน</li>
+<li>เทียบระดับกลางของแต่ละช่วง ถ้าต่างกัน ค่าเฉลี่ยไม่คงที่</li>
+<li>เทียบความกว้างของการแกว่ง ถ้าต่างกัน ความแปรปรวนไม่คงที่</li>
 <li>มองหารอบที่ซ้ำตามปฏิทิน ถ้ามี ยังมี seasonal</li>
 </ol>
 </div>
@@ -365,85 +321,87 @@ accuracy(test[,1],test[,2])</code></pre>
 <figcaption>Slide 2 หน้า 22 — Why Stationarity is important</figcaption>
 </figure>
 
-<p>Stationary processes วิเคราะห์ได้ง่ายกว่า ด้วยเหตุผลสามข้อ ข้อแรก เป็น sub-class ของโมเดลที่เป็นไปได้ทั้งหมด และ sub-class นี้ <mark class="src" data-p="22">much easier to model and investigate.</mark> ข้อที่สอง process เช่นนี้ควรพยากรณ์ได้ <mark class="src" data-p="22">as the way they change is predictable.</mark> ข้อที่สาม ทฤษฎีของ time series ส่วนใหญ่เกี่ยวกับ stationary time series การวิเคราะห์จึงมักต้อง <mark class="src" data-p="22">transform a nonstationary time series into a stationary</mark> one ก่อนใช้ทฤษฎี วิธีแปลงคือ detrending และ differencing ใน Lesson 3 เหตุผลเชิงปฏิบัติคือ ข้อมูลจริงมีเพียงเส้นเดียว ถ้าสมบัติคงที่ตามเวลา ค่าที่ต่างเวลากันใช้ประมาณค่าเฉลี่ยและ covariance ตัวเดียวกันได้ ถ้าสมบัติเปลี่ยนทุกเวลา แต่ละเวลาจะมีข้อมูลเพียงค่าเดียวให้ประมาณ</p>
+<p>เหตุผลสามข้อบนสไลด์ ข้อแรก อนุกรมที่นิ่งเป็นกลุ่มย่อยของโมเดลทั้งหมด และกลุ่มนี้ <mark class="src" data-p="22">much easier to model and investigate.</mark> ข้อสอง พยากรณ์ได้ <mark class="src" data-p="22">as the way they change is predictable.</mark> ข้อสาม ทฤษฎีของอนุกรมเวลาส่วนใหญ่สร้างบนอนุกรมที่นิ่ง จึงมักต้อง <mark class="src" data-p="22">transform a nonstationary time series into a stationary</mark> ก่อนใช้ทฤษฎี อาจารย์พูดถึงข้อสองว่าอนุกรมที่นิ่ง "ไม่น่าสนใจ" เพราะไม่มีอะไรตื่นเต้น แต่ model ง่ายเพราะ "predictable" (Class 2, 1:53:20–1:54:25) เหตุผลเชิงปฏิบัติตรงกับย่อหน้าแรกของหัวข้อนี้: เมื่อกติกาไม่เปลี่ยน ข้อมูลทุกจุดช่วยกันประมาณค่าเฉลี่ยและ covariance ชุดเดียวกันได้</p>
 
 <figure>
 <img src="../assets/slides/ts2-p23.png" alt="Slide 2 หน้า 23: Types of stationarity" loading="lazy">
 <figcaption>Slide 2 หน้า 23 — Types of stationarity</figcaption>
 </figure>
 
-<p>แนวคิดพื้นฐานคือสมบัติทางสถิติของค่าสังเกตมีแนวโน้มคงเดิมตามเวลา Stationarity มีสองรูปแบบ คือ <mark class="src" data-p="23">strong</mark> (หรือ strict) stationarity และ <mark class="src" data-p="23">weak</mark> stationarity แบบแรกกำหนดเงื่อนไขกับการแจกแจงทั้งหมด แบบที่สองกำหนดเฉพาะค่าเฉลี่ยและ covariance</p>
+<p>Stationarity มีสองแบบ แบบเข้ม (strong หรือ strict) กำหนดเงื่อนไขกับการแจกแจงทั้งหมด และแบบอ่อน (weak) กำหนดเฉพาะค่าเฉลี่ยกับ covariance หัวข้อ 5 และ 6 อธิบายทีละแบบ</p>
 
 <!-- ===================================================== -->
 <h2 id="s5">5. Strictly stationary</h2>
+
+<p>อาจารย์บอกว่าแบบเข้ม "พรูฟยาก ผมจะข้าม" (Class 2, 1:54:52–1:56:21) จึงไม่ใช่จุดที่จะออกให้พิสูจน์ แต่ต้องรู้นิยามและรู้ว่าทำไมต้องหันไปใช้แบบอ่อน</p>
 
 <figure>
 <img src="../assets/slides/ts2-p24.png" alt="Slide 2 หน้า 24: A strictly stationary" loading="lazy">
 <figcaption>Slide 2 หน้า 24 — A strictly stationary</figcaption>
 </figure>
 
-<p>\(\{X_t\}\) เป็น strictly stationary ถ้า joint distribution ของ \(\{X_{t_1},X_{t_2},\dots,X_{t_n}\}\) เหมือนกับของ \(\{X_{t_1+h},X_{t_2+h},\dots,X_{t_n+h}\}\) สำหรับทุกชุดของจุดเวลา ทุก lag h และทุก \(n\ge1\) หมายความว่า เลือกจุดเวลากี่จุดก็ได้ แล้วเลื่อนทั้งชุดไป h ช่วงเวลา การแจกแจงร่วมต้องเหมือนเดิมทุกประการ ตัวอย่าง: การแจกแจงร่วมของ \((X_1,X_3)\) ต้องเหมือนกับของ \((X_{11},X_{13})\) และของ \((X_{101},X_{103})\)</p>
+<p>\(\{X_t\}\) เป็น strictly stationary ถ้าการแจกแจงร่วมของ \((X_{t_1},\dots,X_{t_n})\) เหมือนกับของ \((X_{t_1+h},\dots,X_{t_n+h})\) สำหรับทุกชุดของเวลา ทุก h และทุก n หมายความว่า หยิบจุดเวลากี่จุดก็ได้ แล้วเลื่อนทั้งชุดไป h ช่วง การแจกแจงร่วมต้องเหมือนเดิมทุกประการ เช่น การแจกแจงร่วมของ \((X_1,X_3)\) ต้องเหมือนของ \((X_{11},X_{13})\) และของ \((X_{101},X_{103})\)</p>
 
 <figure>
-<img src="../assets/slides/ts2-p25.png" alt="Slide 2 หน้า 25: A strictly stationary: New notation (page 20)" loading="lazy">
-<figcaption>Slide 2 หน้า 25 — A strictly stationary: New notation (page 20)</figcaption>
+<img src="../assets/slides/ts2-p25.png" alt="Slide 2 หน้า 25: New notation (page 20)" loading="lazy">
+<figcaption>Slide 2 หน้า 25 — New notation (page 20)</figcaption>
 </figure>
 
-<p>สำหรับ stationary process covariance \(\gamma_{t,s}\) ขึ้นกับ time difference \(|t-s|\) เท่านั้น ค่าความต่างนี้เรียกว่า <mark class="src" data-p="25">lag</mark> และเขียนว่า h สัญกรณ์สองตัวห้อยจาก Lesson 1 จึงย่อเหลือตัวห้อยเดียวได้ เพราะเมื่อรู้ระยะห่างก็รู้ค่าทั้งหมด ไม่ต้องรู้ว่าอยู่ที่เวลาใด</p>
+<p>เมื่อ process นิ่ง covariance \(\gamma(s,t)\) ขึ้นกับระยะห่าง \(|t-s|\) เท่านั้น ระยะห่างนี้เรียกว่า lag และเขียนว่า h สัญกรณ์สองตัวห้อยจึงย่อเหลือตัวเดียวได้ เพราะรู้ระยะห่างก็รู้ค่า ไม่ต้องรู้ว่าอยู่ที่เวลาใด ตรงกับที่อาจารย์เปลี่ยนการเขียนใน Lesson 1 หัวข้อ 8</p>
 
 <figure>
 <img src="../assets/slides/ts2-p26.png" alt="Slide 2 หน้า 26: New notation (ต่อ)" loading="lazy">
 <figcaption>Slide 2 หน้า 26 — New notation (ต่อ)</figcaption>
 </figure>
 
-<p>สัญกรณ์ใหม่คือ \(\gamma_h=\gamma(h)=\mathrm{cov}(X_t,X_{t-h})\) และ \(\rho_h=\mathrm{corr}(X_t,X_{t-h})\) กรณี \(h=0\) ได้ \(\gamma_0=\mathrm{var}(X_t)\) และสูตรของ ACF ย่อเหลือ \(\rho_h=\gamma_h/\gamma_0\) สูตรนี้มาจากสูตรเดิม \(\gamma_{t,s}/\sqrt{\gamma_{t,t}\gamma_{s,s}}\) โดยตัวหารคือ \(\sqrt{\gamma_0\cdot\gamma_0}=\gamma_0\) เพราะความแปรปรวนเท่ากันทุกเวลา สัญกรณ์ \(\gamma(h)\) และ \(\rho(h)\) ใช้ตลอดบทที่เหลือของวิชา</p>
+<p>สัญกรณ์ใหม่คือ \(\gamma(h)=\mathrm{cov}(X_t,X_{t-h})\) และ \(\rho(h)=\mathrm{corr}(X_t,X_{t-h})\) เมื่อ h = 0 ได้ \(\gamma(0)=\mathrm{Var}(X_t)\) และ ACF ย่อเป็น \(\rho(h)=\gamma(h)/\gamma(0)\) ซึ่งเป็นสูตรที่อาจารย์ให้จด สูตรนี้มาจากสูตรเดิม \(\gamma(s,t)/\sqrt{\gamma(s,s)\gamma(t,t)}\) โดยตัวหารคือ \(\sqrt{\gamma(0)\gamma(0)}=\gamma(0)\) เพราะความแปรปรวนเท่ากันทุกเวลา</p>
 
 <figure>
 <img src="../assets/slides/ts2-p27.png" alt="Slide 2 หน้า 27: ผลของ strict stationarity เมื่อ n = 1" loading="lazy">
 <figcaption>Slide 2 หน้า 27 — ผลของ strict stationarity เมื่อ n = 1</figcaption>
 </figure>
 
-<p>เมื่อ \(n=1\) นิยามบอกว่าการแจกแจงของ \(X_t\) เหมือนกับของ \(X_{t+h}\) สำหรับทุก t และ h เลือก \(h=-t\) จะได้ว่าการแจกแจงของ \(X_t\) เหมือนกับของ \(X_0\) ทุก t ดังนั้นภายใต้ strict stationarity <mark class="src" data-p="27">every X_t has the same distribution</mark> ผลที่ตามมาคือ \(E(X_t)\) และ \(\mathrm{Var}(X_t)\) คงที่ทุกเวลา เพราะค่าทั้งสองคำนวณจากการแจกแจงเดียวกัน</p>
+<p>เมื่อ n = 1 นิยามบอกว่าการแจกแจงของ \(X_t\) เหมือนของ \(X_{t+h}\) ทุก t และ h ทุกจุดเวลาจึงมีการแจกแจงเดียวกัน ผลที่ตามมาคือ \(E(X_t)\) และ \(\mathrm{Var}(X_t)\) คงที่ เพราะคำนวณจากการแจกแจงเดียวกัน</p>
 
 <figure>
 <img src="../assets/slides/ts2-p28.png" alt="Slide 2 หน้า 28: ผลของ strict stationarity เมื่อ n = 2" loading="lazy">
 <figcaption>Slide 2 หน้า 28 — ผลของ strict stationarity เมื่อ n = 2</figcaption>
 </figure>
 
-<p>เมื่อ \(n=2\) นิยามบอกว่า <mark class="src" data-p="28">the joint distribution</mark> ของ \((X_t,X_s)\) เหมือนกับของ \((X_{t+h},X_{s+h})\) สำหรับทุก s, t และ h เลือก \(h=-s\) จะได้ว่าเหมือนกับการแจกแจงของ \((X_{t-s},X_0)\) ซึ่งขึ้นกับ t และ s ผ่านค่า \(t-s\) เท่านั้น ดังนั้น \(\mathrm{cov}(X_t,X_s)\) เป็นฟังก์ชันของ \(|s-t|\) เท่านั้น สองหน้านี้รวมกันแสดงว่า strict stationarity ให้ผลสามข้อ คือ mean คงที่ variance คงที่ และ covariance ขึ้นกับ lag เท่านั้น</p>
+<p>เมื่อ n = 2 การแจกแจงร่วมของ \((X_t,X_s)\) เหมือนของ \((X_{t+h},X_{s+h})\) เลือก h = −s จะเหมือนการแจกแจงของ \((X_{t-s},X_0)\) ซึ่งขึ้นกับ t และ s ผ่านค่า t − s เท่านั้น covariance จึงขึ้นกับระยะห่างอย่างเดียว สองหน้านี้รวมกันได้ผลสามข้อ ค่าเฉลี่ยคงที่ ความแปรปรวนคงที่ และ covariance ขึ้นกับ lag เท่านั้น</p>
 
 <figure>
 <img src="../assets/slides/ts2-p29.png" alt="Slide 2 หน้า 29: ข้อจำกัดของ strict stationarity" loading="lazy">
 <figcaption>Slide 2 หน้า 29 — ข้อจำกัดของ strict stationarity</figcaption>
 </figure>
 
-<p>Strict stationarity เป็นเงื่อนไขที่เข้มมาก และตรวจสอบยาก การประเมินว่าสมมติฐานนี้เป็นจริงในทางปฏิบัติทำได้ยาก เพราะต้องรู้การแจกแจงร่วมของทุกชุดของจุดเวลา ขณะที่มีข้อมูลเพียงเส้นเดียว แทนที่จะกำหนดเงื่อนไขกับการแจกแจงทั้งหมด ทั้ง marginal และ joint จึงใช้ <mark class="src" data-p="29">a milder form</mark> ของ stationarity ที่เกี่ยวข้องเฉพาะ first two moments</p>
+<p>เงื่อนไขแบบเข้มตรวจได้ยากมาก เพราะต้องรู้การแจกแจงร่วมของทุกชุดของเวลา ในขณะที่มีข้อมูลเส้นเดียว จึงใช้รูปแบบที่อ่อนลง ซึ่งสนใจแค่ moment สองอันดับแรก เหมือนที่ Lesson 1 หัวข้อ 7 ให้เหตุผลว่าวิชานี้ระบุโมเดลด้วยค่าเฉลี่ย ความแปรปรวน และ covariance</p>
 
 <!-- ===================================================== -->
-<h2 id="s6">6. Weakly stationary</h2>
+<h2 id="s6">6. Weakly stationary และวิธีตรวจ</h2>
 
 <figure>
 <img src="../assets/slides/ts2-p30.png" alt="Slide 2 หน้า 30: A weakly stationary: Definition" loading="lazy">
 <figcaption>Slide 2 หน้า 30 — A weakly stationary: Definition</figcaption>
 </figure>
 
-<p><mark class="src" data-p="30">Definition:</mark> stochastic process \(\{X_t:t=1,\dots,n\}\) เป็น (weakly) stationary หรือ second-order stationary ถ้ามีสามข้อ ข้อแรก mean \(E(X_t)\) เท่ากันทุก t ข้อที่สอง variance ของ \(X_t\) เท่ากันทุก t ข้อที่สาม covariance และ correlation ระหว่าง \(X_t\) กับ \(X_{t-h}\) เท่ากันทุก t ที่แต่ละ lag \(h=1,2,\dots\) สามข้อนี้คือผลสามข้อของ strict stationarity จากหัวข้อ 5 weak stationarity จึงเก็บเฉพาะผลที่ต้องใช้ และทิ้งเงื่อนไขเรื่องการแจกแจงทั้งหมด</p>
+<p>นิยาม: \(\{X_t\}\) เป็น weakly stationary (หรือ second-order stationary) ถ้า ค่าเฉลี่ย \(E(X_t)\) เท่ากันทุก t ความแปรปรวนเท่ากันทุก t และ covariance ระหว่าง \(X_t\) กับ \(X_{t-h}\) เท่ากันทุก t ที่แต่ละ lag h สามข้อนี้คือผลสามข้อของแบบเข้มในหัวข้อ 5 แบบอ่อนจึงเก็บเฉพาะผลที่ต้องใช้ และทิ้งเงื่อนไขเรื่องการแจกแจงทั้งหมด</p>
 
 <figure>
 <img src="../assets/slides/ts2-p31.png" alt="Slide 2 หน้า 31: A weakly stationary: How to check it" loading="lazy">
 <figcaption>Slide 2 หน้า 31 — A weakly stationary: How to check it</figcaption>
 </figure>
 
-<p><mark class="src" data-p="31">How to check it:</mark> ตรวจสองข้อ ข้อแรก mean function \(\mu_t=E(X_t)\) คงที่ตลอดเวลา <mark class="src" data-p="31">(i.e. μ_t is free of t)</mark> ข้อที่สอง covariance ระหว่างค่าสังเกตสองค่าขึ้นกับ time lag ระหว่างกันเท่านั้น <mark class="src" data-p="31">(i.e. γ_{t,t+h} depends only on h, not on t)</mark> เงื่อนไข variance คงที่รวมอยู่ในข้อที่สองแล้ว เพราะเมื่อ \(h=0\) ค่า \(\gamma_{t,t}\) คือ variance ซึ่งต้องไม่ขึ้นกับ t</p>
+<p>วิธีตรวจมีสองข้อ ซึ่งอาจารย์สรุปให้จดตรงตามสไลด์ (Class 2, 1:56:21–1:57:56) ข้อแรก mean function คงที่ <mark class="src" data-p="31">(i.e. 𝝁𝒕 is free of t)</mark> ข้อสอง autocovariance ขึ้นกับ lag อย่างเดียว <mark class="src" data-p="31">(i.e. 𝜸𝒕,𝒕+𝒉 depends only on 𝒉 ,not on 𝒕)</mark> เงื่อนไขความแปรปรวนคงที่รวมอยู่ในข้อสองแล้ว เพราะเมื่อ h = 0 ค่า \(\gamma(t,t)\) คือความแปรปรวน ซึ่งต้องไม่ขึ้นกับ t</p>
 
-<div class="box prereq">
-<div class="label">ขั้นตอนตรวจ stationarity ของโมเดลใดก็ตาม</div>
-<ol>
-<li>หา \(E(X_t)\) ถ้าขึ้นกับ t สรุปว่าไม่ stationary และหยุดได้</li>
-<li>หา \(\gamma(t,t+h)\) ด้วยเทคนิคนับ w ที่ตรงกันจาก <a href="0001-basic-knowledge-and-stochastic-process.html#s8">Lesson 1 หัวข้อ 8</a></li>
-<li>ถ้า \(\gamma\) ขึ้นกับ h เท่านั้น สรุปว่า stationary ถ้ามี t อยู่ในผล สรุปว่าไม่ stationary</li>
+<div class="calc" id="s6-steps">
+<div class="calc-title">ขั้นตอนตรวจ stationarity ของโมเดลใดก็ตาม (ใช้ตอบข้อสอบ)</div>
+<ol class="steps">
+<li><div class="st-title">หา \(E(X_t)\)</div><p>ถ้ามี t อยู่ในผล สรุปว่าไม่นิ่งได้ทันที ถ้าเป็นค่าคงที่ (ไม่จำเป็นต้องเป็น 0) ไปขั้นต่อไป</p></li>
+<li><div class="st-title">หา \(\gamma(h)=\mathrm{cov}(X_t,X_{t+h})\) ทุก h</div><p>ใช้เทคนิคนับ w ที่ตรงกันจาก Lesson 1 เริ่มจาก h = 0, 1, 2 ไปจนกว่าจะแน่ใจว่าที่เหลือเป็น 0 <b>อย่าหยุดเร็ว</b> (ดูข้อสอบเก่าในหัวข้อ 8)</p></li>
+<li><div class="st-title">ดูว่าผลมี t หรือไม่</div><p>ถ้า \(\gamma\) ขึ้นกับ h เท่านั้น สรุปว่านิ่ง ถ้ามี t ปนอยู่ สรุปว่าไม่นิ่ง</p></li>
+<li><div class="st-title">ถ้าโจทย์ถาม ACF</div><p>หาร \(\gamma(h)\) ทุกตัวด้วย \(\gamma(0)\)</p></li>
 </ol>
-<p>ต้องตรวจทั้งสองข้อ mean ที่คงที่อย่างเดียวไม่พอ ตัวอย่างที่ 3 ในหัวข้อ 7 ผ่านข้อแรกแต่ไม่ผ่านข้อที่สอง</p>
 </div>
 
 <figure>
@@ -451,262 +409,395 @@ accuracy(test[,1],test[,2])</code></pre>
 <figcaption>Slide 2 หน้า 32 — ความสัมพันธ์ระหว่าง strong และ weak</figcaption>
 </figure>
 
-<p>สไลด์ระบุว่า <mark class="src" data-p="32">strongly stationary → weakly stationary</mark> คือ strong ให้ weak เสมอ ตามที่หัวข้อ 5 แสดง แต่โดยทั่วไป weak stationarity ไม่ได้ให้ strong stationarity เพราะ mean และ covariance ที่คงที่ไม่ได้บังคับให้การแจกแจงทั้งหมดคงที่ สำหรับการสร้างโมเดลในวิชานี้ แทบไม่แยกความต่างระหว่างสองแบบ เมื่อใช้คำว่า “stationary process” ให้เข้าใจว่าหมายถึง weakly stationary</p>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 6</span><span>นิยาม</span></div>
-<div class="qtext">การตรวจ weak stationarity ต้องตรวจสองข้อใด</div>
-<div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. ข้อนี้คือ strict stationarity">joint distribution ไม่เปลี่ยนเมื่อเลื่อนเวลา</button>
-<button class="opt" data-correct="false" data-note="ผิด. การแจกแจงปกติไม่ใช่เงื่อนไขของ stationarity">\(X_t\) มีการแจกแจงปกติ และ mean เป็น 0</button>
-<button class="opt" data-correct="true" data-note="ถูก. μ_t free of t และ γ depends only on h">\(\mu_t\) ไม่ขึ้นกับ t และ \(\gamma_{t,t+h}\) ขึ้นกับ h เท่านั้น</button>
-<button class="opt" data-correct="false" data-note="ผิด. stationary ไม่ได้ต้องการให้ covariance เป็น 0">\(\mu_t\) ไม่ขึ้นกับ t และ \(\gamma_{t,t+h}\) เป็น 0 ทุก h</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="quiz">
-<div class="qhead"><span>ข้อ 7</span><span>Strong กับ weak</span></div>
-<div class="qtext">ข้อใดถูกเกี่ยวกับ strong และ weak stationarity</div>
-<div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. strongly stationary → weakly stationary แต่กลับกันไม่จำเป็น">strong ให้ weak แต่ weak ไม่จำเป็นต้องให้ strong</button>
-<button class="opt" data-correct="false" data-note="ผิด. ทิศกลับกัน">weak ให้ strong แต่ strong ไม่จำเป็นต้องให้ weak</button>
-<button class="opt" data-correct="false" data-note="ผิด. weak ไม่ได้ให้ strong โดยทั่วไป">ทั้งสองแบบให้กันและกันเสมอ จึงเป็นสิ่งเดียวกัน</button>
-<button class="opt" data-correct="false" data-note="ผิด. strong ให้ weak เสมอ">ทั้งสองแบบไม่เกี่ยวข้องกัน ต้องตรวจแยกกันเสมอ</button>
-</div>
-<div class="feedback"></div>
-</div>
-
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 4 ถึง 6</div>
-<ul>
-<li>นิยามแบบกว้างสามข้อ: ไม่มี trend, variance ไม่เปลี่ยน, ไม่มี periodic variation</li>
-<li>เหตุผลสามข้อที่ stationarity สำคัญ</li>
-<li>นิยามของ strictly stationary และผลเมื่อ n = 1 และ n = 2</li>
-<li>สัญกรณ์ \(\gamma_h\), \(\rho_h\), \(\gamma_0\) และ \(\rho_h=\gamma_h/\gamma_0\)</li>
-<li>นิยามและวิธีตรวจ weakly stationary สองข้อ</li>
-<li>strong ให้ weak และในวิชานี้ stationary หมายถึง weakly stationary</li>
-</ul>
-</div>
+<p>Strong ให้ weak เสมอ ตามที่หัวข้อ 5 แสดง แต่ weak ไม่จำเป็นต้องให้ strong เพราะค่าเฉลี่ยกับ covariance ที่คงที่ไม่ได้บังคับให้การแจกแจงทั้งหมดคงที่ ตัวอย่างใน Exercise 1 ข้อ 1 (หัวข้อ 8) เป็นอนุกรมที่ผ่านแบบอ่อนแต่ไม่ผ่านแบบเข้ม อาจารย์สรุปว่า "เพื่อความง่ายของวิชา ถ้า weakly stationary ก็ถือว่ามัน stationary" (Class 2, 1:57:56–1:58:11) คำว่า stationary ในบทต่อ ๆ ไปจึงหมายถึงแบบอ่อน</p>
 
 <!-- ===================================================== -->
-<h2 id="s7">7. Check stationarity: ตัวอย่างสามข้อ</h2>
+<h2 id="s7">7. ตัวอย่างตรวจ stationarity สามข้อ</h2>
+
+<p>ก่อนทำตัวอย่าง อาจารย์อธิบายว่าทำไมต้องฝึกกับโมเดลที่รู้สมการ: "ชีวิตจริงเราจะไม่รู้ว่ามันเป็นแบบนี้ อันนี้เป็น concept กับ theory เรามี pattern อยู่ แล้วศึกษาว่ามันเป็นยังไง แล้วถ้าเดตาจริงคล้าย ๆ ก็จะใช้อนุกรมเวลาแบบนั้น" (Class 2, 1:58:27–1:59:04) เหมือนการเรียนลักษณะของโรคจากตำราก่อน แล้วจึงไปวินิจฉัยคนไข้จริง</p>
 
 <figure>
 <img src="../assets/slides/ts2-p33.png" alt="Slide 2 หน้า 33: Check stationarity" loading="lazy">
 <figcaption>Slide 2 หน้า 33 — Check stationarity</figcaption>
 </figure>
 
-<p>สไลด์ให้โมเดลสามตัวโดยไม่แสดงวิธีทำ ทั้งสามใช้ขั้นตอนในหัวข้อ 6 ตัวอย่างที่ 1 และ 3 มีผลจาก Lesson 1 อยู่แล้ว</p>
+<p>สไลด์ให้สามโมเดลโดยไม่แสดงวิธีทำ ได้แก่ white noise, ค่าเฉลี่ยถ่วงน้ำหนักสามจุด \(x_t=w_{t-1}+2w_t+w_{t+1}\) และ random walk \(x_t=\sum_{i=1}^{t}w_i\) ทั้งสามใช้ขั้นตอนในหัวข้อ 6 ผลที่ได้ต่างกันชัด: สองตัวแรกนิ่ง ตัวสุดท้ายไม่นิ่ง ทั้งที่ค่าเฉลี่ยของทั้งสามเป็น 0 เหมือนกัน การ์ดต่อไปนี้ทำทีละข้อตามที่อาจารย์ทำในห้อง</p>
 
-<div class="calc">
-<div class="calc-title">Example 1: White noise \(w_t\sim N(0,\sigma^2)\)</div>
+<div class="calc" id="s7-wn">
+<div class="calc-title">ตัวอย่างที่ 1: white noise \(w_t\sim iid\ N(0,\sigma^2)\) (Class 2, 1:59:45–2:02:30)</div>
 <ol class="steps">
 <li><div class="st-title">Mean</div><p>\(E(w_t)=0\) ไม่ขึ้นกับ t</p></li>
-<li><div class="st-title">Autocovariance</div><p>\(\gamma(h)=\sigma^2\) เมื่อ \(h=0\) และ \(\gamma(h)=0\) เมื่อ \(h\ne0\) ขึ้นกับ h เท่านั้น</p></li>
+<li><div class="st-title">Autocovariance</div><p>\(\gamma(0)=\sigma^2\) และ \(\gamma(h)=0\) เมื่อ h ≠ 0 ขึ้นกับ h เท่านั้น</p></li>
 </ol>
 <div class="answer">Stationary</div>
 </div>
 
-<div class="calc" id="s7-ex2">
-<div class="calc-title">Example 2: Moving average \(x_t=w_{t-1}+2w_t+w_{t+1}\) โดย \(w_t\sim iid(0,\sigma^2)\)</div>
+<div class="calc" id="s7-ma">
+<div class="calc-title">ตัวอย่างที่ 2: \(x_t=w_{t-1}+2w_t+w_{t+1}\) (Shumway problem 1.7, Exercise 1 ข้อ 3)</div>
 <ol class="steps">
-<li><div class="st-title">Mean</div><p>\(E(x_t)=0+2(0)+0=0\) ไม่ขึ้นกับ t</p></li>
-<li><div class="st-title">วางสัมประสิทธิ์ให้ w ตรงกัน</div>
+<li><div class="st-title">Mean</div><p>\(E(x_t)=0+2(0)+0=0\)</p></li>
+<li><div class="st-title">\(\gamma(0)\)</div><p>\(\mathrm{cov}(w_{t-1}+2w_t+w_{t+1},\ w_{t-1}+2w_t+w_{t+1})=\sigma^2+4\sigma^2+\sigma^2=6\sigma^2\) อาจารย์อธิบายว่า "ดึง 2 กับ 2 มาข้างหน้า กลายเป็น 4σ²"</p></li>
+<li><div class="st-title">\(\gamma(1)\)</div><p>\(x_{t+1}=w_t+2w_{t+1}+w_{t+2}\) ตัวที่ตรงกันคือ \(w_t\) (สัมประสิทธิ์ 2 กับ 1) และ \(w_{t+1}\) (1 กับ 2): \(\gamma(1)=2\sigma^2+2\sigma^2=4\sigma^2\)</p></li>
+<li><div class="st-title">\(\gamma(2)\) — จุดที่นักศึกษาเดาผิด</div><p>\(x_{t+2}=w_{t+1}+2w_{t+2}+w_{t+3}\) ตัวที่ตรงกันมีแค่ \(w_{t+1}\) (1 กับ 1): \(\gamma(2)=\sigma^2\) ไม่ใช่ \(2\sigma^2\) ที่ได้จากการเดาว่า 6, 4, 2 ลดทีละ 2</p></li>
+<li><div class="st-title">\(\gamma(h)\) เมื่อ \(|h|\ge3\)</div><p>ไม่มีตัวที่ตรงกัน: \(\gamma(h)=0\)</p></li>
+<li><div class="st-title">ACF</div><p>\(\rho(0)=1\), \(\rho(1)=4/6=2/3\), \(\rho(2)=1/6\), \(\rho(h)=0\) เมื่อ \(|h|\ge3\)</p></li>
+</ol>
+<div class="answer">Mean คงที่ และ γ ขึ้นกับ h เท่านั้น จึง stationary (Class 2, 2:02:30–2:16:59)</div>
+</div>
+
+<div class="box exam">
+<div class="label">อาจารย์พูดในคลิป: "มึงโดนหลอกนะ"</div>
+<p>เมื่อนักศึกษาตอบ \(\gamma(2)=2\sigma^2\) เพราะเห็น 6 แล้ว 4 จึงเดาว่าต่อไปเป็น 2 อาจารย์บอกว่า "มึงโดนหลอกนะ มันคือ σ² นะครับ ลองไปคูณกระจายดู" (Class 2, 2:12:31–2:12:49) และพูดถึงการคิดอย่างมีวิจารณญาณว่า "อย่าเชื่อเพราะฟังดูมีเหตุมีผล" (Class 2, 2:21:24) วิธีกันพลาดคือเขียนสองก้อนเรียงกันเป็นตาราง</p>
 <table class="compact">
-<tr><th></th><th>\(w_{t-1}\)</th><th>\(w_t\)</th><th>\(w_{t+1}\)</th><th>\(w_{t+2}\)</th><th>\(w_{t+3}\)</th><th>ผลรวมของผลคูณ</th></tr>
+<tr><th></th><th>\(w_{t-1}\)</th><th>\(w_t\)</th><th>\(w_{t+1}\)</th><th>\(w_{t+2}\)</th><th>\(w_{t+3}\)</th><th>ผลคูณที่ตรงกัน</th></tr>
 <tr><th>\(x_t\)</th><td>1</td><td>2</td><td>1</td><td></td><td></td><td>\(1+4+1=6\)</td></tr>
 <tr><th>\(x_{t+1}\)</th><td></td><td>1</td><td>2</td><td>1</td><td></td><td>\(2\cdot1+1\cdot2=4\)</td></tr>
 <tr><th>\(x_{t+2}\)</th><td></td><td></td><td>1</td><td>2</td><td>1</td><td>\(1\cdot1=1\)</td></tr>
 </table>
-<p>คอลัมน์สุดท้ายได้จากการคูณสัมประสิทธิ์ของแถวนั้นกับแถว \(x_t\) ในคอลัมน์ที่มีค่าทั้งคู่</p></li>
-<li><div class="st-title">Autocovariance</div>
-\[\gamma(0)=6\sigma^2,\qquad \gamma(\pm1)=4\sigma^2,\qquad \gamma(\pm2)=\sigma^2,\qquad \gamma(h)=0\ \text{เมื่อ }|h|\ge3\]</li>
-<li><div class="st-title">ACF</div><p>\(\rho(1)=4/6=2/3\) และ \(\rho(2)=1/6\)</p></li>
-</ol>
-<div class="answer">Mean คงที่ และ \(\gamma\) ขึ้นกับ h เท่านั้น จึง stationary</div>
 </div>
 
-<div class="calc">
-<div class="calc-title">Example 3: Random walk \(x_t=w_1+w_2+\dots+w_t=\sum_{i=1}^{t}w_i\)</div>
+<div class="calc" id="s7-rw">
+<div class="calc-title">ตัวอย่างที่ 3: random walk \(x_t=w_1+w_2+\dots+w_t\) (การบ้าน Class 2, 2:17:23–2:18:19)</div>
 <ol class="steps">
 <li><div class="st-title">Mean</div><p>\(E(x_t)=0\) ไม่ขึ้นกับ t ผ่านข้อแรก</p></li>
-<li><div class="st-title">Variance</div><p>w ทั้ง t ตัวเป็นอิสระต่อกัน: \(\mathrm{Var}(x_t)=t\sigma^2\)</p></li>
-<li><div class="st-title">Autocovariance</div><p>\(x_t\) และ \(x_{t+h}\) มี w ที่ตรงกัน t ตัว: \(\gamma(t,t+h)=t\sigma^2\) มี t อยู่ในผล</p></li>
+<li><div class="st-title">Variance</div><p>w ทั้ง t ตัวอิสระต่อกัน: \(\mathrm{Var}(x_t)=t\sigma^2\)</p></li>
+<li><div class="st-title">Autocovariance</div><p>\(x_t\) และ \(x_{t+h}\) มี w ร่วมกัน t ตัว: \(\gamma(t,t+h)=t\sigma^2\) มี t อยู่ในผล</p></li>
 </ol>
-<div class="answer">\(\gamma\) ขึ้นกับ t จึงไม่ stationary ทั้งที่ mean คงที่</div>
-<p>ตัวอย่างนี้แสดงว่าต้องตรวจครบสองข้อ กราฟของ random walk ไม่มี trend ที่แน่นอน แต่ยิ่งเวลาผ่านไป ค่ายิ่งเดินออกห่างจากจุดเริ่มได้ไกลขึ้น</p>
+<div class="answer">ไม่ stationary ทั้งที่ mean คงที่ อาจารย์เฉลยว่า "E(x_t) = 0 แต่ variance = tσ² depend on t จึงไม่นิ่ง"</div>
 </div>
 
+<p>ตัวอย่างที่ 3 แสดงว่าต้องตรวจครบสองข้อ ค่าเฉลี่ยคงที่อย่างเดียวไม่พอ กราฟของ random walk ไม่มี trend ที่แน่นอน แต่ยิ่งเวลาผ่านไป ค่ายิ่งเดินออกห่างจากจุดเริ่มได้ไกลขึ้น เหมือนคนเมาที่ไม่ได้ตั้งใจเดินไปทางไหน แต่ยิ่งเดินนาน ยิ่งมีโอกาสอยู่ห่างจากเสาไฟต้นแรก</p>
+
 <!-- ===================================================== -->
-<h2 id="s8">8. Exercise: สามโมเดล</h2>
+<h2 id="s8">8. Exercise บนสไลด์ และโจทย์จาก Exercise 1</h2>
 
 <figure>
 <img src="../assets/slides/ts2-p34.png" alt="Slide 2 หน้า 34: Exercise" loading="lazy">
 <figcaption>Slide 2 หน้า 34 — Exercise</figcaption>
 </figure>
 
-<p>โจทย์คือ <mark class="src" data-p="34">Check stationarity of the following models:</mark> โดย \(w_t\sim N(0,\sigma^2)\) สามโมเดลคือ \(x_t=w_t-w_{t-3}\), \(x_t=w_tw_{t-2}\) และ \(x_t=w_t-\theta(w_{t-1})^2\) สองข้อหลังมีการคูณและยกกำลังของ w จึงต้องใช้ moment อันดับสูงของการแจกแจงปกติ</p>
-
-<div class="box prereq">
-<div class="label">ต้องรู้ก่อน — moment ของ \(w\sim N(0,\sigma^2)\) และกฎของตัวแปรอิสระ</div>
-<table class="compact">
-<tr><th>ปริมาณ</th><th>ค่า</th><th>เหตุผล</th></tr>
-<tr><td>\(E(w)\)</td><td>0</td><td>ค่าเฉลี่ย</td></tr>
-<tr><td>\(E(w^2)\)</td><td>\(\sigma^2\)</td><td>เท่ากับความแปรปรวนเมื่อค่าเฉลี่ยเป็น 0</td></tr>
-<tr><td>\(E(w^3)\)</td><td>0</td><td>การแจกแจงสมมาตร ค่าบวกและลบหักล้างกัน moment อันดับคี่ทุกตัวเป็น 0</td></tr>
-<tr><td>\(E(w^4)\)</td><td>\(3\sigma^4\)</td><td>สมบัติของการแจกแจงปกติ</td></tr>
-<tr><td>\(\mathrm{Var}(w^2)\)</td><td>\(2\sigma^4\)</td><td>\(E(w^4)-[E(w^2)]^2=3\sigma^4-\sigma^4\)</td></tr>
-</table>
-<p>ถ้า X และ Y เป็นอิสระต่อกัน: \(E(XY)=E(X)E(Y)\)</p>
-</div>
+<p>สไลด์ให้ตรวจสามโมเดล โดย \(w_t\sim N(0,\sigma^2)\) คือ \(x_t=w_t-w_{t-3}\), \(x_t=w_tw_{t-2}\) และ \(x_t=w_t-\theta(w_{t-1})^2\) ข้อแรกเป็นข้อสอบเก่า ข้อสามอาจารย์บอกว่าเป็นข้อที่ยากที่สุด และทำเฉลยในห้อง ข้อสองอาจารย์ให้เป็นการบ้าน</p>
 
 <div class="calc" id="s8-a">
-<div class="calc-title">(a) \(x_t=w_t-w_{t-3}\)</div>
+<div class="calc-title">(a) \(x_t=w_t-w_{t-3}\) — ข้อสอบเก่า (Class 2, 2:22:06–2:26:46)</div>
 <ol class="steps">
-<li><div class="st-title">Mean</div><p>\(E(x_t)=0-0=0\) ไม่ขึ้นกับ t</p></li>
-<li><div class="st-title">Variance</div><p>\(\gamma(0)=\sigma^2+(-1)^2\sigma^2=2\sigma^2\)</p></li>
-<li><div class="st-title">Lag 3</div><p>\(x_{t+3}=w_{t+3}-w_t\) และ \(x_t=w_t-w_{t-3}\) ตัวที่ตรงกันคือ \(w_t\) มีสัมประสิทธิ์ −1 ในก้อนแรกและ +1 ในก้อนหลัง: \(\gamma(3)=(-1)(1)\sigma^2=-\sigma^2\)</p></li>
-<li><div class="st-title">Lag อื่น</div><p>ที่ \(h=1,2\) และ \(h\ge4\) ไม่มี w ที่ตรงกัน: \(\gamma(h)=0\)</p></li>
+<li><div class="st-title">Mean</div><p>\(E(x_t)=0-0=0\)</p></li>
+<li><div class="st-title">\(\gamma(0)\)</div><p>\(\sigma^2+(-1)^2\sigma^2=2\sigma^2\)</p></li>
+<li><div class="st-title">\(\gamma(1),\gamma(2)\)</div><p>\(x_{t+1}=w_{t+1}-w_{t-2}\) และ \(x_{t+2}=w_{t+2}-w_{t-1}\) ไม่มีตัวที่ตรงกับ \(w_t,w_{t-3}\) จึงเป็น 0 ทั้งคู่</p></li>
+<li><div class="st-title">\(\gamma(3)\) — กับดัก</div><p>\(x_{t+3}=w_{t+3}-w_t\) ตัวที่ตรงกันคือ \(w_t\) ซึ่งมีสัมประสิทธิ์ +1 ใน \(x_t\) และ −1 ใน \(x_{t+3}\): \(\gamma(3)=\mathrm{cov}(w_t,-w_t)=-\sigma^2\)</p></li>
+<li><div class="st-title">\(\gamma(h)\) เมื่อ h ≥ 4</div><p>ไม่มีตัวที่ตรงกัน: 0</p></li>
 </ol>
-<div class="answer">\(\gamma(0)=2\sigma^2\), \(\gamma(\pm3)=-\sigma^2\) และค่าอื่นเป็น 0 ขึ้นกับ h เท่านั้น จึง stationary และ \(\rho(3)=-1/2\)</div>
+<div class="answer">\(\gamma(0)=2\sigma^2\), \(\gamma(\pm3)=-\sigma^2\), อื่น ๆ เป็น 0 → stationary และ \(\rho(3)=-1/2\)</div>
 </div>
 
-<div class="calc" id="s8-b">
-<div class="calc-title">(b) \(x_t=w_tw_{t-2}\)</div>
-<ol class="steps">
-<li><div class="st-title">Mean</div><p>\(w_t\) และ \(w_{t-2}\) เป็นอิสระต่อกัน: \(E(x_t)=E(w_t)E(w_{t-2})=0\cdot0=0\)</p></li>
-<li><div class="st-title">Variance</div><p>ค่าเฉลี่ยเป็น 0 จึงได้ \(\gamma(0)=E(x_t^2)=E(w_t^2)E(w_{t-2}^2)=\sigma^2\cdot\sigma^2=\sigma^4\)</p></li>
-<li><div class="st-title">Lag h ที่ไม่ใช่ 0</div><p>\(\gamma(h)=E(w_tw_{t-2}w_{t+h}w_{t+h-2})\) ถ้ามี w ตัวใดปรากฏเพียงครั้งเดียวในผลคูณ ค่าคาดหมายของตัวนั้นซึ่งเป็น 0 จะแยกออกมาคูณ ทำให้ทั้งหมดเป็น 0 ตัวอย่าง \(h=2\): ผลคูณคือ \(w_tw_{t-2}w_{t+2}w_t=w_t^2w_{t-2}w_{t+2}\) ตัว \(w_{t-2}\) และ \(w_{t+2}\) ปรากฏครั้งเดียว จึงได้ 0 ทุกค่า \(h\ne0\) เป็นเช่นนี้</p></li>
-</ol>
-<div class="answer">\(\mu=0\), \(\gamma(0)=\sigma^4\) และ \(\gamma(h)=0\) เมื่อ \(h\ne0\) จึง stationary</div>
-<p>ผลนี้มีรูปเดียวกับ white noise ทั้งที่โมเดลสร้างจากผลคูณ ค่าต่างเวลา uncorrelated กัน แต่ไม่เป็นอิสระต่อกัน เพราะ \(x_t\) และ \(x_{t+2}\) ใช้ \(w_t\) ร่วมกัน เป็นอีกตัวอย่างของ covariance เป็น 0 โดยไม่เป็นอิสระ</p>
+<div class="box exam">
+<div class="label">อาจารย์พูดในคลิป: ข้อสอบเก่าที่ 30% ทำผิด</div>
+<p>"ข้อนี้จะพิสูจน์เลยว่าเด็กมีความพยายามไหม พอคนเห็น lag 1, lag 2 เป็น 0 เขาก็จะไม่ทำ lag 3 เพราะคิดว่ามันเป็น 0 ... lag 3 ไม่เป็น 0 นะครับ" สมัยก่อน "70% ทำถูก 30% อนุมานว่า lag 3, lag 4 คงเป็น 0 ด้วย" (Class 2, 2:24:51–2:26:46) ในคลิปอาจารย์ลังเลเรื่องเครื่องหมาย "น่าจะลบ σ² ต้องเช็ค" ตรวจแล้วคือ \(-\sigma^2\) ตามการ์ดข้างบน กฎจำ: ไล่ h ไปจนถึงระยะห่างที่ไกลที่สุดในสมการ ที่นี่คือ 3 เพราะมี \(w_t\) กับ \(w_{t-3}\)</p>
+</div>
+
+<div class="box prereq">
+<div class="label">ต้องรู้ก่อนทำข้อ (b) และ (c): moment ของการแจกแจงปกติ</div>
+<p>อาจารย์บอกว่า "ถ้าคุณไม่รู้ว่า moment คืออะไรก็จบตอนต้น" (Class 2, 2:18:55) moment ลำดับที่ k คือ \(E(W^k)\) สำหรับ \(W\sim N(\mu,\sigma^2)\) อาจารย์เขียนสูตรไว้ (Class 2, 2:28:00–2:32:24)</p>
+<table class="compact">
+<tr><th>Moment</th><th>รูปทั่วไป</th><th>เมื่อ μ = 0</th></tr>
+<tr><td>\(E(W)\)</td><td>\(\mu\)</td><td>0</td></tr>
+<tr><td>\(E(W^2)\)</td><td>\(\mu^2+\sigma^2\)</td><td>\(\sigma^2\)</td></tr>
+<tr><td>\(E(W^3)\)</td><td>\(\mu^3+3\mu\sigma^2\)</td><td>0</td></tr>
+<tr><td>\(E(W^4)\)</td><td>\(\mu^4+6\mu^2\sigma^2+3\sigma^4\)</td><td>\(3\sigma^4\)</td></tr>
+</table>
+<p>ผลที่ใช้บ่อย: \(\mathrm{Var}(W^2)=E(W^4)-[E(W^2)]^2=3\sigma^4-\sigma^4=2\sigma^4\) และถ้า X กับ Y อิสระต่อกัน \(E(XY)=E(X)E(Y)\) moment ลำดับคี่เป็น 0 เพราะการแจกแจงปกติสมมาตรรอบ 0 ค่าบวกกับค่าลบหักล้างกัน</p>
 </div>
 
 <div class="calc" id="s8-c">
-<div class="calc-title">(c) \(x_t=w_t-\theta(w_{t-1})^2\)</div>
+<div class="calc-title">(c) \(x_t=w_t-\theta w_{t-1}^2\) — ข้อที่อาจารย์บอกว่ายากที่สุด (Class 2, 2:26:55–2:40:20)</div>
 <ol class="steps">
-<li><div class="st-title">Mean</div><p>\(E(x_t)=E(w_t)-\theta E(w_{t-1}^2)=0-\theta\sigma^2=-\theta\sigma^2\) ไม่เป็น 0 แต่เป็นค่าคงที่ จึงผ่านข้อแรก</p></li>
-<li><div class="st-title">Variance</div><p>\(w_t\) และ \(w_{t-1}^2\) เป็นอิสระต่อกัน: \(\gamma(0)=\mathrm{Var}(w_t)+\theta^2\mathrm{Var}(w_{t-1}^2)=\sigma^2+2\theta^2\sigma^4\)</p></li>
-<li><div class="st-title">Lag 1</div><p>\(x_{t+1}=w_{t+1}-\theta w_t^2\) และ \(x_t=w_t-\theta w_{t-1}^2\) คู่ที่มีตัวร่วมคือ \(-\theta w_t^2\) กับ \(w_t\): \(\gamma(1)=-\theta\,\mathrm{cov}(w_t^2,w_t)=-\theta\,[E(w_t^3)-E(w_t^2)E(w_t)]=-\theta\,[0-\sigma^2\cdot0]=0\)</p></li>
-<li><div class="st-title">Lag 2 ขึ้นไป</div><p>ไม่มี w ร่วมกัน: \(\gamma(h)=0\)</p></li>
+<li><div class="st-title">Mean — กับดัก</div><p>\(E(x_t)=E(w_t)-\theta E(w_{t-1}^2)=0-\theta\sigma^2=-\theta\sigma^2\) ไม่ใช่ 0 "ถ้ามึงตอบว่า mean เป็น 0 จบไปก่อนเลย" (2:33:06) แต่เป็นค่าคงที่ ไม่มี t จึงผ่านข้อแรก</p></li>
+<li><div class="st-title">\(\gamma(0)\)</div><p>\(w_t\) กับ \(w_{t-1}^2\) อยู่คนละเวลาจึงอิสระต่อกัน: \(\mathrm{Var}(x_t)=\mathrm{Var}(w_t)+\theta^2\mathrm{Var}(w_{t-1}^2)=\sigma^2+\theta^2(3\sigma^4-\sigma^4)=\sigma^2+2\theta^2\sigma^4\)</p></li>
+<li><div class="st-title">\(\gamma(1)\)</div><p>\(x_{t+1}=w_{t+1}-\theta w_t^2\) คู่ที่มีตัวร่วมคือ \(w_t\) ใน \(x_t\) กับ \(-\theta w_t^2\) ใน \(x_{t+1}\): \(\gamma(1)=-\theta\,\mathrm{cov}(w_t,w_t^2)=-\theta[E(w_t^3)-E(w_t)E(w_t^2)]=-\theta[0-0]=0\)</p></li>
+<li><div class="st-title">\(\gamma(h)\) เมื่อ h ≥ 2</div><p>ไม่มีตัวร่วม: 0 อาจารย์บอกว่า "ต่อให้มันเป็นฟังก์ชันไม่เหมือนกัน แต่คนละจุดเวลาก็ถือว่า covariance เป็นศูนย์"</p></li>
 </ol>
-<div class="answer">\(\mu=-\theta\sigma^2\), \(\gamma(0)=\sigma^2+2\theta^2\sigma^4\) และ \(\gamma(h)=0\) เมื่อ \(h\ne0\) จึง stationary</div>
-<p>ข้อนี้มีสองจุดที่ต้องระวัง ข้อแรก mean ไม่จำเป็นต้องเป็น 0 เพียงต้องไม่ขึ้นกับ t ข้อที่สอง ขั้น lag 1 ใช้ \(E(w^3)=0\) ซึ่งเป็นจริงเพราะโจทย์กำหนดให้ w มีการแจกแจงปกติ</p>
+<div class="answer">\(\mu=-\theta\sigma^2\), \(\gamma(0)=\sigma^2+2\theta^2\sigma^4\), \(\gamma(h)=0\) เมื่อ h ≠ 0 → stationary</div>
+</div>
+
+<p>สองจุดที่ทำให้ข้อ (c) ยาก จุดแรก mean ไม่จำเป็นต้องเป็น 0 แค่ต้องไม่ขึ้นกับ t จุดที่สอง ขั้น \(\gamma(1)\) ต้องใช้ \(E(w^3)=0\) ซึ่งจริงเพราะโจทย์บอกว่า w แจกแจงปกติ ถ้าเปลี่ยนเป็นการแจกแจงที่ไม่สมมาตร ขั้นนี้จะไม่เป็น 0 อาจารย์บอกว่าควิซครั้งแรกอาจออกแนวนี้ "ให้คล้ายการบ้าน คงไม่ได้ยากไปกว่านั้น" (Class 2, 2:21:14, 2:44:04)</p>
+
+<div class="calc" id="s8-b">
+<div class="calc-title">(b) \(x_t=w_tw_{t-2}\) — การบ้าน (อาจารย์ไม่ได้ทำในห้อง เฉลยนี้คำนวณตามวิธีเดียวกัน)</div>
+<ol class="steps">
+<li><div class="st-title">Mean</div><p>\(w_t\) กับ \(w_{t-2}\) อิสระต่อกัน: \(E(x_t)=E(w_t)E(w_{t-2})=0\)</p></li>
+<li><div class="st-title">\(\gamma(0)\)</div><p>\(E(x_t^2)=E(w_t^2)E(w_{t-2}^2)=\sigma^2\cdot\sigma^2=\sigma^4\)</p></li>
+<li><div class="st-title">\(\gamma(h)\) เมื่อ h ≠ 0</div><p>\(\gamma(h)=E(w_tw_{t-2}w_{t+h}w_{t+h-2})\) ถ้ามี w ตัวใดปรากฏครั้งเดียวในผลคูณ ค่าคาดหมายของตัวนั้นซึ่งเป็น 0 จะแยกออกมาคูณ ทำให้ทั้งหมดเป็น 0 เช่น h = 2: \(w_t^2w_{t-2}w_{t+2}\) มี \(w_{t-2}\) และ \(w_{t+2}\) ปรากฏครั้งเดียว จึงได้ 0</p></li>
+</ol>
+<div class="answer">\(\mu=0\), \(\gamma(0)=\sigma^4\), \(\gamma(h)=0\) เมื่อ h ≠ 0 → stationary</div>
+</div>
+
+<p>ผลของข้อ (b) หน้าตาเหมือน white noise ทุกประการ ทั้งที่ \(x_t\) กับ \(x_{t+2}\) ใช้ \(w_t\) ร่วมกัน จึงไม่เป็นอิสระต่อกัน นี่คืออีกตัวอย่างของ covariance เป็น 0 แต่ไม่อิสระ ตรงกับคำเตือนบนสไลด์ Lesson 1 หน้า 28</p>
+
+<h3>โจทย์จาก Exercise 1 ที่อาจารย์แจก (ส่วนทฤษฎี)</h3>
+
+<p>Exercise 1 มีแปดข้อ ข้อ 3 คือตัวอย่างที่ 2 ในหัวข้อ 7 ข้อ 5–8 เรื่อง sample ACF, differencing และการใช้ R อยู่ใน Lesson 3 ข้อ 1, 2 และ 4 เป็นโจทย์ตรวจ stationarity ที่ใช้วิธีของบทนี้</p>
+
+<div class="calc" id="s8-ex1q2">
+<div class="calc-title">Exercise 1 ข้อ 2: \(X_t=w_t-1.2w_{t-1}-1.6w_{t-2}\), \(\sigma^2=0.25\)</div>
+<ol class="steps">
+<li><div class="st-title">Mean</div><p>\(E(X_t)=0\)</p></li>
+<li><div class="st-title">\(\gamma(0)\)</div><p>\((1^2+1.2^2+1.6^2)\sigma^2=(1+1.44+2.56)(0.25)=5(0.25)=1.25\)</p></li>
+<li><div class="st-title">\(\gamma(1)\)</div><p>\(X_{t+1}=w_{t+1}-1.2w_t-1.6w_{t-1}\) ตัวที่ตรงกัน: \(w_t\) (1 กับ −1.2) และ \(w_{t-1}\) (−1.2 กับ −1.6): \([(1)(-1.2)+(-1.2)(-1.6)](0.25)=(-1.2+1.92)(0.25)=0.18\)</p></li>
+<li><div class="st-title">\(\gamma(2)\)</div><p>\(X_{t+2}=w_{t+2}-1.2w_{t+1}-1.6w_t\) ตัวที่ตรงกัน: \(w_t\) (1 กับ −1.6): \(-1.6(0.25)=-0.4\)</p></li>
+<li><div class="st-title">\(\gamma(h)\) เมื่อ \(|h|\ge3\)</div><p>0</p></li>
+<li><div class="st-title">ACF</div><p>\(\rho(1)=0.18/1.25=0.144\), \(\rho(2)=-0.4/1.25=-0.32\) ตรวจด้วย R: <code>ARMAacf(ma = c(-1.2, -1.6), lag.max = 3)</code> ได้ 1, 0.144, −0.320, 0</p></li>
+</ol>
+<div class="answer">Mean คงที่และ γ ขึ้นกับ h เท่านั้น → stationary</div>
+</div>
+
+<div class="calc" id="s8-ex1q1">
+<div class="calc-title">Exercise 1 ข้อ 1: \(X_t=Z_t\) เมื่อ t คู่ และ \(X_t=(Z_{t-1}^2-1)/\sqrt2\) เมื่อ t คี่, \(Z_t\sim iid\ N(0,1)\)</div>
+<ol class="steps">
+<li><div class="st-title">Mean</div><p>t คู่: \(E(Z_t)=0\) &nbsp; t คี่: \((E(Z_{t-1}^2)-1)/\sqrt2=(1-1)/\sqrt2=0\) เท่ากันทุก t</p></li>
+<li><div class="st-title">Variance</div><p>t คู่: 1 &nbsp; t คี่: \(\mathrm{Var}(Z^2)/2=(3-1)/2=1\) เท่ากันทุก t</p></li>
+<li><div class="st-title">Covariance ของคู่ที่ติดกัน (t คี่ กับ t − 1 คู่)</div><p>ทั้งคู่ใช้ \(Z_{t-1}\): \(\mathrm{cov}(Z_{t-1},(Z_{t-1}^2-1)/\sqrt2)=E(Z^3)/\sqrt2=0\)</p></li>
+<li><div class="st-title">คู่อื่น</div><p>ใช้ Z คนละตัว จึงอิสระต่อกัน covariance = 0</p></li>
+</ol>
+<div class="answer">\(\mu=0\), \(\gamma(0)=1\), \(\gamma(h)=0\) เมื่อ h ≠ 0 → weakly stationary (เป็น white noise ที่ uncorrelated) แต่ไม่ strictly stationary เพราะ t คู่แจกแจงปกติ ส่วน t คี่แจกแจงแบบไคกำลังสองที่เลื่อนและย่อ การแจกแจงจึงต่างกันตามเวลา</div>
+</div>
+
+<p>ข้อ 1 เป็นตัวอย่างที่ตอบหน้าสไลด์หน้า 32 ได้ตรงที่สุด: weak ไม่จำเป็นต้องให้ strong ค่าเฉลี่ยและ covariance เหมือนกันทุกเวลา แต่หน้าตาการแจกแจงสลับไปมาระหว่างเวลาคู่กับคี่ ตรวจด้วยการจำลอง 1,000 จุดใน R ได้ค่าเฉลี่ย 0.018 ความแปรปรวน 0.968 และ ACF ที่ lag 1 เท่ากับ 0.062 ซึ่งอยู่ในเส้นขอบ 0.063</p>
+
+<div class="calc" id="s8-ex1q4">
+<div class="calc-title">Exercise 1 ข้อ 4: \(X_t=w_0\cos(ct)\), \(w_0\sim N(0,\sigma^2)\)</div>
+<ol class="steps">
+<li><div class="st-title">Mean</div><p>\(E(X_t)=\cos(ct)E(w_0)=0\) ทุก t</p></li>
+<li><div class="st-title">Autocovariance</div><p>\(\cos(ct)\) เป็นค่าคงที่ (ไม่สุ่ม) ส่วนที่สุ่มคือ \(w_0\) ตัวเดียว: \(\gamma(t,t+h)=\cos(ct)\cos(c(t+h))\,\mathrm{Var}(w_0)=\sigma^2\cos(ct)\cos(c(t+h))\)</p></li>
+<li><div class="st-title">ดูว่ามี t ไหม</div><p>ใช้ \(\cos A\cos B=\tfrac12[\cos(A-B)+\cos(A+B)]\): \(\gamma(t,t+h)=\tfrac{\sigma^2}2[\cos(ch)+\cos(c(2t+h))]\) พจน์หลังมี t เช่น \(\mathrm{Var}(X_t)=\sigma^2\cos^2(ct)\) เปลี่ยนตาม t</p></li>
+</ol>
+<div class="answer">Mean คงที่ แต่ autocovariance ขึ้นกับ t → ไม่ stationary (ยกเว้นกรณีพิเศษที่ c เป็นพหุคูณของ π ซึ่ง cos(ct) เป็น ±1 ทุก t)</div>
 </div>
 
 <table>
 <tr><th>โมเดล</th><th>Mean</th><th>\(\gamma(0)\)</th><th>\(\gamma(h)\) ที่ไม่เป็น 0</th><th>Stationary</th></tr>
 <tr><td>White noise</td><td>0</td><td>\(\sigma^2\)</td><td>ไม่มี</td><td>ใช่</td></tr>
 <tr><td>\(w_{t-1}+2w_t+w_{t+1}\)</td><td>0</td><td>\(6\sigma^2\)</td><td>\(\gamma(1)=4\sigma^2\), \(\gamma(2)=\sigma^2\)</td><td>ใช่</td></tr>
-<tr><td>Random walk</td><td>0</td><td>\(t\sigma^2\)</td><td>\(\gamma(t,t+h)=t\sigma^2\)</td><td>ไม่</td></tr>
+<tr><td>Random walk</td><td>0</td><td>\(t\sigma^2\)</td><td>\(t\sigma^2\)</td><td>ไม่</td></tr>
 <tr><td>\(w_t-w_{t-3}\)</td><td>0</td><td>\(2\sigma^2\)</td><td>\(\gamma(3)=-\sigma^2\)</td><td>ใช่</td></tr>
 <tr><td>\(w_tw_{t-2}\)</td><td>0</td><td>\(\sigma^4\)</td><td>ไม่มี</td><td>ใช่</td></tr>
 <tr><td>\(w_t-\theta w_{t-1}^2\)</td><td>\(-\theta\sigma^2\)</td><td>\(\sigma^2+2\theta^2\sigma^4\)</td><td>ไม่มี</td><td>ใช่</td></tr>
+<tr><td>\(w_t-1.2w_{t-1}-1.6w_{t-2}\)</td><td>0</td><td>1.25</td><td>\(\gamma(1)=0.18\), \(\gamma(2)=-0.4\)</td><td>ใช่</td></tr>
+<tr><td>\(w_0\cos(ct)\)</td><td>0</td><td>\(\sigma^2\cos^2(ct)\)</td><td>ขึ้นกับ t</td><td>ไม่</td></tr>
 </table>
 
-<div class="box exam">
-<div class="label">จุดสอบ — หัวข้อ 7 และ 8</div>
-<ul>
-<li>ตรวจ stationarity ของโมเดลใหม่ได้ด้วยสามขั้น: mean, autocovariance, ดูว่ามี t หรือไม่</li>
-<li>Random walk มี mean คงที่แต่ไม่ stationary เพราะ variance เป็น \(t\sigma^2\)</li>
-<li>Mean ที่คงที่ไม่จำเป็นต้องเป็น 0</li>
-<li>ใช้ \(E(w^3)=0\), \(E(w^4)=3\sigma^4\) และ \(E(XY)=E(X)E(Y)\) เมื่อโมเดลมีผลคูณหรือกำลังของ w</li>
-</ul>
-</div>
+<p>อาจารย์ปิดคาบว่า "ทฤษฎีมีอยู่ประมาณ 3 พาร์ท ต่อไปจะเป็น data analysis" (Class 2, 2:40:32) Lesson 3 จึงเปลี่ยนจากโมเดลที่รู้สมการ ไปเป็นการประมาณค่าเหล่านี้จากข้อมูลจริง</p>
 
 <!-- ===================================================== -->
-<h2 id="s9">9. แบบฝึกท้ายบท</h2>
+<h2 id="s9">9. แบบฝึกห้าแบบ</h2>
+
+<p>กลุ่ม A คำนวณ กลุ่ม B ทฤษฎีและพิสูจน์ กลุ่ม C อธิบายความเข้าใจ กลุ่ม D อ่านผลจาก R กลุ่ม E รันโค้ดแล้วเทียบผล ไฟล์ข้อมูล <code>temp.txt</code> และ <code>accuracy.txt</code> อยู่ในโฟลเดอร์ CLASS 2 บน myCourseVille</p>
+
+<h3>กลุ่ม A: คำนวณ</h3>
 
 <div class="quiz">
-<div class="qhead"><span>ข้อ 8</span><span>Stationarity</span></div>
-<div class="qtext">โมเดล \(x_t=w_t-w_{t-3}\) โดย \(w_t\sim N(0,\sigma^2)\) มี \(\gamma(3)\) เท่าใด</div>
+<div class="qhead"><span>ข้อ 1</span><span>Forecast errors</span></div>
+<div class="qtext">ค่าจริงคือ 50, 40, 60 และค่าพยากรณ์คือ 45, 44, 54 ค่า MAE และ RMSE คือเท่าใด</div>
 <div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. สัมประสิทธิ์ของ w_t ในสองก้อนคือ −1 และ +1 ผลคูณเป็นลบ">\(\gamma(3)=\sigma^2\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. 2σ² คือ γ(0)">\(\gamma(3)=2\sigma^2\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ที่ lag 3 มี w_t ร่วมกัน">\(\gamma(3)=0\)</button>
-<button class="opt" data-correct="true" data-note="ถูก. (−1)(+1)σ² = −σ²">\(\gamma(3)=-\sigma^2\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ME (5 − 4 + 6)/3 ที่ยังไม่ใส่ค่าสัมบูรณ์">MAE = 2.333, RMSE = 5.066</button>
+<button class="opt" data-correct="true" data-note="ถูก. MAE = (5+4+6)/3 = 5 และ RMSE = √((25+16+36)/3) = √25.667 = 5.066">MAE = 5.000, RMSE = 5.066</button>
+<button class="opt" data-correct="false" data-note="ผิด. 25.667 คือ MSE ยังไม่ถอดราก">MAE = 5.000, RMSE = 25.67</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย 2 แทน n = 3">MAE = 7.500, RMSE = 6.205</button>
 </div>
 <div class="feedback"></div>
 </div>
 
 <div class="quiz">
-<div class="qhead"><span>ข้อ 9</span><span>Stationarity</span></div>
-<div class="qtext">Random walk \(x_t=\sum_{i=1}^{t}w_i\) ไม่ stationary เพราะเหตุใด</div>
+<div class="qhead"><span>ข้อ 2</span><span>MAPE</span></div>
+<div class="qtext">จากข้อ 1 ค่า MAPE คือเท่าใด</div>
 <div class="options">
-<button class="opt" data-correct="false" data-note="ผิด. mean ของ random walk ที่ไม่มี drift เป็น 0 คงที่">เพราะ mean function ขึ้นกับเวลา t</button>
-<button class="opt" data-correct="true" data-note="ถูก. γ(t,t+h) = tσ² มี t อยู่ในผล">เพราะ autocovariance ขึ้นกับเวลา t</button>
-<button class="opt" data-correct="false" data-note="ผิด. การแจกแจงปกติไม่เกี่ยวกับ stationarity">เพราะ \(w_t\) ไม่มีการแจกแจงปกติ</button>
-<button class="opt" data-correct="false" data-note="ผิด. ACF ที่ไม่เป็น 0 ไม่ได้ทำให้ไม่ stationary">เพราะ ACF ไม่เป็นศูนย์ที่ lag 1</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วยค่าพยากรณ์แทนค่าจริง">MAPE = 10.37%</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมใส่ค่าสัมบูรณ์ ได้ MPE">MAPE = 3.33%</button>
+<button class="opt" data-correct="true" data-note="ถูก. (5/50 + 4/40 + 6/60)/3 = (0.1+0.1+0.1)/3 = 10%">MAPE = 10.00%</button>
+<button class="opt" data-correct="false" data-note="ผิด. รวมโดยไม่หาร n">MAPE = 30.00%</button>
 </div>
 <div class="feedback"></div>
 </div>
 
 <div class="quiz">
-<div class="qhead"><span>ข้อ 10</span><span>สัญกรณ์</span></div>
-<div class="qtext">Stationary process หนึ่งมี \(\gamma_0=5\) และ \(\gamma_2=2\) ค่า \(\rho_2\) คือเท่าใด</div>
+<div class="qhead"><span>ข้อ 3</span><span>Autocovariance</span></div>
+<div class="qtext">\(x_t=w_t-w_{t-3}\), \(w_t\sim N(0,\sigma^2)\) ค่า \(\rho(3)\) คือเท่าใด</div>
 <div class="options">
-<button class="opt" data-correct="true" data-note="ถูก. ρ_h = γ_h / γ_0 = 2/5">\(\rho_2=0.40\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. กลับเศษส่วน และ ρ เกิน 1 ไม่ได้">\(\rho_2=2.50\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ตัวหารคือ γ_0 ไม่ใช่ γ_0 กำลังสอง">\(\rho_2=0.08\)</button>
-<button class="opt" data-correct="false" data-note="ผิด. ไม่ต้องถอดราก เพราะตัวหารคือ √(γ_0 · γ_0) = γ_0">\(\rho_2=0.89\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. lag 3 มี w_t ร่วมกัน จึงไม่เป็น 0 นี่คือกับดักของข้อสอบเก่า">\(\rho(3)=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายผิด w_t มีสัมประสิทธิ์ +1 กับ −1">\(\rho(3)=+1/2\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมหารด้วย γ(0) = 2σ²">\(\rho(3)=-1\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. γ(3) = −σ² และ γ(0) = 2σ² จึงได้ −1/2">\(\rho(3)=-1/2\)</button>
 </div>
 <div class="feedback"></div>
 </div>
 
-<p>ข้อต่อไปนี้ให้เขียนคำตอบเองก่อน แล้วจึงเปิดเฉลย</p>
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Mean ของโมเดลที่มี w²</span></div>
+<div class="qtext">\(x_t=w_t-\theta w_{t-1}^2\), \(w_t\sim N(0,\sigma^2)\) ค่า \(E(x_t)\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. E(w²) = σ² จึงได้ −θσ² อาจารย์บอกว่าตอบ 0 คือจบ">\(E(x_t)=-\theta\sigma^2\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. E(w²) ไม่เป็น 0 เป็นกับดักที่อาจารย์เตือน">\(E(x_t)=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. E(w²) = σ² ไม่ใช่ σ">\(E(x_t)=-\theta\sigma\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ E(w⁴) แทน E(w²)">\(E(x_t)=-3\theta\sigma^4\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 11</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">จงตรวจ stationarity ของ \(x_t=w_{t-1}+2w_t+w_{t+1}\) โดย \(w_t\sim iid(0,\sigma^2)\) และหา ACF</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 5</span><span>พิสูจน์ (แนวควิซ)</span></div>
+<div class="qtext">ให้ \(x_t=w_t+\theta w_{t-1}^2\), \(w_t\sim N(0,\sigma^2)\) จงหา mean function, \(\gamma(0)\), \(\gamma(1)\) และสรุปว่า stationary หรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(E(x_t)=0+\theta E(w_{t-1}^2)=\theta\sigma^2\) คงที่</p>
+<p>\(\gamma(0)=\mathrm{Var}(w_t)+\theta^2\mathrm{Var}(w_{t-1}^2)=\sigma^2+\theta^2(3\sigma^4-\sigma^4)=\sigma^2+2\theta^2\sigma^4\)</p>
+<p>\(\gamma(1)=\mathrm{cov}(w_t+\theta w_{t-1}^2,\ w_{t+1}+\theta w_t^2)=\theta\,\mathrm{cov}(w_t,w_t^2)=\theta[E(w^3)-E(w)E(w^2)]=0\)</p>
+<p>\(\gamma(h)=0\) เมื่อ h ≥ 2 เพราะไม่มีตัวร่วม สรุป stationary</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>พิสูจน์</span></div>
+<div class="qtext">ให้ \(x_t=2w_t+w_{t-2}\), \(w_t\sim wn(0,\sigma^2)\) จงหา \(\gamma(h)\) ทุก h และ ACF แล้วสรุปว่า stationary หรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <p>\(E(x_t)=0\)</p>
-<p>\(\gamma(0)=(1+4+1)\sigma^2=6\sigma^2\)</p>
-<p>\(\gamma(1)\): ตัวที่ตรงกันคือ \(w_t\) (2 กับ 1) และ \(w_{t+1}\) (1 กับ 2) ได้ \(4\sigma^2\)</p>
-<p>\(\gamma(2)\): ตัวที่ตรงกันคือ \(w_{t+1}\) (1 กับ 1) ได้ \(\sigma^2\) และ \(\gamma(h)=0\) เมื่อ \(|h|\ge3\)</p>
-<p>Mean คงที่และ \(\gamma\) ขึ้นกับ h เท่านั้น จึง stationary โดย \(\rho(1)=2/3\), \(\rho(2)=1/6\)</p>
+<p>\(\gamma(0)=(4+1)\sigma^2=5\sigma^2\)</p>
+<p>\(\gamma(1)\): \(x_{t+1}=2w_{t+1}+w_{t-1}\) ไม่มีตัวร่วมกับ \(w_t,w_{t-2}\) จึงเป็น 0</p>
+<p>\(\gamma(2)\): \(x_{t+2}=2w_{t+2}+w_t\) ตัวร่วมคือ \(w_t\) (2 กับ 1) ได้ \(2\sigma^2\)</p>
+<p>\(\gamma(h)=0\) เมื่อ \(|h|\ge3\) ACF: \(\rho(1)=0\), \(\rho(2)=2/5\) สรุป stationary สังเกตว่า lag 1 เป็น 0 แต่ lag 2 ไม่เป็น 0 จึงต้องไล่ทุก lag จนถึงระยะห่างสูงสุดในสมการ</p>
 </div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 12</span><span>เขียนพิสูจน์</span></div>
-<div class="qtext">จงตรวจ stationarity ของ \(x_t=w_t-\theta(w_{t-1})^2\) โดย \(w_t\sim N(0,\sigma^2)\)</div>
-<textarea placeholder="เขียนการพิสูจน์ที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 7</span><span>ทฤษฎี</span></div>
+<div class="qtext">จงพิสูจน์ว่าถ้า \(\{X_t\}\) เป็น strictly stationary และมีความแปรปรวนจำกัด แล้ว \(E(X_t)\) คงที่ และ \(\mathrm{cov}(X_t,X_s)\) ขึ้นกับ \(|t-s|\) เท่านั้น</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<p>\(E(x_t)=0-\theta E(w_{t-1}^2)=-\theta\sigma^2\) คงที่</p>
-<p>\(\gamma(0)=\sigma^2+\theta^2\mathrm{Var}(w_{t-1}^2)=\sigma^2+2\theta^2\sigma^4\) เพราะ \(\mathrm{Var}(w^2)=3\sigma^4-\sigma^4\)</p>
-<p>\(\gamma(1)=-\theta\,\mathrm{cov}(w_t^2,w_t)=-\theta E(w_t^3)=0\) และ \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
-<p>Mean คงที่และ \(\gamma\) ขึ้นกับ h เท่านั้น จึง stationary</p>
+<p>n = 1: การแจกแจงของ \(X_t\) เหมือนของ \(X_{t+h}\) ทุก h ทุกเวลาจึงมีการแจกแจงเดียวกัน \(E(X_t)\) และ \(\mathrm{Var}(X_t)\) จึงคงที่</p>
+<p>n = 2: การแจกแจงร่วมของ \((X_t,X_s)\) เหมือนของ \((X_{t+h},X_{s+h})\) เลือก h = −s ได้การแจกแจงของ \((X_{t-s},X_0)\) ซึ่งขึ้นกับ t − s เท่านั้น covariance ที่คำนวณจากการแจกแจงนี้จึงขึ้นกับ \(|t-s|\) เท่านั้น</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>Partition</span></div>
+<div class="qtext">ทำไมห้ามสุ่มแบ่งอนุกรมเวลาเป็น train กับ test</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ปัญหาไม่ใช่จำนวนข้อมูล แต่เป็นลำดับเวลา">เพราะข้อมูลอนุกรมเวลามีน้อยเกินไป</button>
+<button class="opt" data-correct="false" data-note="ผิด. MAPE ไม่เกี่ยวกับวิธีแบ่ง">เพราะจะคำนวณ MAPE ไม่ได้</button>
+<button class="opt" data-correct="true" data-note="ถูก. ข้อมูลมี order การสุ่มทำให้ใช้อนาคตทายอดีต">เพราะการสุ่มทำให้ใช้อนาคตทายอดีต</button>
+<button class="opt" data-correct="false" data-note="ผิด. R สุ่มแถวของ ts ได้ แต่ไม่ควรทำ">เพราะ R สุ่มแถวของ ts ไม่ได้</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>Strong กับ weak</span></div>
+<div class="qtext">ข้อใดถูกเกี่ยวกับ strictly และ weakly stationary</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. weak ไม่จำเป็นต้องให้ strong เช่น Exercise 1 ข้อ 1">Weak ให้ strong เสมอ และในทางกลับกันด้วย</button>
+<button class="opt" data-correct="false" data-note="ผิด. random walk มี mean คงที่แต่ไม่นิ่ง">Mean คงที่อย่างเดียวพอจะสรุปว่า weak</button>
+<button class="opt" data-correct="false" data-note="ผิด. อาจารย์บอกให้ถือ weak เป็น stationary ในวิชานี้">วิชานี้ใช้เฉพาะนิยามแบบ strict</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตามสไลด์หน้า 32 และ Exercise 1 ข้อ 1">Strong ให้ weak แต่ weak ไม่จำเป็นต้องให้ strong</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>Roll-forward</span></div>
+<div class="qtext">แผนภาพหนึ่ง train ทุกรอบเริ่มจุดเดิมและยาวขึ้นเรื่อย ๆ ส่วน test อยู่ถัดจาก train เสมอ เป็นการแบ่งแบบใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. train เริ่มจุดเดิมและสะสม">Roll-forward แบบสะสม (cumulative)</button>
+<button class="opt" data-correct="false" data-note="ผิด. moving window มี train ยาวคงที่และเลื่อนจุดเริ่ม">Roll-forward แบบหน้าต่างเลื่อน</button>
+<button class="opt" data-correct="false" data-note="ผิด. fixed ตัดครั้งเดียว ไม่มีหลายรอบ">Fixed partitioning ตัดครั้งเดียว</button>
+<button class="opt" data-correct="false" data-note="ผิด. การสุ่มใช้กับ cross-sectional">Random partition แบบ cross-sectional</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>อธิบาย</span></div>
+<div class="qtext">จงอธิบายว่าทำไม stationarity สำคัญต่อการสร้างโมเดล และอาจารย์มีกลยุทธ์อย่างไรกับข้อมูลจริงที่ส่วนใหญ่ไม่นิ่ง</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ข้อมูลจริงมีค่าเดียวต่อเวลา ถ้าค่าเฉลี่ยและ covariance เปลี่ยนทุกเวลา จะประมาณค่าเหล่านั้นไม่ได้ เมื่อนิ่ง กติกาไม่เปลี่ยนตามเวลา ทุกจุดช่วยกันประมาณค่าชุดเดียว ทำให้ model ง่ายและพยากรณ์ได้ (predictable) ทฤษฎีส่วนใหญ่จึงสร้างบนอนุกรมที่นิ่ง</p>
+<p>กลยุทธ์: ดึงส่วนที่ไม่นิ่งออกก่อน (trend ด้วย detrending หรือ differencing, ความแปรปรวนด้วย log) นำส่วนที่นิ่งไปสร้างโมเดล แล้วปรับกลับทีหลัง</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>อ่าน output</span></div>
+<div class="qtext"><p>เพื่อนรันคำสั่งตามสไลด์และได้ผลนี้ แล้วรายงานว่า "โมเดลพยากรณ์ต่ำกว่าค่าจริงเฉลี่ย 0.33 หน่วย MAPE 15.8%" จงอธิบายว่าถูกหรือผิด เพราะอะไร</p>
+<pre class="out">&gt; test &lt;- ts(read.table("accuracy.txt", h=T))   # คอลัมน์ 1 = data, 2 = forecast
+&gt; accuracy(test[,1], test[,2])
+                ME     RMSE      MAE       MPE   MAPE
+Test set 0.3333333 4.434712 3.666667 -1.666443 15.799</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ผิด <code>accuracy(f, x)</code> รับค่าพยากรณ์ก่อน แต่คำสั่งนี้ส่งค่าจริงไปเป็นตัวแรก error จึงกลายเป็น forecast − data เครื่องหมายของ ME กลับ และ MAPE หารด้วยค่าพยากรณ์แทนค่าจริง</p>
+<p>คำสั่งที่ถูกคือ <code>accuracy(test[,2], test[,1])</code> ได้ ME = −0.333 (พยากรณ์<b>สูงกว่า</b>ค่าจริงเฉลี่ย 0.33) และ MAPE = 15.73% ตรงกับ Excel ส่วน RMSE 4.435 และ MAE 3.667 ถูกทั้งสองแบบ</p>
 </div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 13</span><span>คำนวณ</span></div>
-<div class="qtext">ค่าจริงคือ 50, 40, 60 และค่าพยากรณ์คือ 45, 44, 54 จงหา ME, MAE, RMSE และ MAPE</div>
-<textarea placeholder="เขียนวิธีทำที่นี่"></textarea>
+<div class="qhead"><span>ข้อ 13</span><span>อ่าน output</span></div>
+<div class="qtext"><p>จาก output นี้ train และ test มีกี่จุด ครอบคลุมปีใด</p>
+<pre class="out">&gt; new_temperature &lt;- ts(read.table("temp.txt"), start = 1856)
+&gt; length(new_temperature); end(new_temperature)
+[1] 142
+[1] 1997    1
+&gt; nValid &lt;- 36; nTrain &lt;- length(new_temperature) - nValid</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<p>\(e=5,\ -4,\ 6\)</p>
-<p>\(\text{ME}=(5-4+6)/3=2.333\)</p>
-<p>\(\text{MAE}=(5+4+6)/3=5\)</p>
-<p>\(\text{RMSE}=\sqrt{(25+16+36)/3}=\sqrt{25.667}=5.066\)</p>
-<p>\(\text{MAPE}=(5/50+4/40+6/60)/3=(0.1+0.1+0.1)/3=0.10\) คือ 10 เปอร์เซ็นต์</p>
+<p>nTrain = 142 − 36 = 106 จุด ปี 1856 ถึง 1856 + 106 − 1 = 1961</p>
+<p>test 36 จุด ปี 1962 ถึง 1997</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>แบ่ง temp.txt เป็น train และ test ตามสไลด์ แล้วลองพยากรณ์ test ด้วยสองวิธีง่าย ๆ (ก) ใช้ค่าเฉลี่ยของ train (ข) ใช้ค่าสุดท้ายของ train จากนั้นเทียบ RMSE, MAE และ ME ของสองวิธี วิธีไหนดีกว่า และ ME บอกอะไร</p>
+<pre><code>library(forecast)
+x  &lt;- ts(read.table("temp.txt"), start = 1856)
+tr &lt;- window(x, end = 1961); te &lt;- window(x, start = 1962)
+fa &lt;- rep(mean(tr), 36)        # (ก) ค่าเฉลี่ย train
+fb &lt;- rep(tail(tr, 1), 36)     # (ข) ค่าสุดท้ายของ train
+accuracy(fa, te); accuracy(fb, te)</code></pre></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">(ก) ค่าเฉลี่ย train = −0.235   RMSE 0.349  MAE 0.305  ME 0.305
+(ข) ค่าสุดท้าย   =  0.030   RMSE 0.174  MAE 0.141  ME 0.039</pre>
+<p>วิธี (ข) ดีกว่าทุกตัววัด เพราะข้อมูลมี trend ขาขึ้น ค่าเฉลี่ยของ train ทั้ง 106 ปีจึงต่ำกว่าช่วง test มาก ME ของวิธี (ก) เป็นบวก 0.305 เกือบเท่า MAE แปลว่าพยากรณ์ต่ำกว่าจริงเกือบทุกปี ซึ่งเป็นอาการของโมเดลที่ไม่จับ trend ข้อมูลนี้ไม่นิ่ง จึงต้องดึง trend ออกก่อน (Lesson 3)</p>
 </div>
 </div>
 
 <div class="quiz free">
-<div class="qhead"><span>ข้อ 14</span><span>อธิบาย</span></div>
-<div class="qtext">จงอธิบายความต่างระหว่าง roll-forward แบบ cumulative กับแบบ moving window และบอกว่า roll-forward ให้ข้อมูลเกี่ยวกับการพยากรณ์ช่วงใดมากกว่า</div>
-<textarea placeholder="เขียนคำตอบที่นี่"></textarea>
-<button class="reveal-btn">เฉลย</button>
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>จำลองโมเดลของ Exercise 1 ข้อ 2 แล้วเทียบ ACF จากข้อมูลกับค่าทางทฤษฎีที่คำนวณในหัวข้อ 8</p>
+<pre><code>set.seed(11)
+w &lt;- rnorm(2002, 0, 0.5)                          # sigma^2 = 0.25
+x &lt;- w[3:2002] - 1.2*w[2:2001] - 1.6*w[1:2000]
+acf(x, lag.max = 3, plot = FALSE); var(x)
+ARMAacf(ma = c(-1.2, -1.6), lag.max = 3)          # ค่าทางทฤษฎี</code></pre></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
 <div class="model-answer">
-<p>Cumulative: training เริ่มที่จุดเดิมทุกรอบและยาวขึ้น เก็บข้อมูลเก่าไว้ทั้งหมด</p>
-<p>Moving window: training ยาวคงที่ หน้าต่างเลื่อนไปข้างหน้าและทิ้งข้อมูลเก่า</p>
-<p>ทั้งสองแบบมี test ถัดจาก training ทันที</p>
-<p>Roll-forward ให้ข้อมูลเกี่ยวกับ short-term forecasts มากกว่า และจำนวนข้อมูลลดลงเมื่อพยากรณ์ไกลขึ้น</p>
+<pre class="out">ACF จากข้อมูล lag 0–3: 1.000  0.149  -0.312  0.005     var(x) = 1.233
+ทฤษฎี (ARMAacf):       1.000  0.144  -0.320  0.000     γ(0)  = 1.25</pre>
+<p>ค่าจากข้อมูล 2,000 จุดใกล้ค่าทางทฤษฎีทุก lag lag 3 ควรอยู่ในเส้นขอบ \(2/\sqrt{2000}=0.045\) สรุปว่าการคำนวณมือถูก และโมเดลนิ่ง ACF ตัดหลัง lag 2</p>
 </div>
 </div>
 
@@ -715,29 +806,39 @@ accuracy(test[,1],test[,2])</code></pre>
 <div class="box win">
 <div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
 <ul>
-<li>อธิบาย overfitting และลำดับของ cross-validation</li>
-<li>แยก fixed, cumulative และ moving window partitioning และเขียนโค้ด <code>window()</code></li>
-<li>คำนวณ ME, MSE, RMSE, MAE, MAPE และ MPE จากตาราง และตีความเครื่องหมาย</li>
-<li>เขียนนิยามของ strictly และ weakly stationary และสัญกรณ์ \(\gamma_h\), \(\rho_h\)</li>
-<li>ตรวจ stationarity ของโมเดลใดก็ตามด้วยการหา mean และ autocovariance</li>
+<li>อธิบาย overfitting และเหตุผลที่ต้องวัด error บน test set เท่านั้น</li>
+<li>แยก fixed, roll-forward แบบสะสม และแบบหน้าต่างเลื่อน และเขียนโค้ด <code>window()</code></li>
+<li>คำนวณ ME, MSE, RMSE, MAE, MAPE, MPE จากตาราง ตีความเครื่องหมาย และรู้ข้อเสียของ MAPE</li>
+<li>ใช้ <code>accuracy(f, x)</code> ให้ถูกลำดับ</li>
+<li>เขียนนิยามของ strictly และ weakly stationary และวิธีตรวจสองข้อ</li>
+<li>ตรวจ stationarity ของโมเดลใดก็ตาม ไล่ lag ให้ครบ และใช้ moment ของการแจกแจงปกติเมื่อมี w² หรือผลคูณ</li>
 </ul>
-<p>บทถัดไป: <a href="0003-estimation-correlogram-and-detrending.html">Lesson 3 — Estimation, correlogram และ detrending</a></p>
 </div>
 
-<!-- ===================================================== -->
+<p>บทถัดไป: <a href="0003-estimation-correlogram-and-detrending.html">Lesson 3 — ประมาณ ACF จากข้อมูล, correlogram, ADF test, detrending และ differencing</a></p>
+
 <h2 id="appendix">ภาคผนวก: สไลด์ทั้ง 34 หน้าอยู่ในหัวข้อใด</h2>
 <table>
 <tr><th>หน้า</th><th>เนื้อหา</th><th>สอนที่</th></tr>
 <tr data-pages="1" class="etc"><td>1</td><td>ปก Performance Evaluation</td><td>etc — ปก</td></tr>
 <tr data-pages="2-4"><td>2–4</td><td>ทำไมต้องประเมิน, cross-validation, overfitting</td><td><a href="#s1">หัวข้อ 1</a></td></tr>
 <tr data-pages="5-12"><td>5–12</td><td>Data partitioning, fixed, roll-forward, R-codes</td><td><a href="#s2">หัวข้อ 2</a></td></tr>
-<tr data-pages="13-17"><td>13–17</td><td>Forecast errors, ตารางตัวอย่าง, R-codes</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
+<tr data-pages="13-17"><td>13–17</td><td>Forecast errors, ตาราง Excel, R-codes</td><td><a href="#s3">หัวข้อ 3</a></td></tr>
 <tr data-pages="18" class="etc"><td>18</td><td>หน้าคั่น Stationary Time Series</td><td>etc — หน้าคั่น</td></tr>
 <tr data-pages="19-23"><td>19–23</td><td>Consistency, stationarity, why important, types</td><td><a href="#s4">หัวข้อ 4</a></td></tr>
-<tr data-pages="24-29"><td>24–29</td><td>Strictly stationary และ new notation</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
+<tr data-pages="24-29"><td>24–29</td><td>Strictly stationary, new notation</td><td><a href="#s5">หัวข้อ 5</a></td></tr>
 <tr data-pages="30-32"><td>30–32</td><td>Weakly stationary</td><td><a href="#s6">หัวข้อ 6</a></td></tr>
 <tr data-pages="33"><td>33</td><td>Check stationarity สามตัวอย่าง</td><td><a href="#s7">หัวข้อ 7</a></td></tr>
 <tr data-pages="34"><td>34</td><td>Exercise สามโมเดล</td><td><a href="#s8">หัวข้อ 8</a></td></tr>
+</table>
+
+<h3>คลิปและเอกสารที่ใช้ในบทนี้</h3>
+<table>
+<tr><th>แหล่ง</th><th>ช่วงที่ใช้</th><th>หัวข้อ</th></tr>
+<tr><td>Class 2</td><td>0:40–1:16 performance evaluation และ R, 1:47–2:44 stationarity และโจทย์</td><td>1–8</td></tr>
+<tr><td>Class 4</td><td>0:15, 0:21 ห้ามใช้ test set และควิซ RMSE/MAE</td><td>1, 3</td></tr>
+<tr><td>Exercise 1 (CLASS 2)</td><td>ข้อ 1, 2, 3, 4</td><td>7, 8</td></tr>
+<tr><td>Forecast Error Example.xlsx, accuracy.txt, temp.txt, R_codes (CLASS 2)</td><td>ทั้งไฟล์</td><td>2, 3, 9</td></tr>
 </table>
 
 <script src="../assets/quiz.js"></script>
