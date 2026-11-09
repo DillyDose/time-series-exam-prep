@@ -408,3 +408,11 @@ table.fix td:first-child { width: 34%; }
 
 /* Keep math case intact inside uppercase table headers (w_t must not become W_T) */
 th .katex { text-transform: none; letter-spacing: 0; }
+
+/* footnotes: clip citations collected at the end of a lesson */
+sup.fn { font-size: 0.7em; line-height: 0; margin-left: 1px; }
+sup.fn a { text-decoration: none; color: #8a5a00; }
+ol.fnlist { font-size: 0.9em; color: #444; }
+ol.fnlist li { margin: 0.25em 0; }
+ol.fnlist li:target { background: #fff6d6; }
+a.fnback { font-size: 0.85em; margin-left: 4px; }
