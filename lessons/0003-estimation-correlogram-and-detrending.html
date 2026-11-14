@@ -38,6 +38,7 @@
 <li>ข้อสอบเก่า: "ถ้ามี trend ช่วยพรูฟหน่อยสิครับว่าทำไมมันไม่ stationary" คือ Shumway problem 1.6 (Class 3, 1:19:32) เฉลยใน<a href="#s7">หัวข้อ 7</a></li>
 <li>การบ้าน: พิสูจน์ว่า differencing ทำให้ข้อมูลนิ่ง (Class 3, 1:30:36, 1:47:01) และคำนวณ \(\hat\rho(3),\hat\rho(4)\) ของ in-class example เอง (Class 3, 1:45:20)</li>
 <li>มีสอบย่อยทุกคาบ และวิชานี้ไม่มีสอบกลางภาค (Class 3, 0:11:19, 0:21:48)</li>
+<li>ข้อสอบปลายภาค 2024 ข้อ 2 (ACF มือของราคาหุ้น 6 วัน, differencing) และข้อ 3ก–3ข (regression บนเวลา, เส้นประใน correlogram) พร้อมแม่แบบคำตอบ อยู่ใน<a href="#exam">หัวข้อ 11</a></li>
 </ul>
 </div>
 
@@ -53,7 +54,8 @@
 <tr><td><a href="#s8">8</a></td><td>ตัวอย่าง global temperature: fit เส้นตรงด้วย R</td><td>26–31</td></tr>
 <tr><td><a href="#s9">9</a></td><td>Differencing และ backshift operator</td><td>32–37</td></tr>
 <tr><td><a href="#s10">10</a></td><td>Exercise 1 ข้อ 5–8 (ACF มือ และงาน R)</td><td>—</td></tr>
-<tr><td><a href="#s11">11</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
+<tr><td><a href="#exam">11</a></td><td>ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</td><td>—</td></tr>
+<tr><td><a href="#s11">12</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
@@ -602,7 +604,137 @@ acf(diff.1); shapiro.test(diff.1); mean(diff.1)</code></pre>
 </div>
 
 <!-- ===================================================== -->
-<h2 id="s11">11. แบบฝึกห้าแบบ</h2>
+<h2 id="exam">11. ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</h2>
+
+<p>บทนี้ออกในข้อสอบปลายภาค 2024 รวม 8 คะแนน ทั้งคำนวณ ACF ด้วยมือ (ห้ามใช้ R แต่ใช้ Excel ช่วยได้) อธิบายเส้นประใน correlogram และอ่านผล regression บนเวลา ปี 2025 ไม่ได้ออกตรง ๆ แต่การอ่าน ACF ของ residual และการเลือก differencing อยู่ในทุกข้อย่อยของภาค R เวลาสอบประมาณ 4.5 นาทีต่อคะแนน</p>
+
+<table>
+<tr><th>ข้อสอบ</th><th>โจทย์ (สรุปความ)</th><th>คะแนน</th><th>เวลาที่ควรใช้</th><th>เฉลย</th></tr>
+<tr><td>Final 2024 ข้อ 2ก</td><td>ราคาหุ้น 6 วัน คำนวณ sample ACF ถึง lag 2 ด้วยมือ และวาด correlogram</td><td>3</td><td>~15 นาที</td><td><a href="#exam-a">ข้อ ก</a></td></tr>
+<tr><td>Final 2024 ข้อ 2ข</td><td>เติมค่า \(\nabla x_t\) ในตาราง</td><td>1</td><td>~3 นาที</td><td><a href="#exam-b">ข้อ ข</a></td></tr>
+<tr><td>Final 2024 ข้อ 3ข</td><td>เส้นประสองเส้นใน correlogram ใช้ทำอะไร และคำนวณอย่างไร</td><td>2</td><td>~8 นาที</td><td><a href="#exam-c">ข้อ ค</a></td></tr>
+<tr><td>Final 2024 ข้อ 3ก</td><td>อ่านผล <code>lm(Nile ~ time(Nile))</code> แล้วบอกว่าใช้ในการวิเคราะห์อนุกรมเวลาอย่างไร และเกี่ยวกับตัวแบบอะไร</td><td>2</td><td>~8 นาที</td><td><a href="#exam-d">ข้อ ง</a></td></tr>
+</table>
+
+<div class="box">
+<div class="label">แม่แบบคำตอบ 1: คำนวณ sample ACF ด้วยมือ (จัดตารางแบบ Excel)</div>
+<ol>
+<li>หา \(\bar x\) แล้วทำคอลัมน์ \(x_t-\bar x\)</li>
+<li>ทำคอลัมน์ \((x_t-\bar x)^2\) ผลรวมหารด้วย n ได้ \(\hat\gamma(0)\)</li>
+<li>คอลัมน์ lag h คือ \((x_t-\bar x)(x_{t-h}-\bar x)\) มี n − h แถว ผลรวม<b>หารด้วย n ไม่ใช่ n − h</b> (สูตรของสไลด์และของ R) ได้ \(\hat\gamma(h)\)</li>
+<li>\(\hat\rho(h)=\hat\gamma(h)/\hat\gamma(0)\) แล้ววาดแท่งที่ lag 0, 1, 2 พร้อมเส้น \(\pm2/\sqrt n\) และสรุปว่าแท่งไหนหลุดเส้น</li>
+</ol>
+</div>
+
+<div class="box">
+<div class="label">แม่แบบคำตอบ 2: อ่าน correlogram 3 รูปแบบ</div>
+<table>
+<tr><th>สิ่งที่เห็น</th><th>ตีความ</th><th>ทำต่ออย่างไร</th></tr>
+<tr><td>แท่งลดลงช้า ๆ และอยู่นอกเส้นหลาย lag</td><td>มี trend หรือไม่นิ่ง</td><td>detrend หรือ difference แล้วดู ACF ใหม่ ยืนยันด้วย ADF (<a href="#s5">หัวข้อ 5</a>)</td></tr>
+<tr><td>แท่งหลุดเส้นแค่ไม่กี่ lag แรก แล้วตกอยู่ในเส้น</td><td>นิ่ง และมีความสัมพันธ์ระยะสั้น</td><td>เลือกโมเดล MA หรือ AR (Lesson 5–6)</td></tr>
+<tr><td>แท่งเกือบทั้งหมดอยู่ในเส้น (ราว 1 ใน 20 อาจหลุดโดยบังเอิญ)</td><td>ดูเหมือน white noise</td><td>ถ้าเป็น residual แปลว่าโมเดลจับความสัมพันธ์ได้หมด (Lesson 8)</td></tr>
+</table>
+</div>
+
+<div class="quiz free" id="exam-a">
+<div class="qhead"><span>ข้อ ก</span><span>Final 2024 ข้อ 2ก (3 คะแนน)</span></div>
+<div class="qtext">ราคาหุ้น 6 วันทำการติดกันคือ 196.03, 198.64, 191.58, 187.98, 187.40, 192.99 จงคำนวณ sample ACF ถึง lag 2 แสดงวิธีทำ และวาด correlogram (ห้ามใช้ R หรือ Python แต่ใช้ Excel ช่วยคำนวณได้)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\bar x=1154.62/6=192.4367\)</p>
+<table>
+<tr><th>t</th><th>\(x_t\)</th><th>\(x_t-\bar x\)</th><th>\((x_t-\bar x)^2\)</th><th>lag 1: \((x_t-\bar x)(x_{t-1}-\bar x)\)</th><th>lag 2: \((x_t-\bar x)(x_{t-2}-\bar x)\)</th></tr>
+<tr><td>1</td><td>196.03</td><td>3.5933</td><td>12.9120</td><td>–</td><td>–</td></tr>
+<tr><td>2</td><td>198.64</td><td>6.2033</td><td>38.4813</td><td>22.2906</td><td>–</td></tr>
+<tr><td>3</td><td>191.58</td><td>−0.8567</td><td>0.7339</td><td>−5.3142</td><td>−3.0783</td></tr>
+<tr><td>4</td><td>187.98</td><td>−4.4567</td><td>19.8619</td><td>3.8179</td><td>−27.6462</td></tr>
+<tr><td>5</td><td>187.40</td><td>−5.0367</td><td>25.3680</td><td>22.4467</td><td>4.3147</td></tr>
+<tr><td>6</td><td>192.99</td><td>0.5533</td><td>0.3062</td><td>−2.7870</td><td>−2.4660</td></tr>
+<tr><td colspan="3"><b>ผลรวม</b></td><td><b>97.6633</b></td><td><b>40.4541</b></td><td><b>−28.8758</b></td></tr>
+</table>
+<p>\(\hat\gamma(0)=97.6633/6=16.2772\), \(\hat\gamma(1)=40.4541/6=6.7424\), \(\hat\gamma(2)=-28.8758/6=-4.8126\)</p>
+<p>\(\hat\rho(0)=1\), \(\hat\rho(1)=6.7424/16.2772=0.4142\), \(\hat\rho(2)=-4.8126/16.2772=-0.2957\)</p>
+<p>เส้นขอบ \(\pm2/\sqrt6=\pm0.8165\)</p>
+<svg viewBox="0 0 340 220" width="340" role="img" aria-label="Correlogram ของราคาหุ้น 6 วัน: lag 0 = 1, lag 1 = 0.414, lag 2 = −0.296, เส้นขอบ ±0.8165">
+<line x1="40" y1="110" x2="320" y2="110" stroke="#333"/>
+<line x1="40" y1="20" x2="40" y2="200" stroke="#333"/>
+<line x1="40" y1="44.7" x2="320" y2="44.7" stroke="#2563eb" stroke-dasharray="5,4"/>
+<line x1="40" y1="175.3" x2="320" y2="175.3" stroke="#2563eb" stroke-dasharray="5,4"/>
+<rect x="76" y="30" width="8" height="80" fill="#111"/>
+<rect x="166" y="76.9" width="8" height="33.1" fill="#111"/>
+<rect x="256" y="110" width="8" height="23.7" fill="#111"/>
+<text x="80" y="214" font-size="12" text-anchor="middle">0</text>
+<text x="170" y="214" font-size="12" text-anchor="middle">1</text>
+<text x="260" y="214" font-size="12" text-anchor="middle">2</text>
+<text x="34" y="34" font-size="11" text-anchor="end">1</text>
+<text x="34" y="114" font-size="11" text-anchor="end">0</text>
+<text x="34" y="194" font-size="11" text-anchor="end">−1</text>
+<text x="322" y="40" font-size="11" text-anchor="end" fill="#2563eb">+0.8165</text>
+<text x="322" y="190" font-size="11" text-anchor="end" fill="#2563eb">−0.8165</text>
+<text x="170" y="70" font-size="11" text-anchor="middle">0.414</text>
+<text x="260" y="148" font-size="11" text-anchor="middle">−0.296</text>
+</svg>
+<p><b>สรุป:</b> ไม่มีแท่ง lag 1 หรือ 2 หลุดเส้นขอบ ยังไม่มีหลักฐานว่ามี autocorrelation แต่ควรเขียนต่อว่า n = 6 น้อยมาก เส้นขอบจึงกว้าง (±0.82) และสูตร ±2/√n เป็นค่าประมาณสำหรับ n ใหญ่ ผลนี้จึงบอกได้น้อย ค่าทุกตัวตรงกับ <code>acf(x, lag.max = 2)</code> ใน R (1.0000, 0.4142, −0.2957)</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-b">
+<div class="qhead"><span>ข้อ ข</span><span>Final 2024 ข้อ 2ข (1 คะแนน)</span></div>
+<div class="qtext">จากราคาในข้อ ก จงหา \(\nabla x_t=x_t-x_{t-1}\) ทุกวันที่หาได้</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<table>
+<tr><th>t</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+<tr><th>\(\nabla x_t\)</th><td>––</td><td>2.61</td><td>−7.06</td><td>−3.60</td><td>−0.58</td><td>5.59</td></tr>
+</table>
+<p>วันแรกไม่มีค่า เพราะไม่มี \(x_0\) ข้อมูลหลัง differencing จึงเหลือ n − 1 = 5 ค่า (ใน R คือ <code>diff(x)</code>) ถ้าเป็นราคาหุ้น ค่านี้คือการเปลี่ยนแปลงของราคา ซึ่งต่างจากผลตอบแทน \((P_t-P_{t-1})/P_{t-1}\) ที่ใช้ในข้อ CPALL ปี 2024</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-c">
+<div class="qhead"><span>ข้อ ค</span><span>Final 2024 ข้อ 3ข (2 คะแนน)</span></div>
+<div class="qtext">ใน correlogram ของข้อมูลอัตราการไหลของแม่น้ำ (n = 100) มีเส้นประสองเส้นรอบค่า ACF = 0 เส้นเหล่านี้ใช้ทำอะไร และสร้างอย่างไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>ใช้ทำอะไร:</b> ใช้ทดสอบว่า autocorrelation ที่ lag นั้นต่างจาก 0 อย่างมีนัยสำคัญหรือไม่ แท่งที่หลุดเส้นแปลว่ามีความสัมพันธ์จริงที่ lag นั้น แท่งที่อยู่ในเส้นแปลว่าแยกไม่ออกจาก 0</p>
+<p><b>สร้างอย่างไร:</b> ถ้าข้อมูลเป็น white noise และ n ใหญ่ \(\hat\rho(h)\) จะแจกแจงประมาณ \(N(0,1/n)\) ช่วงความเชื่อมั่น 95% จึงเป็น \(\pm1.96/\sqrt n\approx\pm2/\sqrt n\) กรณีนี้ n = 100 ได้ \(\pm0.196\) (R ใช้ 1.96)</p>
+<p><b>ข้อควรเขียนเพิ่ม:</b> เส้นนี้สร้างภายใต้สมมติฐานว่าเป็น white noise ที่ระดับ 95% แม้ข้อมูลเป็น white noise จริง ก็คาดได้ว่าราว 1 ใน 20 lag จะหลุดเส้นโดยบังเอิญ จึงดูภาพรวมทั้ง correlogram ไม่ตัดสินจากแท่งเดียว</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-d">
+<div class="qhead"><span>ข้อ ง</span><span>Final 2024 ข้อ 3ก (2 คะแนน)</span></div>
+<div class="qtext">ข้อมูลอัตราการไหลของแม่น้ำไนล์ปี 1871–1970 ถูก fit ด้วย \(x_t=\beta_0+\beta_1t+\varepsilon_t\) ได้ intercept 6129.46 (p = 1.9e−08) และสัมประสิทธิ์ของเวลา −2.7143 (s.e. 0.5216, p = 1.07e−06) ผลนี้นำไปใช้ในการวิเคราะห์อนุกรมเวลาได้อย่างไร และเกี่ยวกับตัวแบบอะไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>อ่านผล:</b> อัตราการไหลลดลงเฉลี่ยปีละ 2.71 หน่วย อย่างมีนัยสำคัญ (p ≈ 0.000001) ข้อมูลจึงมี deterministic linear trend ขาลง ไม่นิ่งเพราะ mean ขึ้นกับ t</p>
+<p><b>นำไปใช้:</b> ใช้ทำ <b>detrending</b> (<a href="#s7">หัวข้อ 7</a>) คือ \(\hat\varepsilon_t=x_t-(6129.46-2.7143t)\) แล้วตรวจว่า residual นิ่งด้วย ACF หรือ ADF ถ้านิ่งแต่ยังมี autocorrelation ให้ fit ARMA บน residual</p>
+<p><b>ตัวแบบที่เกี่ยวข้อง:</b> trend-stationary model หรือ regression with ARMA errors คือ \(x_t=\beta_0+\beta_1t+y_t\) โดย \(y_t\) เป็น ARMA ทางเลือกอีกทางคือ differencing ซึ่งได้ ARIMA(p,1,q) (ข้อ 3ฉ ของชุดเดียวกัน auto.arima เลือก ARIMA(1,1,1))</p>
+<p><b>ข้อควรระวังที่ควรเขียนต่อ:</b> residual ของ OLS ในอนุกรมเวลามักมี autocorrelation ทำให้ s.e. และ p-value ต่ำเกินจริง (แก้ด้วย GLS ใน Lesson 11) และการต่อเส้นตรงไปในอนาคตจะลดลงไม่มีที่สิ้นสุด ซึ่งไม่สมเหตุสมผลกับอัตราการไหลของแม่น้ำ</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-e">
+<div class="qhead"><span>ข้อ จ</span><span>รันตรวจคำตอบด้วย R (หลังทำข้อ ก และ ข ด้วยมือแล้ว)</span></div>
+<div class="qtext">รันโค้ดนี้แล้วเทียบกับคำตอบที่คำนวณมือ ค่าใดควรตรงกันทุกตำแหน่ง</div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>x &lt;- c(196.03, 198.64, 191.58, 187.98, 187.40, 192.99)
+acf(x, lag.max = 2, plot = FALSE)   # 1.000  0.414  -0.296
+acf(x, lag.max = 2)                 # วาด correlogram พร้อมเส้นประ
+diff(x)                             # 2.61 -7.06 -3.60 -0.58 5.59
+2 / sqrt(length(x))                 # 0.8165 (R วาดเส้นที่ 1.96/sqrt(n) = 0.8002)</code></pre>
+<p>ค่า ACF และ diff ต้องตรงกันทุกตำแหน่ง ถ้า lag 1 ไม่ตรง มักเป็นเพราะหารด้วย n − h แทน n ส่วนเส้นประของ R ใช้ 1.96 จึงแคบกว่า ±2/√n เล็กน้อย ในข้อสอบเขียนสูตรใดก็ได้ แต่ต้องบอกว่าใช้สูตรไหน</p>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<h2 id="s11">12. แบบฝึกห้าแบบ</h2>
 
 <h3>กลุ่ม A: คำนวณ</h3>
 

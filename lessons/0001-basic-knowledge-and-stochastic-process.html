@@ -41,6 +41,7 @@
 <li>วิเคราะห์ข้อมูลจริงด้วย R ตั้งแต่ดูกราฟ เลือกโมเดล ตรวจโมเดล จนถึงพยากรณ์<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup></li>
 </ol></li>
 <li>อาจารย์บอกว่าข้อสอบช่วงต้นวิชาจะให้โมเดลมาหา mean function กับ autocovariance function<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup> หัวข้อ 8–11 ของบทนี้คือการฝึกทักษะนั้น</li>
+<li>ข้อสอบเก่าที่ใช้ทักษะนี้ (Practice Final 1 และ Final 2023) พร้อมแม่แบบคำตอบ 4 ขั้น อยู่ใน<a href="#exam">หัวข้อ 12</a></li>
 </ul>
 </div>
 
@@ -57,7 +58,8 @@
 <tr><td><a href="#s9">9</a></td><td>White noise</td><td>38–44</td></tr>
 <tr><td><a href="#s10">10</a></td><td>Example 1.9: ค่าเฉลี่ยเคลื่อนที่สามจุด</td><td>45</td></tr>
 <tr><td><a href="#s11">11</a></td><td>Homework: random walk with drift</td><td>46</td></tr>
-<tr><td><a href="#s12">12</a></td><td>แบบฝึกห้าแบบ: คำนวณ ทฤษฎี อธิบาย อ่านผล R และรันโค้ด</td><td>—</td></tr>
+<tr><td><a href="#exam">12</a></td><td>ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</td><td>—</td></tr>
+<tr><td><a href="#s12">13</a></td><td>แบบฝึกห้าแบบ: คำนวณ ทฤษฎี อธิบาย อ่านผล R และรันโค้ด</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
@@ -903,8 +905,83 @@ cor(10,20) = 0.699   ทฤษฎี min(10,20)/sqrt(10·20) = 0.707</pre>
 </table>
 
 <p>สองโจทย์ใช้เทคนิคเดียวกันแต่ให้ผลตรงข้าม จึงเป็นคู่เปรียบเทียบที่ดีของเรื่อง stationarity ใน Lesson 2 วิธีทำให้ random walk นิ่งคือการทำผลต่าง \(X_t-X_{t-1}=\delta+w_t\) ซึ่งเหลือแค่ค่าคงที่บวก white noise สอนใน Lesson 3</p>
+<h2 id="exam">12. ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</h2>
+
+<p>ทักษะของบทนี้คือหา mean function และ autocovariance ของ process ที่โจทย์สร้างขึ้น ข้อสอบไม่ได้ถามตรง ๆ ว่า "mean คืออะไร" แต่ทุกข้อที่ถามว่า "นิ่งหรือไม่" (Lesson 2) ต้องเริ่มจากทักษะนี้ ข้อสอบปลายภาคเปิดตำราได้และใช้ R กับ Excel ได้ แต่ข้อพิสูจน์ต้องเขียนในกระดาษ เวลาสอบ 3 ชั่วโมงต่อ 40 คะแนน หรือประมาณ 4.5 นาทีต่อคะแนน</p>
+
+<table>
+<tr><th>ข้อสอบ</th><th>โจทย์ (สรุปความ)</th><th>คะแนน</th><th>เวลาที่ควรใช้</th><th>เฉลย</th></tr>
+<tr><td>Practice Final 1 ข้อ 5</td><td>\(X_t=w_t(w_{t-1}+w_t)/2\) หา mean และ autocovariance</td><td>10</td><td>~15 นาที</td><td><a href="#exam-a">ข้อ ก</a></td></tr>
+<tr><td>Final 2023 ข้อ 3</td><td>\(Y_t=(-1)^tX\) โดย X มี mean 0 นิ่งหรือไม่ หา mean และ autocovariance</td><td>5</td><td>~8 นาที</td><td><a href="#exam-b">ข้อ ข</a></td></tr>
+<tr><td>Practice Final 1 ข้อ 3</td><td>\(X_t=\sin(2\pi Ut)\) โดย \(U\sim\text{Uniform}(0,1)\) พิสูจน์ว่านิ่ง</td><td>20</td><td>~20 นาที</td><td><a href="#exam-c">ข้อ ค</a></td></tr>
+</table>
+
+<div class="box">
+<div class="label">แม่แบบคำตอบ: หา mean และ autocovariance (4 ขั้น)</div>
+<ol>
+<li><b>Mean:</b> ใส่ \(E(\cdot)\) ทีละพจน์ ถ้ามีผลคูณของตัวแปรสุ่มที่เป็นอิสระกัน ให้แยกเป็นผลคูณของ expectation</li>
+<li><b>\(\gamma(0)\):</b> ใช้ \(\mathrm{Var}(X_t)=E(X_t^2)-[E(X_t)]^2\) เมื่อมีผลคูณหรือกำลังสอง เพราะสูตร Var ของผลบวกใช้ไม่ได้ตรง ๆ</li>
+<li><b>\(\gamma(h)\) แยกกรณี:</b> เขียน \(X_t\) กับ \(X_{t+h}\) คู่กัน แล้วหาตัวที่ซ้ำกัน ไล่ h = 1, 2, … จนถึงระยะห่างมากที่สุดในสมการ เกินจากนั้นเป็น 0</li>
+<li><b>สรุปเป็นประโยค:</b> "mean = … ไม่ขึ้นกับ t, γ(h) = … ขึ้นกับ h อย่างเดียว" แล้วค่อยหา \(\rho(h)=\gamma(h)/\gamma(0)\) ถ้าโจทย์ถาม</li>
+</ol>
+<p><b>ค่าที่ต้องจำ</b> (w ~ N(0, σ²) อิสระกัน): \(E(w)=0\), \(E(w^2)=\sigma^2\), \(E(w^3)=0\), \(E(w^4)=3\sigma^4\) และ \(E(w_tw_s)=0\) เมื่อ \(t\ne s\) ถ้าโจทย์ไม่บอกว่าแจกแจงปกติ ให้เขียน \(E(w^4)=\eta\) ไว้เป็นสัญลักษณ์</p>
+</div>
+
+<div class="quiz free" id="exam-a">
+<div class="qhead"><span>ข้อ ก</span><span>Practice Final 1 ข้อ 5 (10 คะแนน)</span></div>
+<div class="qtext">ให้ \(\{w_t\}\) เป็น white noise ที่อิสระกัน และ \(X_t=w_t[w_{t-1}+w_t]/2\) จงหา mean และ autocovariance function ของ \(\{X_t\}\)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>กระจายก่อน: \(X_t=\tfrac12\,(w_tw_{t-1}+w_t^2)\)</p>
+<p><b>Mean:</b> \(E(X_t)=\tfrac12[E(w_t)E(w_{t-1})+E(w_t^2)]=\tfrac12[0+\sigma^2]=\sigma^2/2\) คงที่ แต่ไม่เป็น 0 (จุดที่คนตอบผิดบ่อย)</p>
+<p><b>γ(0):</b> \(E[(w_tw_{t-1}+w_t^2)^2]=E(w_t^2)E(w_{t-1}^2)+2E(w_t^3)E(w_{t-1})+E(w_t^4)=\sigma^4+0+\eta\)<br>
+\(\mathrm{Var}(w_tw_{t-1}+w_t^2)=\sigma^4+\eta-(\sigma^2)^2=\eta\) จึงได้ \(\gamma(0)=\eta/4\) ถ้า w แจกแจงปกติ \(\eta=3\sigma^4\) จะได้ \(\gamma(0)=3\sigma^4/4\)</p>
+<p><b>γ(1):</b> \(E[(w_tw_{t-1}+w_t^2)(w_{t+1}w_t+w_{t+1}^2)]\) กระจายได้ 4 พจน์ คือ \(E(w_t^2w_{t-1}w_{t+1})=0\), \(E(w_tw_{t-1}w_{t+1}^2)=0\), \(E(w_t^3w_{t+1})=0\) และ \(E(w_t^2w_{t+1}^2)=\sigma^4\) รวมได้ \(\sigma^4\) ลบผลคูณของ mean \(\sigma^2\cdot\sigma^2\) จึงได้ covariance เป็น 0 ดังนั้น \(\gamma(1)=0\)</p>
+<p><b>γ(h), |h| ≥ 2:</b> ไม่มี w ตัวใดซ้ำกัน จึงเป็น 0</p>
+<p><b>สรุป:</b> \(\mu=\sigma^2/2\), \(\gamma(0)=\eta/4\) (= \(3\sigma^4/4\) กรณีปกติ), \(\gamma(h)=0\) เมื่อ \(h\ne0\) mean คงที่และ γ ขึ้นกับ h อย่างเดียว จึงเป็น weakly stationary (ตรวจด้วยการจำลอง 2 ล้านจุดแล้ว ค่าตรงกับสูตร)</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-b">
+<div class="qhead"><span>ข้อ ข</span><span>Final 2023 ข้อ 3 (5 คะแนน)</span></div>
+<div class="qtext">ให้ X เป็นตัวแปรสุ่มหนึ่งตัวที่มี mean 0 และ variance \(\sigma_X^2\) นิยาม \(Y_t=(-1)^tX\) จงหา mean และ autocovariance แล้วตอบว่า \(\{Y_t\}\) นิ่งหรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>Mean:</b> \(E(Y_t)=(-1)^tE(X)=0\) ทุก t</p>
+<p><b>Autocovariance:</b> \(\mathrm{cov}(Y_t,Y_{t+h})=(-1)^t(-1)^{t+h}\mathrm{Var}(X)=(-1)^{2t+h}\sigma_X^2=(-1)^h\sigma_X^2\) เพราะ \((-1)^{2t}=1\)</p>
+<p><b>สรุป:</b> mean คงที่ และ \(\gamma(h)=(-1)^h\sigma_X^2\) ขึ้นกับ h อย่างเดียว จึงเป็น weakly stationary ได้ \(\rho(h)=(-1)^h\) คือสลับ +1 กับ −1 ทุก lag</p>
+<p><b>จุดที่ต้องเขียนให้ครบ:</b> เงื่อนไข \(E(X)=0\) จำเป็น ถ้า \(E(X)=\mu\ne0\) mean จะเป็น \((-1)^t\mu\) ซึ่งเปลี่ยนตาม t และไม่นิ่ง ข้อนี้ยังเป็นตัวอย่างว่าอนุกรมที่ "ไม่สุ่มตามเวลา" (มีความสุ่มแค่ตัวเดียว) ก็นิ่งได้</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-c">
+<div class="qhead"><span>ข้อ ค</span><span>Practice Final 1 ข้อ 3 (20 คะแนน)</span></div>
+<div class="qtext">ให้ \(X_t=\sin(2\pi Ut)\), \(t=1,2,3,\dots\) โดย \(U\sim\text{Uniform}(0,1)\) จงพิสูจน์ว่า \(\{X_t\}\) เป็น stationary</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ความสุ่มทั้งหมดมาจาก U ตัวเดียว expectation จึงคืออินทิกรัลเทียบกับ u บนช่วง (0, 1) โดยความหนาแน่นเท่ากับ 1</p>
+<p><b>Mean:</b> \(E(X_t)=\int_0^1\sin(2\pi ut)\,du=\left[\dfrac{-\cos(2\pi ut)}{2\pi t}\right]_0^1=\dfrac{1-\cos(2\pi t)}{2\pi t}=0\) เพราะ t เป็นจำนวนเต็ม \(\cos(2\pi t)=1\)</p>
+<p><b>Autocovariance:</b> ใช้ \(\sin A\sin B=\tfrac12[\cos(A-B)-\cos(A+B)]\)<br>
+\(E(X_tX_{t+h})=\tfrac12\int_0^1\cos(2\pi uh)\,du-\tfrac12\int_0^1\cos(2\pi u(2t+h))\,du\)</p>
+<p>อินทิกรัลของ \(\cos(2\pi uk)\) บน (0, 1) เท่ากับ 1 เมื่อ k = 0 และเท่ากับ 0 เมื่อ k เป็นจำนวนเต็มที่ไม่ใช่ 0 พจน์ที่สองมี \(k=2t+h\ne0\) จึงเป็น 0 เสมอ</p>
+<p>ได้ \(\gamma(0)=1/2\) และ \(\gamma(h)=0\) เมื่อ \(h\ne0\)</p>
+<p><b>สรุป:</b> mean = 0 คงที่ และ γ ขึ้นกับ h อย่างเดียว จึงเป็น weakly stationary (และ uncorrelated ทุก lag แม้ทุกค่าจะมาจาก U ตัวเดียว จึงเป็นตัวอย่างของ white noise ที่ไม่ independent) ตรวจด้วยการจำลองแล้ว: mean ≈ 0, variance ≈ 0.500</p>
+</div>
+</div>
+
+<div class="box exam">
+<div class="label">ข้อสอบที่ใช้ทักษะนี้ในบทถัดไป</div>
+<ul>
+<li>Final 2025 ข้อ 1 \(X_t=w_tw_{t-1}\) และ Practice Final 1 ข้อ 1 (trend + MA) อยู่ใน <a href="0002-performance-evaluation-and-stationarity.html#exam">Lesson 2</a></li>
+<li>Final 2023 ข้อ 2 พิสูจน์ \(|\rho(1)|\le1/2\) ของ MA(1) และ Practice Final 1 ข้อ 4 (θ กับ 1/θ ให้ ACF เดียวกัน) อยู่ใน Lesson 5</li>
+</ul>
+</div>
+
 <!-- ===================================================== -->
-<h2 id="s12">12. แบบฝึกห้าแบบ</h2>
+<h2 id="s12">13. แบบฝึกห้าแบบ</h2>
 
 <p>ข้อสอบของวิชาออกได้หลายแบบ แบบฝึกจึงแบ่งเป็นห้ากลุ่ม</p>
 <ul>

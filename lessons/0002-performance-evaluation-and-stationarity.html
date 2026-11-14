@@ -38,6 +38,7 @@
 <li><b>อย่าเดาแบบแผน ต้องคูณกระจายจริง:</b> \(\gamma(2)\) ของ \(w_{t-1}+2w_t+w_{t+1}\) มักถูกเดาเป็น \(2\sigma^2\) แต่คำตอบคือ \(\sigma^2\)<sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup></li>
 <li><b>ควิซ RMSE หรือ MAE:</b> ใช้เฉพาะ test set<sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup> ควิซเป็น open book ใช้คอมได้ แต่ไม่ใช้ AI<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup></li>
 <li><b>White noise:</b> ไม่ออกข้อสอบโดยตรงเพราะง่ายที่สุด แต่ทุกข้อใช้สมบัติของมัน<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup></li>
+<li>ข้อสอบเก่าปลายภาค 2025 ข้อ 1 (\(w_tw_{t-1}\)), Practice Final 1 ข้อ 1 และ 6 และการหา RMSE บน test set ของข้อ 5g ปี 2025 พร้อมแม่แบบคำตอบ อยู่ใน<a href="#exam">หัวข้อ 9</a></li>
 </ul>
 </div>
 
@@ -51,7 +52,8 @@
 <tr><td><a href="#s6">6</a></td><td>Weakly stationary และวิธีตรวจ</td><td>30–32</td></tr>
 <tr><td><a href="#s7">7</a></td><td>ตัวอย่างตรวจ stationarity สามข้อ</td><td>33</td></tr>
 <tr><td><a href="#s8">8</a></td><td>Exercise บนสไลด์ และโจทย์จาก Exercise 1</td><td>34</td></tr>
-<tr><td><a href="#s9">9</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
+<tr><td><a href="#exam">9</a></td><td>ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</td><td>—</td></tr>
+<tr><td><a href="#s9">10</a></td><td>แบบฝึกห้าแบบ</td><td>—</td></tr>
 </table>
 
 <!-- ===================================================== -->
@@ -751,8 +753,108 @@ accuracy(test[,2], test[,1])      # forecast ก่อน ค่าจริง�
 
 <p>ภาคทฤษฎีของช่วงต้นวิชามีราว 3 ส่วน ต่อจากนี้เป็น data analysis<sup class="fn"><a href="#fn-51" id="fnr-51">51</a></sup> Lesson 3 จึงเปลี่ยนจากโมเดลที่รู้สมการ ไปเป็นการประมาณค่าเหล่านี้จากข้อมูลจริง</p>
 
+<h2 id="exam">9. ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</h2>
+
+<p>ข้อ "นิ่งหรือไม่" ออกในข้อสอบปลายภาคทุกชุดที่มี และในชุดล่าสุด (2025) เป็นข้อแรกของข้อสอบ อาจารย์บอกให้ยึดชุดล่าสุดเป็นหลัก ส่วนเรื่องวัดความแม่นยำ ปี 2025 ใช้ RMSE บน test set เป็นคะแนนก้อนใหญ่ที่สุดของภาค R (8 คะแนนในข้อ 5g) เวลาสอบประมาณ 4.5 นาทีต่อคะแนน</p>
+
+<table>
+<tr><th>ข้อสอบ</th><th>โจทย์ (สรุปความ)</th><th>คะแนน</th><th>เวลาที่ควรใช้</th><th>เฉลย</th></tr>
+<tr><td>Final 2025 ข้อ 1</td><td>\(X_t=w_tw_{t-1}\) นิ่งหรือไม่</td><td>5</td><td>~20 นาที</td><td><a href="#exam-a">ข้อ ก</a></td></tr>
+<tr><td>Practice Final 1 ข้อ 1</td><td>\(X_t=-2t+w_t+0.5w_{t-1}\) ไม่นิ่ง แต่ \(\nabla X_t\) นิ่งหรือไม่</td><td>20</td><td>~20 นาที</td><td><a href="#exam-b">ข้อ ข</a></td></tr>
+<tr><td>Practice Final 1 ข้อ 6</td><td>detrending: \(Y_t=7-3t+X_t\) เมื่อ \(E(X_t)=3t\)</td><td>5</td><td>~5 นาที</td><td><a href="#exam-c">ข้อ ค</a></td></tr>
+<tr><td>Final 2025 ข้อ 5g</td><td>แบ่ง train/test ตามแถว แล้วหา RMSE บน test set ของ 4 โมเดล</td><td>8</td><td>~35 นาที</td><td><a href="#exam-d">ข้อ ง</a></td></tr>
+<tr><td>Final 2025 ข้อ 5e</td><td>เทียบ MSE ของ auto.arima กับ ets ด้วย time series cross-validation</td><td>2</td><td>~10 นาที</td><td>Lesson 10 (tsCV)</td></tr>
+</table>
+
+<div class="box">
+<div class="label">แม่แบบคำตอบ: "อนุกรมนี้นิ่งหรือไม่" (ให้เขียนครบทุกขั้นแม้คำตอบจะชัด)</div>
+<ol>
+<li><b>Mean:</b> หา \(E(X_t)\) แล้วเขียนว่า "ขึ้นกับ t" หรือ "ไม่ขึ้นกับ t"</li>
+<li><b>Variance:</b> หา \(\gamma(0)\) และระบุว่ามีค่าจำกัด</li>
+<li><b>Autocovariance:</b> หา \(\gamma(h)\) ทุก h แยกกรณี (เทคนิคจาก <a href="0001-basic-knowledge-and-stochastic-process.html#exam">Lesson 1 หัวข้อ 12</a>) แล้วเขียนว่า "ขึ้นกับ h อย่างเดียว" หรือ "ขึ้นกับ t"</li>
+<li><b>สรุป:</b> "จึงเป็น (ไม่เป็น) weakly stationary" ถ้าไม่นิ่ง ให้บอกว่าข้อไหนไม่ผ่าน ถ้าข้อ 1 ไม่ผ่าน ไม่ต้องทำต่อก็ได้ แต่ให้เขียนเหตุผลชัด</li>
+</ol>
+<table>
+<tr><th>กับดักที่พบในข้อสอบเก่า</th><th>วิธีหลบ</th></tr>
+<tr><td>ผลคูณ \(w_tw_{t-1}\) ดูเหมือนไม่เชิงเส้นจนคิดว่าไม่นิ่ง</td><td>นิ่งได้ ให้คำนวณจริง เพราะ independence ทำให้แยก expectation ของผลคูณได้</td></tr>
+<tr><td>uncorrelated ทุก lag แล้วสรุปว่าเป็น iid</td><td>ไม่จริง ต้องตรวจความสัมพันธ์ของ \(X_t^2\) ด้วย (ข้อ ก ส่วนท้าย)</td></tr>
+<tr><td>mean ไม่เป็น 0 แล้วคิดว่าไม่นิ่ง</td><td>นิ่งได้ ขอแค่ mean ไม่ขึ้นกับ t เช่น \(E(\nabla X_t)=-2\)</td></tr>
+<tr><td>หยุดไล่ γ(h) ที่ lag ที่เป็น 0 ตัวแรก</td><td>ต้องไล่จนถึงระยะห่างมากที่สุดในสมการ (กับดักของ \(w_t-w_{t-3}\) ใน<a href="#s8">หัวข้อ 8</a>)</td></tr>
+</table>
+</div>
+
+<div class="quiz free" id="exam-a">
+<div class="qhead"><span>ข้อ ก</span><span>Final 2025 ข้อ 1 (5 คะแนน)</span></div>
+<div class="qtext">ให้ \(X_t=w_tw_{t-1}\) โดย \(w_t\) เป็น white noise \(N(0,\sigma^2)\) จงตรวจว่า \(\{X_t\}\) เป็น stationary หรือไม่ แสดงวิธีทำ</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>Mean:</b> \(w_t\) กับ \(w_{t-1}\) อิสระกัน จึงได้ \(E(X_t)=E(w_t)E(w_{t-1})=0\) ไม่ขึ้นกับ t</p>
+<p><b>Variance:</b> \(\gamma(0)=E(w_t^2w_{t-1}^2)=E(w_t^2)E(w_{t-1}^2)=\sigma^4\) มีค่าจำกัด</p>
+<p><b>γ(1):</b> \(E(X_tX_{t+1})=E(w_tw_{t-1}\cdot w_{t+1}w_t)=E(w_t^2)E(w_{t-1})E(w_{t+1})=\sigma^2\cdot0\cdot0=0\)</p>
+<p><b>γ(h), |h| ≥ 2:</b> \(E(w_tw_{t-1}w_{t+h}w_{t+h-1})\) มี w สี่ตัวที่ต่างกันหมด จึงเป็น 0</p>
+<p><b>สรุป:</b> mean = 0 คงที่ \(\gamma(0)=\sigma^4\) และ \(\gamma(h)=0\) เมื่อ \(h\ne0\) จึงเป็น weakly stationary และเป็น white noise ด้วย (variance \(\sigma^4\))</p>
+<p><b>ส่วนเพิ่มที่ทำให้คำตอบโดดเด่น:</b> \(X_t\) ไม่ใช่ iid เพราะ \(\mathrm{cov}(X_t^2,X_{t+1}^2)=E(w_{t-1}^2w_t^4w_{t+1}^2)-\sigma^4\cdot\sigma^4=3\sigma^8-\sigma^8=2\sigma^8\ne0\) ค่าที่ห่างกัน 1 lag ไม่สัมพันธ์กัน แต่ขนาดของมันสัมพันธ์กัน ซึ่งเป็นแนวคิดเดียวกับ ARCH/GARCH ที่สอนใน Class 11 (ตรวจด้วยการจำลองแล้ว: \(\hat\rho(1)\approx0\) และ covariance ของกำลังสองตรงกับ \(2\sigma^8\))</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-b">
+<div class="qhead"><span>ข้อ ข</span><span>Practice Final 1 ข้อ 1 (20 คะแนน)</span></div>
+<div class="qtext">ให้ \(X_t=-2t+w_t+0.5w_{t-1}\), \(w_t\sim N(0,\sigma^2)\) (a) จงแสดงว่า \(X_t\) ไม่นิ่ง (b) พิจารณา \(\nabla X_t=X_t-X_{t-1}\) อนุกรมนี้นิ่งหรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>(a)</b> \(E(X_t)=-2t\) ขึ้นกับ t จึงไม่นิ่ง ข้อนี้ข้อเดียวพอ</p>
+<p><b>(b)</b> \(\nabla X_t=[-2t+w_t+0.5w_{t-1}]-[-2(t-1)+w_{t-1}+0.5w_{t-2}]=-2+w_t-0.5w_{t-1}-0.5w_{t-2}\)</p>
+<p>Mean: \(E(\nabla X_t)=-2\) คงที่ (ไม่เป็น 0 ก็นิ่งได้)</p>
+<p>สัมประสิทธิ์ของ \(w_t,w_{t-1},w_{t-2}\) คือ \(1,-0.5,-0.5\)<br>
+\(\gamma(0)=(1+0.25+0.25)\sigma^2=1.5\sigma^2\)<br>
+\(\gamma(1)=[1\cdot(-0.5)+(-0.5)(-0.5)]\sigma^2=-0.25\sigma^2\)<br>
+\(\gamma(2)=[1\cdot(-0.5)]\sigma^2=-0.5\sigma^2\)<br>
+\(\gamma(h)=0\) เมื่อ \(|h|\ge3\)</p>
+<p><b>สรุป:</b> mean คงที่และ γ ขึ้นกับ h อย่างเดียว \(\nabla X_t\) จึงนิ่ง ได้ \(\rho(1)=-1/6\) และ \(\rho(2)=-1/3\) (ตรวจด้วยการจำลองแล้ว) ข้อนี้คือเหตุผลที่ differencing กำจัด linear trend ได้ ดูต่อใน Lesson 3 หัวข้อ 9</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-c">
+<div class="qhead"><span>ข้อ ค</span><span>Practice Final 1 ข้อ 6 (5 คะแนน)</span></div>
+<div class="qtext">ให้ \(\mathrm{cov}(X_t,X_{t+h})=\gamma_h\) ไม่ขึ้นกับ t แต่ \(E(X_t)=3t\) จงแสดงว่า \(Y_t=7-3t+X_t\) เป็น stationary</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(E(Y_t)=7-3t+3t=7\) คงที่</p>
+<p>\(\mathrm{cov}(Y_t,Y_{t+h})=\mathrm{cov}(X_t,X_{t+h})=\gamma_h\) เพราะ \(7-3t\) เป็นค่าคงที่ (ไม่สุ่ม) และการบวกค่าคงที่ไม่เปลี่ยน covariance</p>
+<p><b>สรุป:</b> mean คงที่และ covariance ขึ้นกับ h อย่างเดียว จึงนิ่ง นี่คือ detrending (Lesson 3 หัวข้อ 7) ที่เอาเส้น trend ที่รู้รูปแบบออก</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-d">
+<div class="qhead"><span>ข้อ ง</span><span>Final 2025 ข้อ 5g (ส่วนของโมเดลที่ 1)</span></div>
+<div class="qtext">ข้อมูลฝนรายเดือน 47 เดือน (ม.ค. 2022 ถึง พ.ย. 2025) ไฟล์ <code>rain.txt</code> โจทย์ให้แบ่ง train = แถว 1–36 และ test = แถว 37–47 แล้ว fit <code>auto.arima(stepwise = TRUE, approximation = FALSE)</code> บน train และหา RMSE บน test เขียนโค้ดให้ถูกลำดับ และระบุว่าคำตอบที่ต้องกรอกคืออะไร</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>library(forecast)
+rain &lt;- read.table("rain.txt", header = TRUE)
+tr &lt;- ts(rain$rain[1:36],  start = c(2022, 1), frequency = 12)
+te &lt;- ts(rain$rain[37:47], start = c(2025, 1), frequency = 12)
+fit &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE)
+fit                              # ชื่อโมเดลที่ต้องกรอกในตาราง
+fc &lt;- forecast(fit, h = length(te))
+accuracy(fc, te)                 # อ่านแถว "Test set" คอลัมน์ RMSE</code></pre>
+<p>ผลที่รันจริง: ได้ <b>ARIMA(0,0,0)(0,1,0)[12] with drift</b> และ RMSE บน test = <b>4.846</b> (ตรวจด้วยสูตร \(\sqrt{\text{mean}((te-\hat y)^2)}\) ได้ค่าเดียวกัน)</p>
+<p><b>สิ่งที่ต้องระวังจากบทนี้:</b></p>
+<ul>
+<li>ต้องตั้ง <code>frequency = 12</code> ก่อน ถ้าลืม auto.arima จะไม่เห็น seasonality และได้โมเดลอื่น</li>
+<li>ลำดับใน <code>accuracy(พยากรณ์, ค่าจริง)</code> ต้องเอาค่าพยากรณ์ขึ้นก่อน ถ้าสลับ RMSE และ MAE ยังเท่าเดิม (4.846) แต่ ME กลับเครื่องหมายจาก +1.071 เป็น −1.071 และ MAPE เปลี่ยนจาก 7.181 เป็น 7.025 (กับดักเดียวกับ<a href="#s3">หัวข้อ 3</a>)</li>
+<li>อาจารย์ขอให้รายงานค่าของ test set เท่านั้น ห้ามเอาแถว Training set ไปกรอก</li>
+<li>การแบ่งเป็นแบบ fixed partition ตาม<a href="#s2">หัวข้อ 2</a> ตัดตามเวลา ห้ามสุ่ม</li>
+</ul>
+</div>
+</div>
+
 <!-- ===================================================== -->
-<h2 id="s9">9. แบบฝึกห้าแบบ</h2>
+<h2 id="s9">10. แบบฝึกห้าแบบ</h2>
 
 <p>แบบฝึกแบ่งเป็นห้ากลุ่ม</p>
 <ul>
