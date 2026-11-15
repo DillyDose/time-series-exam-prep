@@ -416,3 +416,24 @@ ol.fnlist { font-size: 0.9em; color: #444; }
 ol.fnlist li { margin: 0.25em 0; }
 ol.fnlist li:target { background: #fff6d6; }
 a.fnback { font-size: 0.85em; margin-left: 4px; }
+
+/* ===== reader layout (lessons rewritten 2026-11-15): continuous prose, small slides, folded extras ===== */
+body.reader { line-height: 1.8; }
+body.reader p { margin: 1em 0; }
+body.reader h2 { margin-top: 2.6em; }
+.readmeta { font-size: 0.85rem; color: var(--ink-soft); margin: -0.4em 0 1.6em; }
+figure.thumb { max-width: 360px; margin: 1.2em auto; }
+figure.thumb img { cursor: zoom-in; }
+figure.thumb figcaption, .gallery figcaption { font-size: 0.78rem; }
+details.fold { border: 1px solid var(--rule); border-radius: 8px; margin: 1.4em 0; padding: 0 1em; }
+details.fold > summary { cursor: pointer; padding: 0.6em 0; font-size: 0.9rem; color: var(--ink-soft); list-style-position: outside; }
+details.fold[open] > summary { border-bottom: 1px dashed var(--rule); margin-bottom: 0.6em; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 0.4em 0 1em; }
+.gallery figure { margin: 0; }
+.gallery img { cursor: zoom-in; }
+#readbar { position: fixed; top: 0; left: 0; height: 3px; width: 0; background: var(--accent); z-index: 50; }
+#zoom { position: fixed; inset: 0; background: rgba(255,255,255,0.97); display: none; align-items: center; justify-content: center; z-index: 60; cursor: zoom-out; padding: 2vh 2vw; }
+#zoom.on { display: flex; }
+#zoom img { max-width: 100%; max-height: 96vh; border: 1px solid var(--rule); border-radius: 6px; }
+.nextpage { border-top: 1px solid var(--rule); margin-top: 2.5em; padding-top: 1em; }
+@media print { #readbar, #zoom { display: none !important; } details.fold { border: none; } figure.thumb { max-width: 60%; } }

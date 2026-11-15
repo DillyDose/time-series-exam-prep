@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 2: วัดความแม่นยำของการพยากรณ์ และ Stationarity</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 2</span>
+  <span><a href="0002-performance-evaluation-and-stationarity.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 2: วัดความแม่นยำของการพยากรณ์ และ Stationarity</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>Forecast errors</span></div>
+<div class="qtext">ค่าจริงคือ 50, 40, 60 และค่าพยากรณ์คือ 45, 44, 54 ค่า MAE และ RMSE คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ME (5 − 4 + 6)/3 ที่ยังไม่ใส่ค่าสัมบูรณ์">MAE = 2.333, RMSE = 5.066</button>
+<button class="opt" data-correct="true" data-note="ถูก. MAE = (5+4+6)/3 = 5 และ RMSE = √((25+16+36)/3) = √25.667 = 5.066">MAE = 5.000, RMSE = 5.066</button>
+<button class="opt" data-correct="false" data-note="ผิด. 25.667 คือ MSE ยังไม่ถอดราก">MAE = 5.000, RMSE = 25.67</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย 2 แทน n = 3">MAE = 7.500, RMSE = 6.205</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>MAPE</span></div>
+<div class="qtext">จากข้อ 1 ค่า MAPE คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วยค่าพยากรณ์แทนค่าจริง">MAPE = 10.37%</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมใส่ค่าสัมบูรณ์ ได้ MPE">MAPE = 3.33%</button>
+<button class="opt" data-correct="true" data-note="ถูก. (5/50 + 4/40 + 6/60)/3 = (0.1+0.1+0.1)/3 = 10%">MAPE = 10.00%</button>
+<button class="opt" data-correct="false" data-note="ผิด. รวมโดยไม่หาร n">MAPE = 30.00%</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>Autocovariance</span></div>
+<div class="qtext">\(x_t=w_t-w_{t-3}\), \(w_t\sim N(0,\sigma^2)\) ค่า \(\rho(3)\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. lag 3 มี w_t ร่วมกัน จึงไม่เป็น 0 นี่คือกับดักของข้อสอบเก่า">\(\rho(3)=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายผิด w_t มีสัมประสิทธิ์ +1 กับ −1">\(\rho(3)=+1/2\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมหารด้วย γ(0) = 2σ²">\(\rho(3)=-1\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. γ(3) = −σ² และ γ(0) = 2σ² จึงได้ −1/2">\(\rho(3)=-1/2\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Mean ของโมเดลที่มี w²</span></div>
+<div class="qtext">\(x_t=w_t-\theta w_{t-1}^2\), \(w_t\sim N(0,\sigma^2)\) ค่า \(E(x_t)\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. E(w²) = σ² จึงได้ −θσ² ตอบ 0 คือผิดทันที">\(E(x_t)=-\theta\sigma^2\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. E(w²) ไม่เป็น 0 นี่คือกับดักของข้อนี้">\(E(x_t)=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. E(w²) = σ² ไม่ใช่ σ">\(E(x_t)=-\theta\sigma\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ E(w⁴) แทน E(w²)">\(E(x_t)=-3\theta\sigma^4\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 5</span><span>พิสูจน์ (แนวควิซ)</span></div>
+<div class="qtext">ให้ \(x_t=w_t+\theta w_{t-1}^2\), \(w_t\sim N(0,\sigma^2)\) จงหา mean function, \(\gamma(0)\), \(\gamma(1)\) และสรุปว่า stationary หรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(E(x_t)=0+\theta E(w_{t-1}^2)=\theta\sigma^2\) คงที่</p>
+<p>\(\gamma(0)=\mathrm{Var}(w_t)+\theta^2\mathrm{Var}(w_{t-1}^2)=\sigma^2+\theta^2(3\sigma^4-\sigma^4)=\sigma^2+2\theta^2\sigma^4\)</p>
+<p>\(\gamma(1)=\mathrm{cov}(w_t+\theta w_{t-1}^2,\ w_{t+1}+\theta w_t^2)=\theta\,\mathrm{cov}(w_t,w_t^2)=\theta[E(w^3)-E(w)E(w^2)]=0\)</p>
+<p>\(\gamma(h)=0\) เมื่อ h ≥ 2 เพราะไม่มีตัวร่วม สรุป stationary</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>พิสูจน์</span></div>
+<div class="qtext">ให้ \(x_t=2w_t+w_{t-2}\), \(w_t\sim wn(0,\sigma^2)\) จงหา \(\gamma(h)\) ทุก h และ ACF แล้วสรุปว่า stationary หรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(E(x_t)=0\)</p>
+<p>\(\gamma(0)=(4+1)\sigma^2=5\sigma^2\)</p>
+<p>\(\gamma(1)\): \(x_{t+1}=2w_{t+1}+w_{t-1}\) ไม่มีตัวร่วมกับ \(w_t,w_{t-2}\) จึงเป็น 0</p>
+<p>\(\gamma(2)\): \(x_{t+2}=2w_{t+2}+w_t\) ตัวร่วมคือ \(w_t\) (2 กับ 1) ได้ \(2\sigma^2\)</p>
+<p>\(\gamma(h)=0\) เมื่อ \(|h|\ge3\) ACF: \(\rho(1)=0\), \(\rho(2)=2/5\) สรุป stationary สังเกตว่า lag 1 เป็น 0 แต่ lag 2 ไม่เป็น 0 จึงต้องไล่ทุก lag จนถึงระยะห่างสูงสุดในสมการ</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>ทฤษฎี</span></div>
+<div class="qtext">จงพิสูจน์ว่าถ้า \(\{X_t\}\) เป็น strictly stationary และมีความแปรปรวนจำกัด แล้ว \(E(X_t)\) คงที่ และ \(\mathrm{cov}(X_t,X_s)\) ขึ้นกับ \(|t-s|\) เท่านั้น</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>n = 1: การแจกแจงของ \(X_t\) เหมือนของ \(X_{t+h}\) ทุก h ทุกเวลาจึงมีการแจกแจงเดียวกัน \(E(X_t)\) และ \(\mathrm{Var}(X_t)\) จึงคงที่</p>
+<p>n = 2: การแจกแจงร่วมของ \((X_t,X_s)\) เหมือนของ \((X_{t+h},X_{s+h})\) เลือก h = −s ได้การแจกแจงของ \((X_{t-s},X_0)\) ซึ่งขึ้นกับ t − s เท่านั้น covariance ที่คำนวณจากการแจกแจงนี้จึงขึ้นกับ \(|t-s|\) เท่านั้น</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>Partition</span></div>
+<div class="qtext">ทำไมห้ามสุ่มแบ่งอนุกรมเวลาเป็น train กับ test</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ปัญหาไม่ใช่จำนวนข้อมูล แต่เป็นลำดับเวลา">เพราะข้อมูลอนุกรมเวลามีน้อยเกินไป</button>
+<button class="opt" data-correct="false" data-note="ผิด. MAPE ไม่เกี่ยวกับวิธีแบ่ง">เพราะจะคำนวณ MAPE ไม่ได้</button>
+<button class="opt" data-correct="true" data-note="ถูก. ข้อมูลมี order การสุ่มทำให้ใช้อนาคตทายอดีต">เพราะการสุ่มทำให้ใช้อนาคตทายอดีต</button>
+<button class="opt" data-correct="false" data-note="ผิด. R สุ่มแถวของ ts ได้ แต่ไม่ควรทำ">เพราะ R สุ่มแถวของ ts ไม่ได้</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>Strong กับ weak</span></div>
+<div class="qtext">ข้อใดถูกเกี่ยวกับ strictly และ weakly stationary</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. weak ไม่จำเป็นต้องให้ strong เช่น Exercise 1 ข้อ 1">Weak ให้ strong เสมอ และในทางกลับกันด้วย</button>
+<button class="opt" data-correct="false" data-note="ผิด. random walk มี mean คงที่แต่ไม่นิ่ง">Mean คงที่อย่างเดียวพอจะสรุปว่า weak</button>
+<button class="opt" data-correct="false" data-note="ผิด. วิชานี้ถือว่า weak คือ stationary">วิชานี้ใช้เฉพาะนิยามแบบ strict</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตามสไลด์หน้า 32 และ Exercise 1 ข้อ 1">Strong ให้ weak แต่ weak ไม่จำเป็นต้องให้ strong</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>Roll-forward</span></div>
+<div class="qtext">แผนภาพหนึ่ง train ทุกรอบเริ่มจุดเดิมและยาวขึ้นเรื่อย ๆ ส่วน test อยู่ถัดจาก train เสมอ เป็นการแบ่งแบบใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. train เริ่มจุดเดิมและสะสม">Roll-forward แบบสะสม (cumulative)</button>
+<button class="opt" data-correct="false" data-note="ผิด. moving window มี train ยาวคงที่และเลื่อนจุดเริ่ม">Roll-forward แบบหน้าต่างเลื่อน</button>
+<button class="opt" data-correct="false" data-note="ผิด. fixed ตัดครั้งเดียว ไม่มีหลายรอบ">Fixed partitioning ตัดครั้งเดียว</button>
+<button class="opt" data-correct="false" data-note="ผิด. การสุ่มใช้กับ cross-sectional">Random partition แบบ cross-sectional</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>อธิบาย</span></div>
+<div class="qtext">จงอธิบายว่าทำไม stationarity สำคัญต่อการสร้างโมเดล และกลยุทธ์ของวิชากับข้อมูลจริงที่ส่วนใหญ่ไม่นิ่งคืออะไร</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ข้อมูลจริงมีค่าเดียวต่อเวลา ถ้าค่าเฉลี่ยและ covariance เปลี่ยนทุกเวลา จะประมาณค่าเหล่านั้นไม่ได้ เมื่อนิ่ง กติกาไม่เปลี่ยนตามเวลา ทุกจุดช่วยกันประมาณค่าชุดเดียว ทำให้ model ง่ายและพยากรณ์ได้ (predictable) ทฤษฎีส่วนใหญ่จึงสร้างบนอนุกรมที่นิ่ง</p>
+<p>กลยุทธ์: ดึงส่วนที่ไม่นิ่งออกก่อน (trend ด้วย detrending หรือ differencing, ความแปรปรวนด้วย log) นำส่วนที่นิ่งไปสร้างโมเดล แล้วปรับกลับทีหลัง</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>อ่าน output</span></div>
+<div class="qtext"><p>เพื่อนรันคำสั่งตามสไลด์และได้ผลนี้ แล้วรายงานว่า "โมเดลพยากรณ์ต่ำกว่าค่าจริงเฉลี่ย 0.33 หน่วย MAPE 15.8%" จงอธิบายว่าถูกหรือผิด เพราะอะไร</p>
+<pre class="out">&gt; test &lt;- ts(read.table("accuracy.txt", h=T))   # คอลัมน์ 1 = data, 2 = forecast
+&gt; accuracy(test[,1], test[,2])
+                ME     RMSE      MAE       MPE   MAPE
+Test set 0.3333333 4.434712 3.666667 -1.666443 15.799</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ผิด <code>accuracy(f, x)</code> รับค่าพยากรณ์ก่อน แต่คำสั่งนี้ส่งค่าจริงไปเป็นตัวแรก error จึงกลายเป็น forecast − data เครื่องหมายของ ME กลับ และ MAPE หารด้วยค่าพยากรณ์แทนค่าจริง</p>
+<p>คำสั่งที่ถูกคือ <code>accuracy(test[,2], test[,1])</code> ได้ ME = −0.333 (พยากรณ์<b>สูงกว่า</b>ค่าจริงเฉลี่ย 0.33) และ MAPE = 15.73% ตรงกับ Excel ส่วน RMSE 4.435 และ MAE 3.667 ถูกทั้งสองแบบ</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>อ่าน output</span></div>
+<div class="qtext"><p>จาก output นี้ train และ test มีกี่จุด ครอบคลุมปีใด</p>
+<pre class="out">&gt; new_temperature &lt;- ts(read.table("temp.txt"), start = 1856)
+&gt; length(new_temperature); end(new_temperature)
+[1] 142
+[1] 1997    1
+&gt; nValid &lt;- 36; nTrain &lt;- length(new_temperature) - nValid</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>nTrain = 142 − 36 = 106 จุด ปี 1856 ถึง 1856 + 106 − 1 = 1961</p>
+<p>test 36 จุด ปี 1962 ถึง 1997</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>แบ่ง temp.txt เป็น train และ test ตามสไลด์ แล้วลองพยากรณ์ test ด้วยสองวิธีง่าย ๆ (ก) ใช้ค่าเฉลี่ยของ train (ข) ใช้ค่าสุดท้ายของ train จากนั้นเทียบ RMSE, MAE และ ME ของสองวิธี วิธีไหนดีกว่า และ ME บอกอะไร</p>
+<pre><code>library(forecast)
+x  &lt;- ts(read.table("temp.txt"), start = 1856)
+tr &lt;- window(x, end = 1961); te &lt;- window(x, start = 1962)
+fa &lt;- rep(mean(tr), 36)        # (ก) ค่าเฉลี่ย train
+fb &lt;- rep(tail(tr, 1), 36)     # (ข) ค่าสุดท้ายของ train
+accuracy(fa, te); accuracy(fb, te)</code></pre></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">(ก) ค่าเฉลี่ย train = −0.235   RMSE 0.349  MAE 0.305  ME 0.305
+(ข) ค่าสุดท้าย   =  0.030   RMSE 0.174  MAE 0.141  ME 0.039</pre>
+<p>วิธี (ข) ดีกว่าทุกตัววัด เพราะข้อมูลมี trend ขาขึ้น ค่าเฉลี่ยของ train ทั้ง 106 ปีจึงต่ำกว่าช่วง test มาก ME ของวิธี (ก) เป็นบวก 0.305 เกือบเท่า MAE แปลว่าพยากรณ์ต่ำกว่าจริงเกือบทุกปี ซึ่งเป็นอาการของโมเดลที่ไม่จับ trend ข้อมูลนี้ไม่นิ่ง จึงต้องดึง trend ออกก่อน (Lesson 3)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>จำลองโมเดลของ Exercise 1 ข้อ 2 แล้วเทียบ ACF จากข้อมูลกับค่าทางทฤษฎีที่คำนวณในตอนที่ 4 ของบทเรียน</p>
+<pre><code>set.seed(11)
+w &lt;- rnorm(2002, 0, 0.5)                          # sigma^2 = 0.25
+x &lt;- w[3:2002] - 1.2*w[2:2001] - 1.6*w[1:2000]
+acf(x, lag.max = 3, plot = FALSE); var(x)
+ARMAacf(ma = c(-1.2, -1.6), lag.max = 3)          # ค่าทางทฤษฎี</code></pre></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">ACF จากข้อมูล lag 0–3: 1.000  0.149  -0.312  0.005     var(x) = 1.233
+ทฤษฎี (ARMAacf):       1.000  0.144  -0.320  0.000     γ(0)  = 1.25</pre>
+<p>ค่าจากข้อมูล 2,000 จุดใกล้ค่าทางทฤษฎีทุก lag lag 3 ควรอยู่ในเส้นขอบ \(2/\sqrt{2000}=0.045\) สรุปว่าการคำนวณมือถูก และโมเดลนิ่ง ACF ตัดหลัง lag 2</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>อธิบาย overfitting และเหตุผลที่ต้องวัด error บน test set เท่านั้น</li>
+<li>แยก fixed, roll-forward แบบสะสม และแบบหน้าต่างเลื่อน และเขียนโค้ด <code>window()</code></li>
+<li>คำนวณ ME, MSE, RMSE, MAE, MAPE, MPE จากตาราง ตีความเครื่องหมาย และรู้ข้อเสียของ MAPE</li>
+<li>ใช้ <code>accuracy(f, x)</code> ให้ถูกลำดับ</li>
+<li>เขียนนิยามของ strictly และ weakly stationary และวิธีตรวจสองข้อ</li>
+<li>ตรวจ stationarity ของโมเดลใดก็ตาม ไล่ lag ให้ครบ และใช้ moment ของการแจกแจงปกติเมื่อมี w² หรือผลคูณ</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0002-performance-evaluation-and-stationarity.html">← กลับไปที่บทเรียน Lesson 2</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
