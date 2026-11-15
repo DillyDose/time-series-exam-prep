@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 3: ประมาณ ACF จากข้อมูล และกำจัด trend</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 3</span>
+  <span><a href="0003-estimation-correlogram-and-detrending.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 3: ประมาณ ACF จากข้อมูล และกำจัด trend</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+<h2 id="exam">ข้อสอบเก่าที่ออกจากบทนี้ และแม่แบบคำตอบ</h2>
+
+<p>บทนี้ออกในข้อสอบปลายภาค 2024 รวม 8 คะแนน ทั้งคำนวณ ACF ด้วยมือ (ห้ามใช้ R แต่ใช้ Excel ช่วยได้) อธิบายเส้นประใน correlogram และอ่านผล regression บนเวลา ปี 2025 ไม่ได้ออกตรง ๆ แต่การอ่าน ACF ของ residual และการเลือก differencing อยู่ในทุกข้อย่อยของภาค R เวลาสอบประมาณ 4.5 นาทีต่อคะแนน</p>
+
+<table>
+<tr><th>ข้อสอบ</th><th>โจทย์ (สรุปความ)</th><th>คะแนน</th><th>เวลาที่ควรใช้</th><th>เฉลย</th></tr>
+<tr><td>Final 2024 ข้อ 2ก</td><td>ราคาหุ้น 6 วัน คำนวณ sample ACF ถึง lag 2 ด้วยมือ และวาด correlogram</td><td>3</td><td>~15 นาที</td><td><a href="#exam-a">ข้อ ก</a></td></tr>
+<tr><td>Final 2024 ข้อ 2ข</td><td>เติมค่า \(\nabla x_t\) ในตาราง</td><td>1</td><td>~3 นาที</td><td><a href="#exam-b">ข้อ ข</a></td></tr>
+<tr><td>Final 2024 ข้อ 3ข</td><td>เส้นประสองเส้นใน correlogram ใช้ทำอะไร และคำนวณอย่างไร</td><td>2</td><td>~8 นาที</td><td><a href="#exam-c">ข้อ ค</a></td></tr>
+<tr><td>Final 2024 ข้อ 3ก</td><td>อ่านผล <code>lm(Nile ~ time(Nile))</code> แล้วบอกว่าใช้ในการวิเคราะห์อนุกรมเวลาอย่างไร และเกี่ยวกับตัวแบบอะไร</td><td>2</td><td>~8 นาที</td><td><a href="#exam-d">ข้อ ง</a></td></tr>
+</table>
+
+<div class="box">
+<div class="label">แม่แบบคำตอบ 1: คำนวณ sample ACF ด้วยมือ (จัดตารางแบบ Excel)</div>
+<ol>
+<li>หา \(\bar x\) แล้วทำคอลัมน์ \(x_t-\bar x\)</li>
+<li>ทำคอลัมน์ \((x_t-\bar x)^2\) ผลรวมหารด้วย n ได้ \(\hat\gamma(0)\)</li>
+<li>คอลัมน์ lag h คือ \((x_t-\bar x)(x_{t-h}-\bar x)\) มี n − h แถว ผลรวม<b>หารด้วย n ไม่ใช่ n − h</b> (สูตรของสไลด์และของ R) ได้ \(\hat\gamma(h)\)</li>
+<li>\(\hat\rho(h)=\hat\gamma(h)/\hat\gamma(0)\) แล้ววาดแท่งที่ lag 0, 1, 2 พร้อมเส้น \(\pm2/\sqrt n\) และสรุปว่าแท่งไหนหลุดเส้น</li>
+</ol>
+</div>
+
+<div class="box">
+<div class="label">แม่แบบคำตอบ 2: อ่าน correlogram 3 รูปแบบ</div>
+<table>
+<tr><th>สิ่งที่เห็น</th><th>ตีความ</th><th>ทำต่ออย่างไร</th></tr>
+<tr><td>แท่งลดลงช้า ๆ และอยู่นอกเส้นหลาย lag</td><td>มี trend หรือไม่นิ่ง</td><td>detrend หรือ difference แล้วดู ACF ใหม่ ยืนยันด้วย ADF (<a href="0003-estimation-correlogram-and-detrending.html#s3">ตอนที่ 3 ของบทเรียน</a>)</td></tr>
+<tr><td>แท่งหลุดเส้นแค่ไม่กี่ lag แรก แล้วตกอยู่ในเส้น</td><td>นิ่ง และมีความสัมพันธ์ระยะสั้น</td><td>เลือกโมเดล MA หรือ AR (Lesson 5–6)</td></tr>
+<tr><td>แท่งเกือบทั้งหมดอยู่ในเส้น (ราว 1 ใน 20 อาจหลุดโดยบังเอิญ)</td><td>ดูเหมือน white noise</td><td>ถ้าเป็น residual แปลว่าโมเดลจับความสัมพันธ์ได้หมด (Lesson 8)</td></tr>
+</table>
+</div>
+
+<div class="quiz free" id="exam-a">
+<div class="qhead"><span>ข้อ ก</span><span>Final 2024 ข้อ 2ก (3 คะแนน)</span></div>
+<div class="qtext">ราคาหุ้น 6 วันทำการติดกันคือ 196.03, 198.64, 191.58, 187.98, 187.40, 192.99 จงคำนวณ sample ACF ถึง lag 2 แสดงวิธีทำ และวาด correlogram (ห้ามใช้ R หรือ Python แต่ใช้ Excel ช่วยคำนวณได้)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\bar x=1154.62/6=192.4367\)</p>
+<table>
+<tr><th>t</th><th>\(x_t\)</th><th>\(x_t-\bar x\)</th><th>\((x_t-\bar x)^2\)</th><th>lag 1: \((x_t-\bar x)(x_{t-1}-\bar x)\)</th><th>lag 2: \((x_t-\bar x)(x_{t-2}-\bar x)\)</th></tr>
+<tr><td>1</td><td>196.03</td><td>3.5933</td><td>12.9120</td><td>–</td><td>–</td></tr>
+<tr><td>2</td><td>198.64</td><td>6.2033</td><td>38.4813</td><td>22.2906</td><td>–</td></tr>
+<tr><td>3</td><td>191.58</td><td>−0.8567</td><td>0.7339</td><td>−5.3142</td><td>−3.0783</td></tr>
+<tr><td>4</td><td>187.98</td><td>−4.4567</td><td>19.8619</td><td>3.8179</td><td>−27.6462</td></tr>
+<tr><td>5</td><td>187.40</td><td>−5.0367</td><td>25.3680</td><td>22.4467</td><td>4.3147</td></tr>
+<tr><td>6</td><td>192.99</td><td>0.5533</td><td>0.3062</td><td>−2.7870</td><td>−2.4660</td></tr>
+<tr><td colspan="3"><b>ผลรวม</b></td><td><b>97.6633</b></td><td><b>40.4541</b></td><td><b>−28.8758</b></td></tr>
+</table>
+<p>\(\hat\gamma(0)=97.6633/6=16.2772\), \(\hat\gamma(1)=40.4541/6=6.7424\), \(\hat\gamma(2)=-28.8758/6=-4.8126\)</p>
+<p>\(\hat\rho(0)=1\), \(\hat\rho(1)=6.7424/16.2772=0.4142\), \(\hat\rho(2)=-4.8126/16.2772=-0.2957\)</p>
+<p>เส้นขอบ \(\pm2/\sqrt6=\pm0.8165\)</p>
+<svg viewBox="0 0 340 220" width="340" role="img" aria-label="Correlogram ของราคาหุ้น 6 วัน: lag 0 = 1, lag 1 = 0.414, lag 2 = −0.296, เส้นขอบ ±0.8165">
+<line x1="40" y1="110" x2="320" y2="110" stroke="#333"/>
+<line x1="40" y1="20" x2="40" y2="200" stroke="#333"/>
+<line x1="40" y1="44.7" x2="320" y2="44.7" stroke="#2563eb" stroke-dasharray="5,4"/>
+<line x1="40" y1="175.3" x2="320" y2="175.3" stroke="#2563eb" stroke-dasharray="5,4"/>
+<rect x="76" y="30" width="8" height="80" fill="#111"/>
+<rect x="166" y="76.9" width="8" height="33.1" fill="#111"/>
+<rect x="256" y="110" width="8" height="23.7" fill="#111"/>
+<text x="80" y="214" font-size="12" text-anchor="middle">0</text>
+<text x="170" y="214" font-size="12" text-anchor="middle">1</text>
+<text x="260" y="214" font-size="12" text-anchor="middle">2</text>
+<text x="34" y="34" font-size="11" text-anchor="end">1</text>
+<text x="34" y="114" font-size="11" text-anchor="end">0</text>
+<text x="34" y="194" font-size="11" text-anchor="end">−1</text>
+<text x="322" y="40" font-size="11" text-anchor="end" fill="#2563eb">+0.8165</text>
+<text x="322" y="190" font-size="11" text-anchor="end" fill="#2563eb">−0.8165</text>
+<text x="170" y="70" font-size="11" text-anchor="middle">0.414</text>
+<text x="260" y="148" font-size="11" text-anchor="middle">−0.296</text>
+</svg>
+<p><b>สรุป:</b> ไม่มีแท่ง lag 1 หรือ 2 หลุดเส้นขอบ ยังไม่มีหลักฐานว่ามี autocorrelation แต่ควรเขียนต่อว่า n = 6 น้อยมาก เส้นขอบจึงกว้าง (±0.82) และสูตร ±2/√n เป็นค่าประมาณสำหรับ n ใหญ่ ผลนี้จึงบอกได้น้อย ค่าทุกตัวตรงกับ <code>acf(x, lag.max = 2)</code> ใน R (1.0000, 0.4142, −0.2957)</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-b">
+<div class="qhead"><span>ข้อ ข</span><span>Final 2024 ข้อ 2ข (1 คะแนน)</span></div>
+<div class="qtext">จากราคาในข้อ ก จงหา \(\nabla x_t=x_t-x_{t-1}\) ทุกวันที่หาได้</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<table>
+<tr><th>t</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+<tr><th>\(\nabla x_t\)</th><td>––</td><td>2.61</td><td>−7.06</td><td>−3.60</td><td>−0.58</td><td>5.59</td></tr>
+</table>
+<p>วันแรกไม่มีค่า เพราะไม่มี \(x_0\) ข้อมูลหลัง differencing จึงเหลือ n − 1 = 5 ค่า (ใน R คือ <code>diff(x)</code>) ถ้าเป็นราคาหุ้น ค่านี้คือการเปลี่ยนแปลงของราคา ซึ่งต่างจากผลตอบแทน \((P_t-P_{t-1})/P_{t-1}\) ที่ใช้ในข้อ CPALL ปี 2024</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-c">
+<div class="qhead"><span>ข้อ ค</span><span>Final 2024 ข้อ 3ข (2 คะแนน)</span></div>
+<div class="qtext">ใน correlogram ของข้อมูลอัตราการไหลของแม่น้ำ (n = 100) มีเส้นประสองเส้นรอบค่า ACF = 0 เส้นเหล่านี้ใช้ทำอะไร และสร้างอย่างไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>ใช้ทำอะไร:</b> ใช้ทดสอบว่า autocorrelation ที่ lag นั้นต่างจาก 0 อย่างมีนัยสำคัญหรือไม่ แท่งที่หลุดเส้นแปลว่ามีความสัมพันธ์จริงที่ lag นั้น แท่งที่อยู่ในเส้นแปลว่าแยกไม่ออกจาก 0</p>
+<p><b>สร้างอย่างไร:</b> ถ้าข้อมูลเป็น white noise และ n ใหญ่ \(\hat\rho(h)\) จะแจกแจงประมาณ \(N(0,1/n)\) ช่วงความเชื่อมั่น 95% จึงเป็น \(\pm1.96/\sqrt n\approx\pm2/\sqrt n\) กรณีนี้ n = 100 ได้ \(\pm0.196\) (R ใช้ 1.96)</p>
+<p><b>ข้อควรเขียนเพิ่ม:</b> เส้นนี้สร้างภายใต้สมมติฐานว่าเป็น white noise ที่ระดับ 95% แม้ข้อมูลเป็น white noise จริง ก็คาดได้ว่าราว 1 ใน 20 lag จะหลุดเส้นโดยบังเอิญ จึงดูภาพรวมทั้ง correlogram ไม่ตัดสินจากแท่งเดียว</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-d">
+<div class="qhead"><span>ข้อ ง</span><span>Final 2024 ข้อ 3ก (2 คะแนน)</span></div>
+<div class="qtext">ข้อมูลอัตราการไหลของแม่น้ำไนล์ปี 1871–1970 ถูก fit ด้วย \(x_t=\beta_0+\beta_1t+\varepsilon_t\) ได้ intercept 6129.46 (p = 1.9e−08) และสัมประสิทธิ์ของเวลา −2.7143 (s.e. 0.5216, p = 1.07e−06) ผลนี้นำไปใช้ในการวิเคราะห์อนุกรมเวลาได้อย่างไร และเกี่ยวกับตัวแบบอะไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>อ่านผล:</b> อัตราการไหลลดลงเฉลี่ยปีละ 2.71 หน่วย อย่างมีนัยสำคัญ (p ≈ 0.000001) ข้อมูลจึงมี deterministic linear trend ขาลง ไม่นิ่งเพราะ mean ขึ้นกับ t</p>
+<p><b>นำไปใช้:</b> ใช้ทำ <b>detrending</b> (<a href="0003-estimation-correlogram-and-detrending.html#s4">ตอนที่ 4 ของบทเรียน</a>) คือ \(\hat\varepsilon_t=x_t-(6129.46-2.7143t)\) แล้วตรวจว่า residual นิ่งด้วย ACF หรือ ADF ถ้านิ่งแต่ยังมี autocorrelation ให้ fit ARMA บน residual</p>
+<p><b>ตัวแบบที่เกี่ยวข้อง:</b> trend-stationary model หรือ regression with ARMA errors คือ \(x_t=\beta_0+\beta_1t+y_t\) โดย \(y_t\) เป็น ARMA ทางเลือกอีกทางคือ differencing ซึ่งได้ ARIMA(p,1,q) (ข้อ 3ฉ ของชุดเดียวกัน auto.arima เลือก ARIMA(1,1,1))</p>
+<p><b>ข้อควรระวังที่ควรเขียนต่อ:</b> residual ของ OLS ในอนุกรมเวลามักมี autocorrelation ทำให้ s.e. และ p-value ต่ำเกินจริง (แก้ด้วย GLS ใน Lesson 11) และการต่อเส้นตรงไปในอนาคตจะลดลงไม่มีที่สิ้นสุด ซึ่งไม่สมเหตุสมผลกับอัตราการไหลของแม่น้ำ</p>
+</div>
+</div>
+
+<div class="quiz free" id="exam-e">
+<div class="qhead"><span>ข้อ จ</span><span>รันตรวจคำตอบด้วย R (หลังทำข้อ ก และ ข ด้วยมือแล้ว)</span></div>
+<div class="qtext">รันโค้ดนี้แล้วเทียบกับคำตอบที่คำนวณมือ ค่าใดควรตรงกันทุกตำแหน่ง</div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>x &lt;- c(196.03, 198.64, 191.58, 187.98, 187.40, 192.99)
+acf(x, lag.max = 2, plot = FALSE)   # 1.000  0.414  -0.296
+acf(x, lag.max = 2)                 # วาด correlogram พร้อมเส้นประ
+diff(x)                             # 2.61 -7.06 -3.60 -0.58 5.59
+2 / sqrt(length(x))                 # 0.8165 (R วาดเส้นที่ 1.96/sqrt(n) = 0.8002)</code></pre>
+<p>ค่า ACF และ diff ต้องตรงกันทุกตำแหน่ง ถ้า lag 1 ไม่ตรง มักเป็นเพราะหารด้วย n − h แทน n ส่วนเส้นประของ R ใช้ 1.96 จึงแคบกว่า ±2/√n เล็กน้อย ในข้อสอบเขียนสูตรใดก็ได้ แต่ต้องบอกว่าใช้สูตรไหน</p>
+</div>
+</div>
+
+<!-- ===================================================== -->
+
+<h2 id="ex1">เฉลย Exercise 1 ข้อ 5–8 (ACF มือ และงาน R)</h2>
+
+<p>Exercise 1 ที่แจกใน CLASS 2 มีส่วนทฤษฎี (ข้อ 1–4 อยู่ใน Lesson 2 ตอนที่ 4) และส่วนที่ใช้เนื้อหาของบทนี้ ข้อ 5 คำนวณมือ ข้อ 6–8 ใช้ R ไฟล์ข้อมูล <code>earthquake.txt</code> และ <code>ventilation.txt</code> อยู่ในโฟลเดอร์ CLASS 3 ส่วน <code>prescrip</code> อยู่ใน package TSA ผลด้านล่างได้จากการรันจริง</p>
+
+<div class="calc" id="s10-q5">
+<div class="calc-title">ข้อ 5: ยอดขายพลาสติก ม.ค.–มิ.ย. 2013 คือ 781, 780, 782, 1109, 1115, 1107</div>
+<ol class="steps">
+<li><div class="st-title">ค่าเฉลี่ยและส่วนเบี่ยงเบน</div><p>\(\bar X=5674/6=945.667\) ส่วนเบี่ยงเบนคือ −164.667, −165.667, −163.667, 163.333, 169.333, 161.333</p></li>
+<li><div class="st-title">ตัวส่วน</div><p>ผลรวมกำลังสองทั้ง 6 เทอม ≈ 162,727</p></li>
+<li><div class="st-title">(a) sample ACF</div><p>\(\hat\rho(0)=1\), \(\hat\rho(1)=0.508\), \(\hat\rho(2)=-0.009\), \(\hat\rho(3)=-0.500\), \(\hat\rho(4)=-0.336\), \(\hat\rho(5)=-0.163\) ตัวอย่างการคิด \(\hat\rho(3)\): คู่ที่ห่าง 3 ช่วงมี 3 คู่ คือ (เม.ย., ม.ค.), (พ.ค., ก.พ.), (มิ.ย., มี.ค.) ทุกคู่เป็นบวกคูณลบ ผลรวมราว −81,350 หารด้วย 162,727 ได้ −0.500</p></li>
+<li><div class="st-title">(b) correlogram</div><p>เส้นขอบคือ \(2/\sqrt6=0.816\) ทุกแท่งอยู่ในเส้น เพราะข้อมูลมีแค่ 6 จุด รูปทรงคือบวกที่ lag 1 แล้วกลายเป็นลบที่ lag 3 สะท้อนการกระโดดของระดับครั้งเดียวระหว่างมีนาคมกับเมษายน</p></li>
+<li><div class="st-title">(c) first differences</div><p>\(\nabla X_2=-1\), \(\nabla X_3=2\), \(\nabla X_4=327\), \(\nabla X_5=6\), \(\nabla X_6=-8\)</p></li>
+<li><div class="st-title">(d) correlogram ของผลต่าง</div><p>\(\hat\rho(1)=-0.274\), \(\hat\rho(2)=-0.382\), \(\hat\rho(3)=0.100\), \(\hat\rho(4)=0.057\) เส้นขอบ \(2/\sqrt5=0.894\) ทุกค่าอยู่ในเส้น การทำผลต่างเปลี่ยนการกระโดดของระดับให้กลายเป็นค่าโดดค่าเดียว (327)</p></li>
+</ol>
+</div>
+
+<div class="calc" id="s10-q6">
+<div class="calc-title">ข้อ 6: แผ่นดินไหวขนาด 7.0 ขึ้นไปต่อปี 1900–1998 (n = 99) — เขียนรายงานสั้น</div>
+<pre><code>eq &lt;- ts(read.table("earthquake.txt"), start = 1900)
+plot(eq, type = "o"); acf(eq); library(tseries); adf.test(eq)</code></pre>
+<ol class="steps">
+<li><div class="st-title">ระดับ</div><p>ค่าอยู่ระหว่าง 6 ถึง 41 ครั้งต่อปี ค่าเฉลี่ย 20.0 ค่าสูงสุดปี 1943 ต่ำสุดปี 1986 ค่าเฉลี่ยราย 20 ปี: 21.1, 18.6, 25.4, 20.4, 14.3 สูงช่วง 1940–1959 และต่ำช่วงท้าย ไม่มี trend ทิศเดียวที่ชัด</p></li>
+<li><div class="st-title">ความสัมพันธ์ตามเวลา</div><p>ACF lag 1–6 คือ 0.419, 0.398, 0.324, 0.237, 0.172, 0.190 เส้นขอบ 0.201 lag 1–4 เกินเส้น ลดลงทีละน้อย ปีที่มีแผ่นดินไหวมากมักตามด้วยปีที่มากด้วย</p></li>
+<li><div class="st-title">ADF</div><p>Dickey-Fuller = −3.2364, p-value = 0.0858 มากกว่า 0.05 จึงยังไม่ปฏิเสธว่าไม่นิ่งที่ระดับ 5% แต่ใกล้เส้น</p></li>
+<li><div class="st-title">ข้อสรุป</div><p>ไม่มี seasonal (ข้อมูลรายปี) ไม่มี trend ชัด ความแปรปรวนค่อนข้างคงที่ แต่มี autocorrelation บวกหลาย lag และระดับเปลี่ยนเป็นช่วง ๆ เป็นข้อมูลที่เกือบนิ่ง ต้องใช้โมเดลที่จับความสัมพันธ์ระหว่างปี เช่น AR ใน Lesson 5</p></li>
+</ol>
+</div>
+
+<div class="calc" id="s10-q7">
+<div class="calc-title">ข้อ 7: ventilation (n = 195) — plot, fit เส้นตรง, ตรวจ residual</div>
+<pre><code>v &lt;- ts(read.table("ventilation.txt"))
+plot(v, type = "o")
+fit &lt;- lm(v ~ time(v)); summary(fit)
+r &lt;- resid(fit); plot(r, type = "o"); acf(r)
+shapiro.test(r); Box.test(r, lag = 10, type = "Ljung")</code></pre>
+<ol class="steps">
+<li><div class="st-title">(a) ลักษณะ</div><p>ค่าเพิ่มจากราว 15 (ค่าเฉลี่ย 10 จุดแรก 15.31) ถึงราว 76 (10 จุดสุดท้าย 76.07) ช่วงทั้งหมด 10.93–90.33 มี trend ขาขึ้นแรงเกือบเป็นเส้นตรง</p></li>
+<li><div class="st-title">(b) เส้นตรง</div><p>\(\hat\mu_t=15.51+0.2791t\) (t = 1, …, 195) เพิ่ม 0.28 หน่วยต่อจุดเวลา</p></li>
+<li><div class="st-title">(c) residual</div><p>ACF lag 1–5 คือ 0.452, 0.412, 0.407, 0.342, 0.279 เกินเส้น 0.143 ทุก lag Ljung-Box (lag 10) ได้ Q = 260.09, p &lt; 2.2e-16 และ Shapiro-Wilk W = 0.956, p = 9.3e-06</p></li>
+<li><div class="st-title">ข้อสรุป</div><p>residual <b>ไม่ใช่</b> white noise ค่าเฉลี่ยศูนย์ ยังมี autocorrelation สูงหลาย lag และไม่แจกแจงปกติ เส้นตรงอธิบาย trend ได้ แต่ยังเหลือโครงสร้างที่ต้องสร้างโมเดลต่อ (Ljung-Box อธิบายใน Lesson 8: H0 คือไม่มี autocorrelation ค่า p ต่ำจึงปฏิเสธ)</p></li>
+</ol>
+</div>
+
+<div class="calc" id="s10-q8">
+<div class="calc-title">ข้อ 8: prescrip (ค่ายาต่อใบสั่ง ส.ค. 1986–มี.ค. 1992, n = 68)</div>
+<pre><code>library(TSA); data(prescrip)
+plot(prescrip, type = "o")
+diff.1 &lt;- diff(prescrip); plot(diff.1, type = "o")
+acf(diff.1); shapiro.test(diff.1); mean(diff.1)</code></pre>
+<ol class="steps">
+<li><div class="st-title">(a) ข้อมูลเดิม</div><p>เพิ่มจากราว 14.3 เป็น 30.7 ดอลลาร์ trend ขาขึ้นชัด จึงไม่นิ่ง</p></li>
+<li><div class="st-title">(b) ผลต่าง</div><p>แกว่งรอบค่าเฉลี่ย 0.241 (ค่ายาเพิ่มเฉลี่ย 0.24 ดอลลาร์ต่อเดือน) trend หายไป</p></li>
+<li><div class="st-title">(c) white noise ไหม</div><p>เส้นขอบ \(2/\sqrt{67}=0.244\) ACF เกินเส้นที่ lag 4 (−0.379), 5 (−0.260), 9 (0.311) และ 11 (0.319) Ljung-Box (lag 12) p = 4.5e-06 ส่วน Shapiro-Wilk W = 0.993, p = 0.964 แจกแจงปกติ</p></li>
+<li><div class="st-title">ข้อสรุป</div><p>ผลต่างแจกแจงปกติและไม่มี trend แต่ยังมี autocorrelation ที่บาง lag จึงไม่ใช่ white noise ค่าเฉลี่ยก็ไม่เป็นศูนย์ (0.24) แบบแผนที่เหลือต้องใช้โมเดล ARIMA ในบทต่อไป</p></li>
+</ol>
+</div>
+
+
+<h2 id="practice">แบบฝึกห้ากลุ่ม</h2>
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>Sample ACF</span></div>
+<div class="qtext">ข้อมูล 2, 4, 6, 4, 4 ค่า \(\hat\rho(1)\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมลบค่าเฉลี่ย 4 ก่อนคูณ">\(\hat\rho(1)=0.83\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย n − 1 ในตัวเศษแต่ n ในตัวส่วน">\(\hat\rho(1)=0.25\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ส่วนเบี่ยงเบน −2, 0, 2, 0, 0 ผลคูณคู่ติดกันรวมเป็น 0">\(\hat\rho(1)=0.00\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้คู่ที่ห่างกัน 2 ช่วง">\(\hat\rho(1)=-0.50\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>\(\hat\gamma\)</span></div>
+<div class="qtext">ข้อมูล n = 5 มีผลรวมของ \((X_{t+1}-\bar X)(X_t-\bar X)\) ทั้ง 4 คู่เท่ากับ 6.24 ค่า \(\hat\gamma(1)\) ตามสูตรของสไลด์คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วยจำนวนเทอม n − h = 4 แต่สูตรหารด้วย n">\(\hat\gamma(1)=1.560\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตัวเศษมี n − h เทอม แต่หารด้วย n = 5 เสมอ">\(\hat\gamma(1)=1.248\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ไม่ได้หาร">\(\hat\gamma(1)=6.240\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ̂(1) = 6.24/17.2">\(\hat\gamma(1)=0.363\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>เส้นขอบ</span></div>
+<div class="qtext">ข้อมูล n = 400 ค่า \(\hat\rho\) ข้อใดเกินเส้นขอบ \(\pm2/\sqrt n\)</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 0.08 อยู่ในเส้น ±0.10">\(\hat\rho(2)=0.08\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. −0.09 อยู่ในเส้น">\(\hat\rho(5)=-0.09\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.05 อยู่ในเส้น">\(\hat\rho(7)=0.05\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 2/√400 = 0.10 และ |−0.12| เกิน">\(\hat\rho(3)=-0.12\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Differencing</span></div>
+<div class="qtext">\(X_t=\beta_1+\beta_2t+w_t\) หลังทำผลต่างครั้งที่หนึ่ง ได้ mean และ \(\rho(1)\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ∇X_t = β₂ + w_t − w_{t−1}">mean \(=\beta_2\), \(\rho(1)=-0.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. β₁ หักล้างกันหมด เหลือ β₂">mean \(=\beta_1\), \(\rho(1)=-0.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ผลต่างไม่ใช่ white noise ใช้ w_t ร่วมกันที่ lag 1">mean \(=\beta_2\), \(\rho(1)=0\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. mean ไม่เป็น 0 และ ρ(1) ติดลบ">mean \(=0\), \(\rho(1)=+0.5\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 5</span><span>ข้อสอบเก่า</span></div>
+<div class="qtext">ให้ \(X_t=\beta_1+\beta_2t+w_t\) จง (ก) พิสูจน์ว่า \(X_t\) ไม่ stationary (ข) พิสูจน์ว่า \(X_t-(\beta_1+\beta_2t)\) stationary (ค) พิสูจน์ว่า \(\nabla X_t\) stationary</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(E(X_t)=\beta_1+\beta_2t\) ขึ้นกับ t จึงไม่นิ่ง (แม้ \(\gamma(h)\) จะไม่ขึ้นกับ t)</p>
+<p>(ข) \(Y_t=w_t\) mean 0, \(\gamma(0)=\sigma^2\), \(\gamma(h)=0\) เมื่อ h ≠ 0 จึงนิ่ง</p>
+<p>(ค) \(\nabla X_t=\beta_2+w_t-w_{t-1}\) mean \(\beta_2\), \(\gamma(0)=2\sigma^2\), \(\gamma(\pm1)=-\sigma^2\), 0 เมื่อ \(|h|\ge2\) ไม่ขึ้นกับ t จึงนิ่ง</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>พิสูจน์ (แนวข้อสอบเก่า Class 6)</span></div>
+<div class="qtext">ให้ \(X_t=\beta_0+\beta_1t+\beta_2t^2+w_t\) จงแสดงว่า \(\nabla X_t\) ยังไม่นิ่ง แต่ \(\nabla^2X_t\) นิ่ง</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\nabla X_t=\beta_1+\beta_2(t^2-(t-1)^2)+w_t-w_{t-1}=\beta_1+\beta_2(2t-1)+w_t-w_{t-1}\) mean \(=\beta_1-\beta_2+2\beta_2t\) ยังขึ้นกับ t จึงไม่นิ่ง</p>
+<p>\(\nabla^2X_t=\nabla X_t-\nabla X_{t-1}=2\beta_2+w_t-2w_{t-1}+w_{t-2}\) mean \(=2\beta_2\) คงที่ \(\gamma(0)=6\sigma^2\), \(\gamma(1)=-4\sigma^2\), \(\gamma(2)=\sigma^2\), 0 เมื่อ \(|h|\ge3\) จึงนิ่ง</p>
+<p>ข้อนี้เป็นข้อสอบเก่า "ทำไมต้อง diff สองครั้ง" (Class 6, 1:46:36)</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>ADF</span></div>
+<div class="qtext"><code>adf.test</code> ให้ p-value = 0.4726 ที่ระดับ 0.05 สรุปว่าอะไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. H0 ของ ADF คือไม่นิ่ง p-value สูงจึงไม่ปฏิเสธ">ปฏิเสธ H0 ข้อมูลนิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. p-value สูงไม่ได้พิสูจน์ว่านิ่ง">ไม่ปฏิเสธ H0 ข้อมูลนิ่ง</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.4726 > 0.05 ยังถือว่าไม่นิ่ง ต้องกำจัด trend">ไม่ปฏิเสธ H0 ข้อมูลไม่นิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. ปฏิเสธ H0 แปลว่านิ่ง ไม่ใช่ไม่นิ่ง">ปฏิเสธ H0 ข้อมูลไม่นิ่ง</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>Detrending กับ differencing</span></div>
+<div class="qtext">ข้อใดเป็นข้อดีของ differencing เหนือ detrending ตามสไลด์</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. differencing ไม่ให้เส้น trend ออกมา">ได้สมการ trend ออกมาให้ตีความ</button>
+<button class="opt" data-correct="true" data-note="ถูก. สไลด์หน้า 35: no parameters are estimated">ไม่ต้องประมาณพารามิเตอร์ใดเลย</button>
+<button class="opt" data-correct="false" data-note="ผิด. differencing ทำให้ข้อมูลลดลงครั้งละหนึ่งจุด">จำนวนข้อมูลเท่าเดิมหลังทำ</button>
+<button class="opt" data-correct="false" data-note="ผิด. differencing ไม่ให้ค่าประมาณของ Y_t">ได้ค่าประมาณของ error process</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>อธิบาย</span></div>
+<div class="qtext">จงอธิบายว่าทำไม correlogram ของข้อมูลที่มี trend ลดลงช้า และทำไมในวิชานี้จึงไม่ต้องสนใจ p-value ของ <code>lm()</code> ตอน fit trend</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ข้อมูลที่มี trend มีค่าใกล้กันในช่วงเวลาที่อยู่ใกล้กัน ช่วงต้นอยู่ต่ำกว่าค่าเฉลี่ยทั้งหมด ช่วงปลายอยู่สูงกว่า คู่ที่ห่างกัน 1 หรือ 10 ช่วงจึงอยู่ฝั่งเดียวกันของค่าเฉลี่ย ผลคูณเป็นบวกต่อเนื่อง ACF จึงลดลงช้า</p>
+<p>วัตถุประสงค์ของการ fit คือได้เส้น trend (intercept กับ slope) มาลบออก ไม่ได้ทดสอบผลของ t ต่อ Y อีกทั้ง p-value ของ lm ถูกต้องเฉพาะเมื่อ residual เป็น white noise ซึ่งในอนุกรมเวลามักไม่จริง (ACF ของ residual ไม่เป็นศูนย์) ตัวเลขเหล่านั้นจึงไม่มีความหมาย</p>
+</div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9a</span><span>Correlogram</span></div>
+<div class="qtext">Correlogram ของข้อมูล n = 100 มีค่า 0.82, 0.72, 0.68, 0.63 ที่ lag 1–4 และยังเกินเส้นที่ lag 15 ข้อสรุปใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ลดลงช้าและเกินเส้น ±0.2 หลาย lag คือลักษณะของข้อมูลที่ไม่นิ่ง">ไม่นิ่ง ACF ลดลงช้ามาก</button>
+<button class="opt" data-correct="false" data-note="ผิด. MA ตัดเป็นศูนย์หลัง lag q ไม่ลดลงช้าแบบนี้">นิ่ง เป็นโมเดล MA(15)</button>
+<button class="opt" data-correct="false" data-note="ผิด. white noise มี ACF อยู่ในเส้นทุก lag">นิ่ง ใกล้เคียง white noise</button>
+<button class="opt" data-correct="false" data-note="ผิด. correlogram บอกได้ว่าลดลงช้า แม้ไม่บอกสาเหตุ">ตัดสินไม่ได้ ต้องใช้ ADF เท่านั้น</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9b</span><span>Backshift</span></div>
+<div class="qtext">\((1-B)^2X_t\) เท่ากับข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมพจน์ไขว้ −2B">\(X_t-X_{t-2}\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายของพจน์สุดท้ายต้องเป็นบวก">\(X_t-2X_{t-1}-X_{t-2}\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. B² ถอยสองช่วง ไม่ใช่ยกกำลังค่า">\(X_t-2X_{t-1}+X_t^2\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. (1 − B)² = 1 − 2B + B² และ B²X_t = X_{t−2}">\(X_t-2X_{t-1}+X_{t-2}\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>อ่าน output</span></div>
+<div class="qtext"><p>จาก output นี้ จงเขียนสมการ trend หาค่า trend ของปี 1950 และ residual ถ้าค่าจริงปี 1950 คือ −0.15 แล้วบอกว่าค่า t value 13.40 ใช้ได้หรือไม่ ถ้า ACF ของ residual ที่ lag 1 คือ 0.53</p>
+<pre class="out">Coefficients:
+                 Estimate Std. Error t value Pr(&gt;|t|)
+(Intercept)    -1.219e+01  9.032e-01  -13.49   &lt;2e-16
+time(temp.1900) 6.209e-03  4.635e-04   13.40   &lt;2e-16</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\hat\mu_t=-12.19+0.006209t\)</p>
+<p>ปี 1950: \(-12.19+0.006209(1950)=-12.19+12.108=-0.08\) (ถ้าใช้ค่าเต็ม −12.18641 ได้ −0.079) residual \(=-0.15-(-0.08)=-0.07\)</p>
+<p>t value ใช้ไม่ได้ เพราะ ACF ของ residual ที่ lag 1 = 0.53 เกินเส้น 0.202 residual ไม่ใช่ white noise สมมติฐานความเป็นอิสระของ regression ไม่จริง standard error และ t value จึงไม่มีความหมาย ใช้ได้แค่ค่าประมาณของเส้น</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>อ่าน output</span></div>
+<div class="qtext"><p>ข้อมูล 98 ปี ได้ผลนี้จากข้อมูลเดิมและจากผลต่าง สรุปว่าควรใช้ข้อมูลแบบไหนสร้างโมเดล เพราะอะไร</p>
+<pre class="out">&gt; adf.test(temp.1900)
+Dickey-Fuller = -2.2512, Lag order = 4, p-value = 0.4726
+&gt; adf.test(diff(temp.1900))
+Dickey-Fuller = -6.8589, Lag order = 4, p-value = 0.01
+Warning message: p-value smaller than printed p-value</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ข้อมูลเดิม p = 0.4726 > 0.05 ไม่ปฏิเสธ H0 ยังไม่นิ่ง ผลต่าง p ≤ 0.01 (คำเตือนบอกว่าค่าจริงน้อยกว่าที่พิมพ์) ปฏิเสธ H0 นิ่ง จึงควรสร้างโมเดลกับผลต่าง (d = 1) แล้วแปลงผลพยากรณ์กลับด้วยการบวกค่าล่าสุด</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันโค้ดในตอนที่ 4 และ 5 ของบทเรียน กับ <code>temp.txt</code> แล้วตอบว่า (ก) ACF lag 1 ของข้อมูลเดิม residual และผลต่างคือเท่าใด (ข) วิธีไหนทำให้ใกล้ white noise ที่สุด (ค) <code>mean(diff1)</code> ใกล้กับค่าใดใน output ของ lm</p></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<p>(ก) ข้อมูลเดิม 0.819, residual 0.530, ผลต่าง −0.196</p>
+<p>(ข) ผลต่าง เพราะ |−0.196| อยู่ในเส้น 0.203 และ ADF p ≤ 0.01 ส่วน residual ยังเกินเส้นที่ lag 1 และ ADF p = 0.4726</p>
+<p>(ค) <code>mean(diff1)</code> = 0.0058 ใกล้ความชัน 0.0062 เพราะผลต่างของเส้นตรงเท่ากับความชัน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>คำนวณ in-class example ด้วย R แล้วเทียบกับการคำนวณมือในตอนที่ 1 ของบทเรียน</p>
+<pre><code>x &lt;- c(12, 10, 11, 14, 15)
+acf(x, plot = FALSE)
+acf(x, type = "covariance", plot = FALSE)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">Autocorrelations:  1.000  0.363  -0.402  -0.400  -0.060
+Autocovariances:   3.440  1.248  -1.384  -1.376  -0.208</pre>
+<p>ตรงกับมือทุกค่า type = "covariance" ให้ \(\hat\gamma(h)\) ซึ่งหารด้วย n = 5 เช่น \(\hat\gamma(1)=6.24/5=1.248\) และ \(\hat\gamma(0)=17.2/5=3.44\) ยืนยันว่า R ใช้ตัวหาร n ตามสูตรของสไลด์</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>คำนวณ \(\bar X\), \(\hat\gamma(h)\), \(\hat\rho(h)\) ด้วยมือ (ตัวเศษ n − h เทอม หารด้วย n)</li>
+<li>อ่าน correlogram ใช้เส้นขอบ \(\pm2/\sqrt n\) และบอกได้ว่านิ่งหรือไม่จากรูปทรง</li>
+<li>อ่านผล ADF: H0 คือไม่นิ่ง p &lt; 0.05 คือนิ่ง</li>
+<li>พิสูจน์ problem 1.6 ทั้งสามส่วน และ quadratic trend ต้อง diff สองครั้ง</li>
+<li>ใช้ <code>lm</code>, <code>resid</code>, <code>diff</code>, <code>acf</code>, <code>adf.test</code> และอ่าน output</li>
+<li>เทียบ detrending กับ differencing และเขียน \(\nabla=(1-B)\), \(\nabla^2=(1-B)^2\)</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0003-estimation-correlogram-and-detrending.html">← กลับไปที่บทเรียน Lesson 3</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
