@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 5: MA(q) และ AR(p)</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 5</span>
+  <span><a href="0005-ma-and-ar-models.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 5: MA(q) และ AR(p)</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>MA(1)</span></div>
+<div class="qtext">MA(1) \(X_t=w_t+0.5w_{t-1}\) มีค่า \(\rho_1\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ θ ไม่ได้หารด้วย 1 + θ²">\(\rho_1=0.50\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.5/(1 + 0.25) = 0.5/1.25 = 0.4">\(\rho_1=0.40\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ θ² เป็นตัวเศษ">\(\rho_1=0.20\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คำนวณ 1/(1 + θ²) ลืมคูณ θ">\(\rho_1=0.80\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>MA(2)</span></div>
+<div class="qtext">MA(2) ที่ θ₁ = 0.5, θ₂ = 0.4 มีค่า \(\rho_1\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมพจน์ θ₁θ₂ ในตัวเศษ">\(\rho_1=0.355\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมหารด้วย 1 + θ₁² + θ₂²">\(\rho_1=0.700\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ₂ = 0.4/1.41">\(\rho_1=0.284\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. (0.5 + 0.2)/(1 + 0.25 + 0.16) = 0.7/1.41 = 0.496">\(\rho_1=0.496\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>AR(1)</span></div>
+<div class="qtext">AR(1) \(X_t=-0.6X_{t-1}+w_t\) มีค่า \(\rho_3\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. (−0.6)³ = −0.216 กำลังคี่จึงติดลบ">\(\rho_3=-0.216\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เครื่องหมายผิด กำลังคี่ของจำนวนลบต้องติดลบ">\(\rho_3=+0.216\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ γ₃ = −0.216 × γ₀ เมื่อ σ² = 1 (γ₀ = 1.5625)">\(\rho_3=-0.338\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ₂ ใส่เครื่องหมายผิด">\(\rho_3=-0.360\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Theorem</span></div>
+<div class="qtext">AR(2) \(X_t=0.9X_{t-1}-0.2X_{t-2}+w_t\) มี \(\Phi(B)=1-0.9B+0.2B^2=(1-0.4B)(1-0.5B)\) ข้อใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. 0.4 กับ 0.5 คือ α (reciprocal roots) ไม่ใช่ราก และ α < 1 แปลว่านิ่ง">ราก 0.4, 0.5 น้อยกว่า 1 จึงไม่นิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. รากต้องทำให้ 1 − 0.4B = 0 คือ B = 2.5 เป็นบวก">ราก −2.5, −2 มากกว่า 1 จึงนิ่ง</button>
+<button class="opt" data-correct="true" data-note="ถูก. ราก 1/0.4 = 2.5 และ 1/0.5 = 2 มากกว่า 1 ทั้งคู่">ราก 2.5, 2 มากกว่า 1 จึงนิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. เงื่อนไขของทฤษฎีบทคือรากต้องมากกว่า 1">ราก 2.5, 2 มากกว่า 1 จึงไม่นิ่ง</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>Mean ของ AR(1)</span></div>
+<div class="qtext">อนุกรมนิ่ง \(X_t=3+0.4X_{t-1}+w_t\) มี mean เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. μ = 3 + 0.4μ จึงได้ 0.6μ = 3 และ μ = 5">\(\mu=5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. 3 คือ intercept a ไม่ใช่ mean">\(\mu=3\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย φ แทน 1 − φ">\(\mu=7.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คูณ a ด้วย 1 − φ ซึ่งเป็นการกลับสูตร">\(\mu=1.8\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>คำนวณมือ</span></div>
+<div class="qtext">MA(2) \(X_t=w_t+0.4w_{t-1}-0.3w_{t-2}\) โดย \(\sigma^2=2\) จงหา \(\gamma_0,\gamma_1,\gamma_2,\gamma_3\) และ \(\rho_1,\rho_2\)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\gamma_0=2(1+0.16+0.09)=2(1.25)=2.5\)</p>
+<p>\(\gamma_1=2(\theta_1+\theta_1\theta_2)=2(0.4-0.12)=0.56\)</p>
+<p>\(\gamma_2=2\theta_2=-0.6\) และ \(\gamma_3=0\)</p>
+<p>\(\rho_1=0.56/2.5=0.224\), \(\rho_2=-0.6/2.5=-0.24\) σ² ไม่มีผลต่อ ρ เพราะตัดกัน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>คำนวณมือ</span></div>
+<div class="qtext">AR(1) \(X_t=6+0.8X_{t-1}+w_t\) โดย \(\sigma^2=9\) จงหา mean, \(\gamma_0\), \(\rho_2\) และ \(\gamma_2\)</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\mu=6/(1-0.8)=30\)</p>
+<p>\(\gamma_0=9/(1-0.64)=9/0.36=25\) ค่าคงที่ 6 ไม่มีผลต่อ variance</p>
+<p>\(\rho_2=0.8^2=0.64\) และ \(\gamma_2=0.64\times25=16\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 8</span><span>ข้อสอบเก่า</span></div>
+<div class="qtext">จงพิสูจน์ว่า MA(1) \(X_t=w_t+\theta w_{t-1}\) มี \(|\rho_1|\le\tfrac12\) ทุกค่า θ และบอกว่าเท่ากับ 1/2 เมื่อใด</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\rho_1=\theta/(1+\theta^2)\) และ \((1-|\theta|)^2\ge0\) กระจายได้ \(1+\theta^2\ge2|\theta|\)</p>
+<p>หารด้วย \(2(1+\theta^2)&gt;0\) ได้ \(|\theta|/(1+\theta^2)\le1/2\) คือ \(|\rho_1|\le1/2\)</p>
+<p>เท่ากันเมื่อ \(|\theta|=1\): θ = 1 ได้ ρ₁ = 1/2 และ θ = −1 ได้ ρ₁ = −1/2</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>พิสูจน์</span></div>
+<div class="qtext">ให้ AR(1) \(X_t=\phi X_{t-1}+w_t\) นิ่ง จงหา \(\gamma_0\), \(\gamma_1\) และแสดงว่า \(\rho_h=\phi^h\) พร้อมบอกว่าใช้สมมุติฐานอะไรในแต่ละขั้น</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\gamma_0=\mathrm{Var}(\phi X_{t-1}+w_t)=\phi^2\mathrm{Var}(X_{t-1})+\sigma^2\) ใช้ \(\mathrm{Cov}(X_{t-1},w_t)=0\) (shock ใหม่ไม่สัมพันธ์กับอดีต)</p>
+<p>ความนิ่งทำให้ \(\mathrm{Var}(X_{t-1})=\gamma_0\) จึงได้ \(\gamma_0(1-\phi^2)=\sigma^2\) และ \(\gamma_0=\sigma^2/(1-\phi^2)\) ต้องมี |φ| &lt; 1</p>
+<p>\(\gamma_1=\mathrm{Cov}(X_t,\phi X_t+w_{t+1})=\phi\gamma_0\) ใช้ \(\mathrm{Cov}(X_t,w_{t+1})=0\)</p>
+<p>ทำซ้ำ \(\gamma_h=\phi\gamma_{h-1}=\phi^h\gamma_0\) หารด้วย γ₀ ได้ \(\rho_h=\phi^h\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>พิสูจน์</span></div>
+<div class="qtext">จงแสดงว่า MA(1) ที่ θ = 4 และ θ = 0.25 มี ACF เหมือนกันทุก lag แล้วอธิบายว่าทำไมจึงต้องเลือกค่าใดค่าหนึ่ง และควรเลือกค่าไหน</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>θ = 4: ρ₁ = 4/17 = 0.235 และ θ = 0.25: ρ₁ = 0.25/1.0625 = 0.235 ส่วน ρ_h = 0 เมื่อ h ≥ 2 ทั้งคู่ ทั่วไป \((1/\theta)/(1+1/\theta^2)=\theta/(\theta^2+1)\)</p>
+<p>ข้อมูลให้เพียง ACF จึงแยกสองโมเดลไม่ออก ถ้าไม่กำหนดเงื่อนไข การประมาณ θ จะไม่มีคำตอบเดียว ค่าที่เลือกคือค่าที่ |θ| &lt; 1 คือ 0.25 ("อันที่ใช้ได้คือ 1/7 ไม่ใช่ 7") เงื่อนไขนี้คือ invertibility ใน Lesson 7</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>ควิซข้อสอบเก่า</span></div>
+<div class="qtext">sample ACF ของอนุกรมหนึ่งมีแท่ง lag 0 = 1, lag 1 = 0.42, lag 2 = −0.15, lag 3 = −0.38, lag 4 = −0.26 และ lag 5 ถึง 20 อยู่ในเส้นประ ±0.2 ควรเป็น MA อันดับใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นับแท่งที่ทะลุเส้นได้ 3 แท่ง แต่ order คือ lag สุดท้ายที่ทะลุ">MA(3)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นับ lag 0 ด้วย ซึ่งมีค่า 1 ทุกอนุกรม">MA(5)</button>
+<button class="opt" data-correct="true" data-note="ถูก. lag สุดท้ายที่ทะลุเส้นคือ lag 4 แม้ lag 2 จะอยู่ในเส้นก็ตาม">MA(4)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หยุดนับที่ lag แรกที่อยู่ในเส้น">MA(1)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>ETS ของ Xbox</span></div>
+<div class="qtext"><code>ets(sales_ts)</code> ของ Xbox ได้ ETS(M,A,M) ข้อใดอธิบายโมเดลนี้ถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ตำแหน่งแรกคือ error ไม่ใช่ trend">trend คูณ seasonal บวก error คูณ</button>
+<button class="opt" data-correct="true" data-note="ถูก. ลำดับคือ (Error, Trend, Seasonal) = Holt-Winters แบบคูณ มี α, β, γ">error คูณ trend บวก seasonal คูณ</button>
+<button class="opt" data-correct="false" data-note="ผิด. A ตรงกลางคือ trend แบบบวก ไม่ใช่ damped (Ad)">error คูณ trend หน่วง seasonal คูณ</button>
+<button class="opt" data-correct="false" data-note="ผิด. M ตัวสุดท้ายคือมี seasonal แบบคูณ">error คูณ trend บวก ไม่มี seasonal</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) MA ในบทนี้ต่างจาก moving average ใน Lesson 4 อย่างไร (ข) ทำไม ACF ใช้หา q ของ MA ได้ แต่ใช้หา p ของ AR ไม่ได้ (ค) ทำไม AR(1) ที่ φ = 0.7 อาจถูกอ่านผิดเป็น MA(2)</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) moving average ใน Lesson 4 เฉลี่ยค่าที่สังเกตได้ X เพื่อทำให้เรียบ MA(q) เป็นโมเดลที่ X_t เป็นผลรวมถ่วงน้ำหนักของ shock w ที่สังเกตไม่ได้</p>
+<p>(ข) X_t ของ MA(q) กับ X_{t+h} ไม่มี shock ร่วมเมื่อ h &gt; q ACF จึงเป็นศูนย์ทันทีหลัง lag q ส่วน AR ส่งผลต่อกันเป็นทอด ๆ ρ_h = φ^h ไม่เป็นศูนย์ที่ lag ใด ACF ของ AR(1) กับ AR(2) จึงลดลงช้า ๆ เหมือนกัน แยก p ไม่ได้</p>
+<p>(ค) ρ₁ = 0.7, ρ₂ = 0.49 ทะลุเส้น 0.2 ชัด ส่วน ρ₃ = 0.343, ρ₄ = 0.24 อยู่ใกล้เส้น sampling error จาก n = 100 อาจดึงให้ตกลงมาในเส้น จึงดูเหมือนตัดหลัง lag 2 ต้องดูว่าค่าลดลงทีละสัดส่วนเดิมหรือไม่ และใช้ PACF</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 14</span><span>อ่าน arima()</span></div>
+<div class="qtext"><p>ฟิต MA(1) กับข้อมูล 100 ค่าได้ผลดังนี้ ข้อใดถูก</p>
+<pre class="out">Coefficients:
+         ma1  intercept
+      0.8676    -0.1834
+s.e.  0.0500     0.1965
+sigma^2 estimated as 1.117</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ma1 คือ θ̂ ไม่ใช่ ρ₁ และ ρ₁ ของ MA(1) เกิน 0.5 ไม่ได้">\(\hat\rho_1\) ตามโมเดลเท่ากับ 0.868</button>
+<button class="opt" data-correct="false" data-note="ผิด. −0.1834/0.1965 ≈ −0.93 ขนาดน้อยกว่า 2 จึงไม่ต่างจากศูนย์">intercept ต่างจากศูนย์อย่างมีนัยสำคัญ</button>
+<button class="opt" data-correct="false" data-note="ผิด. γ₀ = σ²(1 + θ²) = 1.117 × 1.753 ≈ 1.96 ไม่ใช่ 1.117">variance ของ X_t ประมาณ 1.117</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.8676/(1 + 0.8676²) = 0.8676/1.7527 = 0.495">\(\hat\rho_1\) ตามโมเดลเท่ากับ 0.495</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>อ่าน output</span></div>
+<div class="qtext"><p>อนุกรมยาว 100 ค่า ได้ sample ACF ดังนี้ จงเลือกโมเดลและให้เหตุผล และอธิบายว่าทำไม lag 1 จึงไม่เท่ากับ 0.497 ถ้าข้อมูลมาจาก MA(1) θ = 0.9 จริง</p>
+<pre class="out">lag:   1      2      3      4      5
+ACF: 0.412 -0.047  0.156  0.156 -0.002</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>เส้นประคือ \(\pm2/\sqrt{100}=\pm0.2\) มีแค่ lag 1 = 0.412 ที่ทะลุเส้น lag 3 และ 4 = 0.156 ยังอยู่ในเส้น จึงตัดหลัง lag 1 เลือก MA(1) และ ρ₁ บวกจึงคาดว่า θ เป็นบวก</p>
+<p>0.412 เป็นค่าจาก sample ที่มีความคลาดเคลื่อน ค่าทฤษฎี 0.497 เป็นค่าเฉลี่ยระยะยาว แต่ละชุดข้อมูล 100 ค่าให้ค่าต่างกันไป ข้อมูลชุดนี้คือ arima.sim ด้วย set.seed(2603630)</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันโค้ดนี้แล้วเทียบผลกับค่าทฤษฎี</p>
+<pre><code>round(ARMAacf(ma = c(-0.9, 0.7), lag.max = 4), 3)
+round(ARMAacf(ar = 0.7, lag.max = 5), 3)
+set.seed(2603630); m &lt;- arima.sim(list(order=c(0,0,1), ma=0.9), n=100)
+round(acf(m, plot=FALSE, lag.max=5)$acf[2:6], 3)
+arima(m, order = c(0,0,1))
+set.seed(2603630); a &lt;- arima.sim(list(order=c(1,0,0), ar=0.9), n=100)
+arima(a, order = c(1,0,0))
+try(arima.sim(list(ar = 1.2), n = 10))</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">1 -0.665  0.304  0  0                (MA(2) ตรงกับสูตรในตอนที่ 3)
+1  0.7  0.49  0.343  0.24  0.168     (AR(1) = 0.7^h)
+0.412 -0.047 0.156 0.156 -0.002      (sample ACF ของ MA(1))
+ma1 0.8676 (s.e. 0.0500)  intercept -0.1834  sigma^2 1.117  aic 302.23
+ar1 0.9105 (s.e. 0.0391)  intercept  0.3129  sigma^2 1.069  aic 298.26
+Error: 'ar' part of model is not stationary</pre>
+<p>ค่าประมาณ θ̂ = 0.868 และ φ̂ = 0.911 ใกล้ค่าจริง 0.9 ทั้งคู่ บรรทัดสุดท้ายยืนยันทฤษฎีบทในตอนที่ 4: φ = 1.2 มีราก 1/1.2 = 0.83 น้อยกว่า 1 R จึงไม่ยอมสร้างข้อมูล ตัวเลขของ arima.sim อาจต่างเล็กน้อยถ้าใช้ R คนละเวอร์ชัน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 17</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รัน R_codes_1.txt กับ XBOX.txt (แก้ชื่อไฟล์ให้ตรง) แล้วตอบ: ค่าพยากรณ์มกราคม 2015 ของ ETS กับของ decomposition แบบ regression เป็นเท่าใด ต่างกันกี่เท่า และเพราะอะไร</p></div>
+<textarea placeholder="จดผลและอธิบาย"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">ETS(M,A,M)  alpha 0.3619  beta 0.0156  gamma 0.419
+ETS:            Jan 42941.97  Feb 42531.02  Mar 33242.12
+trend:          388917.9 + 249.72 t
+regression:     Jan 342461.0  Feb 317604.6  Mar 277801.0
+decompose+ARIMA: Jan 64964.23 Feb 70638.84  Mar 64994.34</pre>
+<p>regression สูงกว่า ETS ราว 8 เท่า ยอดขายขึ้นถึงปี 2011 (7.97 ล้าน) แล้วลดลงเหลือ 1.45 ล้านในปี 2014 เส้นตรงที่ฟิตทั้ง 110 เดือนยังมีความชันบวก จึงพยากรณ์สูงเกินจริงมาก (มกราคม 2014 ขายได้ 108,003) ETS ปรับ level ตามข้อมูลล่าสุดจึงตามขาลงทัน decomposition ด้วย regression เหมาะเมื่อ trend เป็นเส้นตรงจริง</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>เขียน MA(q) และ AR(p) ได้สามระดับ รวมถึง \(X_t=\theta(B)w_t\) และ \(\Phi(B)X_t=w_t\) และจัดรูปสมการให้อยู่ในรูป backshift</li>
+<li>หา mean, γ_h และ ρ_h ของ MA(1), MA(2) ด้วยการจับคู่ดัชนี และของ AR(1) ด้วยทริกความนิ่ง</li>
+<li>พิสูจน์ |ρ₁| ≤ 1/2 และอธิบายเรื่อง θ กับ 1/θ</li>
+<li>อ่าน order ของ MA จาก ACF โดยไม่นับ lag 0 และอ่าน scatter plot ได้</li>
+<li>หา mean ของ AR ที่มี intercept และรู้ว่า intercept ใน arima() คือ μ</li>
+<li>ใช้ทฤษฎีบทรากของ Φ(B) ตรวจว่า AR(p) นิ่งหรือไม่ และไม่สับสน α กับ β</li>
+<li>แยก ARMAacf (ทฤษฎี) กับ arima.sim + acf (ตัวอย่าง)</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0005-ma-and-ar-models.html">← กลับไปที่บทเรียน Lesson 5</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
