@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 4: Smoothing Methods และ Decomposition</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 4</span>
+  <span><a href="0004-smoothing-methods.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 4: Smoothing Methods และ Decomposition</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+
+
+<h3>กลุ่ม A: คำนวณ (แนวควิซ Excel)</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>SMA</span></div>
+<div class="qtext">ข้อมูลสี่วันคือ 6, 9, 3, 12 ค่า SMA แบบ trailing ที่ k = 3 ของวันที่ 4 คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. เฉลี่ยวันที่ 1–3 ซึ่งเป็นค่าของวันที่ 3">\(F_4=6\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. (12 + 3 + 9)/3 = 8 ใช้ X₄, X₃, X₂">\(F_4=8\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. เฉลี่ยครบสี่ค่า ใช้ k = 4">\(F_4=7.5\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้สูตรผิดบนสไลด์ที่ถึง X_{t−k} ได้ 4 ตัวแต่หาร 3">\(F_4=10\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>EMA</span></div>
+<div class="qtext">EMA ที่ α = 0.3 มี \(X_t=60\) และ \(F_t=50\) ค่า \(F_{t+1}\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. สลับน้ำหนัก ให้ค่าจริง 0.7">\(F_{t+1}=57\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือค่าเฉลี่ยธรรมดา">\(F_{t+1}=55\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.3(60) + 0.7(50) = 18 + 35 = 53">\(F_{t+1}=53\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมบวกส่วนของ F_t">\(F_{t+1}=18\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>Holt</span></div>
+<div class="qtext">Holt แบบ additive ที่ α = β = 0.5 มี \(L_{t-1}=100\), \(T_{t-1}=10\), \(Y_t=120\) ค่า \(L_t\) และ \(T_t\) คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมบวก T_{t−1} ในวงเล็บของ level">\(L_t=110,\ T_t=10\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ Y_t − L_{t−1} เป็นความชันใหม่ แทน L_t − L_{t−1}">\(L_t=115,\ T_t=15\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. คำนวณ T ก่อน L">\(L_t=115,\ T_t=10\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. L = 0.5(120) + 0.5(110) = 115 และ T = 0.5(115 − 100) + 0.5(10) = 12.5">\(L_t=115,\ T_t=12.5\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Holt forecast</span></div>
+<div class="qtext">ข้อมูลถึงเวลา 50 มี \(L_{50}=400\), \(T_{50}=12\) ค่าพยากรณ์ของเวลา 53 คือเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. F₅₃ = L₅₀ + 3T₅₀ = 400 + 36 = 436">\(F_{53}=436\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ k = 1 ทุกเวลา">\(F_{53}=412\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ k = 53">\(F_{53}=1036\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ k = 2">\(F_{53}=424\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>Decomposition แบบคูณ</span></div>
+<div class="qtext">trend ของไตรมาสหนึ่งคือ 440 และ seasonal index ของไตรมาสนั้นคือ 0.87 ค่าพยากรณ์และความหมายของ 0.87 คือข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. แบบคูณต้องคูณ ไม่ใช่ลบ">439.13 ต่ำกว่า trend 0.87 หน่วย</button>
+<button class="opt" data-correct="true" data-note="ถูก. 440 × 0.87 = 382.8 ไตรมาสนี้ต่ำกว่า trend 13%">382.8 ต่ำกว่า trend 13%</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารแทนคูณ">505.7 สูงกว่า trend 15%</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.87 แปลว่าต่ำกว่า trend 13% ไม่ใช่ 87%">382.8 ต่ำกว่า trend 87%</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>ปรับ seasonal index</span></div>
+<div class="qtext">seasonal index แบบคูณสี่ไตรมาสก่อนปรับคือ 1.05, 0.88, 0.94, 1.17 (เฉลี่ย 1.01) หลังปรับให้เฉลี่ยเป็น 1 ตามวิธีในบทเรียน ไตรมาส 4 เป็นเท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ไม่ได้ปรับ">1.17</button>
+<button class="opt" data-correct="false" data-note="ผิด. บวก 0.01 แทนลบ">1.18</button>
+<button class="opt" data-correct="true" data-note="ถูก. ลบ 0.01 ทุกตัวให้เฉลี่ยเป็น 1">1.16</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย 4 แทน">0.29</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>พิสูจน์</span></div>
+<div class="qtext">จงแสดงว่า \(F_{t+1}=\alpha X_t+\alpha(1-\alpha)X_{t-1}+\alpha(1-\alpha)^2X_{t-2}+\dots\) เขียนได้เป็น \(F_{t+1}=\alpha X_t+(1-\alpha)F_t\) และแสดงว่าน้ำหนักรวมเท่ากับ 1</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ดึง \((1-\alpha)\) ออกจากพจน์ที่สองเป็นต้นไป: \(F_{t+1}=\alpha X_t+(1-\alpha)[\alpha X_{t-1}+\alpha(1-\alpha)X_{t-2}+\dots]\)</p>
+<p>ในวงเล็บคือนิยามของ \(F_t\) (เลื่อนเวลาลงหนึ่ง) จึงได้ \(F_{t+1}=\alpha X_t+(1-\alpha)F_t\)</p>
+<p>น้ำหนักรวม \(\alpha\sum_{j=0}^{\infty}(1-\alpha)^j=\alpha\cdot\dfrac{1}{1-(1-\alpha)}=1\) เมื่อ \(0&lt;\alpha&lt;1\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 8</span><span>คำนวณมือแนวควิซ</span></div>
+<div class="qtext">Holt แบบ additive ที่ α = 0.2, β = 0.5 มี \(L_0=100\), \(T_0=10\), \(y_1=115\), \(y_2=118\) จงหา \(F_1,L_1,T_1,F_2,L_2,T_2\) และค่าพยากรณ์ของเวลา 4</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(F_1=100+10=110\)</p>
+<p>\(L_1=0.2(115)+0.8(110)=111\), \(T_1=0.5(111-100)+0.5(10)=10.5\)</p>
+<p>\(F_2=111+10.5=121.5\)</p>
+<p>\(L_2=0.2(118)+0.8(121.5)=120.8\), \(T_2=0.5(120.8-111)+0.5(10.5)=10.15\)</p>
+<p>\(F_4=L_2+2T_2=120.8+20.3=141.1\)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>ทฤษฎี</span></div>
+<div class="qtext">จงอธิบายว่าทำไม centered moving average ของข้อมูลรายไตรมาสใช้น้ำหนัก 1/8, 1/4, 1/4, 1/4, 1/8 และทำไมสูตรนี้จึงกำจัดผลของ seasonal ได้</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ค่าเฉลี่ย 4 จุดมีจุดกึ่งกลางที่เวลาครึ่ง (2.5, 3.5) จึงเฉลี่ยสองค่าที่ติดกันอีกครั้งให้ตรงเวลา 3: \(\tfrac12[\tfrac14(x_1+\dots+x_4)+\tfrac14(x_2+\dots+x_5)]\) กระจายแล้ว \(x_1,x_5\) ได้ 1/8 ส่วน \(x_2,x_3,x_4\) ได้ 1/4</p>
+<p>\(x_1\) กับ \(x_5\) เป็นไตรมาสเดียวกัน รวมได้ 1/4 ทุกไตรมาสจึงได้น้ำหนักรวม 1/4 เท่ากัน ผลของฤดูที่สูงหรือต่ำจึงถูกเฉลี่ยออกเท่ากัน เหลือแต่ trend</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>เลือก ETS</span></div>
+<div class="qtext">ยอดขายรายเดือนมี trend ขาขึ้นเป็นเส้นตรง และยอดเดือนธันวาคมสูงกว่าระดับปกติเป็นสัดส่วนที่ใกล้เคียงกันทุกปี (กว้างขึ้นตามระดับ) ควรใช้ model ใดใน ets()</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. trend บวก seasonal คูณ">ZAM</button>
+<button class="opt" data-correct="false" data-note="ผิด. seasonal ที่โตตามระดับเป็นแบบคูณ ไม่ใช่บวก">ZAA</button>
+<button class="opt" data-correct="false" data-note="ผิด. ข้อมูลมี seasonal">ZAN</button>
+<button class="opt" data-correct="false" data-note="ผิด. trend เป็นเส้นตรงจึงเป็นแบบบวก">ZMN</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>ลืม frequency</span></div>
+<div class="qtext">ข้อมูลรายเดือนที่มี seasonal ชัด แต่สร้างด้วย <code>ts(data)</code> โดยไม่ใส่ frequency แล้วรัน <code>ets()</code> จะเกิดอะไรขึ้น</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ETS ต้องรู้ความยาวรอบจาก frequency ก่อน">R หาความยาวรอบ 12 ได้เอง</button>
+<button class="opt" data-correct="false" data-note="ผิด. ets() รันได้ แต่ได้โมเดลผิด">R แจ้ง error และไม่รัน</button>
+<button class="opt" data-correct="false" data-note="ผิด. ไม่มี seasonal ในโมเดลที่ได้">ได้ ETS(A,N,A) เหมือนเดิม</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตัวอย่าง german ได้ ANN (AIC 315.6) แทน ANA (AIC 214.7)">ได้โมเดลที่ไม่มี seasonal เช่น ANN</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>อธิบาย</span></div>
+<div class="qtext">บทเรียนไล่จาก SMA, EMA, Holt ไปจนถึง Holt-Winters จงอธิบายว่าแต่ละวิธีแก้จุดอ่อนอะไรของวิธีก่อน และทำไมค่าพยากรณ์ของ SMA กับ EMA จึงเป็นเส้นราบ</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>SMA ให้น้ำหนักเท่ากันทุกค่าใน k ค่าล่าสุด EMA แก้ให้ค่าใหม่มีน้ำหนักมากกว่าค่าเก่าแบบลดลงทีละสัดส่วน แต่ทั้งสองประมาณแค่ระดับ เมื่อพยากรณ์ช่วง test ไม่รู้ค่าใหม่ จึงใช้ระดับล่าสุดค่าเดียวซ้ำทุกจุด เป็นเส้นราบ ใช้กับข้อมูลที่มี trend ไม่ได้</p>
+<p>Holt เพิ่มสมการความชัน พยากรณ์เป็น \(L_t+kT_t\) จึงเป็นเส้นเอียง แต่จับ seasonal ไม่ได้ Holt-Winters เพิ่มสมการ seasonal พยากรณ์เป็น \(L_t+kT_t+S_{t+k-m}\) หรือแบบคูณ จึงจับรูปแบบซ้ำตามฤดูได้</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>อ่าน output</span></div>
+<div class="qtext"><p>จาก output นี้ จงบอกชื่อโมเดล ความหมายของ phi และอธิบายว่าทำไมข้อมูลนี้ถึงได้โมเดลแบบนี้</p>
+<pre class="out">&gt; ets(singapur)
+ETS(M,Ad,N)
+  Smoothing parameters:  alpha = 0.528   beta = 1e-04   phi = 0.959
+  Initial states:  l = 69.3963   b = 0.868
+  AIC 62.09</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ETS(M,Ad,N): error แบบคูณ trend แบบบวกที่ถูกหน่วง (damped) ไม่มี seasonal</p>
+<p>phi = 0.959 คือตัวหน่วงความชัน ความชันของแต่ละก้าวข้างหน้าคูณด้วย φ, φ², … จึงค่อย ๆ ลดลง ค่าพยากรณ์โค้งเข้าแทนที่จะขึ้นเป็นเส้นตรง</p>
+<p>ข้อมูลเป็นร้อยละที่เกิน 100 ไม่ได้ ถ้าใช้ trend ตรงไปเรื่อย ๆ จะพยากรณ์เกินเพดาน damped trend จึงเหมาะ</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>อ่าน output</span></div>
+<div class="qtext"><p>output ของ decompose แบบคูณกับข้อมูลรายไตรมาสให้ seasonal = 1.0238, 0.8754, 0.9233, 1.1775 และ trend ของไตรมาสหนึ่ง (Qtr3) = 255.325 ค่าจริง = 226.9 จงหา random ของจุดนั้นและตีความ</p></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>random = series ÷ (trend × seasonal) \(=226.9/(255.325\times0.9233)=226.9/235.74=0.9625\)</p>
+<p>ค่าจริงต่ำกว่าที่ trend และ seasonal อธิบายราว 3.75% เป็นส่วนสุ่มที่เหลือ</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันโค้ด CPALL ในตอนที่ 1 และ 2 ของบทเรียน แล้วตอบว่า SMA k = 3 กับ EMA α = 0.2 ได้ RMSE และ MAE บน test เท่าใด ควรเลือกวิธีไหน และถ้าไม่กำหนด alpha ให้ <code>ets(train.ts, model = "ANN")</code> R เลือก α เท่าใด</p></div>
+<textarea placeholder="จดผลที่ได้และตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">SMA k=3:   ค่าพยากรณ์ 1.5533   test RMSE 1.663   MAE 1.586
+EMA α=0.2: ค่าพยากรณ์ 0.5105   test RMSE 0.738   MAE 0.543
+ets(train.ts, model = "ANN")  →  alpha = 1e-04</pre>
+<p>เลือก EMA เพราะ error บน test ต่ำกว่า เมื่อให้ R เลือกเอง α เกือบเป็น 0 แปลว่าค่าพยากรณ์ดีที่สุดคือค่าเฉลี่ยระยะยาว เพราะผลตอบแทนหุ้นรายวันแกว่งแบบสุ่มรอบค่าคงที่</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>ทำ decomposition แบบคูณด้วย regression กับ beer.txt ใน R ตามขั้นในตอนที่ 5 ของบทเรียน แล้วพยากรณ์ 4 ไตรมาสถัดไป</p>
+<pre><code>b &lt;- read.table("beer.txt")[,1]; t &lt;- 1:72
+fit &lt;- lm(b ~ t); Tt &lt;- fitted(fit)
+q &lt;- rep(1:4, 18)
+si &lt;- tapply(b / Tt, q, mean)            # seasonal index ก่อนปรับ
+si &lt;- si - (mean(si) - 1)               # ปรับให้เฉลี่ยเป็น 1
+T.new &lt;- coef(fit)[1] + coef(fit)[2] * (73:76)
+T.new * si</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">coef: 223.521  2.914
+si ก่อนปรับ: 1.0316 0.8739 0.9246 1.1748   (เฉลี่ย 1.0012)
+si หลังปรับ: 1.0304 0.8727 0.9234 1.1736
+T.new:      436.24 439.15 442.07 444.98
+พยากรณ์:     449.48 383.25 408.19 522.23</pre>
+<p>ตรงกับตาราง Excel ของวิชา (ต่างในหลักทศนิยมเพราะการปัดเศษ)</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>คำนวณ SMA (สูตรที่ถูก ถึง \(X_{t-k+1}\)), EMA, Holt จากตารางด้วยมือ ตามลำดับ forecast → level → trend</li>
+<li>พยากรณ์ k ก้าวด้วย \(L_t+kT_t\) (บวก) และ \(L_tT_t^k\) (คูณ)</li>
+<li>อ่านและเลือกสัญกรณ์ ETS(error, trend, seasonal) จากรูปกราฟ และรู้หน้าที่ของ α, β, γ, φ</li>
+<li>อ่านผล <code>ets()</code>, <code>holt()</code>, <code>decompose()</code> และรู้ว่าต้องใส่ frequency</li>
+<li>ทำ decomposition ด้วย regression ครบสี่ขั้น ปรับ seasonal ให้เฉลี่ยเป็น 1 (หรือ 0) และพยากรณ์</li>
+<li>คำนวณ centered moving average และอธิบายที่มาของน้ำหนัก</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0004-smoothing-methods.html">← กลับไปที่บทเรียน Lesson 4</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
