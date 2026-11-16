@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 7: ARIMA identification, invertibility และ estimation</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 7</span>
+  <span><a href="0007-arima-identification-and-estimation.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 7: ARIMA identification, invertibility และ estimation</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+<h2 id="exam">ควิซ 5 พร้อมเฉลย</h2>
+
+<p>ควิซ 5 (ปีการศึกษา 2569) มีสามข้อ ทุกข้อใช้ความรู้จาก Lesson 5–7</p>
+<div class="calc" id="quiz5-q1">
+<div class="calc-title">ข้อ 1: AR(2) φ₁ = 0.6, φ₂ = −0.5 (ทฤษฎี ACF, PACF และ simulation n = 100)</div>
+<ol class="steps">
+<li><div class="st-title">ตรวจความนิ่งก่อน</div><p>0.6 − 0.5 = 0.1 &lt; 1, −0.5 − 0.6 = −1.1 &lt; 1, |−0.5| &lt; 1 นิ่ง \(0.36-2=-1.64&lt;0\) รากเชิงซ้อน 0.6 ± 1.281i modulus 1.414 ACF จึงเป็นคลื่นที่หดลง</p></li>
+<li><div class="st-title">(a) ACF ด้วย Yule-Walker</div><p>\(\rho_1=0.6/1.5=0.4\), \(\rho_2=0.6(0.4)-0.5=-0.26\), \(\rho_3=0.6(-0.26)-0.5(0.4)=-0.356\), ρ₄ = −0.084, ρ₅ = 0.128 ตรงกับ <code>ARMAacf(ar=c(0.6,-0.5), lag.max=20)</code></p></li>
+<li><div class="st-title">(b) PACF</div><p>φ₁₁ = 0.4, φ₂₂ = −0.5 = φ₂ แล้วเป็นศูนย์ ใช้ <code>ARMAacf(..., pacf=TRUE)</code></p></li>
+<li><div class="st-title">(c) simulation (set.seed(3))</div><p>sample ACF 0.401, −0.238, −0.270, 0.025, 0.146 และ sample PACF 0.401, −0.475, 0.095, 0.050 PACF ทะลุเส้น ±0.2 แค่ lag 1–2 ตรงกับทฤษฎี ACF ใกล้ทฤษฎีที่ lag 1–3</p></li>
+</ol>
+<div class="answer">ข้อ 2 MA(3): ACF ไม่เป็นศูนย์ถึง lag 3 แล้วตัด PACF tail off ข้อ 3 AR(3): ACF tail off (exponential decay และ/หรือคลื่น) PACF ไม่เป็นศูนย์ถึง lag 3 แล้วตัด</div>
+</div>
+
+<h2 id="practice">แบบฝึกห้ากลุ่ม</h2>
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>ARIMA ↔ SES</span></div>
+<div class="qtext">ฟิต ARIMA(0,1,1) แบบ \(\nabla X_t=w_t+\theta w_{t-1}\) ได้ θ̂ = −0.7 simple exponential smoothing ที่ให้ค่าพยากรณ์เท่ากันมี α เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ α = −θ ลืมบวก 1">α = 0.7</button>
+<button class="opt" data-correct="true" data-note="ถูก. α = 1 + θ = 1 − 0.7 = 0.3">α = 0.3</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ α = 1 − θ ซึ่งเป็นสูตรของ convention ลบ">α = 1.7</button>
+<button class="opt" data-correct="false" data-note="ผิด. α ต้องอยู่ระหว่าง 0 กับ 1">α = −0.7</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>Box-Cox</span></div>
+<div class="qtext"><code>BoxCox.ar()</code> ให้ λ̂ = 0.55 และช่วงเชื่อมั่น 95% คือ 0.3 ถึง 0.8 ควรแปลงข้อมูลอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ช่วงไม่คลุม 0 จึงไม่ใช้ log ตามกฎของ Box-Cox ในบทเรียน">take log</button>
+<button class="opt" data-correct="false" data-note="ผิด. ช่วงไม่คลุม 1 จึงควรแปลง">ไม่ต้องแปลง</button>
+<button class="opt" data-correct="false" data-note="ผิด. λ = −1 อยู่นอกช่วงมาก">ใช้ 1/x</button>
+<button class="opt" data-correct="true" data-note="ถูก. λ = 0.5 อยู่ในช่วงและแปลความง่าย">ใช้ √x</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>Method of moments</span></div>
+<div class="qtext">(ก) อนุกรมมี \(\hat\gamma_0=4\) และ \(\hat\gamma_1=2.4\) จงหา φ̂ และ σ̂² ของ AR(1) ด้วย MOM (ข) อนุกรมอีกชุดมี \(\hat\rho_1=-0.3\) จงหา θ̂ ของ MA(1) \(X_t=w_t+\theta w_{t-1}\) ด้วย MOM และบอกว่าเลือกรากไหน</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(\hat\phi=\hat\rho_1=2.4/4=0.6\) และ \(\hat\sigma^2=\hat\gamma_0(1-\hat\phi^2)=4(0.64)=2.56\)</p>
+<p>(ข) \(-0.3\theta^2-\theta-0.3=0\) ได้ \(\theta=\dfrac{1\pm\sqrt{1-0.36}}{2(-0.3)}=\dfrac{1\pm0.8}{-0.6}\) คือ −0.333 หรือ −3 เลือก −0.333 เพราะ |θ| &lt; 1 (invertible) ตรวจ: \(-0.333/(1+0.111)=-0.3\) ✓</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Invertibility</span></div>
+<div class="qtext">MA(2) \(X_t=w_t+0.5w_{t-1}-0.24w_{t-2}\) invertible หรือไม่</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. 1 + 0.5x − 0.24x² = 0 มีราก 3.33 และ −1.25 ค่าสัมบูรณ์เกิน 1 ทั้งคู่">invertible เพราะราก 3.33 และ −1.25</button>
+<button class="opt" data-correct="false" data-note="ผิด. รากติดลบให้ดูค่าสัมบูรณ์ |−1.25| = 1.25 > 1">ไม่ invertible เพราะมีรากติดลบ</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.5 และ −0.24 เป็นสัมประสิทธิ์ ไม่ใช่ราก เงื่อนไขดูที่ราก">invertible เพราะ |θ₁|, |θ₂| &lt; 1</button>
+<button class="opt" data-correct="false" data-note="ผิด. MA causal เสมอ และราก 3.33 กับ −1.25 อยู่นอกวงกลมหนึ่งหน่วย">ไม่ invertible เพราะราก 0.3 และ −0.8</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>Redundancy</span></div>
+<div class="qtext">\((1-0.5B)X_t=(1-0.5B)(1+0.3B)w_t\) คือโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นับอันดับก่อนตัดตัวประกอบร่วม">ARMA(1,2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ตัด (1 − 0.5B) ทั้งสองฝั่งแล้วไม่มีส่วน AR เหลือ">ARMA(1,1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ตัดตัวประกอบร่วมเหลือ X_t = (1 + 0.3B)w_t">MA(1) θ = 0.3</button>
+<button class="opt" data-correct="false" data-note="ผิด. ยังเหลือ (1 + 0.3B) ทางขวา">white noise</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>Homework Q7 (Class 6)</span></div>
+<div class="qtext">จงพิจารณาว่า \(X_t=w_t+2w_{t-1}-0.25X_{t-2}\) เป็นโมเดลที่ invertible, causal หรือ redundant</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>จัดรูป \((1+0.25B^2)X_t=(1+2B)w_t\) เป็น ARMA(2,1)</p>
+<p>Causal: \(1+0.25x^2=0\) ได้ \(x=\pm2i\) modulus 2 &gt; 1 causal (และนิ่ง)</p>
+<p>Invertible: \(1+2x=0\) ได้ x = −0.5 ค่าสัมบูรณ์ 0.5 &lt; 1 ไม่ invertible</p>
+<p>Redundant: ไม่มีตัวประกอบร่วม (ราก ±2i กับ −0.5 ต่างกัน) จึงไม่ redundant</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>พิสูจน์ (ข้อสอบเก่า)</span></div>
+<div class="qtext">จงแสดงว่า ARIMA(0,1,1) \(X_t-X_{t-1}=w_t+\theta w_{t-1}\) ให้ค่าพยากรณ์หนึ่งก้าวเท่ากับ simple exponential smoothing และหาความสัมพันธ์ของ α กับ θ</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(X_{t+1}=X_t+w_{t+1}+\theta w_t\) และ \(w_{t+1}=X_{t+1}-\hat X_{t+1}\) แทนแล้วตัด \(X_{t+1}\) ได้ \(\hat X_{t+1}=X_t+\theta w_t\)</p>
+<p>แทน \(w_t=X_t-\hat X_t\) ได้ \(\hat X_{t+1}=(1+\theta)X_t-\theta\hat X_t\) ตั้ง α = 1 + θ ได้ \(\hat X_{t+1}=\alpha X_t+(1-\alpha)\hat X_t\) ซึ่งคือ SES</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 8</span><span>ψ weights</span></div>
+<div class="qtext">ARMA(1,1) \((1-0.5B)X_t=(1+0.4B)w_t\) ตรวจ causal/invertible แล้วเขียน \(X_t\) เป็น MA(∞) อย่างน้อยสี่เทอมพร้อม pattern</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ราก AR = 2 &gt; 1 causal ราก MA = −2.5 ค่าสัมบูรณ์ 2.5 &gt; 1 invertible</p>
+<p>\(\psi(z)=(1+0.4z)(1+0.5z+0.25z^2+\dots)\): z → 0.5 + 0.4 = 0.9, z² → 0.25 + 0.2 = 0.45, z³ → 0.125 + 0.1 = 0.225</p>
+<p>\(X_t=(1+0.9B+0.9(0.5)B^2+0.9(0.5)^2B^3+\dots)w_t=w_t+\sum_{j=1}^\infty0.9(0.5)^{j-1}w_{t-j}\) ตรวจด้วย <code>ARMAtoMA(ar=0.5, ma=0.4, lag.max=3)</code></p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>ADF</span></div>
+<div class="qtext"><code>adf.test(x)</code> ได้ Dickey-Fuller = −1.98, p-value = 0.32 ควรสรุปอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. H0 คือไม่นิ่ง p-value มากจึง reject H0 ไม่ได้ ควร difference">ยังไม่นิ่ง ควร difference</button>
+<button class="opt" data-correct="false" data-note="ผิด. สลับ H0 กับ H1 ของ ADF จำไว้ว่า H1 คือนิ่ง">นิ่งแล้ว ใช้ d = 0</button>
+<button class="opt" data-correct="false" data-note="ผิด. ADF ไม่ได้ทดสอบ normality">residual ไม่ normal ต้อง log</button>
+<button class="opt" data-correct="false" data-note="ผิด. p-value 0.32 ไม่ได้บอกว่าต้อง difference สองครั้ง ให้ทำทีละครั้งแล้วทดสอบใหม่">ต้อง difference สองครั้งทันที</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>AIC กับ BIC</span></div>
+<div class="qtext">กับข้อมูล times (n = 150) AIC เลือก ARMA(2,1) แต่ BIC เลือก ARMA(1,1) เหตุผลคือข้อใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ทั้งสองใช้ likelihood เดียวกัน ต่างกันที่ penalty">BIC ใช้ likelihood คนละแบบกับ AIC</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใน R ทั้ง AIC และ BIC ยิ่งน้อยยิ่งดี">BIC ยิ่งมากยิ่งดี จึงเลือกโมเดลเล็ก</button>
+<button class="opt" data-correct="false" data-note="ผิด. ARMA(1,1) มี likelihood ต่ำกว่า ARMA(2,1)">ARMA(1,1) มี likelihood สูงกว่า</button>
+<button class="opt" data-correct="true" data-note="ถูก. BIC คิด ln 150 = 5.01 ต่อพารามิเตอร์ หนักกว่า 2 ของ AIC จึงลงโทษพารามิเตอร์เพิ่มมากกว่า">BIC ลงโทษพารามิเตอร์หนักกว่า</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>อธิบาย</span></div>
+<div class="qtext">ข้อมูลยอดขายรายเดือนมี trend ขาขึ้น และความแกว่งโตขึ้นตามระดับ จงเรียงขั้นตอนการเตรียมข้อมูลก่อนเลือก p, q และอธิบายว่าทำไมต้อง log ก่อน difference และตอนพยากรณ์ต้องทำอะไรเพิ่ม</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>plot → Box-Cox (ถ้าช่วงของ λ คลุม 0 ใช้ log) → log → ตรวจ ACF/ADF ของ log X ถ้าลดช้า difference → ดู ACF/PACF/EACF และ AIC/BIC ของ ∇log X</p>
+<p>log ก่อนเพราะ difference ให้ค่าติดลบได้ซึ่ง log ไม่ได้ และ log ทำให้ความแกว่งที่โตตามระดับคงที่ ส่วน ∇log X คืออัตราการเติบโต แปลความง่าย</p>
+<p>โมเดลถูกสร้างกับ log X ค่าพยากรณ์จึงอยู่ในหน่วย log ต้องแปลงกลับด้วย exponential และถ้ามี seasonal เหลือ (เช่น electricity ACF lag 12 = 0.866) ต้องใช้ SARIMA</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>เขียนโมเดลจาก output</span></div>
+<div class="qtext"><p>จาก output นี้ โมเดลที่เขียนถูกคือข้อใด</p>
+<pre class="out">arima(x = y, order = c(1, 0, 1))
+Coefficients:
+         ar1      ma1  intercept
+      0.4500  -0.3000    10.2000
+s.e.  0.2100   0.2500     0.4000</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ar1 = +0.45 ใน Φ(B) ต้องเป็น 1 − 0.45B">\((1+0.45B)(X_t-10.2)=(1-0.3B)w_t\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. intercept ใน R คือ mean ต้องลบออกจาก X ไม่ใช่เป็นค่าคงที่ a">\((1-0.45B)X_t=10.2+(1-0.3B)w_t\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. Φ(B) = 1 − 0.45B, θ(B) = 1 − 0.30B และลบ mean 10.2 จาก X">\((1-0.45B)(X_t-10.2)=(1-0.3B)w_t\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. R ใช้ convention บวก ma1 = −0.30 จึงได้ 1 − 0.3B">\((1-0.45B)(X_t-10.2)=(1+0.3B)w_t\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 13</span><span>อ่านตาราง AIC</span></div>
+<div class="qtext"><p>ตาราง AIC สร้างด้วย <code>order=c(i-1,0,j-1)</code> โมเดลที่ AIC ต่ำสุดคือข้อใด</p>
+<pre class="out">         [,1]     [,2]     [,3]
+[1,] 412.85   398.20   396.94
+[2,] 395.71   394.02   395.88
+[3,] 396.13   395.47   397.60</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อ่านแถว/คอลัมน์เป็นเลขเดียวกับ p, q โดยไม่ลบ 1">ARMA(2,2)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ช่อง [2,2] = 394.02 คือ p = 2 − 1 = 1 และ q = 2 − 1 = 1">ARMA(1,1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ARMA(1,0) คือช่อง [2,1] = 395.71 สูงกว่า 394.02">AR(1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ช่อง [1,3] = 396.94 ไม่ใช่ค่าต่ำสุด">MA(2)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>อ่าน output</span></div>
+<div class="qtext"><p>จาก output ของ times.txt (n = 150, เส้นประ ±0.163) จงเสนอ candidate และให้เหตุผล</p>
+<pre class="out">ACF : -0.771  0.382 -0.090 -0.077  0.129 -0.098
+PACF: -0.771 -0.524 -0.153 -0.135 -0.079 -0.005
+adf.test: Dickey-Fuller = -7.1518, p-value = 0.01
+AIC ต่ำสุด: ARMA(2,1) 501.28, ARMA(1,2) 502.27, ARMA(2,2) 502.35
+BIC ต่ำสุด: ARMA(1,1) 515.36, ARMA(2,1) 516.33, ARMA(1,2) 517.33</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ADF p = 0.01 &lt; 0.05 นิ่ง ใช้ d = 0 ACF ทะลุเส้นที่ lag 1–2 (MA(2) ได้) PACF ทะลุที่ lag 1–2 (AR(2) ได้) ไม่มีตัวไหนตัดชัด จึงน่าเป็น ARMA</p>
+<p>candidate: ARMA(2,1) (ต่ำสุดใน AIC และติดอันดับสองใน BIC), ARMA(1,2) (อยู่ทั้งสองชุด) และ ARMA(1,1) (ต่ำสุดใน BIC โมเดลเล็กที่สุด) จากนั้นตรวจ diagnostic แล้วเทียบความแม่นยำ ถ้าผ่านพอกันเลือกตัวที่เล็กกว่า</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด times.txt</span></div>
+<div class="qtext"><p>รันส่วน Model identification และ Estimation ของ R_codes.txt (Class 7) แล้วจดค่าต่อไปนี้: table1[3,2], table2[2,2], ผลของ ar.yw ที่ order 1 และ order 2, และ arima ARMA(1,1)</p>
+<pre><code>data &lt;- ts(read.table("times.txt"))
+# ... วน for สร้าง table1, table2 ตามโค้ด ...
+ar.yw(data, order.max = 1, aic = FALSE)
+ar.yw(data, order.max = 2, aic = FALSE)
+arima(data, order = c(1,0,1), method = "ML")</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">table1[3,2] = 501.2778   (ARMA(2,1) AIC ต่ำสุด)
+table2[2,2] = 515.3553   (ARMA(1,1) BIC ต่ำสุด)
+ar.yw order 1: ar -0.7710   var.pred 2.4866
+ar.yw order 2: ar -1.1751 -0.5242   var.pred 1.8157
+ARMA(1,1): ar1 -0.6169 (0.0686)  ma1 -0.7233 (0.0543)  intercept 0.0235 (0.0179)
+           sigma^2 1.57  log likelihood -247.66  aic 503.31</pre>
+<p>ar.yw order 2 ได้ φ̂₂ = −0.5242 เท่ากับ PACF lag 2 ตามสูตร Yule-Walker และ σ² ลดจาก 2.49 เป็น 1.82 เมื่อเพิ่ม AR อีกหนึ่งพจน์ ARMA(1,1) ด้วย MLE ได้ σ² = 1.57 ต่ำกว่าทั้งคู่</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>รันโค้ด electricity</span></div>
+<div class="qtext"><p>รันส่วน Transformation ของ R_codes.txt แล้วตอบ: λ̂ และช่วงเชื่อมั่นคือเท่าใด ควรแปลงแบบใด และ ACF ของ diff(log(electricity)) ที่ lag 12, 24, 36 เป็นเท่าใด</p>
+<pre><code>library(TSA); data(electricity)
+b &lt;- BoxCox.ar(electricity); b$mle; b$ci
+round(acf(diff(log(electricity)), plot = FALSE, lag.max = 36)$acf, 3)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">b$mle = -0.1     b$ci = -0.4  0.2
+ACF ที่ lag 12, 24, 36 = 0.866  0.836  0.812</pre>
+<p>ช่วงคลุม 0 จึงใช้ log ACF ของผลต่างของ log ยังสูงทุก 12 เดือน แปลว่าเหลือ seasonal ต้องใช้ SARIMA (Lesson 9) ระวัง: เมื่อโหลด TSA แล้ว <code>acf()</code> ของ TSA จะไม่คืน lag 0 ตำแหน่งที่ 12 ของผลจึงคือ lag 12 ถ้าใช้ <code>stats::acf()</code> ตำแหน่งแรกคือ lag 0 ต้องเลื่อนหนึ่งช่อง BoxCox.ar รันนานราวหนึ่งนาที</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>พิสูจน์ว่า ARIMA(0,1,1) เท่ากับ SES และแปลง θ เป็น α = 1 + θ</li>
+<li>เลือก transformation ด้วยช่วงเชื่อมั่นของ λ และรู้ว่าต้อง log ก่อน difference</li>
+<li>ใช้ ACF ที่ลดช้าและ ADF (H0 = ไม่นิ่ง) ตัดสิน d</li>
+<li>อ่านตาราง AIC/BIC ที่สร้างด้วย order = c(i−1, 0, j−1) และเสนอ candidate 2–3 ตัว</li>
+<li>ตรวจ causal, invertible และ redundancy ด้วยรากของ Φ(x) และ θ(x) รวมถึง modulus</li>
+<li>เขียน ψ weights และ π weights ด้วยอนุกรมเรขาคณิต</li>
+<li>คำนวณ MOM ของ AR(1), AR(2) และ MA(1) และรู้ว่า MA(1) ไม่มีคำตอบเมื่อ |ρ̂₁| &gt; 0.5</li>
+<li>เขียนโมเดลจาก output ของ arima() โดยลบ intercept ออกจาก X</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0007-arima-identification-and-estimation.html">← กลับไปที่บทเรียน Lesson 7</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
