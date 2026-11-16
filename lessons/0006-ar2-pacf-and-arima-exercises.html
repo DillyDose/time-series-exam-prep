@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 6: AR(2), PACF และ ARIMA</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 6</span>
+  <span><a href="0006-ar2-pacf-and-arima.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 6: AR(2), PACF และ ARIMA</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>Yule-Walker</span></div>
+<div class="qtext">AR(2) \(X_t=0.4X_{t-1}+0.3X_{t-2}+w_t\) มีค่า \(\rho_1\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ ρ₁ = φ₁ แบบ AR(1) ลืมผลของ φ₂">\(\rho_1=0.400\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. นำ φ₁ + φ₂ มาเป็น ρ₁">\(\rho_1=0.700\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ρ₁ = φ₁/(1 − φ₂) = 0.4/0.7 = 0.571">\(\rho_1=0.571\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย 1 + φ₁ แทน 1 − φ₂">\(\rho_1=0.286\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>PACF lag 2</span></div>
+<div class="qtext">อนุกรมนิ่งมี \(\rho_1=0.5\) และ \(\rho_2=0.4\) ค่า \(\phi_{22}\) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. (0.4 − 0.25)/(1 − 0.25) = 0.15/0.75 = 0.2">\(\phi_{22}=0.200\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. PACF lag 2 ไม่เท่ากับ ACF lag 2 ยกเว้นเมื่อ ρ₁ = 0">\(\phi_{22}=0.400\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ได้แค่ตัวเศษ ลืมหารด้วย 1 − ρ₁²">\(\phi_{22}=0.150\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมลบ ρ₁² ในตัวเศษ">\(\phi_{22}=0.533\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>คำนวณมือ</span></div>
+<div class="qtext">AR(2) \(X_t=0.6X_{t-1}-0.2X_{t-2}+w_t\) (ก) ตรวจเงื่อนไขสามข้อ (ข) หารากของ Φ(x) และ modulus (ค) หา ρ₁, ρ₂, ρ₃ ด้วย Yule-Walker (ง) หา φ₁₁ และ φ₂₂</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) 0.6 − 0.2 = 0.4 &lt; 1, −0.2 − 0.6 = −0.8 &lt; 1, |−0.2| &lt; 1 นิ่ง</p>
+<p>(ข) \(\Phi(x)=1-0.6x+0.2x^2\) ได้ \(0.36-0.8=-0.44&lt;0\) รากเชิงซ้อน \(x=\dfrac{0.6\pm\sqrt{-0.44}}{0.4}=1.5\pm1.658i\) modulus \(\sqrt{2.25+2.75}=\sqrt5=2.236&gt;1\)</p>
+<p>(ค) \(\rho_1=0.6/1.2=0.5\), \(\rho_2=0.6(0.5)-0.2=0.1\), \(\rho_3=0.6(0.1)-0.2(0.5)=-0.04\)</p>
+<p>(ง) \(\phi_{11}=\rho_1=0.5\), \(\phi_{22}=(0.1-0.25)/(1-0.25)=-0.2=\phi_2\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>สามเหลี่ยม</span></div>
+<div class="qtext">AR(2) ที่มี (φ₁, φ₂) คู่ใดเป็นกระบวนการที่นิ่ง</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. φ₁ + φ₂ = 1.1 ไม่น้อยกว่า 1 แม้แต่ละตัวจะน้อยกว่า 1">(0.6, 0.5)</button>
+<button class="opt" data-correct="false" data-note="ผิด. φ₂ − φ₁ = 0.3 + 0.8 = 1.1 ไม่น้อยกว่า 1">(−0.8, 0.3)</button>
+<button class="opt" data-correct="false" data-note="ผิด. |φ₂| = 1.1 ไม่น้อยกว่า 1">(0.2, −1.1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.9 < 1, 0.3 < 1 และ |0.6| < 1 ผ่านครบสามข้อ">(0.3, 0.6)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>แยกตัวประกอบ</span></div>
+<div class="qtext">\(X_t=1.4X_{t-1}-0.4X_{t-2}+w_t\) เป็นโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. φ₁ + φ₂ = 1 ไม่ผ่านเงื่อนไข จึงไม่ใช่ AR(2) ที่นิ่ง">AR(2) ที่นิ่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. เมื่อดึง (1 − B) ออกแล้ว ส่วน AR ที่เหลือมีอันดับ 1 ไม่ใช่ 2">ARIMA(2,1,0)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 1 − 1.4B + 0.4B² = (1 − 0.4B)(1 − B) จึงเป็น AR(1) φ = 0.4 ของ ∇X_t">ARIMA(1,1,0)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ด้านขวามีแค่ w_t จึงไม่มีส่วน MA">ARIMA(0,1,1)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>แยกตัวประกอบ</span></div>
+<div class="qtext">จงแสดงว่า \(X_t=1.2X_{t-1}-0.2X_{t-2}+w_t-0.5w_{t-1}\) ไม่ใช่ ARMA(2,1) ที่นิ่ง และบอกว่าเป็น ARIMA อันดับใด พร้อมค่า φ และ θ</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\((1-1.2B+0.2B^2)X_t=(1-0.5B)w_t\) ตรวจ: φ₁ + φ₂ = 1.2 − 0.2 = 1 ไม่น้อยกว่า 1</p>
+<p>บวกได้ 1.2 คูณได้ 0.2 คือ 1 กับ 0.2 จึงได้ \((1-0.2B)(1-B)X_t=(1-0.5B)w_t\) ราก 1 และ 5</p>
+<p>\((1-0.2B)\nabla X_t=(1-0.5B)w_t\) เป็น ARIMA(1,1,1) φ = 0.2 และ θ = 0.5 (convention ลบ) ไม่มีตัวประกอบร่วมจึงตัดต่อไม่ได้</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>พิสูจน์</span></div>
+<div class="qtext">(ก) แสดงว่าถ้า \(X_t\) เป็น random walk \(\nabla X_t\) เป็น white noise (ข) ถ้า \(X_t=w_t\) เป็น white noise อยู่แล้ว แล้วนำไป difference จงหา ACF ของ \(\nabla X_t\) และอธิบายว่าบอกอะไร</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(X_t=X_{t-1}+w_t\) จึงได้ \(\nabla X_t=w_t\) เป็น white noise ARIMA(0,1,0)</p>
+<p>(ข) \(\nabla X_t=w_t-w_{t-1}\) เป็น MA(1) θ = −1 (convention บวก) γ₀ = 2σ², γ₁ = −σ² จึงได้ ρ₁ = −0.5 และ ρ_h = 0 เมื่อ h ≥ 2</p>
+<p>ACF lag 1 ใกล้ −0.5 หลัง difference คือสัญญาณว่า difference เกินจำเป็น (over-differencing) และ θ = −1 ทำให้ไม่ invertible ตรงกับ Exercise หน้า 25 ที่ φ = 0 ให้ \(\rho_Y(1)=-(1-0)/2=-0.5\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>ตาราง ACF/PACF</span></div>
+<div class="qtext">sample ACF ทะลุเส้นที่ lag 1 และ 2 แล้วอยู่ในเส้นทั้งหมด ส่วน sample PACF ลดลงช้า ๆ และสลับเครื่องหมาย ควรเลือกโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. AR(2) ต้องมี PACF ตัดหลัง lag 2 และ ACF ลดช้า ซึ่งกลับด้าน">AR(2)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ACF ตัดหลัง lag 2 บอก q = 2 และ PACF tail off ยืนยันว่าเป็น MA">MA(2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ARMA ต้อง tail off ทั้ง ACF และ PACF">ARMA(2,2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ACF ที่ตัดเร็วบอกว่าอนุกรมนิ่งแล้ว ไม่ต้อง difference">ARIMA(0,2,0)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>นับพารามิเตอร์</span></div>
+<div class="qtext">ARIMA(2,1,1) ที่ไม่มีค่าคงที่ ต้องประมาณสัมประสิทธิ์ φ และ θ รวมกี่ตัว</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. φ₁, φ₂ และ θ₁ ส่วน d = 1 เป็นจำนวนครั้งที่ difference ไม่ใช่พารามิเตอร์">3 ตัว</button>
+<button class="opt" data-correct="false" data-note="ผิด. นับ d เป็นพารามิเตอร์ด้วย แต่ d ไม่ใช่จำนวนพารามิเตอร์">4 ตัว</button>
+<button class="opt" data-correct="false" data-note="ผิด. p = 2 หมายถึงมี φ สองตัว">2 ตัว</button>
+<button class="opt" data-correct="false" data-note="ผิด. นับแค่ส่วน MA">1 ตัว</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>Homework Q1, Q6</span></div>
+<div class="qtext">จงบรรยายลักษณะสำคัญของ ACF และ PACF ของ (ก) ARMA(0,3) (ข) ARMA(3,0) (ค) ARMA(1,2) (ง) AR(2) ที่มีรากเชิงซ้อน</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) ARMA(0,3) = MA(3): ACF ไม่เป็นศูนย์ถึง lag 3 แล้วเป็นศูนย์ PACF tail off</p>
+<p>(ข) ARMA(3,0) = AR(3): ACF tail off (ผสม exponential decay และ/หรือ damped sine) PACF ไม่เป็นศูนย์ถึง lag 3 แล้วเป็นศูนย์</p>
+<p>(ค) ARMA(1,2): ACF และ PACF tail off ทั้งคู่ ACF ลดแบบเลขชี้กำลังด้วยอัตรา φ ตั้งแต่หลัง lag 2 อ่าน p, q จากสองกราฟไม่ได้ ใช้ EACF หรือ auto.arima</p>
+<p>(ง) ACF เป็นคลื่นที่หดลง (damped sine wave) PACF ไม่เป็นศูนย์ที่ lag 1, 2 แล้วเป็นศูนย์</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) อธิบายด้วยภาษาของตัวเองว่าทำไม AR(1) มี ρ₂ = φ² แต่ φ₂₂ = 0 (ข) ทำไม PACF ของ MA(1) จึงไม่ตัดที่ lag ใด (ค) ทำไมจึงกล่าวว่า ACF "ไม่มีประโยชน์อะไรเลย" ในการหา p</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(X_{t-2}\) ไม่อยู่ในสมการของ \(X_t\) แต่ส่งผลทางอ้อมผ่าน \(X_{t-1}\) ρ₂ นับรวมทางอ้อมนี้จึงได้ φ² เมื่อรู้ \(X_{t-1}\) แล้ว ส่วนที่เหลือของ \(X_t\) คือ \(w_t\) ซึ่งไม่เกี่ยวกับ \(X_{t-2}\) PACF ที่ตัดทางอ้อมออกจึงเป็นศูนย์</p>
+<p>(ข) MA(1) ที่ invertible เขียนกลับเป็น AR(∞) ได้ \(X_t\) จึงขึ้นกับค่าในอดีตทุกค่าด้วยน้ำหนักที่ลดลง ไม่มี lag ที่ทำให้ความสัมพันธ์ตรงหายไปพอดี</p>
+<p>(ค) ACF ของ AR ทุกอันดับลดลงช้าเหมือนกัน เช่น AR(1) φ = 0.9 และ AR(2) φ = (1.1, −0.3) ให้ ACF ลดแบบเลขชี้กำลังเหมือนกัน จึงแยก p ไม่ได้ ต้องใช้ PACF</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>อ่าน acf/pacf</span></div>
+<div class="qtext"><p>อนุกรมนิ่งยาว 100 ค่า (เส้นประ ±0.2) ได้ผลดังนี้ ควรเลือกโมเดลใด</p>
+<pre class="out">lag     1      2      3      4      5      6
+ACF   0.55  0.01  -0.24  -0.19  -0.05   0.05
+PACF  0.55 -0.43   0.06  -0.04   0.08  -0.03</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. PACF lag 2 = −0.43 ทะลุเส้นชัดเจน จึงต้องมีอย่างน้อยสองพจน์">AR(1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ACF lag 3 = −0.24 ยังทะลุเส้น ACF จึงไม่ได้ตัดหลัง lag 2">MA(2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. PACF ตัดชัดหลัง lag 2 ไม่ได้ tail off">ARMA(1,1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. PACF ทะลุเส้นที่ lag 1, 2 แล้วตัด ACF เป็นคลื่นที่ลดลง ลักษณะของ AR(2) รากเชิงซ้อน">AR(2)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 13</span><span>อ่าน EACF</span></div>
+<div class="qtext"><p>จากผล <code>eacf()</code> นี้ ควรเลือกโมเดลใด</p>
+<pre class="out">AR/MA
+  0 1 2 3 4 5
+0 x x x x x x
+1 x x o o o o
+2 x x x o o o
+3 x x x x o o
+4 x x x x x o</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. แถวคือ AR และคอลัมน์คือ MA สลับกัน">ARMA(2,1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. มุมบนซ้ายของสามเหลี่ยม o อยู่แถว 1 คอลัมน์ 2">ARMA(1,2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. แถว 1 คอลัมน์ 1 ยังเป็น x">ARMA(1,1)</button>
+<button class="opt" data-correct="false" data-note="ผิด. แถว 0 ไม่มี o เลย ไม่ใช่ MA ล้วน">MA(2)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>อ่าน output</span></div>
+<div class="qtext"><p>อนุกรมยาว 150 ค่า (เส้นประ ±0.163) จงเลือก d และ q และเขียนโมเดลด้วย B</p>
+<pre class="out">acf(x):        0.97  0.94  0.91  0.88  0.86  0.83 ...
+acf(diff(x)): -0.41  0.03 -0.05  0.07 -0.02  0.04
+pacf(diff(x)):-0.41 -0.19 -0.12 -0.03 -0.06  0.01</pre></div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ACF ของ x ลดช้ามาก ไม่นิ่ง ต้อง difference หลัง difference หนึ่งครั้ง ACF ทะลุเส้นแค่ lag 1 แล้วตัด PACF ลดลงช้า ๆ (−0.41, −0.19, −0.12) จึงเป็น MA(1) ของ ∇x</p>
+<p>d = 1, q = 1 ได้ ARIMA(0,1,1) \((1-B)X_t=(1-\theta B)w_t\) จาก \(-\theta/(1+\theta^2)=-0.41\) ได้ θ ≈ 0.5 แบบเดียวกับ IMA(1,1) ในหน้า 53</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด</span></div>
+<div class="qtext"><p>รันส่วน PACF ของ R_codes.txt (Class 6) ด้วย seed นี้แล้วเทียบค่า</p>
+<pre><code>round(ARMAacf(ar = c(-0.5,0.25), lag.max = 4, pacf = TRUE), 3)
+round(ARMAacf(ma = c(-0.9), lag.max = 4, pacf = TRUE), 3)
+set.seed(3)
+ar1.sim &lt;- arima.sim(list(order = c(1,0,0), ar = c(0.9)), n = 150)
+ar2.sim &lt;- arima.sim(list(order = c(2,0,0), ar = c(-0.5,0.25)), n = 150)
+round(pacf(ar1.sim, plot = FALSE, lag.max = 4)$acf, 3)
+round(pacf(ar2.sim, plot = FALSE, lag.max = 4)$acf, 3)
+arima(ar2.sim, order = c(2,0,0))
+polyroot(c(1, -1.5, 0.75)); Mod(polyroot(c(1, -1.5, 0.75)))</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">-0.667  0.250  0.000  0.000
+-0.497 -0.328 -0.243 -0.191
+ 0.899 -0.010  0.031 -0.056
+-0.703  0.163 -0.053  0.054
+ar1 -0.5831 (0.0807)  ar2 0.1641 (0.0810)  intercept 0.0767  aic 442.95
+1+0.5774i 1-0.5774i     1.154701 1.154701</pre>
+<p>PACF ทฤษฎีของ AR(2) ตัดหลัง lag 2 ส่วน MA(1) ลดลงช้า ๆ ข้อมูลจำลองของ AR(2) ได้ PACF lag 2 = 0.163 แตะเส้น 0.163 พอดี และ ar2 = 0.164 ห่างจากค่าจริง 0.25 ด้วย sampling error บรรทัดสุดท้ายคือรากของ Example 3.10 modulus 1.155 &gt; 1 จึงนิ่ง</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 16</span><span>Homework Q5</span></div>
+<div class="qtext"><p>Simulate AR(2) n = 72, φ₁ = 0.7, φ₂ = −0.4 ด้วย <code>set.seed(3)</code> แล้วเทียบ ACF/PACF ทฤษฎีกับตัวอย่าง และฟิต AR(2)</p></div>
+<textarea placeholder="จดผลและเปรียบเทียบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">ACF ทฤษฎี:   0.500 -0.050 -0.235 -0.144 -0.007
+PACF ทฤษฎี:  0.500 -0.400  0      0
+ACF ตัวอย่าง: 0.490 -0.049 -0.161 -0.059  0.031
+PACF ตัวอย่าง:0.490 -0.381  0.092 -0.018  0.023   (เส้นประ ±0.236)
+arima: ar1 0.6898 (0.1089)  ar2 -0.3889 (0.1093)</pre>
+<p>PACF ตัวอย่างทะลุเส้นที่ lag 1 และ 2 แล้วตัด ตรงกับทฤษฎี ส่วน ACF lag 3 ทฤษฎี −0.235 แต่ตัวอย่างได้ −0.161 อยู่ในเส้น เพราะ n = 72 มีเส้นประกว้างกว่า n = 150 รากของ Φ(x) คือ 0.875 ± 1.317i modulus 1.581 ACF จึงเป็นคลื่นเล็กน้อย</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>ตรวจความนิ่งของ AR(2) ด้วยเงื่อนไขสามข้อ และด้วยรากของ Φ(x) จากสูตรกำลังสอง รวมถึง modulus ของรากเชิงซ้อน</li>
+<li>ใช้ Yule-Walker หา ρ₁, ρ₂, ρ₃ ของ AR(2) และใช้ φ₂₂ = (ρ₂ − ρ₁²)/(1 − ρ₁²)</li>
+<li>อธิบาย partial correlation ด้วย residual ของสอง regression และอธิบายว่าทำไม PACF ของ AR(p) ตัดหลัง lag p</li>
+<li>ใช้ตาราง ACF/PACF เลือก AR, MA หรือ ARMA และอ่าน EACF ได้</li>
+<li>เขียน ARIMA(p,d,q) ด้วย B และรู้ว่า d ไม่ใช่จำนวนพารามิเตอร์</li>
+<li>พิสูจน์ว่า quadratic trend ต้อง difference สองครั้ง</li>
+<li>แยกตัวประกอบสมการที่ "ดูเหมือน" AR(2) หรือ ARMA(2,2) เพื่อหา (1 − B) และตัวประกอบร่วม</li>
+<li>อ่านกราฟ IMA(1,1) และ IMA(2,2) เพื่อเลือก d และ q</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0006-ar2-pacf-and-arima.html">← กลับไปที่บทเรียน Lesson 6</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
