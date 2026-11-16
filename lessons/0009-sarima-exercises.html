@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 9: SARIMA</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 9</span>
+  <span><a href="0009-sarima.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 9: SARIMA</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>MA(1)₁₂</span></div>
+<div class="qtext">\(X_t=w_t+0.6w_{t-12}\) มี ACF ที่ lag 12 เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ Θ ไม่ได้หารด้วย 1 + Θ²">ρ₁₂ = 0.600</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.6/(1 + 0.36) = 0.441">ρ₁₂ = 0.441</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ Θ² แทน Θ">ρ₁₂ = 0.360</button>
+<button class="opt" data-correct="false" data-note="ผิด. lag 1 เป็นศูนย์ แต่ lag 12 ไม่เป็นศูนย์">ρ₁₂ = 0.000</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>ตะเกียบ</span></div>
+<div class="qtext">MA(1)×MA(1)₁₂ ที่ θ = 0.5 และ Θ = 0.5 มี ρ₁₃ เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ρ₁ = θ/(1 + θ²)">0.40</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ θΘ ยังไม่หาร">0.25</button>
+<button class="opt" data-correct="false" data-note="ผิด. หารด้วย (1 + θ²) แค่ตัวเดียว">0.20</button>
+<button class="opt" data-correct="true" data-note="ถูก. θΘ/((1 + θ²)(1 + Θ²)) = 0.25/1.5625 = 0.16">0.16</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>MA(2)₁₂</span></div>
+<div class="qtext">\(X_t=w_t+0.5w_{t-12}+0.4w_{t-24}\) จงหา ρ₁, ρ₁₂, ρ₂₄, ρ₃₆ และบอกว่า PACF มีลักษณะอย่างไร</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ρ₁ = 0 (lag ที่ไม่ใช่พหุคูณของ 12 เป็นศูนย์)</p>
+<p>\(\rho_{12}=\dfrac{0.5+0.5(0.4)}{1+0.25+0.16}=\dfrac{0.7}{1.41}=0.496\), \(\rho_{24}=\dfrac{0.4}{1.41}=0.284\), ρ₃₆ = 0</p>
+<p>PACF tail off ที่ lag 12, 24, 36, 48, … (เหมือน PACF ของ MA(2) แต่ย้ายไปที่พหุคูณของ 12) ตรวจด้วย <code>ARMAacf(ma = c(rep(0,11), 0.5, rep(0,11), 0.4), lag.max = 36)</code></p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>AR(P)ₛ</span></div>
+<div class="qtext">AR(2)₄ มี PACF ไม่เป็นศูนย์ที่ lag ใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. PACF ของ AR(P)ₛ ไม่เป็นศูนย์ที่ s, …, Ps = 4, 8 แล้วตัด">4 และ 8 เท่านั้น</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ AR(2) ธรรมดา">1 และ 2 เท่านั้น</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ ACF ที่ tail off">4, 8, 12, 16, … ลดลงเรื่อย ๆ</button>
+<button class="opt" data-correct="false" data-note="ผิด. สลับ P กับ s">2, 4, 6, 8</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>สัญกรณ์</span></div>
+<div class="qtext">\((1-0.6B)(1-B^{12})X_t=(1+0.4B^{12})w_t\) เขียนเป็นสัญกรณ์ใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. (1 − B¹²) คือ D = 1 ไม่ใช่ d = 1">ARIMA(1,1,0)×(0,0,1)₁₂</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.4B¹² เป็น seasonal MA ไม่ใช่ non-seasonal">ARIMA(1,0,1)×(0,1,0)₁₂</button>
+<button class="opt" data-correct="true" data-note="ถูก. p = 1, d = 0, q = 0, P = 0, D = 1, Q = 1">ARIMA(1,0,0)×(0,1,1)₁₂</button>
+<button class="opt" data-correct="false" data-note="ผิด. (1 − 0.6B) คือ non-seasonal AR ไม่ใช่ seasonal">ARIMA(0,0,0)×(1,1,1)₁₂</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>พิสูจน์ (การบ้านที่อาจออกสอบ)</span></div>
+<div class="qtext">จงหา γ₀ และ ACF ทุก lag ของ MA(1)×MA(1)₁₂ \(X_t=(1+\theta B)(1+\Theta B^{12})w_t\) แล้วอธิบายว่าทำไม ρ₁₁ = ρ₁₃</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(X_t=w_t+\theta w_{t-1}+\Theta w_{t-12}+\theta\Theta w_{t-13}\) γ₀ = σ²(1 + θ² + Θ² + θ²Θ²) = σ²(1 + θ²)(1 + Θ²)</p>
+<p>γ₁ = σ²(θ + Θ·θΘ) = σ²θ(1 + Θ²), γ₁₁ = σ²θΘ, γ₁₂ = σ²(Θ + θ·θΘ) = σ²Θ(1 + θ²), γ₁₃ = σ²θΘ lag อื่นเป็น 0</p>
+<p>ρ₁ = θ/(1 + θ²), ρ₁₂ = Θ/(1 + Θ²), ρ₁₁ = ρ₁₃ = θΘ/((1 + θ²)(1 + Θ²)) เท่ากันเพราะทั้งสองมาจากผลคูณสัมประสิทธิ์คู่เดียว θ กับ Θ (lag 11 คือ θ ที่ตำแหน่ง 1 กับ Θ ที่ 12, lag 13 คือ 1 ที่ตำแหน่ง 0 กับ θΘ ที่ 13)</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>กระจายโมเดล</span></div>
+<div class="qtext">จงเขียน ARIMA(1,0,0)×(1,0,0)₁₂ ด้วย B แล้วกระจายให้อยู่ในรูป \(X_t=\dots\) และบอกว่า PACF ตามทฤษฎีไม่เป็นศูนย์ที่ lag ใด</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\((1-\phi B)(1-\Phi B^{12})X_t=w_t\) กระจาย \((1-\phi B-\Phi B^{12}+\phi\Phi B^{13})X_t=w_t\)</p>
+<p>\(X_t=\phi X_{t-1}+\Phi X_{t-12}-\phi\Phi X_{t-13}+w_t\) เป็น AR(13) ที่มีแค่ lag 1, 12, 13 PACF จึงไม่เป็นศูนย์ได้ถึง lag 13 แล้วเป็นศูนย์ (มีค่าเด่นที่ 1, 12, 13) ระวังเครื่องหมายของพจน์ φΦ</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>อ่านรูปแบบ ACF</span></div>
+<div class="qtext">ACF ของอนุกรมรายเดือนไม่เป็นศูนย์เฉพาะ lag 1, 11, 12, 13 (ค่าที่ 11 และ 13 เล็กและเท่ากัน) ส่วน PACF tail off โมเดลใดเหมาะที่สุด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. lag 1 จาก MA(1), lag 12 จาก MA(1)₁₂ และ 11, 13 คือตะเกียบ">MA(1)×MA(1)₁₂</button>
+<button class="opt" data-correct="false" data-note="ผิด. AR(1)₁₂ ทำให้ ACF tail off ที่ 12, 24, 36">MA(1)×AR(1)₁₂</button>
+<button class="opt" data-correct="false" data-note="ผิด. MA(13) ทั่วไปจะมีค่าได้ทุก lag 1–13 ไม่ใช่แค่ 1, 11, 12, 13">MA(13) ไม่มีโครงสร้าง</button>
+<button class="opt" data-correct="false" data-note="ผิด. AR(13) จะมี PACF ตัดหลัง lag 13 และ ACF tail off">AR(1)×AR(1)₁₂</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>ควิซ 7</span></div>
+<div class="qtext">ข้อใดแยก MA(2)₄ ออกจาก MA(4)₂ ได้ถูกต้อง</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ทั้งสองตัดหลัง lag 8">MA(2)₄ ตัดหลัง lag 2 ส่วน MA(4)₂ ตัดหลัง lag 4</button>
+<button class="opt" data-correct="true" data-note="ถูก. MA(2)₄ ไม่เป็นศูนย์ที่ 4, 8 ส่วน MA(4)₂ ที่ 2, 4, 6, 8">ACF ของ MA(2)₄ มีสองแท่ง (4, 8) ส่วน MA(4)₂ มีสี่แท่ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. MA ทั้งสองมี PACF tail off">PACF ของ MA(2)₄ ตัดหลัง lag 8</button>
+<button class="opt" data-correct="false" data-note="ผิด. lag 6 ของ MA(2)₄ เป็นศูนย์">ACF ของทั้งสองไม่เป็นศูนย์ที่ lag 6</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 10</span><span>ควิซ 7 ฉบับเต็ม</span></div>
+<div class="qtext">อธิบายลักษณะสำคัญของ ACF และ PACF อย่างละเอียดสำหรับ (1) AR(2)₃ (2) AR(5)₂ (3) MA(2)₄ (4) MA(4)₂</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(1) AR(2)₃: ACF ไม่เป็นศูนย์เฉพาะ lag 3, 6, 9, … และ tail off lag อื่นเป็นศูนย์ PACF ไม่เป็นศูนย์ที่ lag 3, 6 แล้วเป็นศูนย์</p>
+<p>(2) AR(5)₂: ACF tail off ที่ lag 2, 4, 6, … PACF ไม่เป็นศูนย์ที่ lag 2, 4, 6, 8, 10 แล้วเป็นศูนย์ lag คี่เป็นศูนย์ทั้งหมด</p>
+<p>(3) MA(2)₄: ACF ไม่เป็นศูนย์ที่ lag 4, 8 แล้วเป็นศูนย์ PACF tail off ที่ lag 4, 8, 12, …</p>
+<p>(4) MA(4)₂: ACF ไม่เป็นศูนย์ที่ lag 2, 4, 6, 8 แล้วเป็นศูนย์ PACF tail off ที่ lag 2, 4, 6, 8, 10, …</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>อ่าน sar</span></div>
+<div class="qtext"><p>output ของ <code>arima(y, order = c(0,1,1), seasonal = list(order = c(1,1,0), period = 12))</code> ได้ ma1 = −0.35 และ sar1 = −0.50 โมเดลที่เขียนถูกคือข้อใด</p></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. seasonal AR operator คือ 1 − ΦB¹² จึงเป็น 1 + 0.5B¹²">\((1-0.5B^{12})(1-B)(1-B^{12})X_t=(1-0.35B)w_t\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. sar1 คือ seasonal AR ต้องอยู่ด้าน X ไม่ใช่ด้าน w">\((1-B)(1-B^{12})X_t=(1-0.35B)(1-0.5B^{12})w_t\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. 1 − (−0.5)B¹² = 1 + 0.5B¹² และ R ใช้ MA แบบบวก 1 + (−0.35)B">\((1+0.5B^{12})(1-B)(1-B^{12})X_t=(1-0.35B)w_t\)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืม seasonal differencing (1 − B¹²) ซึ่งมาจาก D = 1">\((1+0.5B^{12})(1-B)X_t=(1-0.35B)w_t\)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 12</span><span>เลือกโมเดลจาก ACF/PACF</span></div>
+<div class="qtext"><p>หลังทำ \(\nabla\nabla_{12}X_t\) ได้ผลนี้ (เส้นประ ±0.18) ควรเลือกส่วน seasonal แบบใด</p>
+<pre class="out">lag      12      24      36      48
+ACF   -0.45   -0.02    0.03   -0.01
+PACF  -0.42   -0.25   -0.17   -0.11
+ACF/PACF ที่ lag อื่นอยู่ในเส้นทั้งหมด</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. AR(1)₁₂ ต้องมี ACF tail off ที่ 12, 24, 36">(P,Q) = (1,0)</button>
+<button class="opt" data-correct="false" data-note="ผิด. PACF ไม่ได้ตัดหลัง lag 36 แต่ค่อย ๆ ลด">(P,Q) = (3,0)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ACF ตัดหลัง lag 12 ชัดเจน ไม่ใช่ tail off ทั้งคู่">(P,Q) = (1,1)</button>
+<button class="opt" data-correct="true" data-note="ถูก. ACF ตัดหลัง lag 12 และ PACF tail off ที่ 12, 24, 36 คือ MA(1)₁₂">(P,Q) = (0,1)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>เขียนโมเดลจาก output</span></div>
+<div class="qtext"><p>เขียนโมเดลจาก output ของ boardings ทั้งรูป B และรูปกระจาย พร้อม σ̂</p>
+<pre class="out">         ma1     ma2     ma3    sar1  intercept
+      0.7288  0.6115  0.2951  0.8777    12.5455
+sigma^2 estimated as 0.0006542</pre></div>
+<textarea placeholder="เขียนโมเดล"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\((1-0.8777B^{12})(\log X_t-12.5455)=(1+0.7288B+0.6115B^2+0.2951B^3)w_t\)</p>
+<p>ค่าคงที่ = 12.5455(1 − 0.8777) = 1.534 จึงได้ \(\log X_t=1.534+0.8777\log X_{t-12}+w_t+0.7288w_{t-1}+0.6115w_{t-2}+0.2951w_{t-3}\), σ̂ = √0.0006542 = 0.0256 (สไลด์ปัดเป็น 0.0255)</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>รันโค้ด simulation</span></div>
+<div class="qtext"><p>รันโค้ดนี้แล้วเทียบกับสูตร</p>
+<pre><code>round(ARMAacf(ma = c(-0.5, rep(0,10), -0.9, 0.45), lag.max = 13)[c(2,12,13,14)], 3)
+round(ARMAacf(ar = c(rep(0,11), 0.9), ma = -0.5, lag.max = 25)[c(2,12,13,14,24,25,26)], 3)
+round(ARMAacf(ar = c(rep(0,11), 0.8), lag.max = 48, pacf = TRUE)[c(12,24)], 3)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">lag 1, 11, 12, 13:            -0.400  0.199 -0.497  0.199
+lag 1, 11, 12, 13, 23, 24, 25: -0.400 -0.360  0.900 -0.360 -0.324  0.810 -0.324
+PACF lag 12, 24 ของ AR(1)_12:  0.800  0.000</pre>
+<p>ARMAacf คืนค่าเริ่มที่ lag 0 จึงต้องบวก 1 ที่ตำแหน่ง (lag 1 อยู่ตำแหน่ง 2) ส่วน pacf = TRUE เริ่มที่ lag 1 ทุกค่าตรงกับสูตรในบทเรียน</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 15</span><span>รันโค้ด milk</span></div>
+<div class="qtext"><p>รันส่วน US milk ของ R_codes แล้วเทียบสองโมเดล</p>
+<pre><code>library(TSA); data(milk)
+f1 &lt;- arima(milk, order = c(0,1,0), seasonal = list(order = c(3,1,0), period = 12), method = "ML")
+f2 &lt;- arima(milk, order = c(0,1,0), seasonal = list(order = c(0,1,1), period = 12), method = "ML")
+f1; f2; AIC(f1); AIC(f2)
+Box.test(residuals(f2)[-(1:13)], lag = 12, type = "Ljung", fitdf = 1)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">f1: sar1 -0.9133  sar2 -0.8146  sar3 -0.6002  sigma^2 121.4  AIC() 1032.05
+f2: sma1 -0.9541                                sigma^2 152.0  AIC() 1058.13
+Ljung-Box f2 (lag 12): p-value = 0.003</pre>
+<p>f1 ดีกว่าทั้ง AIC, σ² และ Ljung-Box ตรงกับสไลด์ aic ที่พิมพ์ในตัว output จะต่ำกว่า AIC() 2 หน่วยเพราะโหลด TSA (1030.05 บนสไลด์)</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>เขียน MA(Q)ₛ, AR(P)ₛ, ARMA(P,Q)ₛ ด้วย Bˢ และบอกว่าเทียบเท่า ARMA อันดับใด</li>
+<li>หา ACF ของ MA(1)₁₂, MA(2)₁₂ และ MA(1)×MA(1)₁₂ รวมถึงตะเกียบที่ lag 11, 13</li>
+<li>ตอบควิซ 7: ACF/PACF ของ seasonal AR/MA ทุกอันดับและทุก s</li>
+<li>เขียน full SARIMA \(\phi(B)\Phi_P(B^s)\nabla^d\nabla_s^DX_t=\theta(B)\Theta_Q(B^s)w_t\) และแปลงเป็นสัญกรณ์ ARIMA(p,d,q)×(P,D,Q)ₛ</li>
+<li>เขียนโมเดลจาก output ที่มี sar/sma โดยระวังเครื่องหมายของ Φ</li>
+<li>วิเคราะห์ boardings และ milk ได้ครบทุกขั้น</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0009-sarima.html">← กลับไปที่บทเรียน Lesson 9</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
