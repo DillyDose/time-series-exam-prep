@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 10: auto.arima, ETS และ tsCV</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 10</span>
+  <span><a href="0010-auto-arima-ets-tscv.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 10: auto.arima, ETS และ tsCV</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>ETS → ARIMA</span></div>
+<div class="qtext">ETS(A,N,N) ได้ α = 0.3 ARIMA(0,1,1) ที่เทียบเท่าในรูป \(\nabla X_t=w_t+\theta_1w_{t-1}\) มี θ₁ เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือ 1 − α ซึ่งเป็นค่าที่ได้เมื่อใช้ MA แบบลบ ไม่ใช่แบบบวก">θ₁ = 0.7</button>
+<button class="opt" data-correct="false" data-note="ผิด. θ₁ ไม่เท่ากับ α">θ₁ = 0.3</button>
+<button class="opt" data-correct="true" data-note="ถูก. θ₁ = α − 1 = −0.7">θ₁ = −0.7</button>
+<button class="opt" data-correct="false" data-note="ผิด. บวก 1 แทนลบ">θ₁ = 1.3</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>Holt → ARIMA(0,2,2)</span></div>
+<div class="qtext">ETS(A,A,N) ได้ α = 0.6, β = 0.2 ARIMA(0,2,2) ที่เทียบเท่ามี (θ₁, θ₂) เท่าใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. θ₁ = α + β − 2 = −1.2, θ₂ = 1 − α = 0.4">(−1.2, 0.4)</button>
+<button class="opt" data-correct="false" data-note="ผิด. สลับสูตร θ₁ กับ θ₂">(0.4, −1.2)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้ α − β − 2 และ 1 − β">(−1.6, 0.8)</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมลบ 2">(0.8, 0.4)</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>AICc และ MSE</span></div>
+<div class="qtext">(ก) โมเดลหนึ่งมี AIC = 100.0, k = 4 พารามิเตอร์ (รวม σ²) และ n = 30 จงหา AICc และเทียบกับกรณี n = 300 (ข) tsCV ได้ error หนึ่งก้าว 0.2, −0.1, 0.3, −0.4 จงหา MSE และ RMSE</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) n = 30: \(2(4)(5)/(30-5)=40/25=1.6\) AICc = 101.6 · n = 300: \(40/295=0.136\) AICc = 100.14 ข้อมูลน้อย penalty เพิ่มมาก ข้อมูลมาก AICc ≈ AIC</p>
+<p>(ข) MSE = (0.04 + 0.01 + 0.09 + 0.16)/4 = 0.30/4 = 0.075 และ RMSE = √0.075 = 0.274</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>เทียบข้ามตระกูล</span></div>
+<div class="qtext">ETS ได้ AIC = 214.7 และ ARIMA ได้ AIC = −2.8 กับข้อมูลชุดเดียวกัน ข้อสรุปใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. AIC เทียบข้ามตระกูลไม่ได้ เพราะ likelihood คำนวณต่างกัน">ARIMA ดีกว่ามากเพราะ AIC ต่ำกว่า</button>
+<button class="opt" data-correct="true" data-note="ถูก. ต้องเทียบด้วย forecast accuracy เช่น MSE จาก tsCV">ยังสรุปไม่ได้ ต้องเทียบด้วย MSE จาก tsCV</button>
+<button class="opt" data-correct="false" data-note="ผิด. AICc ก็ใช้ likelihood เดียวกับ AIC จึงเทียบข้ามตระกูลไม่ได้เช่นกัน">ต้องเปลี่ยนไปเทียบด้วย AICc</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าติดลบของ AIC ไม่ได้แปลว่าโมเดลผิด">ARIMA ผิดเพราะ AIC ติดลบ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 5</span><span>พิสูจน์ความเทียบเท่า</span></div>
+<div class="qtext">จงแสดงว่า simple exponential smoothing \(F_{t+1}=\alpha X_t+(1-\alpha)F_t\) กับ ARIMA(0,1,1) \(\nabla X_t=w_t+\theta w_{t-1}\) ให้ค่าพยากรณ์เดียวกัน เมื่อ θ = α − 1 และอธิบายว่าทำไม ETS ทุกตัวไม่นิ่ง</div>
+<textarea placeholder="เขียนวิธีพิสูจน์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>จาก ARIMA: \(X_{t+1}=X_t+w_{t+1}+\theta w_t\) ค่าพยากรณ์คือ \(\hat X_{t+1}=X_t+\theta w_t\) และ \(w_t=X_t-\hat X_t\) จึงได้ \(\hat X_{t+1}=(1+\theta)X_t-\theta\hat X_t\) แทน θ = α − 1 ได้ \(\hat X_{t+1}=\alpha X_t+(1-\alpha)\hat X_t\) ซึ่งคือ SES</p>
+<p>ETS เทียบเท่า ARIMA ที่มี d ≥ 1 หรือ D ≥ 1 เสมอ (ตาราง Hyndman) คือมีตัวประกอบ (1 − B) ซึ่งมีรากบนวงกลมหนึ่งหน่วย จึงไม่นิ่ง ส่วน ARIMA ที่ d = D = 0 นิ่งได้และไม่มีคู่ใน ETS</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>auto.arima</span></div>
+<div class="qtext">ข้อใดที่ auto.arima <b>ไม่</b>ได้ทำให้</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. auto.arima ใช้ unit root test เลือก d และ D">เลือก d และ D</button>
+<button class="opt" data-correct="false" data-note="ผิด. auto.arima เลือก p, q, P, Q จาก AICc">เลือก p, q, P, Q</button>
+<button class="opt" data-correct="false" data-note="ผิด. auto.arima ประมาณพารามิเตอร์ด้วย MLE">ประมาณพารามิเตอร์</button>
+<button class="opt" data-correct="true" data-note="ถูก. transformation และการตรวจ residual (ขั้น 2, 6) ต้องทำเอง">log ข้อมูลและตรวจ residual</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 7</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) tsCV ต่างจาก leave-one-out cross validation ของข้อมูล cross-sectional อย่างไร และทำไมต้องเป็นแบบนั้น (ข) ทำไม MSE จาก tsCV ของ german (0.077) จึงใหญ่กว่า σ̂² ของโมเดลที่ฟิตกับข้อมูลทั้งหมด (0.049)</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) LOOCV ตัดจุดใดก็ได้ออกแล้วใช้จุดที่เหลือทั้งหมด รวมถึงอนาคตของจุดนั้น ส่วน tsCV ใช้เฉพาะข้อมูลก่อนจุดทดสอบ (rolling forecast origin) เพราะอนุกรมเวลามีลำดับ การใช้อนาคตพยากรณ์อดีตทำให้ความแม่นยำสูงเกินจริงและไม่ตรงกับการใช้งาน</p>
+<p>(ข) σ̂² วัด error ในตัวอย่างที่โมเดลเห็นข้อมูลทุกจุดตอนประมาณ ส่วน tsCV วัด error นอกตัวอย่าง โมเดลแต่ละรอบไม่เห็นจุดที่ทดสอบ และรอบแรก ๆ ใช้ข้อมูลน้อย ค่าประมาณจึงคลาดมากกว่า</p>
+</div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>tsCV</span></div>
+<div class="qtext">tsCV กับ h = 1 พยากรณ์ค่าเวลา t โดยใช้ข้อมูลใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. rolling forecast origin: training คือทุกจุดก่อน t">เฉพาะข้อมูลก่อนเวลา t ทั้งหมด</button>
+<button class="opt" data-correct="false" data-note="ผิด. ใช้อนาคตไม่ได้ ต่างจาก LOOCV แบบ cross-sectional">ข้อมูลทุกจุดยกเว้นเวลา t</button>
+<button class="opt" data-correct="false" data-note="ผิด. tsCV ฟิตโมเดลใหม่ทุกรอบ ไม่ได้ใช้โมเดลเดียว">โมเดลที่ฟิตจากข้อมูลทั้งหมดครั้งเดียว</button>
+<button class="opt" data-correct="false" data-note="ผิด. ไม่ได้ใช้หน้าต่างคงที่ 12 จุด แต่ใช้ทุกจุดก่อนหน้า">เฉพาะ 12 จุดล่าสุดก่อนเวลา t</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>drift</span></div>
+<div class="qtext">Singapore ได้ ARIMA(1,1,0) with drift = 0.4904 ค่า drift หมายถึงอะไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. drift ไม่ใช่ค่าเฉลี่ยของ X แต่เป็นค่าเฉลี่ยของผลต่าง">ค่าเฉลี่ยของอัตราการมีส่วนร่วมคือ 0.49</button>
+<button class="opt" data-correct="true" data-note="ถูก. drift คือ mean ของ ∇X_t อัตราเพิ่มขึ้นเฉลี่ยต่อปี">อัตราเพิ่มขึ้นเฉลี่ย 0.49 จุดต่อปี</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าสัมประสิทธิ์ AR คือ ar1 = −0.369">สัมประสิทธิ์ AR ของผลต่าง</button>
+<button class="opt" data-correct="false" data-note="ผิด. variance คือ sigma^2 = 0.2779">variance ของ error</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>checkresiduals</span></div>
+<div class="qtext"><p>อ่านผลนี้</p>
+<pre class="out">Ljung-Box test
+Q* = 31.2, df = 20, p-value = 0.0526
+Model df: 4.   Total lags used: 24</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. p = 0.0526 > 0.05 จึงยังไม่ reject H0">reject H0 โมเดลไม่เหมาะสม</button>
+<button class="opt" data-correct="false" data-note="ผิด. df = lag ทั้งหมด − จำนวนพารามิเตอร์ = 24 − 4 = 20 ถูกต้องแล้ว">df ผิด ควรเป็น 24</button>
+<button class="opt" data-correct="true" data-note="ถูก. p > 0.05 ไม่ reject H0 แต่ใกล้เส้น ควรดู ACF ของ residual ประกอบ">ผ่านแบบเฉียดเส้น ควรดู ACF ของ residual ประกอบ</button>
+<button class="opt" data-correct="false" data-note="ผิด. Ljung-Box ไม่ได้ทดสอบ normality">residual แจกแจง normal</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>อ่าน trace</span></div>
+<div class="qtext"><p>จาก trace บางส่วน โมเดลที่ auto.arima เลือกคือข้อใด</p>
+<pre class="out">ARIMA(1,0,2)(0,1,1)[12] with drift : 0.0488
+ARIMA(2,0,2)(0,1,1)[12] with drift : 0.2341
+ARIMA(1,0,2)(0,1,1)[12]            : -2.1657
+ARIMA(2,0,1)(0,1,1)[12]            : -1.5212
+ARIMA(2,0,3)(0,1,1)[12]            : Inf</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ตัวเลขคือ AICc ยิ่งน้อยยิ่งดี ไม่ใช่ยิ่งมาก">ARIMA(2,0,2)(0,1,1)[12] with drift</button>
+<button class="opt" data-correct="false" data-note="ผิด. Inf คือฟิตไม่ได้ ไม่ใช่ดีที่สุด">ARIMA(2,0,3)(0,1,1)[12]</button>
+<button class="opt" data-correct="false" data-note="ผิด. −1.5212 สูงกว่า −2.1657">ARIMA(2,0,1)(0,1,1)[12]</button>
+<button class="opt" data-correct="true" data-note="ถูก. AICc = −2.1657 ต่ำสุด">ARIMA(1,0,2)(0,1,1)[12]</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>เขียนโมเดลจาก output</span></div>
+<div class="qtext"><p>เขียนโมเดลเต็มจาก output ของ auto.arima ต่อไปนี้ และบอกว่าทำไมไม่มี intercept</p>
+<pre class="out">ARIMA(1,0,2)(0,1,1)[12]
+          ar1     ma1     ma2     sma1
+      -0.7947  0.7786  0.2115  -0.7618
+sigma^2 = 0.04883</pre></div>
+<textarea placeholder="เขียนโมเดล"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\((1+0.7947B)(1-B^{12})X_t=(1+0.7786B+0.2115B^2)(1-0.7618B^{12})w_t\), \(\hat\sigma=\sqrt{0.04883}=0.221\)</p>
+<p>ไม่มี intercept เพราะ D = 1: ค่าคงที่ในระดับของ X ถูกตัดออกด้วย (1 − B¹²) R จะใส่ค่าคงที่ (drift) ได้ก็ต่อเมื่อ d + D = 1 และ auto.arima ลองแบบ with drift แล้วได้ AICc สูงกว่า</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>รันโค้ด german</span></div>
+<div class="qtext"><p>รันส่วน german ของ R_codes (Class 9) แล้วจดผล</p>
+<pre><code>library(forecast)
+germaninfl &lt;- ts(read.table("german.txt", h = F), start = 2008, frequency = 12)
+ga &lt;- auto.arima(germaninfl, stepwise = T, approximation = F, trace = T)
+checkresiduals(ga)
+forecast(ga, h = 3)
+ets(germaninfl)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">Best model: ARIMA(1,0,2)(0,1,1)[12]
+ar1 -0.7947  ma1 0.7786  ma2 0.2115  sma1 -0.7618   AICc = -2.17
+Ljung-Box: Q* = 15.035, df = 20, p-value = 0.7744
+forecast: Nov 2017 0.0805, Dec 2017 0.3241, Jan 2018 -0.6207
+ets: ETS(A,N,A)  alpha 1e-04  gamma 1e-04  sigma 0.2145  AIC 214.7276</pre>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>รันโค้ด tsCV และ Singapore</span></div>
+<div class="qtext"><p>รันส่วน Comparing models และ Additional Knowledge (ใช้เวลาหลายนาที) แล้วตอบว่าโมเดลใดชนะในแต่ละข้อมูล และ Model 1 กับ Model 2 (หลัง diffinv) ต่างกันเท่าใดในปีที่สาม</p></div>
+<textarea placeholder="จดผลและตอบ"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">german:    MSE ETS 0.0863   MSE ARIMA 0.0770   (error 117 ค่า)
+singapore: MSE ETS 0.6198   MSE ARIMA 0.5471   (error 27 ค่า)
+Singapore Model 1 (1,1,0):           83.5668 83.5816 83.5849
+Singapore Model 2 diffinv (1,0,0):   84.0607 84.5251 85.0251</pre>
+<p>ARIMA ชนะทั้งสองข้อมูล (MSE ต่ำกว่า) MSE ของ ETS กับ german ที่รันได้ (0.0863) ต่างจากสไลด์ (0.0907) เล็กน้อยเพราะ package forecast คนละเวอร์ชัน ข้อสรุปเหมือนเดิม Model 1 กับ Model 2 ต่างกัน 85.03 − 83.58 = 1.44 จุดในปีที่สาม เพราะ Model 1 ไม่มี drift</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>อธิบายว่า auto.arima ทำอะไร (unit root, AICc, MLE) และไม่ทำอะไร (transform, ตรวจ residual)</li>
+<li>คำนวณ AICc จาก AIC และอธิบาย stepwise, trace, approximation</li>
+<li>เขียนโมเดลเต็มจาก output ของ auto.arima</li>
+<li>แปลงพารามิเตอร์ ETS(A,N,N) และ ETS(A,A,N) เป็น ARIMA(0,1,1) และ ARIMA(0,2,2)</li>
+<li>รู้ว่าห้ามเทียบ AIC ข้ามตระกูล และใช้ tsCV (rolling forecast origin) แทน</li>
+<li>อ่าน checkresiduals (Q*, df, p-value) และรู้ว่าต้องคิดเรื่อง drift เมื่อใส่ d ใน arima</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0010-auto-arima-ets-tscv.html">← กลับไปที่บทเรียน Lesson 10</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
