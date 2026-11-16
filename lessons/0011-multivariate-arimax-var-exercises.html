@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 11: Multivariate time series</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 11</span>
+  <span><a href="0011-multivariate-arimax-var.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 11: Multivariate time series</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดเองแล้วเทียบผล ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย</p>
+<p class="quiz-score"></p>
+
+
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>นับพารามิเตอร์</span></div>
+<div class="qtext">VAR(3) ของ 3 ตัวแปร type = "const" มีสัมประสิทธิ์ต่อสมการและรวมทั้งโมเดลกี่ตัว</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นับแค่ lag ของตัวเอง p = 3 กับค่าคงที่">4 ต่อสมการ รวม 12</button>
+<button class="opt" data-correct="true" data-note="ถูก. 3 lag × 3 ตัวแปร + ค่าคงที่ = 10 ต่อสมการ มี 3 สมการ รวม 30">10 ต่อสมการ รวม 30</button>
+<button class="opt" data-correct="false" data-note="ผิด. ลืมค่าคงที่">9 ต่อสมการ รวม 27</button>
+<button class="opt" data-correct="false" data-note="ผิด. คิดว่ามีสมการเดียว">10 ต่อสมการ รวม 10</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>อ่าน CCF</span></div>
+<div class="qtext"><code>ccf(promo, sales)</code> มีแท่งสูงสุดที่ lag −2 หมายความว่าอะไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. lag ลบหมายถึงตัวแปรแรกอยู่ในอดีต ไม่ใช่อนาคต">sales สองช่วงก่อนสัมพันธ์กับ promo ปัจจุบัน</button>
+<button class="opt" data-correct="false" data-note="ผิด. lag 0 คือเวลาเดียวกัน">promo กับ sales ในเวลาเดียวกันสัมพันธ์กันมากที่สุด</button>
+<button class="opt" data-correct="false" data-note="ผิด. CCF ที่ k กับ −k ไม่เท่ากัน ต่างจาก ACF">ผลเหมือน lag +2 ทุกประการ</button>
+<button class="opt" data-correct="true" data-note="ถูก. ccf(x, y) ที่ lag k คือ cor(x[t+k], y[t]) k = −2 คือ promo ที่ t − 2 กับ sales ที่ t">promo สองช่วงก่อนสัมพันธ์กับ sales ปัจจุบัน</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>คำนวณและเขียนโมเดล</span></div>
+<div class="qtext">VAR(1) สองตัวแปร type = "none" ได้สัมประสิทธิ์: สมการ y1: y1.l1 = 0.5, y2.l1 = 0.2 สมการ y2: y1.l1 = −0.1, y2.l1 = 0.7 (ก) เขียนสมการทั้งสองและรูปเมทริกซ์ (ข) ถ้าค่าล่าสุด y1 = 10, y2 = 20 จงพยากรณ์หนึ่งก้าวและสองก้าว</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(y_{1,t}=0.5y_{1,t-1}+0.2y_{2,t-1}+w_{1t}\), \(y_{2,t}=-0.1y_{1,t-1}+0.7y_{2,t-1}+w_{2t}\) หรือ \(\mathbf y_t=\begin{pmatrix}0.5&amp;0.2\\-0.1&amp;0.7\end{pmatrix}\mathbf y_{t-1}+\mathbf w_t\)</p>
+<p>(ข) หนึ่งก้าว: y1 = 0.5(10) + 0.2(20) = 9, y2 = −0.1(10) + 0.7(20) = 13 · สองก้าว: y1 = 0.5(9) + 0.2(13) = 7.1, y2 = −0.1(9) + 0.7(13) = 8.2 พยากรณ์ทั้งสองตัวพร้อมกันโดยใช้ค่าพยากรณ์ของกันและกัน</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎีและพิสูจน์</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>Granger H0</span></div>
+<div class="qtext"><code>grangertest(Y ~ X)</code> ทดสอบสมมุติฐานใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. เทียบโมเดลที่มี lag ของ X กับไม่มี H0 คือ lag ของ X ไม่ช่วยพยากรณ์ Y">H0: X ไม่ Granger-cause Y</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือทิศกลับ ต้องใช้ grangertest(X ~ Y)">H0: Y ไม่ Granger-cause X</button>
+<button class="opt" data-correct="false" data-note="ผิด. Granger ไม่ได้ทดสอบ correlation ณ เวลาเดียวกัน">H0: X กับ Y ไม่สัมพันธ์กันที่ lag 0</button>
+<button class="opt" data-correct="false" data-note="ผิด. นั่นคือ ADF test">H0: Y ไม่นิ่ง</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>GLS</span></div>
+<div class="qtext">revenue: OLS ให้ s.e. ของ growth = 0.202 แต่ GLS ที่ error เป็น AR(1) (φ = 0.668) ให้ 0.117 ข้อใดอธิบายถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. GLS ไม่ได้ลบข้อมูล ใช้ทั้ง 76 จุดเหมือนเดิม">GLS ตัด outlier ออก s.e. จึงลดลง</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าสัมประสิทธิ์เปลี่ยนน้อย (1.61 กับ 1.65) ความต่างอยู่ที่ s.e.">GLS เปลี่ยนค่าสัมประสิทธิ์มาก</button>
+<button class="opt" data-correct="true" data-note="ถูก. OLS สมมุติ error อิสระซึ่งผิดเมื่อ error เป็น AR s.e. ที่ได้จึงไม่ถูกต้อง GLS ใช้โครงสร้าง AR(1) ในการประมาณ">OLS ไม่สนใจ autocorrelation ของ error s.e. จึงผิด</button>
+<button class="opt" data-correct="false" data-note="ผิด. D-W = 0.695 ห่างจาก 2 มาก แปลว่ามี autocorrelation">error ไม่มี autocorrelation ทั้งสองวิธีจึงถูก</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 6</span><span>ทฤษฎี</span></div>
+<div class="qtext">(ก) อธิบายว่า Granger test ด้วย F-test ทำอย่างไร (สองโมเดลที่เทียบคืออะไร) (ข) ทำไม df1 ของ causality(var.a, cause = "DAX") ใน VAR(9) สี่ตัวแปรจึงเท่ากับ 27 (ค) ทำไม season = 52 จึงสร้าง dummy 51 ตัว</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) Model 1 (unrestricted): Y บน lag ของ Y และ lag ของ X · Model 2 (restricted): Y บน lag ของ Y อย่างเดียว F-test ดูว่าการเพิ่ม lag ของ X ลด residual sum of squares อย่างมีนัยสำคัญหรือไม่ ใน output ของ grangertest คือ Model 1 กับ Model 2</p>
+<p>(ข) H0 คือ DAX ไม่ Granger-cause SMI, CAC, FTSE ต้องตั้งสัมประสิทธิ์ของ DAX ทุก lag (9) ในทุกสมการของตัวแปรอื่น (3) เป็นศูนย์ จึงมีข้อจำกัด 9 × 3 = 27 ข้อ</p>
+<p>(ค) ถ้าใช้ 52 ตัว ผลรวมของ dummy ทุกตัวเท่ากับ 1 ทุกแถว ซ้ำกับค่าคงที่ (linear dependence) ประมาณไม่ได้ จึงให้สัปดาห์สุดท้ายเป็นฐาน (dummy ทุกตัวเป็น 0) ค่าของ sd แต่ละตัวคือความต่างจากสัปดาห์ฐาน</p>
+</div>
+</div>
+
+<h3>กลุ่ม C: อธิบายความเข้าใจ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>เลือกโมเดล</span></div>
+<div class="qtext">ร้านค้าต้องการพยากรณ์ยอดขายรายสัปดาห์ งบโฆษณาของสัปดาห์หน้าถูกกำหนดไว้แล้วในแผนการตลาด และโฆษณาไม่ได้รับผลจากยอดขาย ควรใช้โมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. X เป็น exogenous และรู้ค่าในอนาคต จึงใช้ ARIMAX ส่งงบโฆษณาเป็น xreg">ARIMAX ที่ใช้งบโฆษณาเป็น xreg</button>
+<button class="opt" data-correct="false" data-note="ผิด. VAR ใช้เมื่อตัวแปรส่งผลต่อกันและต้องพยากรณ์ทุกตัว ที่นี่งบโฆษณารู้ค่าแล้ว">VAR ของยอดขายและงบโฆษณา</button>
+<button class="opt" data-correct="false" data-note="ผิด. ทิ้งข้อมูลโฆษณาที่มีประโยชน์">ARIMA ของยอดขายอย่างเดียวเท่านั้น</button>
+<button class="opt" data-correct="false" data-note="ผิด. CCF เป็นแค่ EDA ไม่ใช่โมเดลพยากรณ์">CCF ของงบโฆษณาและยอดขาย</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>ระดับนัยสำคัญ</span></div>
+<div class="qtext">Granger income→consumption ได้ p = 0.0749 นักศึกษาเปลี่ยน α เป็น 0.10 เพื่อใช้ income ต่อ ควรมองอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. การเปลี่ยน α หลังเห็นผลเป็นสิ่งที่ไม่ควรทำ">ยอมรับได้เพราะ p ใกล้ 0.05</button>
+<button class="opt" data-correct="true" data-note="ถูก. เป็นการแก้ที่ผิดจุด ปัญหาคือเลือก X, Y ผิด ต้องใช้ literature review">ไม่ควรทำ ควรทบทวนการเลือก X, Y จากทฤษฎี</button>
+<button class="opt" data-correct="false" data-note="ผิด. ปัญหาไม่ได้อยู่ที่จำนวน lag">ควรเพิ่ม lag จนได้ p &lt; 0.05</button>
+<button class="opt" data-correct="false" data-note="ผิด. Granger ทิศกลับมีนัยสำคัญ ซึ่งยิ่งบอกว่า income ไม่ควรเป็นตัวแปรภายนอก">ควรใช้ทิศกลับเป็นหลักฐานยืนยัน</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 9</span><span>อธิบาย</span></div>
+<div class="qtext">(ก) ARIMAX ใน R (regression with ARIMA errors) ต่างจากรูปบนสไลด์ \(\Phi(B)(1-B)^dY_t=\theta(B)w_t+\sum\alpha_iX_{it}\) อย่างไรในการตีความ α (ข) ทำไมการพยากรณ์ด้วย ARIMAX จึงต้องรู้ X ของอนาคต และถ้าไม่รู้ควรทำอย่างไร</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) R: \(Y_t=\beta_0+\alpha X_t+\varepsilon_t\) และ ε เป็น ARIMA α คือผลของ X ต่อค่าเฉลี่ยของ Y ในเวลาเดียวกันโดยตรง รูปบนสไลด์ X อยู่ในสมการ AR ของ Y ผลของ X จะถูกส่งต่อไปยังเวลาถัดไปผ่าน Φ(B) ผลรวมระยะยาวจึงเป็น α/Φ(1) ไม่ใช่ α</p>
+<p>(ข) สมการมี X_t ของเวลาที่พยากรณ์ ต้องใส่ค่าจริงหรือค่าตามแผน (<code>forecast(fit, xreg = inc_test)</code>) ถ้าไม่รู้ต้องพยากรณ์ X ก่อน (ความคลาดเคลื่อนสะสม) หรือใช้ VAR ซึ่งพยากรณ์ทุกตัวพร้อมกัน</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>grangertest</span></div>
+<div class="qtext"><p>อ่านผลนี้</p>
+<pre class="out">Model 1: sales ~ Lags(sales, 1:1) + Lags(ad_tv, 1:1)
+Model 2: sales ~ Lags(sales, 1:1)
+  Res.Df Df      F   Pr(&gt;F)
+1     96
+2     97 -1  9.214  0.0031</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. p = 0.0031 < 0.05 จึง reject H0">ad_tv ไม่ช่วยพยากรณ์ sales</button>
+<button class="opt" data-correct="false" data-note="ผิด. การทดสอบนี้เป็นทิศ ad_tv → sales ทิศกลับต้องทดสอบแยก">sales ช่วยพยากรณ์ ad_tv</button>
+<button class="opt" data-correct="true" data-note="ถูก. reject H0 lag ของ ad_tv ช่วยพยากรณ์ sales (มี Granger effect)">ad_tv Granger-cause sales</button>
+<button class="opt" data-correct="false" data-note="ผิด. Granger ไม่ได้พิสูจน์เหตุเป็นผลทางวิทยาศาสตร์">พิสูจน์ได้ว่าโฆษณาเป็นสาเหตุของยอดขาย</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>causality ใน VAR</span></div>
+<div class="qtext"><p>อ่านผลนี้ ควรสรุปอย่างไร</p>
+<pre class="out">$Granger
+Granger causality H0: X3 do not Granger-cause X1 X2
+F-Test = 0.84, df1 = 6, df2 = 270, p-value = 0.541
+$Instant
+H0: No instantaneous causality between: X3 and X1 X2
+Chi-squared = 15.2, df = 2, p-value = 0.0005</pre></div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ให้ดูเฉพาะ $Granger">X3 ต้องอยู่ในโมเดลเพราะ $Instant มีนัยสำคัญ</button>
+<button class="opt" data-correct="false" data-note="ผิด. df1 = 6 คือ 3 lag × 2 ตัวแปรอื่น ไม่ใช่จำนวนตัวแปร">X3 มี 6 lag ในโมเดล</button>
+<button class="opt" data-correct="false" data-note="ผิด. p = 0.541 ไม่ reject H0">X3 Granger-cause X1 และ X2</button>
+<button class="opt" data-correct="true" data-note="ถูก. ดู $Granger p = 0.541 > 0.05 X3 ไม่ช่วยพยากรณ์ตัวอื่น อาจตัดออกได้">X3 อาจตัดออกจาก VAR ได้</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>เขียนสมการ ARIMAX</span></div>
+<div class="qtext"><p>เขียนสมการจาก output นี้ให้ครบสามบรรทัด</p>
+<pre class="out">Regression with ARIMA(1,0,2) errors
+         ar1      ma1     ma2  intercept    xreg
+      0.5819  -0.5345  0.1843     0.6168  0.2781
+sigma^2 = 0.3543</pre></div>
+<textarea placeholder="เขียนสมการ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>\(\mathrm{consumption}_t=0.6168+0.2781\,\mathrm{income}_t+\varepsilon_t\)</p>
+<p>\(\varepsilon_t=0.5819\varepsilon_{t-1}-0.5345w_{t-1}+0.1843w_{t-2}+w_t\)</p>
+<p>\(w_t\sim N(0,\hat\sigma^2=0.3543)\)</p>
+</div>
+</div>
+
+<h3>กลุ่ม E: รันโค้ดแล้วเทียบผล</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>รันโค้ด uschange</span></div>
+<div class="qtext"><p>รันส่วน uschange ของ R_codes (Class 10) โดยใช้ข้อมูลจาก fpp2</p>
+<pre><code>library(fpp2); library(forecast); library(lmtest)
+data &lt;- as.data.frame(uschange); names(data) &lt;- tolower(names(data))
+consumption &lt;- ts(data$consumption); income &lt;- ts(data$income)
+grangertest(consumption ~ income, data = data)
+con_training &lt;- window(consumption, end = length(consumption) - 41)
+con_test &lt;- window(consumption, start = length(consumption) - 40)
+inc_training &lt;- window(income, end = length(income) - 41)
+inc_test &lt;- window(income, start = length(income) - 40)
+arimax &lt;- auto.arima(con_training, stepwise = T, approximation = F, xreg = inc_training)
+arimax
+accuracy(forecast(arimax, xreg = inc_test)$mean, con_test)</code></pre></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">grangertest: F = 3.2085, Pr(&gt;F) = 0.07491
+Regression with ARIMA(1,0,2) errors
+ar1 0.5819  ma1 -0.5345  ma2 0.1843  intercept 0.6168  xreg 0.2781
+sigma^2 = 0.3543   AICc = 270.5
+accuracy: ME -0.3294  RMSE 0.5964  MAE 0.4398</pre>
+<p>ME ติดลบเพราะใส่ค่าพยากรณ์ก่อน ค่าจริงทีหลัง (ลำดับที่ถูก) ถ้าใช้ลำดับในโค้ด R_codesจะได้ +0.3294</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 14</span><span>รันโค้ด cardiac</span></div>
+<div class="qtext"><p>รันส่วน Cardiac Mortality แล้วจด VARselect และ RMSE ของ cmort ใน test ทั้งหกโมเดล</p></div>
+<textarea placeholder="จดผลที่ได้"></textarea>
+<button class="reveal-btn">ผลที่ควรได้</button>
+<div class="model-answer">
+<pre class="out">VARselect season = 52: AIC 5  HQ 2  SC 2  FPE 5
+VARselect ไม่มี season: AIC 9  HQ 5  SC 2  FPE 9
+trend + seasonal: VAR(2) 6.35  VAR(9) 6.44  VAR(7) 6.41
+trend อย่างเดียว:  VAR(2) 5.92  VAR(9) 6.08  VAR(7) 5.44
+ljung.wge cmort (seasonal): p=2 0.087  p=9 0.055  p=7 0.011</pre>
+<p>VAR(7) แบบมีเฉพาะ trend ให้ RMSE ต่ำสุด ตรงกับสไลด์หน้า 76–77</p>
+</div>
+</div>
+
+
+<p class="quiz-score"></p>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>เลือกระหว่าง ARIMA/ETS, ARIMAX/GLS และ VAR ตามโครงสร้างข้อมูล</li>
+<li>อธิบาย GLS และอ่านผลเทียบกับ OLS</li>
+<li>ทำ Granger test ทั้งสองทิศ รู้ H0 และไม่เปลี่ยน α หลังเห็นผล</li>
+<li>เขียนสมการ ARIMAX (regression with ARIMA errors) จาก output และพยากรณ์ด้วย xreg ของอนาคต</li>
+<li>อ่าน CCF โดยรู้ทิศของ lag ใน ccf(x, y)</li>
+<li>นับพารามิเตอร์ของ VAR(p) เลือก p ด้วย VARselect และเขียนสมการจาก output</li>
+<li>ตรวจ VAR ด้วย serial.test และ causality ($Granger) และเทียบด้วย RMSE ใน test</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0011-multivariate-arimax-var.html">← กลับไปที่บทเรียน Lesson 11</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
