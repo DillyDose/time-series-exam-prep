@@ -437,3 +437,49 @@ details.fold[open] > summary { border-bottom: 1px dashed var(--rule); margin-bot
 #zoom img { max-width: 100%; max-height: 96vh; border: 1px solid var(--rule); border-radius: 6px; }
 .nextpage { border-top: 1px solid var(--rule); margin-top: 2.5em; padding-top: 1em; }
 @media print { #readbar, #zoom { display: none !important; } details.fold { border: none; } figure.thumb { max-width: 60%; } }
+
+/* ===== study cards (Lesson 5 pilot, 2026-11-18): one concept = picture -> equation -> numbers -> trap ===== */
+body.reader h3 { margin-top: 2.2em; font-size: 1.12rem; }
+.lead { font-size: 0.95em; border-left: 3px solid var(--accent); padding-left: 0.9em; }
+.lead b:first-child { color: var(--accent); }
+p.pic, p.num, p.trap, p.say { padding: 0.5em 0.9em; border-radius: 6px; }
+p.pic::before, p.num::before, p.trap::before, p.say::before {
+  display: block; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 0.1em;
+}
+p.pic { background: #f6f3ec; }
+p.pic::before { content: "ภาพในหัว"; color: var(--ink-soft); }
+p.num { background: var(--good-bg); }
+p.num::before { content: "ลองตัวเลข"; color: var(--good); }
+p.trap { background: var(--bad-bg); }
+p.trap::before { content: "⚠ กับดักข้อสอบ"; color: var(--bad); }
+.eq { margin: 1em 0 0; padding: 0.2em 0.9em; border: 1px solid var(--rule); border-radius: 6px 6px 0 0; background: #fff; }
+p.say { margin-top: 0; border: 1px solid var(--rule); border-top: 1px dashed var(--rule); border-radius: 0 0 6px 6px; }
+p.say::before { content: "อ่านเป็นภาษาคน"; color: var(--accent); }
+table.sym { font-size: 0.88em; margin: 0.6em 0 1em; }
+table.sym td:first-child { width: 22%; white-space: nowrap; }
+.k-w { color: #1d6fb8; font-weight: 600; }
+.k-p { color: #c25e00; font-weight: 600; }
+.legend { font-size: 0.85rem; color: var(--ink-soft); }
+details.check { border: 1px dashed var(--accent); border-radius: 6px; padding: 0 0.9em; margin: 1.2em 0; }
+details.check > summary { cursor: pointer; padding: 0.5em 0; font-size: 0.95em; }
+details.check > summary::before { content: "เช็คความเข้าใจ · "; font-weight: 700; color: var(--accent); }
+details.check[open] > summary { border-bottom: 1px dashed var(--rule); }
+table.map td, table.map th { vertical-align: top; }
+body.reader th { text-transform: none; letter-spacing: 0.02em; font-size: 0.85rem; }
+
+/* interactive ACF lab */
+.acflab { border: 1px solid var(--rule); border-radius: 8px; padding: 0.7em 1em; margin: 1.4em 0; background: #fff; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 0.85rem; }
+.acflab .lab-title { font-weight: 700; margin-bottom: 0.4em; }
+.acflab label { display: flex; align-items: center; gap: 0.6em; margin: 0.25em 0; }
+.acflab label span.nm { width: 2.2em; color: #c25e00; font-weight: 700; }
+.acflab input[type=range] { flex: 1; min-width: 0; }
+.acflab output { width: 3.4em; text-align: right; font-variant-numeric: tabular-nums; }
+.acflab svg { width: 100%; height: auto; display: block; margin-top: 0.4em; }
+.acflab .lab-note { color: var(--ink-soft); margin-top: 0.3em; min-height: 2.6em; }
+@media print { .acflab { display: none; } details.check { break-inside: avoid; } }
+/* highlighted slide phrase shown in Thai; English original in title (hover / tap) */
+mark.src[title] { cursor: help; }
+/* explanatory illustrations (inline SVG files in assets/viz) */
+figure.viz { margin: 1.2em 0; }
+figure.viz img { border: none; border-radius: 0; }
