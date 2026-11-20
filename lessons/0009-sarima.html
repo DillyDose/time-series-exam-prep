@@ -20,34 +20,55 @@
 
 <p class="kicker">FORECAST_AND_SARIMA หน้า 14–52 และควิซ 7</p>
 <h1>Seasonal ARIMA (SARIMA)</h1>
-<p class="readmeta">อ่านประมาณ 20 นาที · ตัวเลขยก<sup class="fn"><a href="#fnotes">1</a></sup>คือนาทีในคลิปที่รวมไว้ท้ายบท</p>
+<p class="readmeta">อ่านประมาณ 20 นาที · ข้อความ<mark class="src">ไฮไลต์</mark>คือคำแปลของถ้อยคำบนสไลด์ (ชี้เมาส์หรือแตะค้างเพื่อดูภาษาอังกฤษต้นฉบับ) ตัวเลขยก<sup class="fn"><a href="#fnotes">1</a></sup>คือนาทีในคลิปที่รวมไว้ท้ายบท</p>
 
-<p>ข้อมูลไฟฟ้าใน Lesson 7 หลัง log และ difference แล้วยังมี ACF สูงที่ lag 12, 24, 36 ARIMA ธรรมดาจัดการ pattern ที่ "กระโดด" ทีละ 12 ไม่ได้ บทนี้เพิ่มส่วน seasonal เข้าไป หลักคิดสรุปได้ประโยคเดียว คือ seasonal "เหมือนเดิม" ทุกอย่าง แต่ค่าที่เกี่ยวข้องกันห่างกัน s ไม่ใช่ห่างกัน 1<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup> บทนี้เริ่มจาก pure seasonal คือ MA(Q)ₛ และ AR(P)ₛ ซึ่งเปลี่ยน t − 1 เป็น t − s และ B เป็น Bˢ ตาราง ACF/PACF แบบ seasonal จึงมีรูปแบบเดิมทุกอย่าง แต่เกิดที่ lag s, 2s, 3s ต่อด้วย multiplicative ARMA(p,q)×(P,Q)ₛ ที่คูณพหุนามสองชุดจนเกิด "ตะเกียบ" ข้าง lag seasonal แล้วรวมเป็น full model \(\phi(B)\Phi_P(B^s)\nabla^d\nabla_s^DX_t=\theta(B)\Theta_Q(B^s)w_t\) ซึ่งเป็น "โมเดลสุดท้าย" ของ Box-Jenkins สุดท้ายใช้กับข้อมูลจริงสองชุด คือ Denver boardings และ US milk</p>
+<p>ข้อมูลไฟฟ้าใน Lesson 7 หลัง log และ difference แล้วยังมี ACF สูงที่ lag 12, 24, 36 ARIMA ธรรมดาจัดการ pattern ที่ "กระโดด" ทีละ 12 ไม่ได้ บทนี้เพิ่มส่วน seasonal หลักคิดมีประโยคเดียว: seasonal "เหมือนเดิม" ทุกอย่างกับ Lesson 5–6 แต่ค่าที่เกี่ยวข้องกันห่างกัน s ไม่ใช่ห่างกัน 1<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup></p>
 
-<p>เรื่องที่ระบุว่าเกี่ยวกับข้อสอบและควิซในบทนี้มีดังนี้</p>
-<ul>
-<li>ควิซ 7 คือตาราง ACF/PACF ของ seasonal AR/MA<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup> ถ้าทำแบบฝึกใน Class 8 ได้ ควิซก็ทำได้<sup class="fn"><a href="#fn-3" id="fnr-3">3</a></sup> ข้อพื้นฐานอย่าง AR(3)₁₂ ไม่ควรตอบผิด<sup class="fn"><a href="#fn-4" id="fnr-4">4</a></sup></li>
-<li>ต้องเขียน full model ให้เป็น<sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup><sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup></li>
-<li>การบ้านที่อาจออกสอบ คือ ACF ของ MA(1)×MA(1)₁₂<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup> และ ACF ของ MA(2)₁₂<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup></li>
-<li>ระวังเครื่องหมาย seasonal AR เป็น "1 ลบ Φ ใหญ่" ถ้า R ให้ sar ติดลบ ในวงเล็บจะกลายเป็นบวก<sup class="fn"><a href="#fn-9" id="fnr-9">9</a></sup> และ Φ ใหญ่ (seasonal) ต่างจาก φ เล็ก<sup class="fn"><a href="#fn-10" id="fnr-10">10</a></sup></li>
-</ul>
+<table class="map">
+<tr><th>ตอน</th><th>คำถามที่ตอบ</th><th>เครื่องมือหลัก</th></tr>
+<tr><td><a href="#s1">1</a></td><td>MA และ AR แบบ seasonal ล้วนหน้าตาอย่างไร</td><td>MA(Q)ₛ, AR(P)ₛ: เปลี่ยน B เป็น Bˢ</td></tr>
+<tr><td><a href="#s2">2</a></td><td>อ่าน ACF/PACF แบบ seasonal อย่างไร (ควิซ 7)</td><td>ตาราง ARMA(P,Q)ₛ</td></tr>
+<tr><td><a href="#s3">3</a></td><td>ส่วนสั้นกับส่วน seasonal รวมกันแล้วเกิดอะไร</td><td>multiplicative, "ตะเกียบ", full SARIMA</td></tr>
+<tr><td><a href="#s4">4</a></td><td>ข้อมูลนิ่งที่มี seasonal</td><td>Denver boardings: ARMA(0,3)×(1,0)₁₂</td></tr>
+<tr><td><a href="#s5">5</a></td><td>ข้อมูลที่มีทั้ง trend และ seasonal</td><td>US milk: ARIMA(0,1,0)×(3,1,0)₁₂</td></tr>
+</table>
+
+<p class="legend">สีในสมการ: \(\shk{w_t}\) สีฟ้าคือ shock ที่มองไม่เห็น · \(\prm{\theta},\prm{\Theta},\prm{\phi},\prm{\Phi}\) สีส้มคือพารามิเตอร์ (ตัวเล็กคือ non-seasonal ตัวใหญ่คือ seasonal)</p>
 
 <!-- ===================================================== -->
 <h2 id="s1">1. Pure seasonal: MA(Q)ₛ และ AR(P)ₛ</h2>
 
-<p>ส่วนนี้คือ Section 3.9 ของหนังสือ สอนครั้งแรกใน Class 8 ด้วยการเขียนมือทั้งหมดเพราะ "ลืมเอาสไลด์มา" แล้วทวนอีกครั้งใน Class 9-1 บนกระดาน และใช้สไลด์ชุดนี้กับข้อมูลจริงใน Class 9-2 ข้อมูลรายเดือนมักมี autocorrelation สูงที่ lag เป็นพหุคูณของ s = 12 เพราะ "January observations tend to be alike across years" เช่น ยอดขายเดือนธันวาคมปีนี้ใกล้กับธันวาคมปีก่อนมากกว่าพฤศจิกายนปีนี้ ข้อมูลรายไตรมาสใช้ s = 4 และเรียก s ว่า seasonal lag หรือ seasonal index<sup class="fn"><a href="#fn-11" id="fnr-11">11</a></sup> ความไม่นิ่งหลายครั้งเกิดจาก periodic component ซ้อนอยู่ ต้องแยกส่วน seasonal ออกก่อนฟิต ARIMA และบางข้อมูลส่วน seasonal เองก็มีลักษณะไม่นิ่งแบบพหุนาม ต้องใช้ seasonal differencing \(\nabla_sX_t=X_t-X_{t-s}=(1-B^s)X_t\) เช่น \(\nabla_{12}\) ของมกราคม 2005 คือมกราคม 2005 ลบมกราคม 2004 ซึ่งตัดผลของเดือนที่ซ้ำทุกปีออก</p>
+<h3 id="s1-why">1.1 ทำไมต้องมีส่วน seasonal</h3>
 
-<p>MA(Q)ₛ คือ \(X_t=w_t+\Theta_1w_{t-s}+\Theta_2w_{t-2s}+\dots+\Theta_Qw_{t-Qs}\) Θ ใหญ่ "คือเหมือนกัน" กับ θ แค่ใช้ตัวใหญ่เพื่อแยก seasonal กับ non-seasonal Q ใหญ่คือจำนวน Θ และค่าที่เกี่ยวข้องกระโดดห่างกัน s<sup class="fn"><a href="#fn-12" id="fnr-12">12</a></sup> เขียนด้วย B ได้ \(\Theta_Q(B^s)=1+\Theta_1B^s+\dots+\Theta_QB^{Qs}\) เช่น MA(2)₄ คือ \(X_t=(1+\Theta_1B^4+\Theta_2B^8)w_t\) ตัวอย่างที่ง่ายที่สุดคือ \(X_t=w_t+\Theta w_{t-12}\) เทียบกับ MA(1) \(X_t=w_t+\theta w_{t-1}\) จุดที่ต้องระวังคือ \(w_{t-12}\) ไม่ใช่ \(w_{t-1}\)<sup class="fn"><a href="#fn-13" id="fnr-13">13</a></sup> MA(1)₁₂ คือ MA(12) ที่ θ₁ ถึง θ₁₁ เป็นศูนย์และ θ₁₂ = Θ จึงใช้เครื่องมือเดิมทั้งหมดได้ ใน R จึง simulate ด้วย <code>ma = c(rep(0,11), 0.9)</code><sup class="fn"><a href="#fn-14" id="fnr-14">14</a></sup></p>
+<p class="pic">ยอดขายเดือนธันวาคมปีนี้ใกล้กับธันวาคมปีก่อน มากกว่าใกล้กับพฤศจิกายนปีนี้ ค่าที่ "รู้จักกัน" จึงอยู่ห่างกันหนึ่งปี ไม่ใช่หนึ่งเดือน</p>
+
+<p>ข้อมูลมี <mark class="src" data-p="15" title="an underlying seasonal lag, denoted by s.">seasonal lag พื้นฐาน เขียนแทนด้วย s</mark> รายเดือนใช้ <mark class="src" data-p="15" title="s = 12">s = 12</mark> รายไตรมาสใช้ <mark class="src" data-p="15" title="s = 4">s = 4</mark> และเรียก s ว่า seasonal lag หรือ seasonal index<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup> ส่วนนี้คือ Section 3.9 ของหนังสือ สอนครั้งแรกใน Class 8 ด้วยการเขียนมือ ทวนใน Class 9-1 บนกระดาน และใช้กับข้อมูลจริงใน Class 9-2</p>
+
+<div class="eq">\[\nabla_sX_t=X_t-X_{t-s}=(1-B^s)X_t\]</div>
+<p class="say">seasonal differencing ลบค่าของเดือนเดียวกันปีก่อน เช่น \(\nabla_{12}\) ของมกราคม 2005 คือมกราคม 2005 ลบมกราคม 2004 ซึ่งตัดผลของเดือนที่ซ้ำทุกปีออก ใช้เมื่อส่วน seasonal เองไม่นิ่ง เหมือน \(\nabla=(1-B)\) ใน Lesson 6 ที่ใช้เมื่อ trend ไม่นิ่ง</p>
+
+<h3 id="s1-ma">1.2 MA(Q)ₛ: shock ที่ค้างไว้ข้ามปี</h3>
+
+<div class="eq">\[X_t=\shk{w_t}+\prm{\Theta_1}\shk{w_{t-s}}+\dots+\prm{\Theta_Q}\shk{w_{t-Qs}}=\Theta_Q(B^s)\,\shk{w_t}\]</div>
+<p class="say">สไลด์เรียก <mark class="src" data-p="17" title="MA(Q)s">MA(Q)ₛ</mark> ว่า <mark class="src" data-p="17" title="seasonal moving average (MA) model">โมเดล seasonal moving average</mark> Θ ใหญ่ "คือเหมือนกัน" กับ θ แค่ใช้ตัวใหญ่แยก seasonal ออกจาก non-seasonal<sup class="fn"><a href="#fn-3" id="fnr-3">3</a></sup></p>
+
+<table class="sym">
+<tr><td>Q</td><td><mark class="src" data-p="17" title="order">อันดับ</mark> คือจำนวน Θ</td></tr>
+<tr><td>s</td><td><mark class="src" data-p="17" title="seasonal period">คาบ seasonal</mark></td></tr>
+<tr><td>\(\Theta_Q(B^s)\)</td><td><mark class="src" data-p="17" title="Θ_Q(B^s)">\(1+\Theta_1B^s+\dots+\Theta_QB^{Qs}\)</mark> seasonal MA operator เป็นพหุนามดีกรี Qs</td></tr>
+</table>
+
+<p class="num">MA(1)₁₂ <mark class="src" data-p="18" title="( Q = 1 and s = 12 ).">(Q = 1 และ s = 12)</mark> คือ \(X_t=w_t+\Theta w_{t-12}\) จุดที่ต้องระวังคือ \(w_{t-12}\) ไม่ใช่ \(w_{t-1}\)<sup class="fn"><a href="#fn-4" id="fnr-4">4</a></sup> มันคือ MA(12) ที่ θ₁ ถึง θ₁₁ เป็นศูนย์และ θ₁₂ = Θ จึงใช้เครื่องมือของ Lesson 5 ได้ทั้งหมด ใน R simulate ด้วย <code>ma = c(rep(0,11), 0.9)</code><sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup></p>
 
 <div class="calc" id="s1-acf">
-<div class="calc-title">ACF ของ MA(1)₁₂<sup class="fn"><a href="#fn-15" id="fnr-15">15</a></sup></div>
+<div class="calc-title">ACF ของ MA(1)₁₂<sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup></div>
 <ol class="steps">
 <li><div class="st-title">γ₀</div><p>\(\mathrm{Var}(w_t+\Theta w_{t-12})=\sigma^2(1+\Theta^2)\)</p></li>
-<li><div class="st-title">lag 1 ถึง 11</div><p>เช่น \(\mathrm{Cov}(w_t+\Theta w_{t-12},\,w_{t+1}+\Theta w_{t-11})\) ดัชนี \(t, t-12\) กับ \(t+1, t-11\) "ไม่ชนกันเลย" จึงเป็น 0</p></li>
+<li><div class="st-title">lag 1 ถึง 11</div><p>ดัชนี \(t, t-12\) กับ \(t+h, t+h-12\) "ไม่ชนกันเลย" จึงเป็น 0</p></li>
 <li><div class="st-title">lag 12</div><p>\(\mathrm{Cov}(w_t+\Theta w_{t-12},\,w_{t+12}+\Theta w_t)\) ชนกันที่ \(w_t\) ได้ \(\Theta\sigma^2\)</p></li>
-<li><div class="st-title">ACF</div><p>\(\rho_{12}=\Theta/(1+\Theta^2)\) และ ρ อื่นทุกตัวเป็น 0 เทียบกับ MA(1): \(\rho_1=\theta/(1+\theta^2)\)</p></li>
+<li><div class="st-title">ACF</div><p>\(\rho_{12}=\Theta/(1+\Theta^2)\) และ ρ อื่นทุกตัวเป็น 0</p></li>
 </ol>
-<div class="answer">Θ = 0.9 ได้ ρ₁₂ = 0.9/1.81 = 0.497 ค่าเดียวกับ MA(1) θ = 0.9 ใน Lesson 5 แค่ย้ายจาก lag 1 ไป lag 12 ส่วน MA(2)₁₂ ได้ \(\rho_{12}=\dfrac{\Theta_1+\Theta_1\Theta_2}{1+\Theta_1^2+\Theta_2^2}\) และ \(\rho_{24}=\dfrac{\Theta_2}{1+\Theta_1^2+\Theta_2^2}\)<sup class="fn"><a href="#fn-16" id="fnr-16">16</a></sup></div>
+<div class="answer">Θ = 0.9 ได้ ρ₁₂ = 0.497 ค่าเดียวกับ MA(1) θ = 0.9 ใน <a href="0005-ma-and-ar-models.html#s3-ma1">Lesson 5 ตอน 3.3</a> แค่ย้ายจาก lag 1 ไป lag 12 ส่วน MA(2)₁₂ (การบ้าน<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup>) ได้ \(\rho_{12}=\dfrac{\Theta_1+\Theta_1\Theta_2}{1+\Theta_1^2+\Theta_2^2}\) และ \(\rho_{24}=\dfrac{\Theta_2}{1+\Theta_1^2+\Theta_2^2}\)<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup> คือสูตร MA(2) เดิมที่ย้ายไป lag 12, 24</div>
 </div>
 
 <figure class="thumb">
@@ -55,27 +76,35 @@
 <figcaption>FORECAST_AND_SARIMA หน้า 19 — MA(1)₁₂, Θ = 0.9: population และ sample ACF/PACF</figcaption>
 </figure>
 
-<p>population ACF มีแท่งเดียวที่ lag 12 = 0.497 ส่วน population PACF มีค่าที่ lag 12, 24, 36, 48 = 0.497, −0.328, 0.243, −0.191 สลับเครื่องหมายและลดลง ขนาดเท่ากับ PACF ของ MA(1) θ = −0.9 ใน Lesson 6 (0.497, 0.328, 0.243, 0.191) ต่างที่เครื่องหมายสลับบวกลบเพราะ Θ เป็นบวก และย้ายจาก lag 1, 2, 3, 4 ไป 12, 24, 36, 48 sample จาก <code>arima.sim(..., n = 200)</code> มีรูปแบบเดียวกันแต่มีแท่งเล็ก ๆ ที่ lag อื่นด้วย ข้อสรุปบนสไลด์ 20 คือ population ACF และ PACF มีรูปแบบเดียวกับ MA(1) แต่เกิดที่ seasonal lag ACF ไม่เป็นศูนย์เฉพาะ lag 12 แปลว่าค่าที่ห่างกัน 12 หน่วยสัมพันธ์กัน ค่าอื่นไม่สัมพันธ์ และ PACF ลดลงตาม lag 12, 24, 36, …</p>
+<p>population ACF มีแท่งเดียวที่ lag 12 ส่วน PACF ลดลงสลับเครื่องหมายที่ lag 12, 24, 36, 48 ขนาดเท่ากับ PACF ของ MA(1) ใน Lesson 6 แค่ย้ายตำแหน่ง ข้อสรุปของสไลด์คือ ACF <mark class="src" data-p="20" title="displays nonzero autocorrelation only at the first (seasonal) lag k = 12">ไม่เป็นศูนย์เฉพาะที่ seasonal lag แรก k = 12</mark> และ PACF มี <mark class="src" data-p="20" title="a decay across seasonal lags">การลดลงตาม seasonal lag</mark> sample จาก n = 200 มีรูปแบบเดียวกันแต่มีแท่งเล็ก ๆ ที่ lag อื่นด้วย</p>
 
-<p>\(\Theta_Q(B^s)\) เรียกว่า seasonal MA characteristic operator เป็นพหุนามดีกรี Qs MA(Q)ₛ invertible เมื่อรากทั้ง Qs ตัวมีค่าสัมบูรณ์หรือ modulus เกิน 1 เช่น MA(1)₁₂ \(1+\Theta x^{12}=0\) ได้ \(|x|^{12}=1/|\Theta|\) รากทุกตัวมี modulus \(|\Theta|^{-1/12}\) ซึ่งเกิน 1 เมื่อ |Θ| &lt; 1 เงื่อนไขจึงเหมือน MA(1) แบบทดสอบในห้อง<sup class="fn"><a href="#fn-17" id="fnr-17">17</a></sup> ฝึกหาว่า ACF ไม่เป็นศูนย์ที่ lag ใด</p>
-<ul>
-<li>MA(2): ที่ lag 1, 2</li>
-<li>MA(2)₁₂: ที่ 12, 24</li>
-<li>MA(4)₅: ที่ 5, 10, 15, 20 (สี่ตัว)</li>
-<li>MA(5)₈: ที่ 8, 16, 24, 32, 40<sup class="fn"><a href="#fn-18" id="fnr-18">18</a></sup></li>
-</ul>
-<p>วิธีคิดคือ lag ที่ไม่เป็นศูนย์ของ MA(Q)ₛ คือ s, 2s, …, Qs</p>
+<table>
+<tr><th>โมเดล</th><th>ACF ไม่เป็นศูนย์ที่ lag</th></tr>
+<tr><td>MA(2)</td><td>1, 2</td></tr>
+<tr><td>MA(2)₁₂</td><td>12, 24</td></tr>
+<tr><td>MA(4)₅</td><td>5, 10, 15, 20</td></tr>
+<tr><td>MA(5)₈</td><td>8, 16, 24, 32, 40<sup class="fn"><a href="#fn-9" id="fnr-9">9</a></sup></td></tr>
+</table>
 
-<p>AR(P)ₛ เดาได้จากรูปแบบเดียวกัน<sup class="fn"><a href="#fn-19" id="fnr-19">19</a></sup> \(X_t=\Phi_1X_{t-s}+\Phi_2X_{t-2s}+\dots+\Phi_PX_{t-Ps}+w_t\) Φ ใหญ่มี P ตัว และ \(\Phi_P(B^s)=1-\Phi_1B^s-\dots-\Phi_PB^{Ps}\) การคูณด้วย Bˢ เลื่อน t เป็น t − s<sup class="fn"><a href="#fn-20" id="fnr-20">20</a></sup> เช่น AR(2)₁₂ คือ \(X_t=\Phi_1X_{t-12}+\Phi_2X_{t-24}+w_t\) หรือ \((1-\Phi_1B^{12}-\Phi_2B^{24})X_t=w_t\) AR(1)₁₂ \(X_t=\Phi X_{t-12}+w_t\) คือ AR(12) ที่ φ₁ ถึง φ₁₁ เป็นศูนย์และ φ₁₂ = Φ เหมือน AR(1) ตรงที่นิ่งก็ต่อเมื่อ −1 &lt; Φ &lt; 1 ความหมายคือ ยอดขายเดือนนี้ขึ้นกับเดือนเดียวกันของปีก่อน ไม่ขึ้นกับเดือนก่อนหน้า</p>
+<p class="say">แบบทดสอบในห้อง<sup class="fn"><a href="#fn-10" id="fnr-10">10</a></sup> ฝึกหาว่า ACF ไม่เป็นศูนย์ที่ lag ใด กฎคือ MA(Q)ₛ ไม่เป็นศูนย์ที่ s, 2s, …, Qs</p>
+
+<p class="trap">MA(Q)ₛ invertible เมื่อรากทั้ง Qs ตัวของ \(\Theta_Q(x^s)\) มี modulus เกิน 1 เช่น MA(1)₁₂: \(1+\Theta x^{12}=0\) ได้ \(|x|=|\Theta|^{-1/12}\) ซึ่งเกิน 1 เมื่อ |Θ| &lt; 1 เงื่อนไขจึงเหมือน MA(1) (<a href="0007-arima-identification-and-estimation.html#s4-roots">Lesson 7 ตอน 4.3</a>) ไม่ต้องหาราก 12 ตัว</p>
+
+<h3 id="s1-ar">1.3 AR(P)ₛ: เดือนนี้ขึ้นกับเดือนเดียวกันปีก่อน</h3>
+
+<div class="eq">\[X_t=\prm{\Phi_1}X_{t-s}+\dots+\prm{\Phi_P}X_{t-Ps}+\shk{w_t}\quad\Longleftrightarrow\quad\Phi_P(B^s)X_t=\shk{w_t},\ \ \Phi_P(B^s)=1-\Phi_1B^s-\dots-\Phi_PB^{Ps}\]</div>
+<p class="say">สไลด์เรียกว่า <mark class="src" data-p="22" title="seasonal autoregressive (AR) model">โมเดล seasonal autoregressive</mark> เดาได้จากรูปแบบเดียวกับ MA<sup class="fn"><a href="#fn-11" id="fnr-11">11</a></sup> การคูณด้วย Bˢ เลื่อน t เป็น t − s<sup class="fn"><a href="#fn-12" id="fnr-12">12</a></sup></p>
+
+<p class="num">AR(1)₁₂ <mark class="src" data-p="23" title="( P = 1 and s = 12 ).">(P = 1 และ s = 12)</mark> คือ \(X_t=\Phi X_{t-12}+w_t\) เท่ากับ AR(12) ที่ φ₁ ถึง φ₁₁ เป็นศูนย์และ φ₁₂ = Φ นิ่งเมื่อ −1 &lt; Φ &lt; 1 เหมือน AR(1) ACF คือ \(\Phi^{h/12}\) ที่ h = 12, 24, 36 ตามที่หนังสือเขียน<sup class="fn"><a href="#fn-13" id="fnr-13">13</a></sup> เช่น Φ = 0.8 ได้ 0.8, 0.64, 0.512</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p24.png" alt="FORECAST_AND_SARIMA หน้า 24: AR(1)₁₂, Φ = 0.8: population และ sample ACF/PACF" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 24 — AR(1)₁₂, Φ = 0.8: population และ sample ACF/PACF</figcaption>
 </figure>
 
-<p>population ACF มีค่าที่ lag 12, 24, 36, 48 = 0.8, 0.64, 0.512, 0.410 คือ \(\Phi^{h/12}\) ตามที่หนังสือเขียน<sup class="fn"><a href="#fn-21" id="fnr-21">21</a></sup> และ lag อื่นเป็นศูนย์ เช่น lag 1 = 0 population PACF มีแท่งเดียวที่ lag 12 = 0.8 sample ACF จาก n = 200 ลดลงตาม lag 12, 24, 36 ชัดเจน ข้อสรุปบนสไลด์ 25 คือ ACF ลดลงช้าตาม seasonal lag 12, 24, 36, 48 ส่วน PACF ไม่เป็นศูนย์ที่ lag 12 แล้วเป็นศูนย์ เป็นรูปแบบเดียวกับ AR(1) แค่ย้ายตำแหน่ง หัวสไลด์หน้านั้นพิมพ์ว่า Θ = 0.8 แต่ควรเป็น Φ = 0.8 ตามหน้าก่อน</p>
+<p>ภาพนี้คือ AR(1) ของ Lesson 5 ที่ย้ายไปอยู่บน lag 12, 24, 36: ACF <mark class="src" data-p="25" title="displays a slow decay across the seasonal lags">ลดลงช้าตาม seasonal lag</mark> ส่วน PACF <mark class="src" data-p="25" title="nonzero at the first seasonal lag k = 12">ไม่เป็นศูนย์ที่ seasonal lag แรก k = 12</mark> แล้วเป็นศูนย์ lag ที่ไม่ใช่พหุคูณของ 12 เป็นศูนย์ทั้งหมด</p>
 
-<p>\(\Phi_P(B^s)\) เรียกว่า seasonal AR characteristic operator เป็นพหุนามดีกรี Ps AR(P)ₛ causal (นิ่ง) เมื่อรากทั้ง Ps ตัวมีค่าสัมบูรณ์หรือ modulus เกิน 1 แบบฝึกในห้อง: AR(4)₄ มี PACF ไม่เป็นศูนย์ที่ 4, 8, 12, 16 แล้วเป็นศูนย์ และ ACF tail off ที่ 4, 8, 12, 16, 20, 24, …<sup class="fn"><a href="#fn-22" id="fnr-22">22</a></sup></p>
+<p class="trap">หัวสไลด์หน้านั้นพิมพ์ว่า Θ = 0.8 แต่ควรเป็น Φ = 0.8 ตามหน้าก่อน Φ ใหญ่ (seasonal AR) ต่างจาก φ เล็ก<sup class="fn"><a href="#fn-14" id="fnr-14">14</a></sup> และ seasonal AR operator เป็น "1 ลบ Φ ใหญ่" เสมอ AR(P)ₛ causal เมื่อรากทั้ง Ps ตัวมี modulus เกิน 1 แบบฝึกในห้อง: AR(4)₄ มี PACF ไม่เป็นศูนย์ที่ 4, 8, 12, 16 แล้วเป็นศูนย์ และ ACF tail off ที่ 4, 8, 12, …<sup class="fn"><a href="#fn-15" id="fnr-15">15</a></sup></p>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 14–18, 20–23, 25–26)</summary><div class="gallery">
 <figure>
@@ -127,31 +156,42 @@
 <!-- ===================================================== -->
 <h2 id="s2">2. ARMA(P,Q)ₛ และตาราง ACF/PACF (ควิซ 7)</h2>
 
-<p>รวมสองส่วนเป็น \(\Phi_P(B^s)X_t=\Theta_Q(B^s)w_t\) เรียกว่า SARMA(P,Q)ₛ<sup class="fn"><a href="#fn-23" id="fnr-23">23</a></sup> เป็นคู่ของ ARMA(p,q) ที่ autocorrelation ไม่เป็นศูนย์เฉพาะที่ lag s, 2s, 3s, … จุดที่ต้องระวังคือ t − 1 กลายเป็น t − s และ B กลายเป็น Bˢ<sup class="fn"><a href="#fn-24" id="fnr-24">24</a></sup> ส่วนเงื่อนไขก็ตรงกัน คือ causal เมื่อรากของ \(\Phi_P(B^s)\) เกิน 1 ทุกตัว invertible เมื่อรากของ \(\Theta_Q(B^s)\) เกิน 1 ทุกตัว และ ARMA(P,Q)ₛ เทียบเท่า ARMA(Ps, Qs) ธรรมดาที่ \(\phi_s=\Phi_1,\phi_{2s}=\Phi_2,\dots,\phi_{Ps}=\Phi_P\) และ \(\theta_s=\Theta_1,\dots,\theta_{Qs}=\Theta_Q\) ส่วน φ, θ อื่นเป็นศูนย์ เช่น ARMA(1,1)₄ คือ ARMA(4,4) ที่มีแค่ φ₄ กับ θ₄ หน้าสุดท้ายของไฟล์ (หน้า 52) ทวนเรื่องเดียวกันอีกครั้ง ตัวอย่าง AR(2)₃ คือ AR(6) ที่มีแค่ φ₃ = Φ₁ และ φ₆ = Φ₂ ซึ่งใช้ใน R เป็น <code>ar = c(0,0,Φ1,0,0,Φ2)</code></p>
+<h3 id="s2-def">2.1 ARMA(P,Q)ₛ คือ ARMA ที่เว้นช่อง</h3>
+
+<div class="eq">\[\Phi_P(B^s)X_t=\Theta_Q(B^s)\shk{w_t}\]</div>
+<p class="say">SARMA(P,Q)ₛ<sup class="fn"><a href="#fn-16" id="fnr-16">16</a></sup> คือคู่ของ ARMA(p,q) ที่ autocorrelation ไม่เป็นศูนย์เฉพาะ lag s, 2s, 3s, … สิ่งที่ต้องระวังคือ t − 1 กลายเป็น t − s และ B กลายเป็น Bˢ<sup class="fn"><a href="#fn-17" id="fnr-17">17</a></sup> เงื่อนไข causal/invertible ก็เหมือนเดิม แค่ตรวจที่ \(\Phi_P(B^s)\) และ \(\Theta_Q(B^s)\)</p>
+
+<p class="num">ARMA(P,Q)ₛ เทียบเท่า ARMA(Ps, Qs) ธรรมดาที่ \(\phi_s=\Phi_1,\dots,\phi_{Ps}=\Phi_P\) และ \(\theta_s=\Theta_1,\dots,\theta_{Qs}=\Theta_Q\) ส่วนตัวอื่นเป็นศูนย์ เช่น AR(2)₃ คือ AR(6) ที่มีแค่ φ₃ = Φ₁ และ φ₆ = Φ₂ ใน R จึงเขียน <code>ar = c(0,0,Φ1,0,0,Φ2)</code> (หน้าท้ายไฟล์ หน้า 52 ทวนเรื่องเดียวกัน)</p>
+
+<h3 id="s2-table">2.2 ตาราง ACF/PACF แบบ seasonal (ควิซ 7)</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p29.png" alt="FORECAST_AND_SARIMA หน้า 29: ตาราง ACF/PACF ของ AR(P)ₛ, MA(Q)ₛ และ ARMA(P,Q)ₛ (Shumway หน้า 155)" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 29 — ตาราง ACF/PACF ของ AR(P)ₛ, MA(Q)ₛ และ ARMA(P,Q)ₛ (Shumway หน้า 155)</figcaption>
 </figure>
 
-<p>ตารางนี้คือควิซ 7 ซึ่งเขียนบนกระดานใน Class 9-1<sup class="fn"><a href="#fn-25" id="fnr-25">25</a></sup> AR(P)ₛ มี ACF tail off ที่ lag ks และ PACF ตัดหลัง lag Ps MA(Q)ₛ กลับกัน คือ ACF ตัดหลัง lag Qs และ PACF tail off ส่วน ARMA(P,Q)ₛ tail off ทั้งคู่ lag ที่ไม่ใช่พหุคูณของ s เป็นศูนย์ทั้งหมดในโมเดล pure seasonal และ tail off อาจลงแบบบวกทั้งหมดหรือสลับบวกลบก็ได้<sup class="fn"><a href="#fn-26" id="fnr-26">26</a></sup></p>
+<p>ตารางนี้มาจาก <mark class="src" data-p="29" title="(Shumway, page 155)">(Shumway หน้า 155)</mark> และคือควิซ 7 ซึ่งเขียนบนกระดานใน Class 9-1<sup class="fn"><a href="#fn-18" id="fnr-18">18</a></sup><sup class="fn"><a href="#fn-19" id="fnr-19">19</a></sup> มันคือตารางของ <a href="0006-ar2-pacf-and-arima.html#s3-sum">Lesson 6 ตอน 3.6</a> ที่ย้ายทุก lag ไปเป็นพหุคูณของ s</p>
+
 <table>
 <tr><th></th><th>AR(P)ₛ</th><th>MA(Q)ₛ</th><th>ARMA(P,Q)ₛ</th></tr>
-<tr><td>ACF</td><td>tail off ที่ lag ks, k = 1, 2, …</td><td>ตัดหลัง lag Qs (ไม่เป็นศูนย์ที่ s, 2s, …, Qs)</td><td>tail off ที่ lag ks</td></tr>
-<tr><td>PACF</td><td>ตัดหลัง lag Ps (ไม่เป็นศูนย์ที่ s, 2s, …, Ps)</td><td>tail off ที่ lag ks</td><td>tail off ที่ lag ks</td></tr>
+<tr><td>ACF</td><td>tail off ที่ lag ks</td><td>ตัดหลัง lag Qs (ไม่เป็นศูนย์ที่ s, …, Qs)</td><td>tail off ที่ lag ks</td></tr>
+<tr><td>PACF</td><td>ตัดหลัง lag Ps (ไม่เป็นศูนย์ที่ s, …, Ps)</td><td>tail off ที่ lag ks กระจายห่างกัน s<sup class="fn"><a href="#fn-20" id="fnr-20">20</a></sup></td><td>tail off ที่ lag ks</td></tr>
 </table>
-<p>เทียบกับ non-seasonal: MA(q) ไม่เป็นศูนย์ที่ 1, …, q ส่วน MA(Q)ₛ ไม่เป็นศูนย์ที่ s, …, Qs และ PACF ของ MA(Q)ₛ tail off โดยแท่งกระจายห่างกัน s<sup class="fn"><a href="#fn-27" id="fnr-27">27</a></sup></p>
+
+<p class="say">lag ที่ไม่ใช่พหุคูณของ s เป็นศูนย์ทั้งหมดในโมเดล pure seasonal และ tail off อาจลดแบบบวกทั้งหมดหรือสลับบวกลบก็ได้<sup class="fn"><a href="#fn-21" id="fnr-21">21</a></sup> ถ้าทำแบบฝึกใน Class 8 ได้ ควิซก็ทำได้<sup class="fn"><a href="#fn-22" id="fnr-22">22</a></sup></p>
 
 <div class="calc" id="s2-quiz7">
 <div class="calc-title">เฉลยควิซ 7: อธิบาย ACF และ PACF</div>
 <ol class="steps">
-<li><div class="st-title">AR(2)₃</div><p>\(X_t=\Phi_1X_{t-3}+\Phi_2X_{t-6}+w_t\) ACF: ไม่เป็นศูนย์เฉพาะ lag 3, 6, 9, 12, … และค่อย ๆ ลด (tail off) lag อื่นเป็นศูนย์ PACF: ไม่เป็นศูนย์ที่ lag 3 และ 6 แล้วเป็นศูนย์หลัง lag 6 ตัวอย่าง Φ = (0.5, 0.3): ACF ที่ 3, 6, 9, 12 = 0.714, 0.657, 0.543, 0.469 และ PACF ที่ 3, 6, 9 = 0.714, 0.3, 0</p></li>
+<li><div class="st-title">AR(2)₃</div><p>\(X_t=\Phi_1X_{t-3}+\Phi_2X_{t-6}+w_t\) ACF ไม่เป็นศูนย์เฉพาะ lag 3, 6, 9, 12, … และค่อย ๆ ลด PACF ไม่เป็นศูนย์ที่ lag 3 และ 6 แล้วเป็นศูนย์หลัง lag 6 ตัวอย่าง Φ = (0.5, 0.3): PACF ที่ 3, 6, 9 = 0.714, 0.3, 0</p></li>
 <li><div class="st-title">AR(5)₂</div><p>ACF tail off ที่ lag 2, 4, 6, 8, … PACF ไม่เป็นศูนย์ที่ lag 2, 4, 6, 8, 10 แล้วตัดหลัง lag 10 lag คี่เป็นศูนย์ทั้งหมด</p></li>
-<li><div class="st-title">MA(2)₄</div><p>ACF ไม่เป็นศูนย์ที่ lag 4 และ 8 แล้วตัดหลัง lag 8 PACF tail off ที่ lag 4, 8, 12, 16, …</p></li>
-<li><div class="st-title">MA(4)₂</div><p>ACF ไม่เป็นศูนย์ที่ lag 2, 4, 6, 8 แล้วตัดหลัง lag 8 PACF tail off ที่ lag 2, 4, 6, 8, 10, …</p></li>
+<li><div class="st-title">MA(2)₄</div><p>ACF ไม่เป็นศูนย์ที่ lag 4 และ 8 แล้วตัดหลัง lag 8 PACF tail off ที่ lag 4, 8, 12, …</p></li>
+<li><div class="st-title">MA(4)₂</div><p>ACF ไม่เป็นศูนย์ที่ lag 2, 4, 6, 8 แล้วตัดหลัง lag 8 PACF tail off ที่ lag 2, 4, 6, …</p></li>
 </ol>
-<div class="answer">กับดักคือ MA(2)₄ กับ MA(4)₂ ตัดที่ lag 8 เหมือนกัน ต่างกันที่ MA(2)₄ ไม่เป็นศูนย์แค่สองแท่ง (4, 8) ส่วน MA(4)₂ มีสี่แท่ง (2, 4, 6, 8) คำตอบควรระบุ "ไม่เป็นศูนย์ที่ lag ใด" และ "ตัดหลัง lag ใด" ให้ครบ</div>
+<div class="answer">MA(2)₄ กับ MA(4)₂ ตัดที่ lag 8 เหมือนกัน ต่างกันที่จำนวนแท่ง (สองแท่งกับสี่แท่ง) คำตอบจึงต้องระบุทั้ง "ไม่เป็นศูนย์ที่ lag ใด" และ "ตัดหลัง lag ใด"</div>
 </div>
+
+<p class="trap">ข้อพื้นฐานอย่าง AR(3)₁₂ ไม่ควรตอบผิด<sup class="fn"><a href="#fn-23" id="fnr-23">23</a></sup>: PACF ไม่เป็นศูนย์ที่ 12, 24, 36 แล้วตัด ส่วน ACF tail off ที่ 12, 24, 36, 48, …</p>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 27–28 และ 52)</summary><div class="gallery">
 <figure>
@@ -171,18 +211,26 @@
 <!-- ===================================================== -->
 <h2 id="s3">3. Multiplicative ARMA(p,q)×(P,Q)ₛ และ full SARIMA</h2>
 
-<p>ข้อมูลจริงมักมีทั้งความสัมพันธ์ระยะสั้น (lag 1, 2) และระยะ seasonal (lag 12) จึงคูณพหุนามสองชุดเข้าด้วยกันเป็น \(\phi(B)\Phi_P(B^s)X_t=\theta(B)\Theta_Q(B^s)w_t\) เรียกว่า ARMA(p,q)×(P,Q)ₛ ใน R เขียน <code>order = c(p,0,q), seasonal = list(order = c(P,0,Q), period = s)</code> ต้องแปลงชื่อให้เป็น เช่น MA(1)×MA(1)₁₂ = ARIMA(0,0,1)×(0,0,1)₁₂ และ MA(1)×AR(1)₁₂ = ARIMA(0,0,1)×(1,0,0)₁₂<sup class="fn"><a href="#fn-28" id="fnr-28">28</a></sup></p>
+<h3 id="s3-mult">3.1 คูณสองส่วนแล้วเกิด "ตะเกียบ"</h3>
+
+<p class="pic">ข้อมูลจริงมีทั้งความจำระยะสั้น (เมื่อวานกับวันนี้) และความจำข้ามปี (เดือนนี้กับเดือนเดียวกันปีก่อน) เอาสองความจำมาคูณกัน ก็เกิดความสัมพันธ์ใหม่ระหว่าง "เดือนก่อนของปีก่อน" กับ "เดือนนี้" ด้วย</p>
+
+<div class="eq">\[\phi(B)\,\Phi_P(B^s)\,X_t=\theta(B)\,\Theta_Q(B^s)\,\shk{w_t}\]</div>
+<p class="say">สไลด์เรียกว่า <mark class="src" data-p="30" title="multiplicative seasonal ARMA class">ตระกูล multiplicative seasonal ARMA</mark> เขียนย่อ <mark class="src" data-p="30" title="ARMA(p, q) × (P, Q)s">ARMA(p,q)×(P,Q)ₛ</mark> ใน R ใช้ <code>order = c(p,0,q), seasonal = list(order = c(P,0,Q), period = s)</code> ต้องแปลงชื่อให้เป็น เช่น MA(1)×MA(1)₁₂ = ARIMA(0,0,1)×(0,0,1)₁₂ และ MA(1)×AR(1)₁₂ = ARIMA(0,0,1)×(1,0,0)₁₂<sup class="fn"><a href="#fn-24" id="fnr-24">24</a></sup></p>
+
+<figure class="viz"><img src="../assets/viz/l9-chop.svg" alt="MA(1)×MA(1)₁₂ มีน้ำหนักที่ lag 0, 1, 12, 13 คู่ที่ห่างกัน 11 และ 13 คือตะเกียบ"></figure>
+
+<p>คูณพหุนามแล้วได้น้ำหนักสี่ตัวที่ lag 0, 1, 12, 13 วิธีหา γ เหมือนภาพช่องเหลืองใน Lesson 5: จับคู่น้ำหนักที่ห่างกัน h แล้วคูณกันบวกกัน คู่ที่ห่าง 1 และ 12 ให้ "main effect" ของแต่ละส่วน ส่วนคู่ที่ห่าง 11 และ 13 เกิดจากการคูณ จึงเรียกว่า interaction หรือ "ตะเกียบ"</p>
 
 <div class="calc" id="s3-mama">
-<div class="calc-title">ACF ของ MA(1)×MA(1)₁₂ (การบ้านที่อาจออกสอบ)<sup class="fn"><a href="#fn-29" id="fnr-29">29</a></sup></div>
+<div class="calc-title">ACF ของ MA(1)×MA(1)₁₂ (การบ้านที่อาจออกสอบ)<sup class="fn"><a href="#fn-25" id="fnr-25">25</a></sup><sup class="fn"><a href="#fn-26" id="fnr-26">26</a></sup></div>
 <ol class="steps">
 <li><div class="st-title">คูณพหุนาม</div><p>\(X_t=(1+\theta B)(1+\Theta B^{12})w_t=(1+\theta B+\Theta B^{12}+\theta\Theta B^{13})w_t\) จึงเป็น MA(13) ที่มีแค่ θ₁ = θ, θ₁₂ = Θ, θ₁₃ = θΘ</p></li>
 <li><div class="st-title">γ₀</div><p>\(\sigma^2(1+\theta^2+\Theta^2+\theta^2\Theta^2)=\sigma^2(1+\theta^2)(1+\Theta^2)\)</p></li>
-<li><div class="st-title">lag ที่ไม่เป็นศูนย์</div><p>จับคู่สัมประสิทธิ์ (1, θ, Θ, θΘ ที่ตำแหน่ง 0, 1, 12, 13) ที่ห่างกัน h: h = 1 ได้ θ + ΘθΘ = θ(1 + Θ²); h = 11 ได้ θ·Θ; h = 12 ได้ Θ + θ·θΘ = Θ(1 + θ²); h = 13 ได้ θΘ</p></li>
-<li><div class="st-title">ACF</div><p>\(\rho_1=\dfrac{\theta}{1+\theta^2}\), \(\rho_{12}=\dfrac{\Theta}{1+\Theta^2}\), \(\rho_{11}=\rho_{13}=\dfrac{\theta\Theta}{(1+\theta^2)(1+\Theta^2)}\) lag อื่นเป็นศูนย์</p></li>
-<li><div class="st-title">ตัวอย่างใน R_codes</div><p>θ = −0.5, Θ = −0.9: ρ₁ = −0.4, ρ₁₂ = −0.497, ρ₁₁ = ρ₁₃ = 0.45/(1.25 × 1.81) = 0.199 ตรงกับ <code>ARMAacf(ma = c(-0.5, rep(0,10), -0.9, 0.45))</code></p></li>
+<li><div class="st-title">ACF (คู่จากภาพ)</div><p>\(\rho_1=\dfrac{\theta}{1+\theta^2}\), \(\rho_{12}=\dfrac{\Theta}{1+\Theta^2}\), \(\rho_{11}=\rho_{13}=\dfrac{\theta\Theta}{(1+\theta^2)(1+\Theta^2)}\) lag อื่นเป็นศูนย์</p></li>
+<li><div class="st-title">ตัวอย่างใน R_codes</div><p>θ = −0.5, Θ = −0.9: ρ₁ = −0.4, ρ₁₂ = −0.497, ρ₁₁ = ρ₁₃ = 0.45/(1.25 × 1.81) = 0.199</p></li>
 </ol>
-<div class="answer">ρ₁ และ ρ₁₂ คือ "main effect" จากแต่ละส่วน ส่วน ρ₁₁, ρ₁₃ คือ multiplicative effect หรือ "interaction" ที่ขนาดเท่ากันสองข้าง เรียกว่า "ตะเกียบ"<sup class="fn"><a href="#fn-30" id="fnr-30">30</a></sup> ถ้าเห็นตะเกียบ "บางทีอาจคิดว่าเป็น MA(2) ได้" ให้ใช้ auto.arima ช่วยตัดสิน</div>
+<div class="answer">ρ₁ และ ρ₁₂ คือสูตร MA(1) เดิมของแต่ละส่วน ส่วน ρ₁₁ = ρ₁₃ = ρ₁ × ρ₁₂ คือตะเกียบที่ขนาดเท่ากันสองข้าง<sup class="fn"><a href="#fn-27" id="fnr-27">27</a></sup> ถ้าเห็นตะเกียบ "บางทีอาจคิดว่าเป็น MA(2) ได้" ให้ใช้ auto.arima ช่วยตัดสิน</div>
 </div>
 
 <figure class="thumb">
@@ -190,27 +238,36 @@
 <figcaption>FORECAST_AND_SARIMA หน้า 31 — MA(1)×MA(1)₁₂: ACF และ PACF</figcaption>
 </figure>
 
-<p>ACF มีแท่งลบที่ lag 1 (−0.4), แท่งลบใหญ่ที่ lag 12 (−0.497) และแท่งบวกเล็กสองแท่งที่ lag 11, 13 (0.199) แล้วเป็นศูนย์ทั้งหมดหลัง lag 13 PACF ไม่ตัด มีค่ารอบ lag 12, 24, 36, 48 ที่ค่อย ๆ เล็กลง ตามตาราง ACF ของ MA ตัด ส่วน PACF tail off</p>
+<p>ภาพจากสไลด์ตรงกับการคำนวณ: ACF ลบที่ lag 1 และ 12 บวกเล็กที่ 11, 13 แล้วเป็นศูนย์หลัง lag 13 ส่วน PACF ไม่ตัด มีค่ารอบ lag 12, 24, 36 ที่ค่อย ๆ เล็กลง ตามตาราง MA: ACF ตัด PACF tail off</p>
 
-<div class="calc" id="s3-maar">
-<div class="calc-title">MA(1)×AR(1)₁₂<sup class="fn"><a href="#fn-31" id="fnr-31">31</a></sup></div>
+<h3 id="s3-maar">3.2 MA(1)×AR(1)₁₂: ตะเกียบที่ไม่หยุด</h3>
+
+<div class="calc" id="s3-maar-calc">
+<div class="calc-title">MA(1)×AR(1)₁₂<sup class="fn"><a href="#fn-28" id="fnr-28">28</a></sup></div>
 <ol class="steps">
 <li><div class="st-title">โมเดล</div><p>\((1-\Phi B^{12})X_t=(1+\theta B)w_t\) จึงได้ \(X_t=\Phi X_{t-12}+w_t+\theta w_{t-1}\)</p></li>
-<li><div class="st-title">ACF ตัวอย่าง Φ = 0.9, θ = −0.5</div><p>lag 1 = −0.4 (จาก MA(1)), lag 12, 24, 36 = 0.9, 0.81, 0.729 (Φ, Φ², Φ³ จาก AR(1)₁₂) และ lag 11, 13 = −0.36, lag 23, 25 = −0.324</p></li>
-<li><div class="st-title">ที่มาของตะเกียบ</div><p>−0.36 = 0.9 × (−0.4) และ −0.324 = 0.81 × (−0.4) คือ ρ₁ คูณด้วย Φ^k ข้าง lag 12k ทุกตัว</p></li>
+<li><div class="st-title">ACF ตัวอย่าง Φ = 0.9, θ = −0.5</div><p>lag 1 = −0.4 (จาก MA(1)), lag 12, 24, 36 = 0.9, 0.81, 0.729 (Φᵏ จาก AR(1)₁₂) และตะเกียบ lag 11, 13 = −0.36</p></li>
+<li><div class="st-title">ที่มาของตะเกียบ</div><p>−0.36 = 0.9 × (−0.4) คือ ρ₁ คูณด้วย Φᵏ ข้าง lag 12k ทุกตัว</p></li>
 </ol>
-<div class="answer">ต่างจาก MA×MA ตรงที่ตะเกียบไม่หยุดที่ lag 13 แต่ปรากฏรอบ lag 12, 24, 36, … และเล็กลงตาม Φ^k โมเดลแบบนี้ต้องเขียนให้เป็น<sup class="fn"><a href="#fn-32" id="fnr-32">32</a></sup></div>
+<div class="answer">โมเดลแบบนี้ต้องเขียนให้เป็น<sup class="fn"><a href="#fn-29" id="fnr-29">29</a></sup></div>
 </div>
+
+<figure class="viz"><img src="../assets/viz/l9-acf.svg" alt="ACF ทางทฤษฎี: MA(1)×MA(1)₁₂ มีตะเกียบคู่เดียว ส่วน MA(1)×AR(1)₁₂ มีตะเกียบรอบทุก seasonal lag"></figure>
+
+<p>เทียบสองแถว: ส่วน seasonal เป็น MA (แถวบน) ACF ตัดหลัง lag 13 ตะเกียบจึงมีคู่เดียว ส่วน seasonal เป็น AR (แถวล่าง) แท่งสีฟ้าลดลงช้าตาม Φᵏ และตะเกียบสีส้มตามไปอยู่ข้างทุกแท่ง ตะเกียบจึงบอกว่ามีส่วน non-seasonal อยู่ด้วย และระยะของตะเกียบบอก q</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p32.png" alt="FORECAST_AND_SARIMA หน้า 32: AR(1)×AR(1)₁₂: ACF และ PACF" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 32 — AR(1)×AR(1)₁₂: ACF และ PACF</figcaption>
 </figure>
 
-<p>ตัวอย่างบนสไลด์คือ AR(1)×AR(1)₁₂ ACF มีแท่งใหญ่ที่ lag 12, 24, 36, 48 ลดลงช้า และมีแท่งลบรอบ ๆ แต่ละ lag seasonal เพราะ φ ของส่วน non-seasonal ติดลบ ส่วน PACF มีแท่งลบช่วง lag ต้น ๆ แท่งบวกใหญ่ที่ lag 12 และแท่งลบที่ lag 13 แล้วเกือบเป็นศูนย์ ตามทฤษฎี PACF ต้องเป็นศูนย์หลัง lag 13 เพราะ \((1-\phi B)(1-\Phi B^{12})=1-\phi B-\Phi B^{12}+\phi\Phi B^{13}\) คือ AR(13) ที่มีพจน์ที่ lag 1, 12, 13 เท่านั้น เป็นรูปแบบกลับด้านของ MA×MA</p>
+<p>AR(1)×AR(1)₁₂ คือรูปแบบกลับด้าน \((1-\phi B)(1-\Phi B^{12})=1-\phi B-\Phi B^{12}+\phi\Phi B^{13}\) เป็น AR(13) ที่มีพจน์ที่ lag 1, 12, 13 เท่านั้น PACF จึงตัดหลัง lag 13 ส่วน ACF ลดลงช้าตาม lag 12, 24, 36 พร้อมแท่งข้าง ๆ</p>
 
-<p>เมื่อเติม differencing เข้าไปจะได้โมเดลเต็มที่รวมทุกอย่าง<sup class="fn"><a href="#fn-33" id="fnr-33">33</a></sup></p>
-<p>\(\phi(B)\,\Phi_P(B^s)\,\nabla^d\,\nabla_s^D\,X_t=\theta(B)\,\Theta_Q(B^s)\,w_t\)</p>
+<h3 id="s3-full">3.3 Full SARIMA: โมเดลสุดท้ายของ Box-Jenkins</h3>
+
+<div class="eq">\[\phi(B)\,\Phi_P(B^s)\,\nabla^d\,\nabla_s^D\,X_t=\theta(B)\,\Theta_Q(B^s)\,\shk{w_t}\qquad\text{เขียนย่อ ARIMA}(p,d,q)\times(P,D,Q)_s\]</div>
+<p class="say">เติม differencing แล้วได้โมเดลที่รวมทุกอย่าง<sup class="fn"><a href="#fn-30" id="fnr-30">30</a></sup> ครอบคลุมทุกกรณีของ Box-Jenkins ไม่มี seasonal ก็ตัดส่วนนั้นออก<sup class="fn"><a href="#fn-31" id="fnr-31">31</a></sup> ต้องเขียนให้เป็น<sup class="fn"><a href="#fn-32" id="fnr-32">32</a></sup> และอย่าลืมใส่ s<sup class="fn"><a href="#fn-33" id="fnr-33">33</a></sup></p>
+
 <table class="compact">
 <tr><th>ส่วน</th><th>รูป</th><th>ความหมาย</th></tr>
 <tr><td>non-seasonal AR</td><td>\(1-\phi_1B-\dots-\phi_pB^p\)</td><td>p เล็ก = จำนวน φ</td></tr>
@@ -220,17 +277,15 @@
 <tr><td>non-seasonal MA</td><td>\(1+\theta_1B+\dots+\theta_qB^q\)</td><td>q เล็ก = จำนวน θ</td></tr>
 <tr><td>seasonal MA</td><td>\(1+\Theta_1B^s+\dots+\Theta_QB^{Qs}\)</td><td>Q ใหญ่ = จำนวน Θ</td></tr>
 </table>
-<p>เขียนย่อเป็น ARIMA(p,d,q)×(P,D,Q)ₛ ถ้า d = D = 0 เรียก SARMA ถ้ามี differencing เรียก SARIMA โมเดลนี้ครอบคลุมทุกกรณีของ Box-Jenkins ไม่มี seasonal ก็ตัดส่วนนั้นออก<sup class="fn"><a href="#fn-34" id="fnr-34">34</a></sup> และอย่าลืมใส่ s<sup class="fn"><a href="#fn-35" id="fnr-35">35</a></sup></p>
 
 <div class="calc" id="s3-write">
 <div class="calc-title">เขียนและกระจาย ARIMA(0,1,1)×(0,1,1)₁₂ (airline model)</div>
 <ol class="steps">
 <li><div class="st-title">รูปเต็ม</div><p>\((1-B)(1-B^{12})X_t=(1+\theta B)(1+\Theta B^{12})w_t\)</p></li>
-<li><div class="st-title">ด้านซ้าย</div><p>\((1-B-B^{12}+B^{13})X_t=X_t-X_{t-1}-X_{t-12}+X_{t-13}\)</p></li>
-<li><div class="st-title">ด้านขวา</div><p>\(w_t+\theta w_{t-1}+\Theta w_{t-12}+\theta\Theta w_{t-13}\)</p></li>
-<li><div class="st-title">ความหมายของด้านซ้าย</div><p>\((X_t-X_{t-12})-(X_{t-1}-X_{t-13})\) คือ "การเปลี่ยนแปลงจากปีก่อน" ของเดือนนี้ ลบด้วยของเดือนที่แล้ว</p></li>
+<li><div class="st-title">ด้านซ้าย</div><p>\(X_t-X_{t-1}-X_{t-12}+X_{t-13}=(X_t-X_{t-12})-(X_{t-1}-X_{t-13})\) คือ "การเปลี่ยนแปลงจากปีก่อน" ของเดือนนี้ ลบด้วยของเดือนที่แล้ว</p></li>
+<li><div class="st-title">ด้านขวา</div><p>\(w_t+\theta w_{t-1}+\Theta w_{t-12}+\theta\Theta w_{t-13}\) มีตะเกียบที่ lag 13 เหมือนตอน 3.1</p></li>
 </ol>
-<div class="answer">ในข้อสอบเขียนบรรทัดแรกพอ<sup class="fn"><a href="#fn-36" id="fnr-36">36</a></sup> และเมื่อ d หรือ D มากกว่าศูนย์ R จะไม่ใส่ intercept</div>
+<div class="answer">ในข้อสอบเขียนบรรทัดแรกพอ<sup class="fn"><a href="#fn-34" id="fnr-34">34</a></sup> และเมื่อ d หรือ D มากกว่าศูนย์ R ไม่ใส่ intercept (เหตุผลเดียวกับ Lesson 7 ตอน 5.6)</div>
 </div>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 30)</summary><div class="gallery">
@@ -243,60 +298,72 @@
 <!-- ===================================================== -->
 <h2 id="s4">4. ข้อมูลจริงชุดแรก: Denver boardings</h2>
 
-<p>Class 9-2 ทวน multiplicative ด้วย simulation ก่อน แล้วเข้าข้อมูลจริงสองชุด โดยเริ่มจาก "โมเดลที่เราคิดในใจจากการดูกราฟเฉย ๆ" แล้วตรวจสอบ<sup class="fn"><a href="#fn-37" id="fnr-37">37</a></sup> <code>boardings</code> จาก package TSA คือจำนวนผู้โดยสารขนส่งสาธารณะรายเดือนในเดนเวอร์ (ส่วนใหญ่รถบัสและ light rail) สิงหาคม 2000 ถึงมีนาคม 2006 รวม 68 เดือน ข้อมูล<b>ถูก log มาแล้ว</b> โมเดลที่ได้จึงเป็นของ log X_t<sup class="fn"><a href="#fn-38" id="fnr-38">38</a></sup> ข้อมูลเดิมน่าจะมีปัญหา non-constant variance</p>
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> อ่านส่วน seasonal จาก lag 12, 24, 36 และอ่านส่วน non-seasonal จากตะเกียบรอบ ๆ ได้อย่างไร โดยเริ่มจาก "โมเดลที่เราคิดในใจจากการดูกราฟเฉย ๆ" แล้วตรวจสอบ<sup class="fn"><a href="#fn-35" id="fnr-35">35</a></sup></p>
+
+<h3 id="s4-id">4.1 Identification: AR(1)₁₂ กับตะเกียบกว้างสามช่อง</h3>
+
+<p><code>boardings</code> จาก package TSA คือ <mark class="src" data-p="34" title="the monthly number of public transit boardings">จำนวนผู้โดยสารขนส่งสาธารณะรายเดือน</mark> ในเดนเวอร์ ข้อมูล<mark class="src" data-p="34" title="log-transformed.">ถูก log มาแล้ว</mark> โมเดลที่ได้จึงเป็นของ log X_t<sup class="fn"><a href="#fn-36" id="fnr-36">36</a></sup> (ขั้น 2 ในผังของ Lesson 7)</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p35.png" alt="FORECAST_AND_SARIMA หน้า 35: Time plot ของ boardings พร้อมสัญลักษณ์เดือน" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 35 — Time plot ของ boardings พร้อมสัญลักษณ์เดือน</figcaption>
 </figure>
 
-<p>ระดับเฉลี่ยค่อนข้างคงที่ราว 12.5 (log scale) ไม่มีการเลื่อนระดับชัดเจน จึงไม่ต้อง difference ตัวอักษรเดือนที่ใส่ด้วย <code>points(..., pch = as.vector(season(boardings)))</code> ช่วยให้เห็นว่าเดือนเดียวกันมักอยู่ระดับใกล้กันทุกปี เพราะระดับเฉลี่ยคงที่ จึงใช้ ARMA(p,q)×(P,Q)ₛ ที่นิ่ง (ไม่มี d, D) และ s = 12 เพราะเป็นข้อมูลรายเดือน</p>
+<p>ระดับเฉลี่ยค่อนข้างคงที่ จึงไม่ต้อง difference <mark class="src" data-p="35" title="Monthly plotting symbols have been added later.">สัญลักษณ์เดือนถูกเติมทีหลัง</mark> ด้วย <code>points(..., pch = as.vector(season(boardings)))</code> ช่วยให้เห็นว่าเดือนเดียวกันมักอยู่ระดับใกล้กันทุกปี จึงใช้ ARMA(p,q)×(P,Q)₁₂ ที่นิ่ง</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p37.png" alt="FORECAST_AND_SARIMA หน้า 37: ACF/PACF: seasonal AR(1)₁₂" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 37 — ACF/PACF: seasonal AR(1)₁₂</figcaption>
 </figure>
 
-<p>sample ACF ที่ lag 12, 24, 36 คือ 0.500, 0.229, 0.177 "ลงช้า ๆ" ส่วน sample PACF ที่ lag 12 คือ 0.368 และที่ lag 24 เหลือ 0.064 เส้นประคือ 2/√68 = 0.243 จึงทะลุที่ lag 12 เท่านั้น ACF tail off ตาม seasonal lag กับ PACF ตัดหลัง lag 12 คือรูปแบบของ AR(1)₁₂ ตามตารางในตอน 2<sup class="fn"><a href="#fn-39" id="fnr-39">39</a></sup></p>
+<p>ACF ที่ lag 12, 24, 36 "ลงช้า ๆ" คือ <mark class="src" data-p="37" title="decay afterward">ลดลงหลังจากนั้น</mark> ส่วน PACF มี <mark class="src" data-p="37" title="autocorrelation at lag h = 12 and none at higher">ค่าที่ lag 12 และไม่มีที่ lag สูงกว่า</mark> (ทะลุเส้น 2/√68 = 0.243 ที่ lag 12 เท่านั้น) ตามตารางในตอน 2 คือ AR(1)₁₂<sup class="fn"><a href="#fn-37" id="fnr-37">37</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p38.png" alt="FORECAST_AND_SARIMA หน้า 38: ACF รอบ lag 12, 24, 36 บ่งชี้ non-seasonal MA(3)" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 38 — ACF รอบ lag 12, 24, 36 บ่งชี้ non-seasonal MA(3)</figcaption>
 </figure>
 
-<p>รอบ lag 12, 24, 36 ใน ACF มี autocorrelation <i>3 time units in both directions</i> คือที่ lag 9–15 ก็ยังมีค่า ซึ่งเป็น "ตะเกียบ" แบบตอน 3 ที่กว้างสามช่อง และ ACF ช่วงต้นคือ 0.517, 0.106 สไลด์จึงเสนอ non-seasonal MA(3) ได้โมเดล ARMA(0,3)×(1,0)₁₂ ไม่ต้อง difference<sup class="fn"><a href="#fn-40" id="fnr-40">40</a></sup> สไลด์ย้ำว่าโมเดลนี้ <b>tentative</b></p>
+<p>รอบ lag 12, 24, 36 ACF ยังมีค่า <i>3 time units in both directions</i> คือตะเกียบที่กว้างสามช่องแบบตอน 3.2 สไลด์จึงเสนอ <mark class="src" data-p="38" title="nonseasonal MA(3)">MA(3) แบบ non-seasonal</mark> ได้ <mark class="src" data-p="38" title="ARMA(0,3) × (1,0)12">ARMA(0,3)×(1,0)₁₂</mark> ไม่ต้อง difference<sup class="fn"><a href="#fn-38" id="fnr-38">38</a></sup> และย้ำว่าโมเดลนี้ <b>tentative</b></p>
+
+<h3 id="s4-write">4.2 เขียนโมเดลจาก output</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p39.png" alt="FORECAST_AND_SARIMA หน้า 39: ARMA(0,3)×(1,0)₁₂ ด้วย MLE และการเขียนโมเดล" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 39 — ARMA(0,3)×(1,0)₁₂ ด้วย MLE และการเขียนโมเดล</figcaption>
 </figure>
 
-<p>สไลด์แสดงทั้ง output และสมการสองรูปแบบ ทุกค่าในสมการมาจาก output โดยตรง ขั้นการแปลงอยู่ในกล่องข้างล่าง</p>
+<p>ทุกค่าในสมการบนสไลด์มาจาก output โดยตรง ขั้นแปลงอยู่ในกล่องข้างล่าง</p>
 
-<div class="calc" id="s4-write">
-<div class="calc-title">เขียนโมเดล boardings จาก output<sup class="fn"><a href="#fn-41" id="fnr-41">41</a></sup></div>
+<div class="calc" id="s4-write-calc">
+<div class="calc-title">เขียนโมเดล boardings จาก output<sup class="fn"><a href="#fn-39" id="fnr-39">39</a></sup></div>
 <ol class="steps">
-<li><div class="st-title">output</div><p><code>arima(boardings, order = c(0,0,3), seasonal = list(order = c(1,0,0), period = 12), method = "ML")</code>: ma1 = 0.7288, ma2 = 0.6115, ma3 = 0.2951, sar1 = 0.8777, intercept = 12.5455, σ² = 0.0006542</p></li>
-<li><div class="st-title">ระบุสัญลักษณ์</div><p>"sar1 = Φ" คือ Φ ใหญ่ ไม่ใช่ Θ ใหญ่<sup class="fn"><a href="#fn-42" id="fnr-42">42</a></sup></p></li>
-<li><div class="st-title">รูปด้วย B</div><p>\((1-0.877B^{12})(\log X_t-12.545)=(1+0.728B+0.611B^2+0.295B^3)w_t\)</p></li>
-<li><div class="st-title">กระจาย (ไม่จำเป็น)</div><p>ค่าคงที่ \(12.5455(1-0.8777)=1.534\) จึงได้ \(\log X_t=1.534+0.877\log X_{t-12}+w_t+0.72w_{t-1}+0.61w_{t-2}+0.295w_{t-3}\), \(\hat\sigma=\sqrt{0.0006542}=0.0255\)</p></li>
+<li><div class="st-title">output</div><p>ma1 = 0.7288, ma2 = 0.6115, ma3 = 0.2951, sar1 = 0.8777, intercept = 12.5455, σ² = 0.0006542</p></li>
+<li><div class="st-title">ระบุสัญลักษณ์</div><p>"sar1 = Φ" คือ Φ ใหญ่ ไม่ใช่ Θ ใหญ่<sup class="fn"><a href="#fn-40" id="fnr-40">40</a></sup></p></li>
+<li><div class="st-title">รูปด้วย B (ลบ intercept จาก log X ทุกตัว)</div><p><mark class="src" data-p="39" title="(1 − 0.877B^12)(log X_t − 12.545) = (1 + 0.728B + 0.611B^2 + 0.295B^3)w_t">\((1-0.877B^{12})(\log X_t-12.545)=(1+0.728B+0.611B^2+0.295B^3)w_t\)</mark></p></li>
+<li><div class="st-title">กระจาย (ไม่จำเป็น)</div><p>ค่าคงที่ \(12.5455(1-0.8777)=1.534\) จึงได้ <mark class="src" data-p="39" title="log X_t = 1.534 + 0.877 log X_{t−12} + w_t + 0.72w_{t−1} + 0.61w_{t−2} + 0.295w_{t−3}">\(\log X_t=1.534+0.877\log X_{t-12}+w_t+0.72w_{t-1}+0.61w_{t-2}+0.295w_{t-3}\)</mark></p></li>
 </ol>
-<div class="answer">รูปด้วย B ข้างบนคือรูปที่ต้องเขียนให้เป็น<sup class="fn"><a href="#fn-43" id="fnr-43">43</a></sup> σ̂ = 0.0255 ในหน่วย log แปลว่าความคลาดเคลื่อนของการพยากรณ์หนึ่งก้าวราว 2.5% ของจำนวนผู้โดยสาร ระวัง: output บนสไลด์มี aic = −277.09 ซึ่งพิมพ์โดย TSA::arima ถ้ารันด้วย stats::arima จะได้ −275.09 (ดู Lesson 8)</div>
+<div class="answer">รูปด้วย B คือรูปที่ต้องเขียนให้เป็น<sup class="fn"><a href="#fn-41" id="fnr-41">41</a></sup><sup class="fn"><a href="#fn-42" id="fnr-42">42</a></sup> σ̂ = √0.0006542 = 0.0255 ในหน่วย log แปลว่าความคลาดเคลื่อนหนึ่งก้าวราว 2.5% ของจำนวนผู้โดยสาร (ต้อง exp กลับตาม Lesson 8 ตอน 5)</div>
 </div>
+
+<p class="trap">output บนสไลด์มี aic = −277.09 ซึ่งพิมพ์โดย TSA::arima ถ้ารันด้วย stats::arima จะได้ −275.09 (Lesson 8 ตอน 2.4)</p>
+
+<h3 id="s4-diag">4.3 Diagnostic</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p40.png" alt="FORECAST_AND_SARIMA หน้า 40: Histogram และ QQ plot ของ standardized residual" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 40 — Histogram และ QQ plot ของ standardized residual</figcaption>
 </figure>
 
-<p>histogram ใกล้ระฆังคว่ำ และ QQ plot เรียงตามเส้น ยกเว้นปลายล่างสองจุด รันเองได้ Shapiro-Wilk p = 0.619 จึงยอมรับ normality</p>
+<p>histogram ใกล้ระฆังคว่ำ และ QQ plot เรียงตามเส้นยกเว้นปลายล่างสองจุด รันเองได้ Shapiro-Wilk p = 0.619 จึงยอมรับ normality</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p41.png" alt="FORECAST_AND_SARIMA หน้า 41: tsdiag: shows no notable problems" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 41 — tsdiag: shows no notable problems</figcaption>
 </figure>
 
-<p>standardized residual อยู่ใน ±3 ACF ของ residual อยู่ในเส้นทุก lag และ p-value ของ Ljung-Box ในกราฟอยู่เหนือ 0.05 สไลด์และคลิปสรุปว่า "model appropriate"<sup class="fn"><a href="#fn-44" id="fnr-44">44</a></sup> ถ้าคำนวณ Box.test เองด้วย fitdf = 4 ที่ H = 10 ได้ p = 0.031 ต่ำกว่า 0.05 ส่วน H = 20 ได้ 0.321 ความต่างมาจากจำนวน df ที่หักและ lag ที่เลือก ข้อมูล 68 ค่ากับพารามิเตอร์ 5 ตัวทำให้ผลไวต่อการตั้งค่า ในการรายงานควรระบุว่าใช้ H และ df เท่าใด</p>
+<p>standardized residual อยู่ใน ±3 ACF ของ residual อยู่ในเส้น และ Ljung-Box ในกราฟอยู่เหนือ 0.05 สไลด์และคลิปสรุปว่า "model appropriate"<sup class="fn"><a href="#fn-43" id="fnr-43">43</a></sup></p>
+
+<p class="trap">คำนวณ Box.test เองด้วย fitdf = 4 ที่ H = 10 ได้ p = 0.031 แต่ที่ H = 20 ได้ 0.321 ข้อมูล 68 ค่ากับพารามิเตอร์ 5 ตัวทำให้ผลไวต่อ H และ df ที่หัก (df = H − p − q − P − Q ใน Lesson 8 ตอน 1.4) ในการรายงานควรระบุว่าใช้ H และ df เท่าใด</p>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 33–34 และ 36)</summary><div class="gallery">
 <figure>
@@ -316,63 +383,89 @@
 <!-- ===================================================== -->
 <h2 id="s5">5. ข้อมูลจริงชุดที่สอง: US milk production</h2>
 
-<p>ชุดที่สองต้องใช้ทั้ง d และ D จึงเป็น SARIMA เต็มรูปแบบ <code>milk</code> คือผลผลิตนมรายเดือนของสหรัฐฯ (ล้านปอนด์) มกราคม 1994 ถึงธันวาคม 2005 รวม 144 เดือน มี trend ขาขึ้นและ seasonal ภายในปี Box-Cox บอกว่าไม่ต้องแปลง<sup class="fn"><a href="#fn-45" id="fnr-45">45</a></sup></p>
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> เมื่อมีทั้ง trend และ seasonal ต้องใช้ทั้ง d และ D และเมื่อ ACF กับ PACF ชี้คนละทาง ต้องลองทั้งสองโมเดลแล้วให้ diagnostic ตัดสิน</p>
+
+<h3 id="s5-diff">5.1 ต้องใช้ทั้ง ∇ และ ∇₁₂</h3>
+
+<p><code>milk</code> คือผลผลิตนมรายเดือนของสหรัฐฯ มี trend ขาขึ้นและ seasonal ภายในปี ความแกว่งเท่า ๆ กันจึงไม่ต้องแปลง<sup class="fn"><a href="#fn-44" id="fnr-44">44</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p44.png" alt="FORECAST_AND_SARIMA หน้า 44: ∇X_t ตัด trend แต่ยังมี seasonal; ∇₁₂X_t ตัด seasonal แต่ยังมี momentum" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 44 — ∇X_t ตัด trend แต่ยังมี seasonal; ∇₁₂X_t ตัด seasonal แต่ยังมี momentum</figcaption>
 </figure>
 
-<p>ผลต่างธรรมดา \(\nabla X_t\) ตัด trend ได้ แต่ยังเห็น seasonal ชัด ส่วนผลต่าง seasonal \(\nabla_{12}X_t\) ตัด seasonal ได้ แต่ยังเดินเป็นช่วงยาว ACF ของ \(\nabla_{12}X_t\) คือ 0.761, 0.599, 0.443 ลดช้า เป็นสัญญาณไม่นิ่ง จึงต้องใช้ทั้งสองอย่าง</p>
+<table>
+<tr><th>ทำอะไร</th><th>ตัดอะไรได้</th><th>ยังเหลืออะไร</th></tr>
+<tr><td>\(\nabla X_t\)</td><td>trend</td><td>seasonal ชัด</td></tr>
+<tr><td>\(\nabla_{12}X_t\)</td><td>seasonal</td><td>เดินเป็นช่วงยาว <mark class="src" data-p="44" title="The sample ACF of ∇12 Xt (not shown) displays slow decay, a sign of nonstationarity.">sample ACF ของ ∇₁₂X_t ลดช้า เป็นสัญญาณของความไม่นิ่ง</mark></td></tr>
+</table>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p45.png" alt="FORECAST_AND_SARIMA หน้า 45: ∇∇₁₂X_t ดูนิ่ง" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 45 — ∇∇₁₂X_t ดูนิ่ง</figcaption>
 </figure>
 
-<p>\(\nabla\nabla_{12}X_t=(1-B)(1-B^{12})X_t\) แกว่งรอบศูนย์ "ดูดีมากขึ้น" จึงใช้ d = 1, D = 1<sup class="fn"><a href="#fn-46" id="fnr-46">46</a></sup> ลำดับการ difference สลับกันได้<sup class="fn"><a href="#fn-47" id="fnr-47">47</a></sup> เพราะการคูณพหุนามสลับที่ได้ การดูกราฟแบบนี้เป็น "subjective approach" ของสมัยก่อน ปัจจุบันใช้ auto.arima แนะนำ d, D<sup class="fn"><a href="#fn-48" id="fnr-48">48</a></sup></p>
+<p>\(\nabla\nabla_{12}X_t=(1-B)(1-B^{12})X_t\) แกว่งรอบศูนย์ "ดูดีมากขึ้น" จึงใช้ d = 1, D = 1<sup class="fn"><a href="#fn-45" id="fnr-45">45</a></sup> ลำดับการ difference สลับกันได้<sup class="fn"><a href="#fn-46" id="fnr-46">46</a></sup> เพราะการคูณพหุนามสลับที่ได้ การดูกราฟแบบนี้เป็น "subjective approach" ของสมัยก่อน ปัจจุบันใช้ auto.arima แนะนำ d, D<sup class="fn"><a href="#fn-47" id="fnr-47">47</a></sup> (Lesson 10)</p>
+
+<h3 id="s5-id">5.2 ACF กับ PACF ชี้คนละทาง</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p46.png" alt="FORECAST_AND_SARIMA หน้า 46: Sample ACF ของ ∇∇₁₂X_t: spike ที่ lag 12 และ 48" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 46 — Sample ACF ของ ∇∇₁₂X_t: spike ที่ lag 12 และ 48</figcaption>
 </figure>
 
-<p>ACF มีแท่งใหญ่ที่ lag 12 (−0.448) และ lag 48 (0.385) แต่ lag 24, 36 เล็ก (−0.087, −0.109) เส้นประคือ 2/√131 = 0.175 ถ้า "ignore lag 48" จะเป็น MA(1)₁₂<sup class="fn"><a href="#fn-49" id="fnr-49">49</a></sup></p>
+<p>ACF มีแท่งใหญ่ที่ <mark class="src" data-p="46" title="lag k = 12">lag k = 12</mark> และ lag 48 แต่ lag 24, 36 เล็ก ถ้า "ignore lag 48" จะเป็น MA(1)₁₂<sup class="fn"><a href="#fn-48" id="fnr-48">48</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p47.png" alt="FORECAST_AND_SARIMA หน้า 47: Sample PACF ของ ∇∇₁₂X_t: spike ที่ lag 12, 24, 36" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 47 — Sample PACF ของ ∇∇₁₂X_t: spike ที่ lag 12, 24, 36</figcaption>
 </figure>
 
-<p>PACF ที่ lag 12, 24, 36 คือ −0.387, −0.346, −0.354 ทะลุเส้นทั้งสาม และไม่ได้ลดลงชัด ถ้าเน้น PACF จะเป็น AR(3)₁₂ (P = 3)<sup class="fn"><a href="#fn-50" id="fnr-50">50</a></sup></p>
+<p>PACF ทะลุเส้นที่ lag 12, 24, 36 และไม่ได้ลดลงชัด ถ้าเน้น PACF จะเป็น AR(3)₁₂ (P = 3)<sup class="fn"><a href="#fn-49" id="fnr-49">49</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p48.png" alt="FORECAST_AND_SARIMA หน้า 48: ตัวเลือก (P,Q) = (0,1) หรือ (3,0)" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 48 — ตัวเลือก (P,Q) = (0,1) หรือ (3,0)</figcaption>
 </figure>
 
-<p>สไลด์ชั่งน้ำหนักสองทาง (P,Q) = (0,1) ถ้ายอมมองข้าม ACF ที่ lag 48 แต่ถ้าเป็น MA(1)₁₂ จริง PACF ควรลดลงตาม lag 12, 24, 36 ซึ่ง "there is actually not that much of a decay" ส่วน (P,Q) = (3,0) ถ้าเน้น PACF รอบ seasonal lag ใน ACF ไม่มีตะเกียบ และ ACF ที่ lag 1 (−0.171) อยู่ใกล้เส้น จึงใช้ p = q = 0</p>
+<table>
+<tr><th></th><th>(P,Q) = (0,1)</th><th>(P,Q) = (3,0)</th></tr>
+<tr><td>หลักฐาน</td><td>ACF ตัดหลัง lag 12 ถ้า <mark class="src" data-p="48" title="ignore the ACF at k = 48">มองข้าม ACF ที่ k = 48</mark></td><td>PACF ตัดหลัง lag 36</td></tr>
+<tr><td>ข้อขัดแย้ง</td><td>ถ้าเป็น MA(1)₁₂ จริง PACF ต้องลด แต่ <mark class="src" data-p="48" title="There is actually not that much of a decay.">จริง ๆ แล้วไม่ได้ลดลงมากนัก</mark></td><td>ไม่มี</td></tr>
+</table>
+
+<p class="say">ส่วน non-seasonal: <mark class="src" data-p="48" title="around seasonal lags in the ACF">รอบ seasonal lag ใน ACF</mark> ไม่มีตะเกียบ และ <mark class="src" data-p="48" title="the ACF at h = 1">ACF ที่ h = 1</mark> อยู่ใกล้เส้น จึงใช้ <mark class="src" data-p="48" title="p = 0 and q = 0">p = 0 และ q = 0</mark></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p49.png" alt="FORECAST_AND_SARIMA หน้า 49: AR(3)₁₂ ฟิตดีกว่า MA(1)₁₂" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 49 — AR(3)₁₂ ฟิตดีกว่า MA(1)₁₂</figcaption>
 </figure>
 
-<p>ในการทำงานจริงควรลองทั้งสองโมเดล<sup class="fn"><a href="#fn-51" id="fnr-51">51</a></sup> สไลด์สรุปว่า AR(3)₁₂ ให้ AIC เล็กกว่า σ² เล็กกว่า และ diagnostic ดีกว่า (สไลด์พิมพ์ผิดเป็น "AR(3)₁₂ ... than AR(3)₁₂" ควรเป็น "than MA(1)₁₂") ตรวจด้วย R ได้ว่า ARIMA(0,1,0)×(3,1,0)₁₂ มี σ² = 121.4, aic = 1032.05 และ Ljung-Box p ที่ H = 12, 24, 30 = 0.165, 0.268, 0.297 ส่วน ARIMA(0,1,0)×(0,1,1)₁₂ มี sma1 = −0.954, σ² = 152.0, aic = 1058.13 และ Ljung-Box p = 0.003, 0.024, 0.090 ไม่ผ่าน จึงเลือก ARIMA(0,1,0)×(3,1,0)₁₂</p>
+<p>ในการทำงานจริงควรลองทั้งสองโมเดล<sup class="fn"><a href="#fn-50" id="fnr-50">50</a></sup> รันใน R แล้วเทียบได้ดังนี้ (สไลด์พิมพ์ผิดเป็น "AR(3)₁₂ ... than AR(3)₁₂" ควรเป็น "than MA(1)₁₂")</p>
+
+<table>
+<tr><th></th><th>ARIMA(0,1,0)×(0,1,1)₁₂</th><th>ARIMA(0,1,0)×(3,1,0)₁₂</th></tr>
+<tr><td>σ²</td><td>152.0</td><td>121.4</td></tr>
+<tr><td>aic</td><td>1058.13</td><td>1032.05</td></tr>
+<tr><td>Ljung-Box (H = 12, 24)</td><td>p = 0.003, 0.024 ไม่ผ่าน</td><td>p = 0.165, 0.268 ผ่าน</td></tr>
+<tr><td>ผล</td><td></td><td><b>เลือกตัวนี้</b></td></tr>
+</table>
+
+<h3 id="s5-write">5.3 เขียนโมเดล: ระวังเครื่องหมายของ sar</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8f-p50.png" alt="FORECAST_AND_SARIMA หน้า 50: ARIMA(0,1,0)×(3,1,0)₁₂ และการเขียนโมเดล" loading="lazy">
 <figcaption>FORECAST_AND_SARIMA หน้า 50 — ARIMA(0,1,0)×(3,1,0)₁₂ และการเขียนโมเดล</figcaption>
 </figure>
 
-<p>sar ทั้งสามตัวติดลบ จุดที่ต้องระวังที่สุดคือเครื่องหมายเมื่อนำเข้า seasonal AR operator ซึ่ง seasonal AR เป็น "1 ลบ Φ ใหญ่" เสมอ</p>
+<p>สไลด์เขียนโมเดล <mark class="src" data-p="50" title="ARMA(0,1,0) × (3,1,0)12">ARIMA(0,1,0)×(3,1,0)₁₂</mark> ด้วย sar ทั้งสามตัวที่ติดลบ จุดที่ต้องระวังที่สุดคือเครื่องหมายเมื่อนำเข้า seasonal AR operator</p>
 
-<div class="calc" id="s5-write">
-<div class="calc-title">เขียนโมเดล milk<sup class="fn"><a href="#fn-52" id="fnr-52">52</a></sup></div>
+<div class="calc" id="s5-write-calc">
+<div class="calc-title">เขียนโมเดล milk<sup class="fn"><a href="#fn-51" id="fnr-51">51</a></sup></div>
 <ol class="steps">
 <li><div class="st-title">output</div><p>sar1 = −0.9133, sar2 = −0.8146, sar3 = −0.6002, σ² = 121.4 ไม่มี intercept เพราะ d, D &gt; 0</p></li>
-<li><div class="st-title">seasonal AR operator</div><p>\(1-\Phi_1B^{12}-\Phi_2B^{24}-\Phi_3B^{36}=1-(-0.913)B^{12}-(-0.814)B^{24}-(-0.600)B^{36}\) ลบของค่าติดลบจึงกลายเป็นบวกทุกตัว<sup class="fn"><a href="#fn-53" id="fnr-53">53</a></sup></p></li>
-<li><div class="st-title">โมเดลเต็ม</div><p>\((1+0.913B^{12}+0.814B^{24}+0.60B^{36})(1-B)(1-B^{12})X_t=w_t\), \(\hat\sigma=\sqrt{121.4}=11.01\)</p></li>
+<li><div class="st-title">seasonal AR operator</div><p>\(1-\Phi_1B^{12}-\Phi_2B^{24}-\Phi_3B^{36}=1-(-0.913)B^{12}-(-0.814)B^{24}-(-0.600)B^{36}\) ลบของค่าติดลบจึงกลายเป็นบวกทุกตัว<sup class="fn"><a href="#fn-52" id="fnr-52">52</a></sup><sup class="fn"><a href="#fn-53" id="fnr-53">53</a></sup></p></li>
+<li><div class="st-title">โมเดลเต็ม</div><p><mark class="src" data-p="50" title="(1 + 0.913B^12 + 0.814B^24 + 0.60B^36)(1 − B)(1 − B^12)X_t = w_t">\((1+0.913B^{12}+0.814B^{24}+0.60B^{36})(1-B)(1-B^{12})X_t=w_t\)</mark> และ \(\hat\sigma=\sqrt{121.4}=11.01\)</p></li>
 </ol>
 <div class="answer">ไม่มีส่วน MA ด้านขวาจึงเหลือ \(w_t\) B¹², B²⁴, B³⁶ มาจาก Bˢ, B²ˢ, B³ˢ นี่คือการเขียนโมเดลแบบ full version<sup class="fn"><a href="#fn-54" id="fnr-54">54</a></sup> aic บนสไลด์ (1030.05) พิมพ์โดย TSA::arima</div>
 </div>
@@ -382,7 +475,9 @@
 <figcaption>FORECAST_AND_SARIMA หน้า 51 — Diagnostic ของ ARIMA(0,1,0)×(3,1,0)₁₂</figcaption>
 </figure>
 
-<p>histogram และ QQ plot สนับสนุน normality (Shapiro p = 0.767 หลังตัด 13 ค่าแรกที่ใช้เริ่มต้น difference) tsdiag ใช้ <code>omit.initial = T</code> เพื่อตัด residual ช่วงต้นที่คำนวณได้ไม่สมบูรณ์ standardized residual อยู่ใน ±3 และ p-value ของ Ljung-Box ทุกจุดเกิน 0.05<sup class="fn"><a href="#fn-55" id="fnr-55">55</a></sup> ข้อสังเกตจากการรันเพิ่ม: <code>auto.arima(milk)</code> เลือก ARIMA(1,0,0)(2,1,2)[12] with drift ซึ่งใช้ d = 0 ต่างจากที่เลือกด้วยตา โมเดลที่ใช้ d ต่างกันเทียบ AIC กันตรง ๆ ไม่ได้ เพราะ likelihood คำนวณบนข้อมูลคนละชุด ต้องเทียบด้วยความแม่นยำของการพยากรณ์ (Lesson 10)</p>
+<p>histogram และ QQ plot สนับสนุน normality <code>tsdiag</code> ใช้ <code>omit.initial = T</code> เพื่อตัด residual 13 ค่าแรกที่คำนวณได้ไม่สมบูรณ์เพราะ difference standardized residual อยู่ใน ±3 และ p-value ของ Ljung-Box ทุกจุดเกิน 0.05<sup class="fn"><a href="#fn-55" id="fnr-55">55</a></sup></p>
+
+<p class="trap">ลองรัน <code>auto.arima(milk)</code> ได้ ARIMA(1,0,0)(2,1,2)[12] with drift ซึ่งใช้ d = 0 ต่างจากที่เลือกด้วยตา โมเดลที่ d ต่างกันเทียบ AIC กันตรง ๆ ไม่ได้ เพราะ likelihood คำนวณบนข้อมูลคนละชุด (<a href="0007-arima-identification-and-estimation.html#s3-aic">Lesson 7 ตอน 3.3</a>) ต้องเทียบด้วยความแม่นยำของการพยากรณ์บนข้อมูล test (Lesson 2, 10)</p>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 42–43)</summary><div class="gallery">
 <figure>
@@ -402,58 +497,58 @@
 <p>ตัวเลขยกในเนื้อหาชี้มาที่รายการนี้ แต่ละรายการระบุคลาสและนาทีของคลิป พร้อมถ้อยคำในคลิปเมื่อมี</p>
 <ol class="fnlist">
 <li id="fn-1"><b>Class 8, 1:28:40</b> — "กระโดด ... ห่างกัน s ไม่ได้ห่างกัน 1" <a class="fnback" href="#fnr-1">กลับ</a></li>
-<li id="fn-2"><b>Class 9-1, 0:12:32, 0:30:28</b> — "ควิซวันนี้จะเป็นการที่คุณดูว่า ACF PACF ของ AR(P)s ... คืออะไร" และ "ตารางนี้ จะต้องทำเป็นด้วย" <a class="fnback" href="#fnr-2">กลับ</a></li>
-<li id="fn-3"><b>Class 8, 2:03:37</b> — "ถ้าคุณทำได้ ควิซข้างหน้าก็ทำได้ ... ออกแบบนี้เลย" <a class="fnback" href="#fnr-3">กลับ</a></li>
-<li id="fn-4"><b>Class 8, 2:03:20</b> — "AR(3)₁₂ ... ถ้าข้างล่างคุณตอบผิด ผมคิดว่ามันน่าเศร้า" <a class="fnback" href="#fnr-4">กลับ</a></li>
-<li id="fn-5"><b>Class 9-1, 0:17:06</b> — "ลองเขียน ข้อสอบอาจให้เขียน" <a class="fnback" href="#fnr-5">กลับ</a></li>
-<li id="fn-6"><b>Class 9-2, 0:28:07</b> — "อันนี้คือการเขียนโมเดล Box-Jenkins แบบ Full Version" <a class="fnback" href="#fnr-6">กลับ</a></li>
-<li id="fn-7"><b>Class 9-1, 0:19:42</b> <a class="fnback" href="#fnr-7">กลับ</a></li>
-<li id="fn-8"><b>Class 8, 1:45:56</b> <a class="fnback" href="#fnr-8">กลับ</a></li>
-<li id="fn-9"><b>Class 9-2, 0:27:34</b> <a class="fnback" href="#fnr-9">กลับ</a></li>
-<li id="fn-10"><b>Class 9-1, 0:25:23</b> <a class="fnback" href="#fnr-10">กลับ</a></li>
-<li id="fn-11"><b>Class 8, 1:30:48</b> <a class="fnback" href="#fnr-11">กลับ</a></li>
-<li id="fn-12"><b>Class 8, 1:28:04–1:30:48</b> — "มันกระโดด ... ห่างกัน s ไม่ได้ห่างกัน 1" <a class="fnback" href="#fnr-12">กลับ</a></li>
-<li id="fn-13"><b>Class 8, 1:33:39</b> — "สิ่งที่คุณต้องระวังจริงคือ w_{t−12} ... ไม่ใช่ t−1" <a class="fnback" href="#fnr-13">กลับ</a></li>
-<li id="fn-14"><b>Class 9-1, 0:05:15</b> <a class="fnback" href="#fnr-14">กลับ</a></li>
-<li id="fn-15"><b>Class 8, 1:36:03–1:44:46</b> <a class="fnback" href="#fnr-15">กลับ</a></li>
-<li id="fn-16"><b>Class 9-1, 0:10:05</b> <a class="fnback" href="#fnr-16">กลับ</a></li>
-<li id="fn-17"><b>Class 8, 1:45:56–1:48:44</b> <a class="fnback" href="#fnr-17">กลับ</a></li>
-<li id="fn-18"><b>Class 8, 2:04:32</b> <a class="fnback" href="#fnr-18">กลับ</a></li>
-<li id="fn-19"><b>Class 8, 1:55:03</b> — "ขนาดไม่เรียนยังเดาถูก" <a class="fnback" href="#fnr-19">กลับ</a></li>
-<li id="fn-20"><b>Class 8, 2:09:39</b> — "w_t คูณ Bˢ กลายเป็น t − s" <a class="fnback" href="#fnr-20">กลับ</a></li>
-<li id="fn-21"><b>Class 9-1, 0:11:24</b> — "ในหนังสือก็จะเป็น Φ^{h/12}" <a class="fnback" href="#fnr-21">กลับ</a></li>
-<li id="fn-22"><b>Class 8, 2:04:32–2:06:19</b> <a class="fnback" href="#fnr-22">กลับ</a></li>
-<li id="fn-23"><b>Class 8, 2:10:39</b> <a class="fnback" href="#fnr-23">กลับ</a></li>
-<li id="fn-24"><b>Class 8, 2:12:03</b> — "สิ่งที่ต้องระวังคือ s: t−1 กลายเป็น t−s, t−2 กลายเป็น t−2s, B กลายเป็น Bˢ" <a class="fnback" href="#fnr-24">กลับ</a></li>
-<li id="fn-25"><b>Class 9-1, 0:12:28–0:15:46</b> <a class="fnback" href="#fnr-25">กลับ</a></li>
-<li id="fn-26"><b>Class 9-1, 0:15:01</b> <a class="fnback" href="#fnr-26">กลับ</a></li>
-<li id="fn-27"><b>Class 8, 1:51:14</b> — "tail off ที่ s, 2s, 3s, … กระจายห่างกัน s" <a class="fnback" href="#fnr-27">กลับ</a></li>
-<li id="fn-28"><b>Class 9-1, 0:16:21, 0:24:06</b> <a class="fnback" href="#fnr-28">กลับ</a></li>
-<li id="fn-29"><b>Class 9-1, 0:15:46–0:23:19</b> <a class="fnback" href="#fnr-29">กลับ</a></li>
-<li id="fn-30"><b>Class 9-1, 0:22:01; Class 9-2, 0:02:32</b> <a class="fnback" href="#fnr-30">กลับ</a></li>
-<li id="fn-31"><b>Class 9-1, 0:23:19–0:27:41; Class 9-2, 0:03:19</b> <a class="fnback" href="#fnr-31">กลับ</a></li>
-<li id="fn-32"><b>Class 9-1, 0:27:35</b> — "ผมคิดว่านิสิตน่าจะต้องเขียนโมเดลเป็นบ้างนะครับ" <a class="fnback" href="#fnr-32">กลับ</a></li>
-<li id="fn-33"><b>Class 9-1, 0:00:28</b> — "มันรวมทุกอย่างเลย" <a class="fnback" href="#fnr-33">กลับ</a></li>
-<li id="fn-34"><b>Class 9-1, 0:00:28–0:04:17</b> — "ตัวนี้จะ cover ทุกอย่างของ Box-Jenkins" <a class="fnback" href="#fnr-34">กลับ</a></li>
-<li id="fn-35"><b>Class 9-1, 0:29:43</b> — "ต้องใส่ S ตัวนี้ด้วย" <a class="fnback" href="#fnr-35">กลับ</a></li>
-<li id="fn-36"><b>Class 8, 1:17:02</b> — "ถ้าคุณเขียนแค่บรรทัดบนจบ จบเลยนะครับ" <a class="fnback" href="#fnr-36">กลับ</a></li>
-<li id="fn-37"><b>Class 9-2, 0:04:43</b> <a class="fnback" href="#fnr-37">กลับ</a></li>
-<li id="fn-38"><b>Class 9-2, 0:07:22</b> — "อย่าลืมนะครับ โมเดลนิสิตตอนนี้เป็น log X_t" <a class="fnback" href="#fnr-38">กลับ</a></li>
-<li id="fn-39"><b>Class 9-2, 0:07:58–0:10:39</b> <a class="fnback" href="#fnr-39">กลับ</a></li>
-<li id="fn-40"><b>Class 9-2, 0:10:39</b> — "เพราะดูมันไม่ค่อยมี trend" <a class="fnback" href="#fnr-40">กลับ</a></li>
-<li id="fn-41"><b>Class 9-2, 0:10:39–0:12:58</b> <a class="fnback" href="#fnr-41">กลับ</a></li>
-<li id="fn-42"><b>Class 9-2, 0:11:03</b> — "ไม่ใช่ Theta ใหญ่ เป็น Phi ใหญ่" <a class="fnback" href="#fnr-42">กลับ</a></li>
-<li id="fn-43"><b>Class 9-2, 0:11:08</b> — "นิสิตควรจะต้องเขียนโมเดลข้างล่างเป็น" <a class="fnback" href="#fnr-43">กลับ</a></li>
-<li id="fn-44"><b>Class 9-2, 0:13:21–0:14:21</b> <a class="fnback" href="#fnr-44">กลับ</a></li>
-<li id="fn-45"><b>Class 9-2, 0:18:19</b> — "ไม่ต้อง take log เพราะมันแกว่งเท่า ๆ กัน" <a class="fnback" href="#fnr-45">กลับ</a></li>
-<li id="fn-46"><b>Class 9-2, 0:20:10</b> <a class="fnback" href="#fnr-46">กลับ</a></li>
-<li id="fn-47"><b>Class 9-2, 0:29:30</b> — "สามารถสลับ order กันได้" <a class="fnback" href="#fnr-47">กลับ</a></li>
-<li id="fn-48"><b>Class 9-2, 0:20:42</b> <a class="fnback" href="#fnr-48">กลับ</a></li>
-<li id="fn-49"><b>Class 9-2, 0:21:03</b> <a class="fnback" href="#fnr-49">กลับ</a></li>
-<li id="fn-50"><b>Class 9-2, 0:24:29</b> <a class="fnback" href="#fnr-50">กลับ</a></li>
-<li id="fn-51"><b>Class 9-2, 0:24:55</b> — "เวลาทำจริง ๆ ควรจะลองทั้งสองโมเดล" <a class="fnback" href="#fnr-51">กลับ</a></li>
-<li id="fn-52"><b>Class 9-2, 0:26:19–0:28:07</b> <a class="fnback" href="#fnr-52">กลับ</a></li>
-<li id="fn-53"><b>Class 9-2, 0:27:34</b> — "ต้องเป็นลบ Φ ใหญ่ ... มันกลายเป็นบวกทุกอันเลย" <a class="fnback" href="#fnr-53">กลับ</a></li>
+<li id="fn-2"><b>Class 8, 1:30:48</b> <a class="fnback" href="#fnr-2">กลับ</a></li>
+<li id="fn-3"><b>Class 8, 1:28:04–1:30:48</b> — "มันกระโดด ... ห่างกัน s ไม่ได้ห่างกัน 1" <a class="fnback" href="#fnr-3">กลับ</a></li>
+<li id="fn-4"><b>Class 8, 1:33:39</b> — "สิ่งที่คุณต้องระวังจริงคือ w_{t−12} ... ไม่ใช่ t−1" <a class="fnback" href="#fnr-4">กลับ</a></li>
+<li id="fn-5"><b>Class 9-1, 0:05:15</b> <a class="fnback" href="#fnr-5">กลับ</a></li>
+<li id="fn-6"><b>Class 8, 1:36:03–1:44:46</b> <a class="fnback" href="#fnr-6">กลับ</a></li>
+<li id="fn-7"><b>Class 8, 1:45:56</b> <a class="fnback" href="#fnr-7">กลับ</a></li>
+<li id="fn-8"><b>Class 9-1, 0:10:05</b> <a class="fnback" href="#fnr-8">กลับ</a></li>
+<li id="fn-9"><b>Class 8, 2:04:32</b> <a class="fnback" href="#fnr-9">กลับ</a></li>
+<li id="fn-10"><b>Class 8, 1:45:56–1:48:44</b> <a class="fnback" href="#fnr-10">กลับ</a></li>
+<li id="fn-11"><b>Class 8, 1:55:03</b> — "ขนาดไม่เรียนยังเดาถูก" <a class="fnback" href="#fnr-11">กลับ</a></li>
+<li id="fn-12"><b>Class 8, 2:09:39</b> — "w_t คูณ Bˢ กลายเป็น t − s" <a class="fnback" href="#fnr-12">กลับ</a></li>
+<li id="fn-13"><b>Class 9-1, 0:11:24</b> — "ในหนังสือก็จะเป็น Φ^{h/12}" <a class="fnback" href="#fnr-13">กลับ</a></li>
+<li id="fn-14"><b>Class 9-1, 0:25:23</b> <a class="fnback" href="#fnr-14">กลับ</a></li>
+<li id="fn-15"><b>Class 8, 2:04:32–2:06:19</b> <a class="fnback" href="#fnr-15">กลับ</a></li>
+<li id="fn-16"><b>Class 8, 2:10:39</b> <a class="fnback" href="#fnr-16">กลับ</a></li>
+<li id="fn-17"><b>Class 8, 2:12:03</b> — "สิ่งที่ต้องระวังคือ s: t−1 กลายเป็น t−s, t−2 กลายเป็น t−2s, B กลายเป็น Bˢ" <a class="fnback" href="#fnr-17">กลับ</a></li>
+<li id="fn-18"><b>Class 9-1, 0:12:28–0:15:46</b> <a class="fnback" href="#fnr-18">กลับ</a></li>
+<li id="fn-19"><b>Class 9-1, 0:12:32, 0:30:28</b> — "ควิซวันนี้จะเป็นการที่คุณดูว่า ACF PACF ของ AR(P)s ... คืออะไร" และ "ตารางนี้ จะต้องทำเป็นด้วย" <a class="fnback" href="#fnr-19">กลับ</a></li>
+<li id="fn-20"><b>Class 8, 1:51:14</b> — "tail off ที่ s, 2s, 3s, … กระจายห่างกัน s" <a class="fnback" href="#fnr-20">กลับ</a></li>
+<li id="fn-21"><b>Class 9-1, 0:15:01</b> <a class="fnback" href="#fnr-21">กลับ</a></li>
+<li id="fn-22"><b>Class 8, 2:03:37</b> — "ถ้าคุณทำได้ ควิซข้างหน้าก็ทำได้ ... ออกแบบนี้เลย" <a class="fnback" href="#fnr-22">กลับ</a></li>
+<li id="fn-23"><b>Class 8, 2:03:20</b> — "AR(3)₁₂ ... ถ้าข้างล่างคุณตอบผิด ผมคิดว่ามันน่าเศร้า" <a class="fnback" href="#fnr-23">กลับ</a></li>
+<li id="fn-24"><b>Class 9-1, 0:16:21, 0:24:06</b> <a class="fnback" href="#fnr-24">กลับ</a></li>
+<li id="fn-25"><b>Class 9-1, 0:15:46–0:23:19</b> <a class="fnback" href="#fnr-25">กลับ</a></li>
+<li id="fn-26"><b>Class 9-1, 0:19:42</b> <a class="fnback" href="#fnr-26">กลับ</a></li>
+<li id="fn-27"><b>Class 9-1, 0:22:01; Class 9-2, 0:02:32</b> <a class="fnback" href="#fnr-27">กลับ</a></li>
+<li id="fn-28"><b>Class 9-1, 0:23:19–0:27:41; Class 9-2, 0:03:19</b> <a class="fnback" href="#fnr-28">กลับ</a></li>
+<li id="fn-29"><b>Class 9-1, 0:27:35</b> — "ผมคิดว่านิสิตน่าจะต้องเขียนโมเดลเป็นบ้างนะครับ" <a class="fnback" href="#fnr-29">กลับ</a></li>
+<li id="fn-30"><b>Class 9-1, 0:00:28</b> — "มันรวมทุกอย่างเลย" <a class="fnback" href="#fnr-30">กลับ</a></li>
+<li id="fn-31"><b>Class 9-1, 0:00:28–0:04:17</b> — "ตัวนี้จะ cover ทุกอย่างของ Box-Jenkins" <a class="fnback" href="#fnr-31">กลับ</a></li>
+<li id="fn-32"><b>Class 9-1, 0:17:06</b> — "ลองเขียน ข้อสอบอาจให้เขียน" <a class="fnback" href="#fnr-32">กลับ</a></li>
+<li id="fn-33"><b>Class 9-1, 0:29:43</b> — "ต้องใส่ S ตัวนี้ด้วย" <a class="fnback" href="#fnr-33">กลับ</a></li>
+<li id="fn-34"><b>Class 8, 1:17:02</b> — "ถ้าคุณเขียนแค่บรรทัดบนจบ จบเลยนะครับ" <a class="fnback" href="#fnr-34">กลับ</a></li>
+<li id="fn-35"><b>Class 9-2, 0:04:43</b> <a class="fnback" href="#fnr-35">กลับ</a></li>
+<li id="fn-36"><b>Class 9-2, 0:07:22</b> — "อย่าลืมนะครับ โมเดลนิสิตตอนนี้เป็น log X_t" <a class="fnback" href="#fnr-36">กลับ</a></li>
+<li id="fn-37"><b>Class 9-2, 0:07:58–0:10:39</b> <a class="fnback" href="#fnr-37">กลับ</a></li>
+<li id="fn-38"><b>Class 9-2, 0:10:39</b> — "เพราะดูมันไม่ค่อยมี trend" <a class="fnback" href="#fnr-38">กลับ</a></li>
+<li id="fn-39"><b>Class 9-2, 0:10:39–0:12:58</b> <a class="fnback" href="#fnr-39">กลับ</a></li>
+<li id="fn-40"><b>Class 9-2, 0:11:03</b> — "ไม่ใช่ Theta ใหญ่ เป็น Phi ใหญ่" <a class="fnback" href="#fnr-40">กลับ</a></li>
+<li id="fn-41"><b>Class 9-2, 0:11:08</b> — "นิสิตควรจะต้องเขียนโมเดลข้างล่างเป็น" <a class="fnback" href="#fnr-41">กลับ</a></li>
+<li id="fn-42"><b>Class 9-2, 0:28:07</b> — "อันนี้คือการเขียนโมเดล Box-Jenkins แบบ Full Version" <a class="fnback" href="#fnr-42">กลับ</a></li>
+<li id="fn-43"><b>Class 9-2, 0:13:21–0:14:21</b> <a class="fnback" href="#fnr-43">กลับ</a></li>
+<li id="fn-44"><b>Class 9-2, 0:18:19</b> — "ไม่ต้อง take log เพราะมันแกว่งเท่า ๆ กัน" <a class="fnback" href="#fnr-44">กลับ</a></li>
+<li id="fn-45"><b>Class 9-2, 0:20:10</b> <a class="fnback" href="#fnr-45">กลับ</a></li>
+<li id="fn-46"><b>Class 9-2, 0:29:30</b> — "สามารถสลับ order กันได้" <a class="fnback" href="#fnr-46">กลับ</a></li>
+<li id="fn-47"><b>Class 9-2, 0:20:42</b> <a class="fnback" href="#fnr-47">กลับ</a></li>
+<li id="fn-48"><b>Class 9-2, 0:21:03</b> <a class="fnback" href="#fnr-48">กลับ</a></li>
+<li id="fn-49"><b>Class 9-2, 0:24:29</b> <a class="fnback" href="#fnr-49">กลับ</a></li>
+<li id="fn-50"><b>Class 9-2, 0:24:55</b> — "เวลาทำจริง ๆ ควรจะลองทั้งสองโมเดล" <a class="fnback" href="#fnr-50">กลับ</a></li>
+<li id="fn-51"><b>Class 9-2, 0:26:19–0:28:07</b> <a class="fnback" href="#fnr-51">กลับ</a></li>
+<li id="fn-52"><b>Class 9-2, 0:27:34</b> — "ต้องเป็นลบ Φ ใหญ่ ... มันกลายเป็นบวกทุกอันเลย" <a class="fnback" href="#fnr-52">กลับ</a></li>
+<li id="fn-53"><b>Class 9-2, 0:27:34</b> <a class="fnback" href="#fnr-53">กลับ</a></li>
 <li id="fn-54"><b>Class 9-2, 0:28:07</b> — "อันนี้คือการเขียนโมเดล Box-Jenkins แบบ Full Version" <a class="fnback" href="#fnr-54">กลับ</a></li>
 <li id="fn-55"><b>Class 9-2, 0:28:20–0:31:02</b> — "H0 คือ model appropriate หรือ data เป็น random" <a class="fnback" href="#fnr-55">กลับ</a></li>
 </ol>

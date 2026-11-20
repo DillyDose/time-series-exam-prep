@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lesson 8: Diagnostic และการพยากรณ์ ARIMA</title>
+<title>Lesson 8: Diagnostic และการพยากรณ์ด้วย ARIMA</title>
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="../assets/katex/katex.min.css">
 <script defer src="../assets/katex/katex.min.js"></script>
@@ -20,58 +20,107 @@
 
 <p class="kicker">Slide 8 — Diagnostic (Model Validation) และ FORECAST_AND_SARIMA หน้า 1–13</p>
 <h1>ตรวจโมเดล (diagnostic) และพยากรณ์ด้วย ARIMA</h1>
-<p class="readmeta">อ่านประมาณ 25 นาที · ข้อความ<mark class="src">ไฮไลต์</mark>คือถ้อยคำบนสไลด์ ตัวเลขยก<sup class="fn"><a href="#fnotes">1</a></sup>คือนาทีในคลิปที่รวมไว้ท้ายบท</p>
+<p class="readmeta">อ่านประมาณ 20 นาที · ข้อความ<mark class="src">ไฮไลต์</mark>คือคำแปลของถ้อยคำบนสไลด์ (ชี้เมาส์หรือแตะค้างเพื่อดูภาษาอังกฤษต้นฉบับ) ตัวเลขยก<sup class="fn"><a href="#fnotes">1</a></sup>คือนาทีในคลิปที่รวมไว้ท้ายบท</p>
 
-<p>Lesson 7 จบที่ "โมเดลในใจ 2–3 ตัว" พร้อมค่าพารามิเตอร์ บทนี้ตอบว่าตัวไหนใช้ได้จริง และใช้แล้วพยากรณ์อย่างไร การตรวจโมเดลเป็นขั้นที่คนยังต้องทำเองแม้ในยุค auto.arima<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup> หลักคือ residual ควรเป็น white noise ซึ่งตรวจสามเรื่อง ได้แก่ normal, ไม่มี outlier (standardized residual อยู่ใน ±3) และไม่สัมพันธ์กัน (ACF ของ residual และ Ljung-Box) จากนั้นใช้กับข้อมูลจริงสองชุด อุณหภูมิโลกได้ ARIMA(1,1,1) ส่วนขนาดอนุภาค aerosol เทียบ ARIMA(2,1,0) กับ ARIMA(0,1,1) ระหว่างทางคือวิธีเขียนโมเดลจาก output ซึ่งต้องลบ intercept ออกจาก X ทุกตัว และเหตุผลที่ใส่ d ไว้ในคำสั่ง arima ดีกว่า diff เองก่อน ส่วนสุดท้ายคือการพยากรณ์ ค่าพยากรณ์คือค่าคาดหมายแบบมีเงื่อนไข และความคลาดเคลื่อนโตขึ้นเมื่อพยากรณ์ไกลขึ้น</p>
+<p>Lesson 7 จบที่ "โมเดลในใจ 2–3 ตัว" พร้อมค่าพารามิเตอร์ บทนี้คือขั้น 7–8 ของผัง Box-Jenkins: ตัวไหนใช้ได้จริง และใช้แล้วพยากรณ์อย่างไร การตรวจโมเดลเป็นขั้นที่คนยังต้องทำเองแม้ในยุค auto.arima<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup> และ final มีภาคปฏิบัติแบบ full data analysis คือเขียนโมเดลจาก output ตรวจ diagnostic และพยากรณ์<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup></p>
 
-<p>เรื่องที่ระบุว่าเกี่ยวกับข้อสอบในบทนี้มีดังนี้</p>
-<ul>
-<li>Ljung-Box มี H0 คือโมเดลเหมาะสม (residual random) จึงอยากได้ p-value มาก ข้อนี้ให้จดไว้<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup></li>
-<li>Shapiro-Wilk มี H0 คือ normal จึงอยากได้ p-value มากเช่นกัน<sup class="fn"><a href="#fn-3" id="fnr-3">3</a></sup></li>
-<li>เขียนโมเดลจาก output R ให้ได้ บรรทัดเดียวพอ<sup class="fn"><a href="#fn-4" id="fnr-4">4</a></sup> และลบ intercept ทุกที่ที่มี X<sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup></li>
-<li>ถ้า diagnostic ดีเท่ากัน เลือกโมเดลที่เล็กกว่า<sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup></li>
-<li>ใส่ d ในคำสั่ง arima ก่อน forecast เพราะถ้า diff เองก่อน ค่าพยากรณ์จะเป็นค่าผลต่าง เอาไปคำนวณ accuracy แล้วผิด<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup> ข้อความเดียวกันนี้ปิดท้าย Class 9-2<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup></li>
-<li>Final มีภาคปฏิบัติแบบ full data analysis คือเขียนโมเดลจาก output, ตรวจ diagnostic และพยากรณ์<sup class="fn"><a href="#fn-9" id="fnr-9">9</a></sup></li>
-</ul>
+<table class="map">
+<tr><th>ตอน</th><th>คำถามที่ตอบ</th><th>เครื่องมือหลัก</th></tr>
+<tr><td><a href="#s1">1</a></td><td>รู้ได้อย่างไรว่าโมเดลใช้ได้</td><td>standardized residual, Shapiro-Wilk, ACF ของ residual, Ljung-Box</td></tr>
+<tr><td><a href="#s2">2</a></td><td>ทำครบทุกขั้นกับข้อมูลจริงอย่างไร</td><td>อุณหภูมิโลก ARIMA(1,1,1), ใส่ d ใน arima</td></tr>
+<tr><td><a href="#s3">3</a></td><td>สองโมเดลสูสีกัน เลือกตัวไหน</td><td>aerosol: ARIMA(2,1,0) กับ ARIMA(0,1,1)</td></tr>
+<tr><td><a href="#s4">4</a></td><td>ค่าพยากรณ์มาจากไหน ทำไมไกลแล้วไม่แน่นอน</td><td>conditional expectation, MSPE</td></tr>
+<tr><td><a href="#s5">5</a></td><td>อ่านผลพยากรณ์ใน R อย่างไร</td><td>predict, prediction interval, แปลงกลับ</td></tr>
+</table>
+
+<p class="legend">สีในสมการ: \(\shk{w_t}\) สีฟ้าคือ shock ที่มองไม่เห็น · \(\prm{\phi},\prm{\theta}\) สีส้มคือพารามิเตอร์ที่ประมาณได้</p>
 
 <!-- ===================================================== -->
 <h2 id="s1">1. Residual ที่ดีต้องหน้าตาเหมือน white noise</h2>
 
-<p>ใน regression วิชาอื่น ประเมินโมเดลได้สองด้าน คือความแม่นยำของการพยากรณ์ และการตรวจ assumption time series ต่างตรงที่ไม่ค่อยแก้ assumption แต่ตรวจ<sup class="fn"><a href="#fn-10" id="fnr-10">10</a></sup> ถ้าไม่ผ่านก็กลับไปเลือกโมเดลใหม่ สิ่งที่ตรวจคือ residual ซึ่งเป็นส่วนของ X <mark class="src" data-p="2">that is not explained by the fitted model</mark> หรือค่าจริงลบค่าที่โมเดลทำนาย residual \(\hat w_t\) เป็นตัวแทนของ white noise \(w_t\) ที่สังเกตไม่ได้ เราจึงตรวจ <mark class="src" data-p="2">model fit by examining the residuals.</mark> ตรรกะคือ ถ้าโมเดลจับความสัมพันธ์ข้ามเวลาไว้ครบแล้ว สิ่งที่เหลือต้องไม่มีโครงสร้างอะไรอีก เช่น ถ้าข้อมูลจริงเป็น AR(1) แต่ฟิตเป็น white noise residual ก็คือข้อมูลเดิมซึ่งยังมี ACF lag 1 สูง แปลว่าโมเดลยังขาดอะไร</p>
+<h3 id="s1-idea">1.1 ทำไมตรวจที่ residual</h3>
 
-<p>ถ้าโมเดลถูกและค่าประมาณใกล้ค่าจริง residual ควรเป็น iid normal คืออิสระกัน, normal, mean 0 และ variance คงที่<sup class="fn"><a href="#fn-11" id="fnr-11">11</a></sup> ถ้าไม่เป็นแบบนั้น รูปแบบที่เหลืออยู่ยังบอกทางแก้ เช่น residual ที่ยังมี ACF ที่ lag 12 บอกว่าต้องเพิ่ม seasonal เรื่องแรกที่ตรวจคือ outlier ด้วย standardized residual คือ residual หารด้วย σ̂ เนื่องจาก mean เป็น 0 อยู่แล้ว ค่าจึงควรใกล้ N(0,1)<sup class="fn"><a href="#fn-12" id="fnr-12">12</a></sup> ตาม empirical rule ±1 SD ครอบคลุมราว 68% ±2 SD ราว 95% และ ±3 SD ราว 99.7% (ในคลิปพูดว่า "ประมาณ 64%" และ "99.6" ค่าที่ถูกคือ 68% และ 99.7%) สไลด์จึงบอกว่า <mark class="src" data-p="4">standardized residuals should fall between −3 and 3.</mark> ข้อมูล 150 ค่าคาดว่าจะเกิน ±3 ราว 150 × 0.003 = 0.45 จุด จุดเดียวสองจุดจึงยอมรับได้ แต่ถ้ามีหลายจุดโมเดลอาจไม่เหมาะ<sup class="fn"><a href="#fn-13" id="fnr-13">13</a></sup> จำนวนมากแปลว่า error มีหางหนา ซึ่งพบบ่อยในข้อมูลการเงิน</p>
+<p class="pic">ร่อนทรายหาทอง ถ้าตะแกรงดี สิ่งที่หลุดลงไปข้างล่างต้องเป็นทรายล้วน ถ้ายังมีเศษทองปนอยู่ แปลว่าตะแกรงยังพลาดอะไรบางอย่าง โมเดลคือตะแกรง residual คือสิ่งที่หลุดลงไป</p>
 
-<p>เรื่องที่สองคือ normality ตรวจได้สองทาง คือกราฟ (histogram และ QQ plot) กับการทดสอบ Shapiro-Wilk ซึ่ง H0 คือ standardized residual แจกแจง normal p-value น้อยจึง reject normality สรุปสั้น ๆ คือ "p-value มาก → fail to reject → normal"<sup class="fn"><a href="#fn-14" id="fnr-14">14</a></sup> QQ plot มีแกนนอนเป็น quantile ของ normal และแกนตั้งเป็น quantile ของ residual ถ้า normal จุดจะเรียงตามเส้นตรง ถ้าปลายสองข้างแยกออกจากเส้นแปลว่าหางหนากว่า normal</p>
+<div class="eq">\[\hat{\shk{w}}_t=X_t-\hat X_t\]</div>
+<p class="say">residual คือส่วนของ X <mark class="src" data-p="2" title="that is not explained by the fitted model">ที่โมเดลที่ฟิตอธิบายไม่ได้</mark> เป็นตัวแทนของ white noise \(w_t\) ที่สังเกตไม่ได้ เราจึงตรวจ <mark class="src" data-p="2" title="model fit by examining the residuals.">ความเหมาะสมของโมเดลโดยดู residual</mark> ถ้าโมเดลจับความสัมพันธ์ข้ามเวลาไว้ครบ ส่วนที่เหลือต้องไม่มีโครงสร้างอะไรอีก</p>
+
+<p>ใน regression วิชาอื่นมักแก้ assumption ที่ไม่ผ่าน แต่ time series ไม่ค่อยแก้ ใช้วิธีตรวจ<sup class="fn"><a href="#fn-3" id="fnr-3">3</a></sup> ถ้าไม่ผ่านก็กลับไปเลือกโมเดลใหม่ (เส้นประแดงในผังของ Lesson 7) ถ้าโมเดลถูก residual ควรเป็น iid normal คืออิสระกัน, normal, mean 0 และ variance คงที่<sup class="fn"><a href="#fn-4" id="fnr-4">4</a></sup> จึงตรวจสามเรื่อง</p>
+
+<table>
+<tr><th>ตรวจอะไร</th><th>เครื่องมือ</th><th>ผ่านเมื่อ</th><th>ตอน</th></tr>
+<tr><td>outlier</td><td>standardized residual</td><td>อยู่ใน ±3 (หลุดได้ไม่กี่จุด)</td><td>1.2</td></tr>
+<tr><td>normal</td><td>histogram, QQ plot, Shapiro-Wilk</td><td>p-value มาก, จุดเรียงตามเส้น</td><td>1.3</td></tr>
+<tr><td>ไม่สัมพันธ์กัน</td><td>ACF ของ residual, Ljung-Box</td><td>อยู่ในเส้นประ, p-value มากทุก H</td><td>1.4</td></tr>
+</table>
+
+<p class="num">ข้อมูลจริงเป็น AR(1) แต่ฟิตเป็น white noise residual ก็คือข้อมูลเดิมซึ่งยังมี ACF lag 1 สูง จึงบอกว่าโมเดลขาด AR ในทำนองเดียวกัน residual ที่ยังมี ACF ที่ lag 12 บอกว่าต้องเพิ่ม seasonal (Lesson 9) รูปแบบที่เหลืออยู่จึงชี้ทางแก้ด้วย</p>
+
+<p class="trap">การคำนวณ residual ต้องย้อนหา w ในอดีตจาก X ซึ่งทำได้เพราะโมเดล invertible (<a href="0007-arima-identification-and-estimation.html#s4-inv">Lesson 7 ตอน 4.2</a>) และ <code>arima()</code> ไม่ตรวจเรื่องเหล่านี้ให้อัตโนมัติ ต้องสั่งเอง<sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup></p>
+
+<h3 id="s1-out">1.2 Outlier: standardized residual</h3>
+
+<div class="eq">\[\text{standardized residual}=\hat{\shk{w}}_t/\hat\sigma\ \approx N(0,1)\]</div>
+<p class="say">mean เป็น 0 อยู่แล้ว หารด้วย σ̂ แล้วจึงควรใกล้ normal มาตรฐาน<sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup> สไลด์จึงบอกว่า <mark class="src" data-p="4" title="standardized residuals should fall between −3 and 3.">standardized residual ควรอยู่ระหว่าง −3 ถึง 3</mark></p>
+
+<p class="num">±3 SD ครอบคลุมราว 99.7% ข้อมูล 150 ค่าจึงคาดว่าจะเกิน ±3 ราว 150 × 0.003 = 0.45 จุด จุดเดียวสองจุดยอมรับได้ แต่ถ้ามีหลายจุดโมเดลอาจไม่เหมาะ<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup> จำนวนมากแปลว่า error มีหางหนา ซึ่งพบบ่อยในข้อมูลการเงิน</p>
+
+<p class="trap">ในคลิปพูดว่า ±1 SD "ประมาณ 64%" และ ±3 SD "99.6" ค่าที่ถูกตาม empirical rule คือ 68%, 95% และ 99.7%</p>
+
+<h3 id="s1-norm">1.3 Normality: QQ plot และ Shapiro-Wilk</h3>
+
+<table>
+<tr><th>เครื่องมือ</th><th>อ่านอย่างไร</th></tr>
+<tr><td>QQ plot</td><td>แกนนอน quantile ของ normal แกนตั้ง quantile ของ residual ถ้า normal จุดเรียงตามเส้นตรง ปลายสองข้างแยกจากเส้นแปลว่าหางหนา</td></tr>
+<tr><td>Shapiro-Wilk</td><td>H0 คือ standardized residual แจกแจง normal "p-value มาก → fail to reject → normal"<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup></td></tr>
+</table>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p06.png" alt="Slide 8 หน้า 6: ตัวอย่าง: residual ของ ARMA(1,1) กับ times" loading="lazy">
 <figcaption>Slide 8 หน้า 6 — ตัวอย่าง: residual ของ ARMA(1,1) กับ times</figcaption>
 </figure>
 
-<p>ARMA(1,1) ของ times จาก Lesson 7 ได้ <code>shapiro.test(rstandard(nat))</code> W = 0.9893, p-value = 0.3069 มากกว่า 0.05 จึงไม่ reject H0 ถือว่า normal QQ plot เรียงตามเส้นเกือบทั้งหมด<sup class="fn"><a href="#fn-15" id="fnr-15">15</a></sup> histogram สมมาตรรอบศูนย์ standardized residual ที่ไกลสุดคือ 3.20 ที่ t = 101 เกิน 3 เพียงจุดเดียว ตามที่คำนวณไว้ข้างบนยังยอมรับได้</p>
+<p>ARMA(1,1) ของ times จาก Lesson 7 ได้ <code>shapiro.test(rstandard(nat))</code> p-value = 0.3069 มากกว่า 0.05 จึงถือว่า normal QQ plot เรียงตามเส้นเกือบทั้งหมด<sup class="fn"><a href="#fn-9" id="fnr-9">9</a></sup> และมีจุดเดียวที่เกิน 3 (3.20) ซึ่งตามข้อ 1.2 ยังยอมรับได้</p>
 
-<p>เรื่องที่สามคือ residual ต้องไม่สัมพันธ์กัน เพราะความสัมพันธ์ถูกเอาไปไว้ในโมเดล ARIMA แล้ว<sup class="fn"><a href="#fn-16" id="fnr-16">16</a></sup> ACF ของ residual จึงควรอยู่ในเส้นประทุก lag สไลด์ใช้คำว่า roughly เพราะแม้โมเดลถูก ACF ของ residual ก็มีการแจกแจงต่างจาก white noise เล็กน้อย โดยเฉพาะที่ lag ต้น ๆ เพราะ residual คำนวณจากพารามิเตอร์ที่ประมาณจากข้อมูลชุดเดียวกัน การดูทีละ lag ยังมีปัญหาอีกข้อ คือแต่ละ lag อาจอยู่ในเส้นทั้งหมด แต่ <mark class="src" data-p="8">it could be that as a group the sample autocorrelations are “excessive,”</mark> คือรวมกันแล้วมากเกินไป <mark class="src" data-p="8">Ljung and Box (1978)</mark> จึงเสนอสถิติที่รวม lag 1 ถึง H ไว้ด้วยกัน</p>
+<p class="trap">Shapiro-Wilk อยากได้ p-value มาก เพราะ H0 คือสิ่งที่เราอยากให้เป็น<sup class="fn"><a href="#fn-10" id="fnr-10">10</a></sup> กลับด้านกับ ADF ใน Lesson 7 ที่ H0 คือไม่นิ่ง (ตารางรวม test ทั้งหมดอยู่ใน <a href="0007-arima-identification-and-estimation.html#s3-adf">Lesson 7 ตอน 3.2</a>)</p>
 
-<p>\(Q=n(n+2)\sum_{h=1}^{H}\dfrac{\hat\rho(h)^2}{n-h}\)</p>
+<h3 id="s1-lb">1.4 ไม่สัมพันธ์กัน: ACF ของ residual และ Ljung-Box</h3>
 
-<p>ถ้าโมเดลเหมาะสม Q แจกแจงประมาณ χ² ที่ df = H − p − q การยกกำลังสองทำให้ค่าบวกและลบไม่หักล้างกัน และน้ำหนัก 1/(n − h) ชดเชยที่ lag สูงมีคู่ข้อมูลน้อยกว่า ในทางปฏิบัติดูแค่ p-value<sup class="fn"><a href="#fn-17" id="fnr-17">17</a></sup> สมมุติฐานที่ต้องจำคือ H0 ARMA(p,q) เหมาะสม <mark class="src" data-p="9">(residuals are random)</mark> และ H1 ไม่เหมาะสม <mark class="src" data-p="9">(residuals are not random)</mark> การทดสอบนี้ตรวจว่าโมเดลเหมาะหรือไม่ ไม่ได้ตรวจแค่ว่าสัมพันธ์กันหรือเปล่า<sup class="fn"><a href="#fn-18" id="fnr-18">18</a></sup> H คือ lag สูงสุดซึ่งเลือกได้ค่อนข้างอิสระ <code>tsdiag()</code> ของ TSA คำนวณ Q ทุก H ตั้งแต่ 1 ถึงค่าที่กำหนด และทุกค่าควรมี p-value มาก<sup class="fn"><a href="#fn-19" id="fnr-19">19</a></sup></p>
+<p>residual ต้องไม่สัมพันธ์กัน เพราะความสัมพันธ์ถูกเอาไปไว้ในโมเดลแล้ว<sup class="fn"><a href="#fn-11" id="fnr-11">11</a></sup> ACF ของ residual จึงควรอยู่ในเส้นประทุก lag สไลด์ใช้คำว่า roughly เพราะ residual คำนวณจากพารามิเตอร์ที่ประมาณจากข้อมูลชุดเดียวกัน lag ต้น ๆ จึงต่างจาก white noise เล็กน้อย ปัญหาอีกข้อคือแต่ละ lag อาจอยู่ในเส้นทั้งหมด แต่ <mark class="src" data-p="8" title="it could be that as a group the sample autocorrelations are “excessive,”">sample autocorrelation เมื่อรวมเป็นกลุ่มอาจ "มากเกินไป"</mark> <mark class="src" data-p="8" title="Ljung and Box (1978)">Ljung และ Box (1978)</mark> จึงรวม lag 1 ถึง H ไว้ในสถิติตัวเดียว</p>
+
+<div class="eq">\[Q=n(n+2)\sum_{h=1}^{H}\frac{\hat\rho(h)^2}{n-h}\ \sim\ \chi^2_{H-p-q}\]</div>
+<p class="say">H0 คือ ARMA(p,q) เหมาะสม <mark class="src" data-p="9" title="(residuals are random)">(residual เป็น random)</mark> และ H1 คือไม่เหมาะสม <mark class="src" data-p="9" title="(residuals are not random)">(residual ไม่ random)</mark> ข้อนี้ให้จดไว้ อยากได้ p-value มาก<sup class="fn"><a href="#fn-12" id="fnr-12">12</a></sup> การทดสอบนี้ตรวจว่าโมเดลเหมาะหรือไม่ ไม่ได้ตรวจแค่ว่าสัมพันธ์กันหรือเปล่า<sup class="fn"><a href="#fn-13" id="fnr-13">13</a></sup></p>
+
+<table class="sym">
+<tr><td>ρ̂(h)²</td><td>ยกกำลังสองให้ค่าบวกและลบไม่หักล้างกัน</td></tr>
+<tr><td>1/(n − h)</td><td>ชดเชยที่ lag สูงมีคู่ข้อมูลน้อยกว่า</td></tr>
+<tr><td>H</td><td>lag สูงสุด เลือกได้ค่อนข้างอิสระ <code>tsdiag()</code> คำนวณทุก H ตั้งแต่ 1 ถึงค่าที่กำหนด</td></tr>
+<tr><td>df = H − p − q</td><td>หักจำนวนพารามิเตอร์ ARMA ที่ประมาณ (ใน <code>Box.test</code> ใส่เป็น <code>fitdf = p + q</code>)</td></tr>
+</table>
 
 <div class="calc" id="s1-q">
 <div class="calc-title">คำนวณ Q ด้วยมือ</div>
 <ol class="steps">
 <li><div class="st-title">ข้อมูล</div><p>n = 100 residual ของ MA(1) มี ACF ที่ lag 1, 2 เท่ากับ 0.2 และ 0.1 ใช้ H = 2</p></li>
 <li><div class="st-title">แทนสูตร</div><p>\(Q=100(102)\left(\dfrac{0.04}{99}+\dfrac{0.01}{98}\right)=10200(0.000404+0.000102)=5.16\)</p></li>
-<li><div class="st-title">เทียบ χ²</div><p>df = H − q = 2 − 1 = 1 ค่าวิกฤต χ²(1) ที่ 5% คือ 3.84 เนื่องจาก 5.16 &gt; 3.84 จึง reject H0 โมเดลยังไม่เหมาะสม</p></li>
+<li><div class="st-title">เทียบ χ²</div><p>df = H − q = 2 − 1 = 1 ค่าวิกฤต χ²(1) ที่ 5% คือ 3.84 เนื่องจาก 5.16 &gt; 3.84 จึงปฏิเสธ H0 โมเดลยังไม่เหมาะสม</p></li>
 </ol>
-<div class="answer">ACF 0.2 ที่ lag 1 อยู่บนเส้นประ 2/√100 = 0.2 พอดี ดูทีละ lag อาจตัดสินไม่ได้ แต่ Q รวมสอง lag แล้วชัดเจนว่าเหลือ autocorrelation มากเกินไป นี่คือข้อดีของการทดสอบแบบรวม</div>
 </div>
+
+<figure class="viz"><img src="../assets/viz/l8-q.svg" alt="ACF ของ residual ทีละ lag ไม่เกินเส้น 0.2 แต่ Q รวมสอง lag ได้ 5.16 เกินค่าวิกฤต 3.84"></figure>
+
+<p>ภาพซ้ายคือการดูทีละ lag: lag 1 แตะเส้นประพอดีและ lag 2 อยู่ในเส้น ตัดสินไม่ได้ ภาพขวาคือ Q ที่รวมสอง lag แล้วเกินเส้นวิกฤตชัดเจน นี่คือข้อดีของการทดสอบแบบรวม ในทางปฏิบัติดูแค่ p-value ไม่ต้องดู Q<sup class="fn"><a href="#fn-14" id="fnr-14">14</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p10.png" alt="Slide 8 หน้า 10: tsdiag ของ ARMA(1,1) กับ times" loading="lazy">
 <figcaption>Slide 8 หน้า 10 — tsdiag ของ ARMA(1,1) กับ times</figcaption>
 </figure>
 
-<p><code>tsdiag(nat, gof.lag = 20)</code> ให้สามกราฟ<sup class="fn"><a href="#fn-20" id="fnr-20">20</a></sup> กราฟแรกคือ standardized residual ตามเวลา มีจุดราว t = 100 เกิน 3 นิดเดียว ซึ่งยังรับได้ ("ไม่เป็นไร") กราฟที่สองคือ ACF ของ residual ค่าที่ lag 1–3 คือ −0.072, 0.007, 0.109 อยู่ในเส้นทั้งหมด กราฟที่สามคือ p-value ของ Ljung-Box แต่ละ H เทียบเส้นประ 0.05 คำนวณเองด้วย <code>Box.test(residuals(nat), lag = H, type = "Ljung", fitdf = 2)</code> ได้ 0.139, 0.644, 0.881, 0.843 ที่ H = 5, 10, 15, 20 เกิน 0.05 ทุกค่า ARMA(1,1) จึงผ่าน ถ้ามีจุดอยู่ใต้เส้นแค่สองจุดยังพอรับได้<sup class="fn"><a href="#fn-21" id="fnr-21">21</a></sup> และ <code>arima()</code> ไม่ตรวจเรื่องเหล่านี้ให้อัตโนมัติ ต้องสั่งเอง<sup class="fn"><a href="#fn-22" id="fnr-22">22</a></sup></p>
+<p><code>tsdiag(nat, gof.lag = 20)</code> ให้สามกราฟตรงกับสามเรื่องในตาราง 1.1<sup class="fn"><a href="#fn-15" id="fnr-15">15</a></sup> ของ times: standardized residual มีจุดราว t = 100 เกิน 3 นิดเดียว ACF ของ residual อยู่ในเส้นทั้งหมด และ p-value ของ Ljung-Box อยู่เหนือเส้น 0.05 ทุก H<sup class="fn"><a href="#fn-16" id="fnr-16">16</a></sup> ARMA(1,1) จึงผ่าน ถ้ามีจุดอยู่ใต้เส้นแค่สองจุดยังพอรับได้<sup class="fn"><a href="#fn-17" id="fnr-17">17</a></sup></p>
+
+<details class="check"><summary>tsdiag ของ ARMA(2,1) ให้ p-value ของ Ljung-Box ต่ำกว่า 0.05 ตั้งแต่ H = 6 เป็นต้นไปทุกจุด สรุปอย่างไร และทำอะไรต่อ</summary>
+<p>ปฏิเสธ H0 ที่ H เหล่านั้น residual ยังไม่ random โมเดลไม่เหมาะสม ให้กลับไปเลือก p, q ใหม่ (ดู ACF/PACF ของ residual ว่าเหลือ lag ไหน) ไม่ใช่ไปเปลี่ยน α ให้ผ่าน</p>
+</details>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 1–9)</summary><div class="gallery">
 <figure>
@@ -111,102 +160,129 @@
 <!-- ===================================================== -->
 <h2 id="s2">2. ข้อมูลจริงชุดแรก: อุณหภูมิโลก และการใส่ d ไว้ใน ARIMA</h2>
 
-<p>ข้อมูลอุณหภูมิเป็น "full data analysis" ครบทุกขั้นที่ข้อสอบภาคปฏิบัติจะถาม คือ plot, ตัดสิน d, ACF/PACF, AIC/BIC, estimation, เขียนโมเดล และ diagnostic ตัวข้อมูลคือค่าเบี่ยงเบนของอุณหภูมิเฉลี่ยรายปี 1856–1997 จำนวน n = 142<sup class="fn"><a href="#fn-23" id="fnr-23">23</a></sup> ชุดเดียวกับที่ใช้ใน Lesson 2–3 แต่ Lesson 3 ใช้ช่วงตั้งแต่ปี 1900 ข้อมูลรายปีแบบนี้ "อาจจะไม่ค่อยมี seasonal"</p>
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> full data analysis ที่ข้อสอบภาคปฏิบัติจะถามมีครบทุกขั้นอย่างไร ตั้งแต่ plot จนสรุปว่าโมเดลเพียงพอ และทำไมต้องใส่ d ไว้ในคำสั่ง arima</p>
+
+<h3 id="s2-id">2.1 Identification: d = 1 แล้วเลือก ARMA(1,1)</h3>
+
+<p>ข้อมูลคือค่าเบี่ยงเบนของอุณหภูมิเฉลี่ยรายปี ชุดเดียวกับ Lesson 2–3<sup class="fn"><a href="#fn-18" id="fnr-18">18</a></sup> ข้อมูลรายปีแบบนี้ "อาจจะไม่ค่อยมี seasonal"</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p13.png" alt="Slide 8 หน้า 13: Time plot ของอุณหภูมิโลก" loading="lazy">
 <figcaption>Slide 8 หน้า 13 — Time plot ของอุณหภูมิโลก</figcaption>
 </figure>
 
-<p>อนุกรมอยู่ราว −0.4 ในช่วงปี 1860–1910 แล้วขึ้นมาราว 0.4 ปลายทศวรรษ 1990 จึงมี trend ขาขึ้น ความแกว่งรอบ trend ใกล้เคียงกันตลอด จึงไม่ต้อง take log<sup class="fn"><a href="#fn-24" id="fnr-24">24</a></sup></p>
+<p>อนุกรมมี trend ขาขึ้น แต่ความแกว่งรอบ trend ใกล้เคียงกันตลอด จึงไม่ต้อง take log<sup class="fn"><a href="#fn-19" id="fnr-19">19</a></sup> (ขั้น 2 ของผัง Lesson 7 ข้ามได้)</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p14.png" alt="Slide 8 หน้า 14: ACF ของข้อมูลเดิม: ลดช้ามาก" loading="lazy">
 <figcaption>Slide 8 หน้า 14 — ACF ของข้อมูลเดิม: ลดช้ามาก</figcaption>
 </figure>
 
-<p>ACF = 0.817, 0.717, 0.669 และยังเกิน 0.2 ถึง lag 20 สไลด์สรุปว่า "probably not an ARMA process" ความสัมพันธ์สูงนี้ไม่ได้มาจาก AR แต่มาจากความไม่นิ่งที่เกิดจาก trend<sup class="fn"><a href="#fn-25" id="fnr-25">25</a></sup> จึงใช้ d = 1</p>
+<p>ACF ยังเกิน 0.2 ถึง lag 20 สไลด์สรุปว่า "probably not an ARMA process" ความสัมพันธ์สูงนี้ไม่ได้มาจาก AR แต่มาจากความไม่นิ่งที่เกิดจาก trend<sup class="fn"><a href="#fn-20" id="fnr-20">20</a></sup> จึงใช้ d = 1</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p15.png" alt="Slide 8 หน้า 15: ACF ของผลต่างครั้งแรก" loading="lazy">
 <figcaption>Slide 8 หน้า 15 — ACF ของผลต่างครั้งแรก</figcaption>
 </figure>
 
-<p>หลัง difference ACF = −0.223, −0.217, −0.132, 0.107 ทะลุเส้น ±0.168 (2/√141) ที่ lag 1–2 แล้วอยู่ในเส้น จึงอาจเป็น MA(2) สไลด์เขียนว่า ACF และ PACF <mark class="src" data-p="15">of the first differences</mark> <mark class="src" data-p="15">look much more plausible.</mark> คือดูเป็นอนุกรมนิ่งแล้ว</p>
+<p>หลัง difference ACF ทะลุเส้น ±0.168 (2/√141) แค่ lag 1–2 จึงอาจเป็น MA(2) สไลด์เขียนว่า ACF และ PACF <mark class="src" data-p="15" title="of the first differences">ของผลต่างครั้งแรก</mark> <mark class="src" data-p="15" title="look much more plausible.">ดูสมเหตุสมผลกว่ามาก</mark> คือดูเป็นอนุกรมนิ่งแล้ว</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p16.png" alt="Slide 8 หน้า 16: PACF ของผลต่างครั้งแรก" loading="lazy">
 <figcaption>Slide 8 หน้า 16 — PACF ของผลต่างครั้งแรก</figcaption>
 </figure>
 
-<p>PACF = −0.223, −0.281, −0.293, −0.107 ทะลุเส้นที่ lag 1–3 จึงอาจเป็น AR(3) candidate จึงมี p ≤ 3 และ q ≤ 2 ในใจมีราว 2–3 โมเดล แล้วให้ AIC/BIC ช่วยเลือก<sup class="fn"><a href="#fn-26" id="fnr-26">26</a></sup></p>
+<p>PACF ทะลุเส้นที่ lag 1–3 จึงอาจเป็น AR(3) candidate จึงมี p ≤ 3 และ q ≤ 2 ในใจมีราว 2–3 โมเดล แล้วให้ AIC/BIC ช่วยเลือก<sup class="fn"><a href="#fn-21" id="fnr-21">21</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p17.png" alt="Slide 8 หน้า 17: AIC / BIC ของ ARMA(p,q) กับผลต่าง" loading="lazy">
 <figcaption>Slide 8 หน้า 17 — AIC / BIC ของ ARMA(p,q) กับผลต่าง</figcaption>
 </figure>
 
-<p>ตารางสร้างแบบเดียวกับ Lesson 7 (แถว p = 0–3 คอลัมน์ q = 0–3) AIC ต่ำสุดอยู่ช่อง [1,3] = −221.83 คือ ARMA(0,2) กลุ่มที่ใกล้กันคือ ARMA(2,1) −221.23, ARMA(1,3) −220.47 และ ARMA(1,1) −220.12 ส่วน BIC ต่ำสุดคือ [2,2] = −208.30 คือ ARMA(1,1) สไลด์เขียนว่า "ARMA(1;4) model had the lowest AIC" ซึ่งไม่ตรงกับตาราง (ตารางมี q ถึง 3 เท่านั้น) น่าจะเหลือจากเวอร์ชันเก่าของสไลด์<sup class="fn"><a href="#fn-27" id="fnr-27">27</a></sup> ข้อสรุปของสไลด์ยังใช้ได้ คือเลือก ARMA(1,1) ของ ∇X_t เพราะ <mark class="src" data-p="17">simpler models are nice for various reasons</mark> จึงได้ ARIMA(1,1,1)</p>
+<p>AIC ต่ำสุดคือ ARMA(0,2) แต่ BIC ต่ำสุดคือ ARMA(1,1) เหมือนกรณี times ใน Lesson 7 ที่ BIC เลือกโมเดลเล็กกว่า สไลด์เลือก ARMA(1,1) ของ ∇X_t เพราะ <mark class="src" data-p="17" title="simpler models are nice for various reasons">โมเดลที่ง่ายกว่าดีด้วยหลายเหตุผล</mark> จึงได้ ARIMA(1,1,1)</p>
+
+<p class="trap">สไลด์เขียนว่า "ARMA(1;4) model had the lowest AIC" ซึ่งไม่ตรงกับตาราง (มี q ถึง 3 เท่านั้น) น่าจะเหลือจากสไลด์เวอร์ชันเก่า<sup class="fn"><a href="#fn-22" id="fnr-22">22</a></sup> ให้เชื่อตัวเลขในตาราง</p>
+
+<h3 id="s2-write">2.2 เขียนโมเดลจาก output</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p21.png" alt="Slide 8 หน้า 21: Model estimation: ARIMA(1,1,1) และการเขียนโมเดล" loading="lazy">
 <figcaption>Slide 8 หน้า 21 — Model estimation: ARIMA(1,1,1) และการเขียนโมเดล</figcaption>
 </figure>
 
-<p>output นี้ฟิต ARMA(1,1) กับผลต่าง (แบบ diff ก่อน) ขั้นแปลงตัวเลขเป็นสมการอยู่ในกล่องข้างล่าง ซึ่งเป็นรูปแบบที่ข้อสอบให้เขียน</p>
+<p>output นี้ฟิต ARMA(1,1) กับผลต่าง (แบบ diff ก่อน) วิธีเดียวกับ <a href="0007-arima-identification-and-estimation.html#s5-out">Lesson 7 ตอน 5.6</a> แต่ตอนนี้ตัวที่ลบ intercept คือ ∇X ไม่ใช่ X ทุกครั้งที่มี X_t หรือ differencing ของ X_t ต้องลบ intercept<sup class="fn"><a href="#fn-23" id="fnr-23">23</a></sup></p>
 
-<div class="calc" id="s2-write">
-<div class="calc-title">เขียนโมเดลจาก output<sup class="fn"><a href="#fn-28" id="fnr-28">28</a></sup></div>
+<div class="calc" id="s2-write-calc">
+<div class="calc-title">เขียนโมเดลจาก output<sup class="fn"><a href="#fn-24" id="fnr-24">24</a></sup></div>
 <ol class="steps">
 <li><div class="st-title">อ่าน output</div><p><code>arima(dif, order = c(1,0,1), method = "ML")</code>: ar1 = 0.3481, ma1 = −0.8278, intercept = 0.0049, σ² = 0.01156</p></li>
-<li><div class="st-title">ระบุสัญลักษณ์</div><p>φ มาจาก ar1 และ θ มาจาก ma1 ถ้า ma1 ติดลบ θ ก็ติดลบ<sup class="fn"><a href="#fn-29" id="fnr-29">29</a></sup> intercept คือ mean ของ ∇X_t</p></li>
-<li><div class="st-title">เขียน (ลบ intercept ทุกที่ที่มี ∇X)</div><p>\(\nabla X_t-0.0049=0.3481(\nabla X_{t-1}-0.0049)-0.8278w_{t-1}+w_t\)</p></li>
-<li><div class="st-title">σ̂</div><p>\(\hat\sigma=\sqrt{0.01156}=0.1075\)</p></li>
+<li><div class="st-title">ระบุสัญลักษณ์</div><p>φ มาจาก ar1 และ θ มาจาก ma1 ถ้า ma1 ติดลบ θ ก็ติดลบ<sup class="fn"><a href="#fn-25" id="fnr-25">25</a></sup> intercept คือ mean ของ ∇X_t</p></li>
+<li><div class="st-title">เขียน (ลบ intercept ทุกที่ที่มี ∇X)</div><p>\(\nabla X_t-0.0049=0.3481(\nabla X_{t-1}-0.0049)-0.8278w_{t-1}+w_t\) และ \(\hat\sigma=\sqrt{0.01156}=0.1075\)</p></li>
 </ol>
-<div class="answer">รูปด้วย B: \((1-0.3481B)(\nabla X_t-0.0049)=(1-0.8278B)w_t\) งานวิจัยเขียนแค่ "ARIMA(1,1,1)" ก็ได้<sup class="fn"><a href="#fn-30" id="fnr-30">30</a></sup> แต่ในข้อสอบให้เขียนบรรทัดเต็ม intercept 0.0049 คือ °C ที่อุณหภูมิเพิ่มเฉลี่ยต่อปี หรือราว 0.49 °C ต่อศตวรรษ ตรวจ: invertible เพราะ |−0.8278| &lt; 1 และ causal เพราะ |0.3481| &lt; 1</div>
+<div class="answer">รูปด้วย B: \((1-0.3481B)(\nabla X_t-0.0049)=(1-0.8278B)w_t\) บรรทัดเดียวพอ ได้เต็ม<sup class="fn"><a href="#fn-26" id="fnr-26">26</a></sup> งานวิจัยเขียนแค่ "ARIMA(1,1,1)" ก็ได้<sup class="fn"><a href="#fn-27" id="fnr-27">27</a></sup> intercept 0.0049 คืออุณหภูมิที่เพิ่มเฉลี่ยต่อปี หรือราว 0.49 °C ต่อศตวรรษ ตรวจ: invertible เพราะ |−0.8278| &lt; 1 และ causal เพราะ |0.3481| &lt; 1</div>
 </div>
+
+<h3 id="s2-valid">2.3 Diagnostic และประโยคสรุปที่ใช้ตอบข้อสอบ</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p22.png" alt="Slide 8 หน้า 22: Model validation: histogram, QQ plot และ Shapiro-Wilk" loading="lazy">
 <figcaption>Slide 8 หน้า 22 — Model validation: histogram, QQ plot และ Shapiro-Wilk</figcaption>
 </figure>
 
-<p>Shapiro-Wilk ได้ W = 0.9864, p-value = 0.1798 มากกว่า 0.05 จึงถือว่า normal histogram สมมาตรรอบศูนย์ และ QQ plot เรียงตามเส้น ยกเว้นจุดปลายล่างสองสามจุดที่ต่ำกว่าเส้นเล็กน้อย<sup class="fn"><a href="#fn-31" id="fnr-31">31</a></sup></p>
+<p>Shapiro-Wilk ได้ p-value = 0.1798 มากกว่า 0.05 จึงถือว่า normal QQ plot เรียงตามเส้น ยกเว้นจุดปลายล่างสองสามจุด<sup class="fn"><a href="#fn-28" id="fnr-28">28</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p23.png" alt="Slide 8 หน้า 23: Model validation: tsdiag ของ ARIMA(1,1,1)" loading="lazy">
 <figcaption>Slide 8 หน้า 23 — Model validation: tsdiag ของ ARIMA(1,1,1)</figcaption>
 </figure>
 
-<p>standardized residual อยู่ในช่วง ±3 ทั้งหมด ACF ของ residual อยู่ในเส้น และ p-value ของ Ljung-Box (fitdf = 2) ที่ H = 5, 10, 15, 20 คือ 0.182, 0.538, 0.693, 0.823 เกิน 0.05 ทุกค่า จุดช่วง lag ต้น ๆ ต่ำกว่าส่วนอื่นแต่ยังอยู่เหนือเส้น 0.05 ARIMA(1,1,1) จึงผ่าน<sup class="fn"><a href="#fn-32" id="fnr-32">32</a></sup> โค้ดที่แจกไม่มีส่วน diagnostic ของข้อมูลนี้ การบ้านคือ copy จากส่วนของ times มาเติมเอง ข้อสรุปบนสไลด์ 24 รวมสามหลักฐาน คือ residual ไม่มี correlation ที่มีนัยสำคัญ, Shapiro-Wilk ให้ p-value สมเหตุสมผล และ QQ plot ใกล้ normal ดังนั้น ARIMA(1,1,1) เพียงพอ รูปแบบการสรุปนี้ใช้เป็นแม่แบบตอบข้อสอบภาคปฏิบัติได้</p>
+<p>standardized residual อยู่ในช่วง ±3 ทั้งหมด ACF ของ residual อยู่ในเส้น และ p-value ของ Ljung-Box เกิน 0.05 ทุก H จุดช่วง lag ต้น ๆ ต่ำกว่าส่วนอื่นแต่ยังอยู่เหนือเส้น ARIMA(1,1,1) จึงผ่าน<sup class="fn"><a href="#fn-29" id="fnr-29">29</a></sup> โค้ดที่แจกไม่มีส่วน diagnostic ของข้อมูลนี้ การบ้านคือ copy จากส่วนของ times มาเติมเอง</p>
 
-<p>คำถามที่ตามมาคือ ฟิตโมเดลนี้ได้สองแบบ แบบแรก <code>arima(diff(data), order = c(p,0,q))</code> คือ difference เองก่อน แบบที่สอง <code>arima(data, order = c(p,1,q))</code> ให้ R difference ภายใน สไลด์ 18 บอกว่าสองแบบ<b>ไม่เท่ากัน</b> เพราะแบบแรกมีค่าคงที่ แบบที่สองไม่มี และแบบที่สองสะดวกกว่าถ้าต้องการค่าพยากรณ์หรือค่า fitted บนข้อมูลเดิม</p>
+<table>
+<tr><th>หลักฐาน (สไลด์ 24)</th><th>ผลของอุณหภูมิ</th></tr>
+<tr><td>residual ไม่มี correlation ที่มีนัยสำคัญ</td><td>ACF อยู่ในเส้น, Ljung-Box p-value &gt; 0.05 ทุก H</td></tr>
+<tr><td>Shapiro-Wilk ให้ p-value สมเหตุสมผล</td><td>0.1798</td></tr>
+<tr><td>QQ plot ใกล้ normal</td><td>เรียงตามเส้น</td></tr>
+<tr><td><b>ข้อสรุป</b></td><td><b>ARIMA(1,1,1) เพียงพอ</b></td></tr>
+</table>
+
+<p class="say">ตารางนี้ใช้เป็นแม่แบบตอบข้อสอบภาคปฏิบัติได้: ไล่สามหลักฐานพร้อมตัวเลข แล้วปิดด้วยข้อสรุปหนึ่งประโยค</p>
+
+<h3 id="s2-d">2.4 ใส่ d ใน arima ดีกว่า diff เองก่อน</h3>
+
+<p>ฟิตโมเดลนี้ได้สองแบบ สไลด์จัดเป็น <mark class="src" data-p="18" title="Additional topic: Differencing before ARIMA or within ARIMA">หัวข้อเสริม: difference ก่อนเข้า ARIMA หรือภายใน ARIMA</mark> และบอกว่าสองแบบ<b>ไม่เท่ากัน</b></p>
+
+<table>
+<tr><th></th><th><code>arima(diff(data), c(1,0,1))</code></th><th><code>arima(data, c(1,1,1))</code></th></tr>
+<tr><td>ค่าคงที่</td><td>มี intercept (drift) 0.0049</td><td>ไม่มี</td></tr>
+<tr><td>ค่าประมาณ</td><td>ar1 = 0.3481, ma1 = −0.8278</td><td>ar1 = 0.3326, ma1 = −0.7887</td></tr>
+<tr><td>ค่าพยากรณ์ที่ได้</td><td>ค่าของผลต่าง ต้อง undifference เอง</td><td>ค่าบนข้อมูลเดิมทันที</td></tr>
+</table>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p19.png" alt="Slide 8 หน้า 19: ผลของสองแบบกับข้อมูลอุณหภูมิ" loading="lazy">
 <figcaption>Slide 8 หน้า 19 — ผลของสองแบบกับข้อมูลอุณหภูมิ</figcaption>
 </figure>
 
-<p>แบบ diff ก่อนได้ ar1 = 0.3481, ma1 = −0.8278, intercept = 0.0049, σ² = 0.01156, aic = −220.12 แบบ d ใน arima ได้ ar1 = 0.3326, ma1 = −0.7887 ไม่มี intercept, σ² = 0.01185, aic = −218.76 สองแบบไม่เหมือนกัน ต่างกันนิดหนึ่ง<sup class="fn"><a href="#fn-33" id="fnr-33">33</a></sup> เพราะแบบแรกประมาณ mean ของผลต่าง (drift) ด้วย</p>
+<p>ค่าประมาณสองแบบ "ไม่เหมือนกัน ต่างกันนิดหนึ่ง"<sup class="fn"><a href="#fn-30" id="fnr-30">30</a></sup> เพราะแบบแรกประมาณ mean ของผลต่างด้วย</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p20.png" alt="Slide 8 หน้า 20: ใส่ include.mean = FALSE แล้วได้ผลเท่ากัน" loading="lazy">
 <figcaption>Slide 8 หน้า 20 — ใส่ include.mean = FALSE แล้วได้ผลเท่ากัน</figcaption>
 </figure>
 
-<p>เมื่อใส่ <code>include.mean = FALSE</code> ในแบบแรก ได้ ar1 = 0.3326, ma1 = −0.7887, σ² = 0.01185 เท่ากับแบบที่สองทุกตัว<sup class="fn"><a href="#fn-34" id="fnr-34">34</a></sup> จึงยืนยันว่าความต่างมาจาก intercept อย่างเดียว แบบที่แนะนำคือใส่ d ในคำสั่ง เพราะแบบแรก forecast ได้ค่าผลต่าง ต้อง undifference เอง และเป็นจุดที่พลาดกันบ่อย<sup class="fn"><a href="#fn-35" id="fnr-35">35</a></sup></p>
+<p>เมื่อใส่ <code>include.mean = FALSE</code> ในแบบแรก ค่าทุกตัวเท่ากับแบบที่สอง<sup class="fn"><a href="#fn-31" id="fnr-31">31</a></sup> จึงยืนยันว่าความต่างมาจาก intercept อย่างเดียว แบบที่แนะนำคือใส่ d ในคำสั่ง<sup class="fn"><a href="#fn-32" id="fnr-32">32</a></sup></p>
 
 <div class="calc" id="s2-undiff">
 <div class="calc-title">ถ้าใช้แบบ diff ก่อน ต้อง undifference เอง</div>
 <ol class="steps">
-<li><div class="st-title">ค่าพยากรณ์ของผลต่างปี 1998–2000</div><p><code>predict(f1, n.ahead = 3)$pred</code> = −0.0791, −0.0243, −0.0052 ถ้านำไปเทียบกับอุณหภูมิจริงที่ราว 0.4 จะผิดทันที</p></li>
-<li><div class="st-title">สะสมกลับจากค่าสุดท้าย</div><p>ปี 1997 = 0.43 จึงได้ 0.43 − 0.0791 = 0.3509, 0.3509 − 0.0243 = 0.3265, 0.3265 − 0.0052 = 0.3213 ใน R คือ <code>diffinv(pred, xi = data[142])</code></p></li>
-<li><div class="st-title">เทียบกับแบบ d ใน arima</div><p><code>predict(arima(t, c(1,1,1)), n.ahead = 3)</code> = 0.3435, 0.3147, 0.3052 ใกล้กันแต่ไม่เท่า เพราะแบบแรกมี drift 0.0049</p></li>
+<li><div class="st-title">ค่าพยากรณ์ของผลต่าง</div><p><code>predict(f1, n.ahead = 3)$pred</code> = −0.0791, −0.0243, −0.0052 ถ้านำไปเทียบกับอุณหภูมิจริงที่ราว 0.4 จะผิดทันที</p></li>
+<li><div class="st-title">สะสมกลับจากค่าสุดท้าย</div><p>ปี 1997 = 0.43 จึงได้ 0.43 − 0.0791 = 0.3509, แล้ว 0.3265, แล้ว 0.3213 ใน R คือ <code>diffinv(pred, xi = data[142])</code></p></li>
 </ol>
-<div class="answer">Class 9-2 สาธิตเรื่องเดียวกันกับข้อมูล Singapore ด้วย <code>diffinv(..., xi = singapur[28])</code> สมัยก่อนถ้าไม่ undifference ผลจะต่างกันมาก และข้อสรุปคือใช้แบบใส่ d ในคำสั่ง<sup class="fn"><a href="#fn-36" id="fnr-36">36</a></sup></div>
+<div class="answer">Class 9-2 สาธิตเรื่องเดียวกันกับข้อมูล Singapore สมัยก่อนถ้าไม่ undifference ผลจะต่างกันมาก และข้อสรุปคือใช้แบบใส่ d ในคำสั่ง<sup class="fn"><a href="#fn-33" id="fnr-33">33</a></sup></div>
 </div>
 
-<p>มีกับดักใน R อีกข้อ package TSA มีฟังก์ชัน <code>arima</code> ของตัวเองที่บังฟังก์ชันของ stats เมื่อรัน <code>library(TSA)</code> (ซึ่ง R_codes เรียกเพื่อใช้ tsdiag) ค่า aic ที่พิมพ์ใน output จะต่ำกว่าของ stats 2 หน่วย เช่น ข้อมูลอุณหภูมิแบบ diff ก่อน <code>stats::arima</code> พิมพ์ −220.12 แต่ <code>TSA::arima</code> พิมพ์ −222.12 ส่วน <code>AIC(fit)</code> ให้ −220.12 เท่ากันทั้งสองแบบ ถ้าเทียบหลายโมเดลให้ใช้ค่าจากที่มาเดียวกันเสมอ หรือใช้ <code>AIC()</code> แบบที่ตาราง AIC ในโค้ดทำ</p>
+<p class="trap">ถ้า diff เองแล้ว forecast ค่าที่ได้คือค่าผลต่าง เอาไปคำนวณ accuracy (Lesson 2) แล้วผิด และทำให้ ARIMA ดูแพ้โมเดลอื่นตลอด<sup class="fn"><a href="#fn-34" id="fnr-34">34</a></sup> ข้อความเดียวกันนี้ปิดท้าย Class 9-2<sup class="fn"><a href="#fn-35" id="fnr-35">35</a></sup> อีกกับดักใน R: <code>library(TSA)</code> มี <code>arima</code> ของตัวเองซึ่งพิมพ์ aic ต่ำกว่า stats 2 หน่วย (−222.12 กับ −220.12) ส่วน <code>AIC(fit)</code> ให้ค่าเท่ากัน ถ้าเทียบหลายโมเดลให้ใช้ค่าจากที่มาเดียวกัน</p>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 11–12, 18 และ 24)</summary><div class="gallery">
 <figure>
@@ -230,58 +306,64 @@
 <!-- ===================================================== -->
 <h2 id="s3">3. ข้อมูลจริงชุดที่สอง: ขนาดอนุภาค aerosol</h2>
 
-<p>ข้อมูลชุดที่สองมาจากงานวิศวกรรม<sup class="fn"><a href="#fn-37" id="fnr-37">37</a></sup> ข้อมูลยาว 559 ค่า และ candidate สองตัวต้องตัดสินกันด้วย diagnostic เครื่อง spray dryer ฉีดของเหลวข้นเข้าห้องอบด้วยความเร็วสูง ของเหลวแตกเป็นละอองเมื่อเจอแก๊สร้อน ความชื้นระเหยไปเหลืออนุภาคแห้ง และขนาดอนุภาคถูกวัดห่างเท่ากันตามเวลา เป้าหมายคือสร้างสมการทำนายขนาดอนุภาคตามเวลา ซึ่งเป็นขั้นแรกของการควบคุมกระบวนการผลิตให้ได้ขนาดคงที่ สไลด์คาดว่าโมเดลมักออกมาเป็น autoregressive</p>
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> เมื่อสองโมเดลฟิตพอ ๆ กัน หลัก parsimony บอกให้เลือกตัวเล็ก แต่ถ้า diagnostic ไม่เท่ากัน ผลของ Ljung-Box ชนะ</p>
+
+<h3 id="s3-id">3.1 ข้อมูลและ candidate สองตัว</h3>
+
+<p>ข้อมูลมาจากงานวิศวกรรม<sup class="fn"><a href="#fn-36" id="fnr-36">36</a></sup> เครื่อง spray dryer ฉีดของเหลวข้นเข้าห้องอบ ละอองแห้งกลายเป็นอนุภาค <mark class="src" data-p="26" title="The response variable is particle size, which is collected equidistant in time.">ตัวแปรตอบสนองคือขนาดอนุภาค ซึ่งเก็บห่างเท่ากันตามเวลา</mark> เป้าหมายคือทำนายขนาดเพื่อควบคุมการผลิต</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p28.png" alt="Slide 8 หน้า 28: Time plot ของ aerosol" loading="lazy">
 <figcaption>Slide 8 หน้า 28 — Time plot ของ aerosol</figcaption>
 </figure>
 
-<p>ค่าอยู่ระหว่างราว 110 ถึง 118 เคลื่อนขึ้นลงเป็นช่วงยาว ค่าติดกันใกล้กันมาก สไลด์สรุปว่ามี autocorrelation บวกสูง และ <mark class="src" data-p="28">does not seem to be a significant trend</mark> หรือ <mark class="src" data-p="28">any obvious seasonal pattern</mark> แต่การเดินเป็นช่วงยาวโดยไม่กลับมาที่ค่าเฉลี่ยคือลักษณะของอนุกรมไม่นิ่งแบบ random walk</p>
+<p>ค่าเคลื่อนขึ้นลงเป็นช่วงยาว สไลด์บอกว่า <mark class="src" data-p="28" title="does not seem to be a significant trend">ดูไม่มี trend ที่มีนัยสำคัญ</mark> หรือ <mark class="src" data-p="28" title="any obvious seasonal pattern">รูปแบบฤดูกาลที่ชัด</mark> แต่การเดินเป็นช่วงยาวโดยไม่กลับมาที่ค่าเฉลี่ยคือลักษณะของ random walk (Lesson 1)</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p29.png" alt="Slide 8 หน้า 29: ACF ของข้อมูลเดิม" loading="lazy">
 <figcaption>Slide 8 หน้า 29 — ACF ของข้อมูลเดิม</figcaption>
 </figure>
 
-<p>ACF สูงมากและลดช้า ยังเกิน 0.5 ที่ lag 27 สไลด์จึงสรุปว่าไม่นิ่ง และ <mark class="src" data-p="29">difference the data.</mark></p>
+<p>ACF สูงและลดช้ามาก สไลด์จึงสรุปว่าไม่นิ่ง และ <mark class="src" data-p="29" title="difference the data.">ให้ difference ข้อมูล</mark></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p30.png" alt="Slide 8 หน้า 30: ACF ของผลต่าง: แนะนำ MA(1)" loading="lazy">
 <figcaption>Slide 8 หน้า 30 — ACF ของผลต่าง: แนะนำ MA(1)</figcaption>
 </figure>
 
-<p>หลัง difference ACF มีแท่งเดียวที่ lag 1 ราว −0.35 แล้วส่วนใหญ่อยู่ในเส้น ±0.085 (n = 558) จึงแนะนำ MA(1) <mark class="src" data-p="30">for the differenced data.</mark> และดู PACF ต่อเพื่อหาทางเลือกอื่น</p>
+<p>หลัง difference ACF มีแท่งเดียวที่ lag 1 แล้วส่วนใหญ่อยู่ในเส้น จึงแนะนำ MA(1) <mark class="src" data-p="30" title="for the differenced data.">สำหรับข้อมูลที่ difference แล้ว</mark></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p31.png" alt="Slide 8 หน้า 31: PACF ของผลต่าง: แนะนำ AR(2)" loading="lazy">
 <figcaption>Slide 8 หน้า 31 — PACF ของผลต่าง: แนะนำ AR(2)</figcaption>
 </figure>
 
-<p>PACF ทะลุเส้นที่ lag 1 (ราว −0.34) และ lag 2 (ราว −0.17) แล้วตัด จึงแนะนำ AR(2) ของผลต่าง ได้ candidate สองตัว คือ ARIMA(2,1,0) และ ARIMA(0,1,1) ตัวกลางเป็น 1 เพราะมี differencing<sup class="fn"><a href="#fn-38" id="fnr-38">38</a></sup></p>
+<p>PACF ทะลุเส้นที่ lag 1 และ 2 แล้วตัด จึงแนะนำ AR(2) ได้ candidate สองตัวคือ ARIMA(0,1,1) และ ARIMA(2,1,0) ตัวกลางเป็น 1 เพราะมี differencing<sup class="fn"><a href="#fn-37" id="fnr-37">37</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p32.png" alt="Slide 8 หน้า 32: AIC / BIC และ EACF ของผลต่าง" loading="lazy">
 <figcaption>Slide 8 หน้า 32 — AIC / BIC และ EACF ของผลต่าง</figcaption>
 </figure>
 
-<p>AIC ต่ำสุดในตารางคือ ARMA(3,3) 673.77 ตามด้วย ARMA(3,2) 676.96 แต่ BIC ต่ำสุดคือ ARMA(0,1) 694.97 และ ARMA(2,0) 698.40 ซึ่งตรงกับ candidate จาก ACF/PACF EACF มีลิ่ม o เริ่มที่ (0,1) สอดคล้องกับ MA(1) บทต่อจากนี้จะใช้ auto.arima แทนการทำตารางเหล่านี้<sup class="fn"><a href="#fn-39" id="fnr-39">39</a></sup></p>
+<p>AIC ต่ำสุดในตารางคือ ARMA(3,3) แต่ BIC สองอันดับแรกคือ ARMA(0,1) และ ARMA(2,0) ตรงกับ candidate จาก ACF/PACF และ EACF มีลิ่ม o เริ่มที่ (0,1) สอดคล้องกับ MA(1) บทต่อจากนี้จะใช้ auto.arima แทนการทำตารางเหล่านี้<sup class="fn"><a href="#fn-38" id="fnr-38">38</a></sup> (Lesson 10)</p>
+
+<h3 id="s3-write">3.2 เขียนสองโมเดล</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p33.png" alt="Slide 8 หน้า 33: Model estimation: ARIMA(2,1,0)" loading="lazy">
 <figcaption>Slide 8 หน้า 33 — Model estimation: ARIMA(2,1,0)</figcaption>
 </figure>
 
-<p>output นี้ฟิต AR(2) กับผลต่างของ aerosol ค่าสัมประสิทธิ์ทั้งสองติดลบ แปลว่าผลต่างที่ขึ้นมักตามด้วยผลต่างที่ลง การเขียนเป็นสมการอยู่ในกล่องข้างล่าง</p>
+<p>ค่าสัมประสิทธิ์ AR ทั้งสองติดลบ แปลว่าผลต่างที่ขึ้นมักตามด้วยผลต่างที่ลง intercept ติดลบ เมื่อลบออกจึงกลายเป็นบวก</p>
 
 <div class="calc" id="s3-210">
-<div class="calc-title">เขียน ARIMA(2,1,0) จาก output<sup class="fn"><a href="#fn-40" id="fnr-40">40</a></sup></div>
+<div class="calc-title">เขียน ARIMA(2,1,0) จาก output<sup class="fn"><a href="#fn-39" id="fnr-39">39</a></sup></div>
 <ol class="steps">
 <li><div class="st-title">output</div><p>ar1 = −0.4064, ar2 = −0.1649, intercept = −0.0050, σ² = 0.1956</p></li>
-<li><div class="st-title">บรรทัดที่ต้องเขียน</div><p>\(\nabla X_t+0.005=-0.4064(\nabla X_{t-1}+0.005)-0.1649(\nabla X_{t-2}+0.005)+w_t\), \(\hat\sigma=\sqrt{0.1956}=0.4423\) (ลบ intercept −0.005 จึงกลายเป็นบวก 0.005)</p></li>
-<li><div class="st-title">กระจายเป็น X (ไม่ต้องทำในข้อสอบ)</div><p>ค่าคงที่ \(=-0.005(1+0.4064+0.1649)=-0.0079\) ได้ \(X_t=-0.0078+0.5936X_{t-1}+0.2415X_{t-2}+0.1649X_{t-3}+w_t\) ในข้อสอบไม่ต้องทำถึงขั้นนี้<sup class="fn"><a href="#fn-41" id="fnr-41">41</a></sup></p></li>
+<li><div class="st-title">บรรทัดที่ต้องเขียน</div><p>\(\nabla X_t+0.005=-0.4064(\nabla X_{t-1}+0.005)-0.1649(\nabla X_{t-2}+0.005)+w_t\) และ \(\hat\sigma=0.4423\)</p></li>
+<li><div class="st-title">กระจายเป็น X (ไม่ต้องทำในข้อสอบ)</div><p>\(X_t=-0.0078+0.5936X_{t-1}+0.2415X_{t-2}+0.1649X_{t-3}+w_t\)<sup class="fn"><a href="#fn-40" id="fnr-40">40</a></sup></p></li>
 </ol>
-<div class="answer">ตรวจสัมประสิทธิ์: 1 − 0.4064 = 0.5936, −0.1649 + 0.4064 = 0.2415, และ 0.1649 ผลรวม 0.5936 + 0.2415 + 0.1649 = 1 พอดี ซึ่งเป็นลักษณะของโมเดลที่มี (1 − B) อยู่ภายใน</div>
+<div class="answer">สัมประสิทธิ์ของ X รวมกันได้ 0.5936 + 0.2415 + 0.1649 = 1 พอดี ซึ่งเป็นลักษณะของโมเดลที่มี (1 − B) อยู่ภายใน คือมีราก AR เท่ากับ 1 ตรงกับข้อ "ราก = 1 ไม่นิ่ง" ใน Lesson 6</div>
 </div>
 
 <figure class="thumb">
@@ -289,42 +371,54 @@
 <figcaption>Slide 8 หน้า 34 — Model estimation: ARIMA(0,1,1)</figcaption>
 </figure>
 
-<p>output ได้ ma1 = −0.3921, intercept = −0.0051, σ² = 0.1966 เขียนได้ \(\nabla X_t+0.0051=-0.3921w_{t-1}+w_t\), \(\hat\sigma=0.4434\) หรือ \(X_t=X_{t-1}-0.0051-0.3921w_{t-1}+w_t\)<sup class="fn"><a href="#fn-42" id="fnr-42">42</a></sup> σ² ของสองโมเดลใกล้กันมาก (0.1956 กับ 0.1966) ถ้าดีเท่ากันจะเลือก ARIMA(0,1,1) ตามหลัก parsimony เพราะมี θ ตัวเดียวและเขียนง่ายกว่า<sup class="fn"><a href="#fn-43" id="fnr-43">43</a></sup> แต่ต้องดู diagnostic ก่อน</p>
+<p>ARIMA(0,1,1) เขียนได้ \(\nabla X_t+0.0051=-0.3921w_{t-1}+w_t\)<sup class="fn"><a href="#fn-41" id="fnr-41">41</a></sup> ซึ่งเทียบเท่า SES ที่ α = 1 − 0.3921 = 0.61 (Lesson 7 ตอน 1.3) σ² ของสองโมเดลใกล้กันมาก (0.1956 กับ 0.1966) ถ้า diagnostic ดีเท่ากันจะเลือก ARIMA(0,1,1) เพราะมี θ ตัวเดียวและเขียนง่ายกว่า<sup class="fn"><a href="#fn-42" id="fnr-42">42</a></sup><sup class="fn"><a href="#fn-43" id="fnr-43">43</a></sup> แต่ต้องดู diagnostic ก่อน</p>
+
+<h3 id="s3-valid">3.3 Diagnostic ตัดสิน</h3>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p35.png" alt="Slide 8 หน้า 35: Validation ARIMA(2,1,0): histogram และ QQ plot" loading="lazy">
 <figcaption>Slide 8 หน้า 35 — Validation ARIMA(2,1,0): histogram และ QQ plot</figcaption>
 </figure>
 
-<p>histogram แคบและสูงกว่า normal มีหางยาว QQ plot ปลายทั้งสองข้างแยกจากเส้นชัดเจน และ standardized residual สูงสุด 4.41 รันเองได้ Shapiro-Wilk p-value ใกล้ 0 จึงไม่ normal ทั้งสองโมเดล (ARIMA(0,1,1) ก็ได้ใกล้ 0) สไลด์และคลิปไม่ได้พูดถึงข้อนี้ เป็นตัวอย่างว่าข้อมูลจริงมักผ่านไม่ครบทุกข้อ</p>
+<p>histogram แคบและสูงกว่า normal มีหางยาว QQ plot ปลายทั้งสองข้างแยกจากเส้น standardized residual สูงสุดราว 4.4 รันเองได้ Shapiro-Wilk p-value ใกล้ 0 ทั้งสองโมเดล ข้อมูลจริงมักผ่านไม่ครบทุกข้อ</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p36.png" alt="Slide 8 หน้า 36: Validation ARIMA(2,1,0): tsdiag" loading="lazy">
 <figcaption>Slide 8 หน้า 36 — Validation ARIMA(2,1,0): tsdiag</figcaption>
 </figure>
 
-<p>standardized residual มีบางจุดเกิน ±4 ACF ของ residual ส่วนใหญ่อยู่ในเส้น และ p-value ของ Ljung-Box ต่ำกว่า 0.05 เฉพาะ lag ท้าย ๆ ที่สไลด์ไฮไลต์ รันเองที่ H = 18, 19, 20 ได้ 0.015, 0.020, 0.027 ไม่กี่จุดแบบนี้ยังพอรับได้<sup class="fn"><a href="#fn-44" id="fnr-44">44</a></sup></p>
+<p>Ljung-Box ของ ARIMA(2,1,0) ต่ำกว่า 0.05 เฉพาะ lag ท้าย ๆ (H = 18–20) ไม่กี่จุดแบบนี้ยังพอรับได้<sup class="fn"><a href="#fn-44" id="fnr-44">44</a></sup></p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p37.png" alt="Slide 8 หน้า 37: Validation ARIMA(0,1,1): histogram และ QQ plot" loading="lazy">
 <figcaption>Slide 8 หน้า 37 — Validation ARIMA(0,1,1): histogram และ QQ plot</figcaption>
 </figure>
 
-<p>รูปร่างแทบเหมือน ARIMA(2,1,0) หางหนาทั้งสองข้าง และ standardized residual สูงสุด 4.40 ด้าน normality สองโมเดลจึงไม่ต่างกัน ต้องใช้เกณฑ์อื่นตัดสิน</p>
+<p>รูปร่างแทบเหมือน ARIMA(2,1,0) หางหนาทั้งสองข้าง ด้าน normality สองโมเดลจึงไม่ต่างกัน ต้องใช้เกณฑ์อื่นตัดสิน</p>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p38.png" alt="Slide 8 หน้า 38: Validation ARIMA(0,1,1): tsdiag" loading="lazy">
 <figcaption>Slide 8 หน้า 38 — Validation ARIMA(0,1,1): tsdiag</figcaption>
 </figure>
 
-<p>p-value ของ Ljung-Box ต่ำกว่า 0.05 หลายจุดตั้งแต่ราว lag 7 เป็นต้นไป รันเองได้ 0.043 ที่ H = 7, 0.015 ที่ H = 10 และ 0.007 ที่ H = 20 แปลว่า residual ยังมี autocorrelation รวมที่ MA(1) จับไม่หมด</p>
+<p>Ljung-Box ของ ARIMA(0,1,1) ต่ำกว่า 0.05 หลายจุดตั้งแต่ราว lag 7 เป็นต้นไป แปลว่า residual ยังมี autocorrelation รวมที่ MA(1) จับไม่หมด</p>
+
+<table>
+<tr><th></th><th>ARIMA(0,1,1)</th><th>ARIMA(2,1,0)</th></tr>
+<tr><td>จำนวนพารามิเตอร์ ARMA</td><td>1 (ชนะเรื่อง parsimony)</td><td>2</td></tr>
+<tr><td>σ²</td><td>0.1966</td><td>0.1956</td></tr>
+<tr><td>normality</td><td>ไม่ผ่าน</td><td>ไม่ผ่าน</td></tr>
+<tr><td>Ljung-Box</td><td>ไม่ผ่านหลายจุดตั้งแต่ lag 7</td><td>ไม่ผ่านแค่ lag ท้าย ๆ</td></tr>
+</table>
 
 <figure class="thumb">
 <img src="../assets/slides/ts8-p39.png" alt="Slide 8 หน้า 39: Summary: ARIMA(2,1,0) ดีกว่าเล็กน้อยเพราะ Ljung-Box" loading="lazy">
 <figcaption>Slide 8 หน้า 39 — Summary: ARIMA(2,1,0) ดีกว่าเล็กน้อยเพราะ Ljung-Box</figcaption>
 </figure>
 
-<p>ข้อสรุปคือ ARIMA(0,1,1) พอใช้ได้ แต่ ARIMA(2,1,0) ดีกว่าเล็กน้อย <mark class="src" data-p="39">(because of Box-Ljung test)</mark> แม้มีพารามิเตอร์มากกว่า กรณีนี้หลัก parsimony ใช้ไม่ได้เพราะ diagnostic ไม่เท่ากัน การบ้านบนสไลด์คือลอง ARIMA(1,1,2) รันแล้วได้ ar1 = 0.9445, ma1 = −1.3755, ma2 = 0.4341, σ² = 0.1935 AIC ต่ำกว่าทั้งสองตัว และ Ljung-Box ที่ H = 5, 10, 15, 20 คือ 0.052, 0.138, 0.272, 0.106 ผ่านทุกค่า จึงดีกว่าทั้งสอง แต่ราก AR 1/0.9445 = 1.059 ใกล้รากหนึ่งของ MA (1.130) โมเดลจึงเกือบมีตัวประกอบร่วม ควรระวังเรื่อง redundancy</p>
+<p>ข้อสรุปของสไลด์คือ ARIMA(0,1,1) พอใช้ได้ แต่ ARIMA(2,1,0) ดีกว่าเล็กน้อย <mark class="src" data-p="39" title="(because of Box-Ljung test)">(เพราะ Box-Ljung test)</mark> แม้มีพารามิเตอร์มากกว่า</p>
+
+<p class="trap">parsimony ใช้ตัดสินเฉพาะเมื่อ diagnostic ดีเท่ากัน การบ้านบนสไลด์คือลอง ARIMA(1,1,2) รันแล้ว AIC ต่ำกว่าทั้งสองตัวและ Ljung-Box ผ่านทุก H แต่ราก AR 1.059 ใกล้รากหนึ่งของ MA (1.130) มาก โมเดลจึงเกือบมีตัวประกอบร่วม ซึ่งคือ parameter redundancy ใน <a href="0007-arima-identification-and-estimation.html#s4-red">Lesson 7 ตอน 4.1</a> ควรระวัง</p>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 25–27)</summary><div class="gallery">
 <figure>
@@ -342,39 +436,63 @@
 </div></details>
 
 <!-- ===================================================== -->
-<h2 id="s4">4. หลักการพยากรณ์: BLUP, one-step และ multi-step</h2>
+<h2 id="s4">4. หลักการพยากรณ์: ค่าคาดหมายแบบมีเงื่อนไข</h2>
 
-<p>สไลด์ชุด FORECAST_AND_SARIMA หน้า 1–13 อยู่ในโฟลเดอร์ CLASS 8 แต่ในคลิปไม่ได้ลงรายละเอียด การพยากรณ์ในทางปฏิบัติใช้คำสั่ง forecast คำสั่งเดียว และการเลือกและตรวจโมเดลสำคัญกว่า<sup class="fn"><a href="#fn-45" id="fnr-45">45</a></sup> multi-step ก็ยังไม่ได้สอนละเอียด<sup class="fn"><a href="#fn-46" id="fnr-46">46</a></sup> ส่วนนี้อธิบายสไลด์ให้ครบ เพราะความเข้าใจว่าค่าพยากรณ์มาจากไหนช่วยให้อ่าน output และช่วงพยากรณ์ได้ถูก เนื้อหาตรงกับหนังสือ Section 3.5 ซึ่งเป็นทฤษฎีเบื้องหลังคำสั่ง <code>predict()</code> และ <code>forecast()</code></p>
+<p>สไลด์ชุด FORECAST_AND_SARIMA หน้า 1–13 อยู่ในโฟลเดอร์ CLASS 8 แต่ในคลิปไม่ได้ลงรายละเอียด การพยากรณ์ในทางปฏิบัติใช้คำสั่ง forecast คำสั่งเดียว และการเลือกและตรวจโมเดลสำคัญกว่า<sup class="fn"><a href="#fn-45" id="fnr-45">45</a></sup> multi-step ก็ยังไม่ได้สอนละเอียด<sup class="fn"><a href="#fn-46" id="fnr-46">46</a></sup> ตอนนี้จึงเหลือแค่สิ่งที่ช่วยอ่าน output ได้ถูก (หนังสือ Section 3.5)</p>
 
-<p>คำถามคือ เมื่อเห็นข้อมูลถึงเวลา n แล้ว ค่าเวลา n + m ควรเดาเป็นเท่าไร คำตอบที่ดีที่สุด (ทำให้ความคลาดเคลื่อนกำลังสองเฉลี่ยต่ำสุด) คือค่าคาดหมายแบบมีเงื่อนไข \(E(X_{n+m}\mid X_1,\dots,X_n)\) ปัญหาคือการหาค่านี้ต้องรู้การแจกแจงร่วมของทุกตัวแปร ซึ่งปกติไม่รู้ ถ้าข้อมูลเป็น Gaussian ค่าคาดหมายแบบมีเงื่อนไขเป็นฟังก์ชันเชิงเส้นของ \(X_1,\dots,X_n\) และ variance แบบมีเงื่อนไขไม่ขึ้นกับค่าที่เห็น ถ้าไม่ใช่ Gaussian ก็ยังใช้ best linear unbiased predictor (BLUP) ได้ ซึ่งอาจไม่ดีที่สุดในทุกตัวพยากรณ์ แต่คำนวณได้ และต้องรู้เพียงโครงสร้าง correlation</p>
+<h3 id="s4-idea">4.1 ค่าพยากรณ์ = ส่วนที่รู้แล้ว ส่วน shock อนาคตตั้งเป็นศูนย์</h3>
 
-<p>BLUP หนึ่งก้าวเขียนเป็น \(X_{n+1}^n=\phi_{n,1}X_n+\dots+\phi_{n,n}X_1\) เลือกน้ำหนักให้ \(E(X_{n+1}^n-X_{n+1})^2\) ต่ำสุด หาอนุพันธ์แล้วตั้งเท่าศูนย์ได้ระบบสมการ \(\Gamma\phi_n=\gamma_n\) ซึ่งหน้าตาเหมือน Yule-Walker ใน Lesson 7 เช่น n = 1 ได้ \(\gamma_0\phi_{1,1}=\gamma_1\) จึงได้ \(\phi_{1,1}=\rho_1\) คือพยากรณ์ด้วย \(\rho_1X_1\) ระบบสมการนี้แก้แบบวนซ้ำได้ด้วย Durbin-Levinson <mark class="src" data-p="5">These do not require matrix inversion.</mark> แต่มีวิธีที่ง่ายกว่า คือเขียน \(X_{n+1}\) เป็น (ผลรวมเชิงเส้นของ X ที่เห็นแล้ว) + (ส่วนที่ไม่สัมพันธ์กับ X ในอดีต) ส่วนแรกคือ BLUP ส่วนที่สองคือความคลาดเคลื่อน สำหรับ AR(p) \(X_{n+1}=[\phi_1X_n+\dots+\phi_pX_{n+1-p}]+w_{n+1}\) จึงได้ \(X_{n+1}^n=\phi_1X_n+\dots+\phi_pX_{n+1-p}\) คือแทนค่าที่รู้ลงในสมการแล้วตั้ง shock ในอนาคตเป็นศูนย์ หน้า 6–8 ของไฟล์เป็นหน้าว่าง ตัวอย่างที่ใช้แทนอยู่ในกล่องคำนวณข้างล่าง</p>
+<p class="pic">พยากรณ์ยอดขายพรุ่งนี้ เราใช้ทุกอย่างที่รู้แล้ว (ยอดวันนี้ เมื่อวาน) ส่วนโชคของพรุ่งนี้ยังไม่เกิด เดาได้ดีที่สุดคือค่าเฉลี่ยของมัน ซึ่งเป็นศูนย์</p>
+
+<div class="eq">\[X_{n+1}=\underbrace{\text{ผลรวมเชิงเส้นของ }X_1,\dots,X_n}_{\text{ค่าพยากรณ์ }X^n_{n+1}}+\underbrace{\shk{w_{n+1}}}_{\text{ส่วนที่ไม่สัมพันธ์กับอดีต}}\]</div>
+<p class="say">สไลด์ตั้งโจทย์ว่า <mark class="src" data-p="2" title="Predict X_{n+m} given X_1, …, X_n">พยากรณ์ X(n+m) เมื่อรู้ X₁, …, Xₙ</mark> และคำตอบที่ดีที่สุดคือ <mark class="src" data-p="2" title="The (conditional) expectation of X_{n+m} given X_1, …, X_n">ค่าคาดหมาย (แบบมีเงื่อนไข) ของ X(n+m) เมื่อรู้ X₁, …, Xₙ</mark> วิธีง่ายคือเขียน X(n+1) เป็น <mark class="src" data-p="5" title="some linear combination of X_1, …, X_n">ผลรวมเชิงเส้นบางแบบของ X₁, …, Xₙ</mark> <mark class="src" data-p="5" title="+ a term uncorrelated with X_1, …, X_n.">บวกพจน์ที่ไม่สัมพันธ์กับ X₁, …, Xₙ</mark> ส่วนแรกคือค่าพยากรณ์</p>
+
+<table>
+<tr><th>แนวทาง</th><th>ต้องรู้อะไร</th><th>หมายเหตุ</th></tr>
+<tr><td>ค่าคาดหมายแบบมีเงื่อนไข</td><td>การแจกแจงร่วมของทุกตัว</td><td>ดีที่สุด (MSE ต่ำสุด) ถ้า Gaussian จะเป็นฟังก์ชันเชิงเส้นของ X</td></tr>
+<tr><td>BLUP <mark class="src" data-p="4" title="X^n_{n+1} = φ_{n,1}X_n + ⋯ + φ_{n,n}X_1,">\(X^n_{n+1}=\phi_{n,1}X_n+\dots+\phi_{n,n}X_1\)</mark></td><td>แค่โครงสร้าง correlation</td><td>แก้ \(\Gamma\phi_n=\gamma_n\) หน้าตาเหมือน Yule-Walker ใน <a href="0007-arima-identification-and-estimation.html#s5-yw">Lesson 7 ตอน 5.3</a> Durbin-Levinson <mark class="src" data-p="5" title="These do not require matrix inversion.">ไม่ต้อง invert เมทริกซ์</mark></td></tr>
+<tr><td>แยกส่วน (วิธีที่ใช้จริง)</td><td>สมการของโมเดล</td><td>AR(p): <mark class="src" data-p="5" title="X^n_{n+1} = φ_1X_n + ⋯ + φ_pX_{n+1−p}.">\(X^n_{n+1}=\phi_1X_n+\dots+\phi_pX_{n+1-p}\)</mark> แทนค่าที่รู้แล้วตั้ง shock อนาคตเป็น 0</td></tr>
+</table>
 
 <div class="calc" id="s4-ar1">
-<div class="calc-title">พยากรณ์ AR(1) หลายก้าวด้วยวิธีแยกส่วน</div>
+<div class="calc-title">พยากรณ์ AR(1) หลายก้าว (หน้า 6–8 ของไฟล์เป็นหน้าว่าง ใช้ตัวอย่างนี้แทน)</div>
 <ol class="steps">
 <li><div class="st-title">โมเดล</div><p>\(X_t-50=0.8(X_{t-1}-50)+w_t\), σ² = 4 และค่าสุดท้าย \(X_n=60\)</p></li>
 <li><div class="st-title">หนึ่งก้าว</div><p>\(X_{n+1}^n=50+0.8(10)=58\) ความคลาดเคลื่อนคือ \(w_{n+1}\) MSPE = σ² = 4</p></li>
-<li><div class="st-title">สองก้าว</div><p>\(X_{n+2}=50+0.8(X_{n+1}-50)+w_{n+2}\) แทน \(X_{n+1}=58+w_{n+1}\) ได้ \(X_{n+2}^n=50+0.64(10)=56.4\) ความคลาดเคลื่อน \(w_{n+2}+0.8w_{n+1}\) MSPE = 4(1 + 0.64) = 6.56</p></li>
-<li><div class="st-title">h ก้าว</div><p>\(X_{n+h}^n=50+0.8^h(10)\) เข้าหา 50 และ MSPE \(=\sigma^2(1+\phi^2+\dots+\phi^{2(h-1)})\to\sigma^2/(1-\phi^2)=4/0.36=11.1\)</p></li>
+<li><div class="st-title">สองก้าว</div><p>แทน \(X_{n+1}=58+w_{n+1}\) ได้ \(X_{n+2}^n=50+0.64(10)=56.4\) ความคลาดเคลื่อน \(w_{n+2}+0.8w_{n+1}\) MSPE = 4(1 + 0.64) = 6.56</p></li>
+<li><div class="st-title">h ก้าว</div><p>\(X_{n+h}^n=50+0.8^h(10)\) เข้าหา 50 และ MSPE \(=\sigma^2(1+\phi^2+\dots+\phi^{2(h-1)})\to\sigma^2/(1-\phi^2)=11.1\)</p></li>
 </ol>
-<div class="answer">ค่าพยากรณ์ไกล ๆ ของอนุกรมนิ่งเข้าหา mean และความไม่แน่นอนเข้าหา variance ของอนุกรม (γ₀) เพราะอนาคตไกลไม่ได้รับข้อมูลจากปัจจุบันแล้ว ช่วงพยากรณ์ 95% หนึ่งก้าวคือ 58 ± 1.96(2) = [54.1, 61.9]</div>
+<div class="answer">ไกลออกไป ค่าพยากรณ์เข้าหา mean และ MSPE เข้าหา γ₀ ของ AR(1) (สูตรใน Lesson 5) เพราะอนาคตไกลไม่ได้รับข้อมูลจากปัจจุบันแล้ว ช่วงพยากรณ์ 95% หนึ่งก้าวคือ 58 ± 1.96(2) = [54.1, 61.9]</div>
 </div>
 
-<p>สำหรับ ARMA ทั่วไป \(X_{n+1}=\phi_1X_n+\dots+\phi_pX_{n+1-p}+\theta_1w_n+\dots+\theta_qw_{n+1-q}+w_{n+1}\) ส่วนแรกรู้ค่าแล้ว ส่วนสุดท้ายไม่สัมพันธ์กับอดีต ที่ยังติดคือส่วนกลาง \(\theta_1w_n+\dots\) ซึ่งเป็น shock ในอดีตที่ไม่เห็นโดยตรง คำตอบเชื่อมกับ Lesson 7 ถ้าโมเดล invertible \(w_t\) เขียนได้เป็นผลรวมเชิงเส้นของ \(X_t,X_{t-1},\dots\) เมื่อ n ใหญ่ ตัดที่ \(X_1\) ได้ ส่วนกลางจึงคำนวณได้ประมาณ ในทางปฏิบัติใช้ residual ของโมเดลแทน w ในอดีต นี่คือคำตอบเชิงปฏิบัติของคำถาม "ทำไมต้อง invertible" ใน Lesson 7</p>
+<h3 id="s4-arma">4.2 ARMA: shock ในอดีตต้องประมาณจาก residual</h3>
+
+<p>สำหรับ ARMA \(X_{n+1}=\phi_1X_n+\dots+\theta_1w_n+\dots+w_{n+1}\) ส่วนที่ติดคือ \(\theta_1w_n+\dots\) ซึ่งเป็น shock ในอดีตที่ไม่เห็น ถ้าโมเดล invertible \(w_t\) เขียนได้จาก X ในอดีต (π weights ใน Lesson 7 ตอน 4.5) ในทางปฏิบัติจึงใช้ residual แทน นี่คือคำตอบเชิงปฏิบัติของ "ทำไมต้อง invertible"</p>
 
 <div class="calc" id="s4-times">
 <div class="calc-title">พยากรณ์หนึ่งก้าวของ times ด้วยมือ (ARMA(1,1))</div>
 <ol class="steps">
 <li><div class="st-title">ค่าที่ต้องใช้</div><p>φ̂ = −0.6169, θ̂ = −0.7233, μ̂ = 0.0235, ค่าสุดท้าย \(X_{150}=-2.9693\), residual สุดท้าย \(\hat w_{150}=-1.9058\)</p></li>
-<li><div class="st-title">แทนในสูตร</div><p>\(X_{151}^{150}=\mu+\phi(X_{150}-\mu)+\theta\hat w_{150}=0.0235+(-0.6169)(-2.9928)+(-0.7233)(-1.9058)\)</p></li>
-<li><div class="st-title">คำนวณ</div><p>\(=0.0235+1.8463+1.3785=3.248\) ตรงกับ <code>predict(nat, n.ahead = 1)</code></p></li>
+<li><div class="st-title">แทนในสูตร</div><p>\(X_{151}^{150}=\mu+\phi(X_{150}-\mu)+\theta\hat w_{150}=0.0235+(-0.6169)(-2.9928)+(-0.7233)(-1.9058)=3.248\) ตรงกับ <code>predict(nat, n.ahead = 1)</code></p></li>
 <li><div class="st-title">สองก้าว (shock อนาคตเป็นศูนย์)</div><p>\(X_{152}^{150}=0.0235+(-0.6169)(3.248-0.0235)=-1.966\)</p></li>
 </ol>
-<div class="answer">ค่าสุดท้ายติดลบมาก (−2.97) ค่าพยากรณ์จึงพลิกเป็นบวก แล้วพลิกกลับเป็นลบ เพราะ φ ติดลบ (ACF lag 1 = −0.771) และค่อย ๆ เข้าหา mean 0.0235</div>
+<div class="answer">ค่าพยากรณ์พลิกบวกแล้วพลิกลบ เพราะ φ ติดลบ แล้วค่อย ๆ เข้าหา mean 0.0235</div>
 </div>
 
-<p>พยากรณ์หลายก้าวต่อยอดจาก one-step สองก้าวคือเขียนสมการของ \(X_{n+2}\) แล้วแทน \(X_{n+1}=X_{n+1}^n+w_{n+1}\) พจน์ \(w_{n+1}\) ปรากฏสองที่ คือผ่าน φ₁ และผ่าน θ₁ รวมกันเป็น \((\theta_1+\phi_1)w_{n+1}\) ความคลาดเคลื่อนสองก้าวจึงเป็น \(w_{n+2}+(\theta_1+\phi_1)w_{n+1}\) และ MSPE \(=\sigma^2[1+(\theta_1+\phi_1)^2]\ge\sigma^2\) ตรวจกับ times ได้ \(1.57[1+(-0.6169-0.7233)^2]=1.57(2.796)=4.390\) ราก \(=2.095\) ตรงกับ se ของก้าวที่สองที่ R รายงาน โดยสรุป MSPE เพิ่มขึ้นตามระยะพยากรณ์ ช่วงพยากรณ์ (prediction interval) จึงกว้างขึ้น สำหรับอนุกรมนิ่ง ความกว้างเข้าหาค่าคงที่ (times: se ก้าวที่ 20 = 2.474 เกือบเท่า SD ของข้อมูล 2.468) แต่สำหรับอนุกรมที่มี d ≥ 1 ความกว้างโตต่อไปไม่สิ้นสุด เพราะ variance ของ random walk โตตามเวลา (Lesson 1)</p>
+<h3 id="s4-mspe">4.3 ทำไมพยากรณ์ไกลแล้วช่วงกว้างขึ้น</h3>
+
+<div class="eq">\[\text{MSPE สองก้าวของ ARMA(1,1)}=\sigma^2\left[1+(\prm{\theta_1}+\prm{\phi_1})^2\right]\ \ge\ \sigma^2\]</div>
+<p class="say">แทน \(X_{n+1}=X^n_{n+1}+w_{n+1}\) ลงในสมการของ \(X_{n+2}\) แล้ว \(w_{n+1}\) โผล่สองที่ คือผ่าน φ₁ และผ่าน θ₁ ความคลาดเคลื่อนจึงมี shock สองตัวแทนตัวเดียว MSPE <mark class="src" data-p="13" title="increases as we predict further into the future.">เพิ่มขึ้นเมื่อพยากรณ์ไกลออกไปในอนาคต</mark> และ <mark class="src" data-p="13" title="prediction intervals (PI)">ช่วงพยากรณ์ (PI)</mark> กว้างขึ้นตาม</p>
+
+<p class="num">times: \(1.57[1+(-0.6169-0.7233)^2]=4.390\) ราก \(=2.095\) ตรงกับ se ก้าวที่สองที่ R รายงาน ตัวคูณ \(\theta_1+\phi_1\) ก็คือ ψ₁ ใน <a href="0007-arima-identification-and-estimation.html#s4-psi">Lesson 7 ตอน 4.5</a> (ข้อ 4 ได้ ψ₁ = 0.9 + 0.5 = 1.4) สูตรทั่วไปคือ MSPE h ก้าว \(=\sigma^2(1+\psi_1^2+\dots+\psi_{h-1}^2)\)</p>
+
+<figure class="viz"><img src="../assets/viz/l8-fan.svg" alt="ช่วงพยากรณ์ของ AR(1) กว้างขึ้นแล้วหยุด ส่วน random walk กว้างขึ้นไม่สิ้นสุด"></figure>
+
+<p>ซ้ายคืออนุกรมนิ่ง ψ weights ลดลงจนเกือบศูนย์ ผลรวมใน MSPE จึงหยุดโตที่ γ₀ ขวาคืออนุกรมที่มี d ≥ 1 ψ weights ไม่ลดลง (random walk มี ψ = 1 ทุกตัว) MSPE = hσ² จึงโตไม่สิ้นสุด ตรงกับ variance ของ random walk ที่โตตามเวลาใน Lesson 1</p>
+
+<details class="check"><summary>ARMA(1,1) ที่ φ = 0.5, θ = 0.3, σ² = 2 มี MSPE ของการพยากรณ์สองก้าวเท่าไร</summary>
+<p>ψ₁ = 0.5 + 0.3 = 0.8 จึงได้ 2(1 + 0.64) = 3.28 และ se = √3.28 = 1.81</p>
+</details>
 
 <details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (FORECAST_AND_SARIMA หน้า 1–5 และ 9–13)</summary><div class="gallery">
 <figure>
@@ -422,18 +540,28 @@
 <!-- ===================================================== -->
 <h2 id="s5">5. พยากรณ์ใน R และ prediction interval</h2>
 
-<p>ใน R ใช้ <code>predict(nat, n.ahead = 20)</code> พยากรณ์ 20 ก้าว ได้สองส่วน คือ <code>$pred</code> (ค่าพยากรณ์) และ <code>$se</code> (รากของ MSPE) prediction interval 95% คือ pred ± 1.96 se โดย 1.96 มาจาก <code>qnorm(0.975, 0, 1)</code> ช่วงนี้สมมุติว่า error เป็น normal จึงต้องตรวจ normality ในตอน 1 ก่อน กับข้อมูล times ได้ผลดังนี้</p>
+<h3 id="s5-r">5.1 อ่าน predict() และช่วง 95%</h3>
+
+<div class="eq">\[\text{PI 95\%}=\texttt{pred}\pm1.96\times\texttt{se}\]</div>
+<p class="say"><code>predict(nat, n.ahead = 20)</code> คืนสองส่วน คือ <code>$pred</code> (ค่าพยากรณ์) และ <code>$se</code> (รากของ MSPE) ค่า 1.96 มาจาก <code>qnorm(0.975, 0, 1)</code> ช่วงนี้สมมติว่า error เป็น normal จึงต้องตรวจ normality ในตอน 1.3 ก่อน</p>
 
 <pre class="out">ก้าว   pred     se      lower    upper
   1    3.248   1.253    0.792    5.704
   2   -1.966   2.095   -6.072    2.141
-  3    1.251   2.337   -3.331    5.832
- 10   -0.018   2.474   -4.868    4.831
  20    0.023   2.474   -4.826    4.873</pre>
 
-<p>ค่าพยากรณ์แกว่งสลับเครื่องหมายแล้วเข้าหา 0.0235 ส่วน se เพิ่มจาก 1.253 เป็น 2.474 แล้วคงที่ ตรงตามทฤษฎีในตอน 4 ข้อมูลที่มี d = 1 ให้ภาพต่างออกไป อุณหภูมิ <code>predict(arima(t, order = c(1,1,1)), n.ahead = 5)</code> ได้ 0.3435, 0.3147, 0.3052, 0.3020, 0.3009 สำหรับปี 1998–2002 ตรวจหนึ่งก้าวด้วยมือได้ \(\hat X_{1998}=X_{1997}+\phi(X_{1997}-X_{1996})+\theta\hat w_{1997}=0.43+0.3326(0.21)-0.7887(0.1982)=0.3435\) se = 0.109, 0.124, 0.131, 0.136, 0.141 โตต่อไปเรื่อย ๆ เพราะ d = 1 ส่วน aerosol ARIMA(2,1,0) ได้ 112.365, 112.332 และ 112.325 ที่ก้าว 12 ใกล้ค่าสุดท้าย 112.185 เพราะผลต่างที่พยากรณ์เข้าหา 0 และ se เพิ่มจาก 0.442 เป็น 1.026</p>
+<p>ค่าพยากรณ์ของ times แกว่งแล้วเข้าหา mean และ se หยุดโตที่ 2.474 ซึ่งเกือบเท่า SD ของข้อมูล (2.468) ตรงกับภาพซ้ายในตอน 4.3 ข้อมูลที่ต้องแปลงหรือ difference ให้ภาพต่างออกไป</p>
 
-<p>ถ้าข้อมูลถูกแปลงด้วย log ส่วนท้ายของ R_codes ที่ comment ไว้แสดงวิธี คือฟิต <code>arima(log(data), order = c(0,1,1))</code> แล้ว <code>exp(predict(...)$pred)</code> เพื่อแปลงกลับ (Lesson 7) ช่วงพยากรณ์ก็แปลงด้วย exp ทั้งสองขอบ ช่วงที่ได้จึงไม่สมมาตรรอบค่าพยากรณ์ เช่น log scale 5 ± 0.2 ได้ [e^4.8, e^5.2] = [121.5, 181.3] รอบ e^5 = 148.4 ซึ่งห่างลงล่าง 26.9 แต่ขึ้นบน 32.9</p>
+<table>
+<tr><th>โมเดล</th><th>ค่าพยากรณ์ไกล ๆ</th><th>se</th></tr>
+<tr><td>นิ่ง (times, d = 0)</td><td>เข้าหา mean</td><td>หยุดโตที่ √γ₀</td></tr>
+<tr><td>d = 1 (อุณหภูมิ ARIMA(1,1,1))</td><td>ค้างใกล้ค่าสุดท้าย (0.34, 0.31, 0.30, …)</td><td>โตไม่หยุด (0.109 → 0.141 ใน 5 ก้าว)</td></tr>
+<tr><td>ฟิตบน log X</td><td>ต้อง <code>exp()</code> กลับ</td><td>exp ทั้งสองขอบ ช่วงจึงไม่สมมาตร</td></tr>
+</table>
+
+<p class="num">ตรวจหนึ่งก้าวของอุณหภูมิด้วยมือ (ARIMA(1,1,1) แบบใส่ d): \(\hat X_{1998}=X_{1997}+\phi(X_{1997}-X_{1996})+\theta\hat w_{1997}=0.43+0.3326(0.21)-0.7887(0.1982)=0.3435\) ส่วน log: log scale 5 ± 0.2 แปลงกลับได้ [e^4.8, e^5.2] = [121.5, 181.3] รอบ e^5 = 148.4 ซึ่งห่างลง 26.9 แต่ห่างขึ้น 32.9</p>
+
+<p class="trap">ส่วนท้ายของ R_codes ที่ comment ไว้แสดงวิธีกับ log คือ <code>arima(log(data), order = c(0,1,1))</code> แล้ว <code>exp(predict(...)$pred)</code> ถ้าลืม exp จะได้ค่าพยากรณ์ในหน่วย log และ accuracy ผิดทั้งหมด เหมือนกรณีลืม undifference ในตอน 2.4</p>
 
 <details class="fold"><summary>ลองใน R: พยากรณ์ 20 ก้าวและช่วงพยากรณ์ 95%</summary>
 <pre><code>nat &lt;- arima(data, order = c(1,0,1), method = 'ML')
@@ -446,8 +574,9 @@ upper.pi &lt;- nat.predict$pred + qnorm(0.975, 0, 1) * nat.predict$se</code></pr
 <tr><th>โค้ด</th><th>ทำอะไร</th></tr>
 <tr><td>predict(nat, n.ahead = 20)</td><td>พยากรณ์ 20 ก้าว คืนสองส่วน: $pred (ค่าพยากรณ์) และ $se (รากของ MSPE)</td></tr>
 <tr><td>qnorm(0.975, 0, 1)</td><td>1.96 ค่าวิกฤตของ normal สำหรับช่วง 95%</td></tr>
-<tr><td>pred ± 1.96 se</td><td>prediction interval 95% สมมุติว่า error เป็น normal</td></tr>
+<tr><td>pred ± 1.96 se</td><td>prediction interval 95% สมมติว่า error เป็น normal</td></tr>
 </table>
+<p>ตารางเต็มของ times: ก้าว 3 = 1.251 (se 2.337), ก้าว 10 = −0.018 (se 2.474) และ aerosol ARIMA(2,1,0) ได้ 112.365, 112.332 และ 112.325 ที่ก้าว 12 ใกล้ค่าสุดท้าย 112.185 ส่วน se เพิ่มจาก 0.442 เป็น 1.026</p>
 </details>
 
 <p class="nextpage">หน้าแบบฝึกมีแบบฝึกห้ากลุ่มพร้อมเฉลย ลองฝึกต่อใน<a href="0008-diagnostic-and-forecasting-exercises.html">แบบฝึก Lesson 8</a> หรืออ่านต่อ <a href="0009-sarima.html">Lesson 9 — SARIMA</a></p>
@@ -457,48 +586,48 @@ upper.pi &lt;- nat.predict$pred + qnorm(0.975, 0, 1) * nat.predict$se</code></pr
 <p>ตัวเลขยกในเนื้อหาชี้มาที่รายการนี้ แต่ละรายการระบุคลาสและนาทีของคลิป พร้อมถ้อยคำในคลิปเมื่อมี</p>
 <ol class="fnlist">
 <li id="fn-1"><b>Class 8, 0:02:05</b> — "ขั้นตอนที่มนุษย์ยังต้องทำอยู่" <a class="fnback" href="#fnr-1">กลับ</a></li>
-<li id="fn-2"><b>Class 8, 0:38:23–0:40:06</b> — "ช่วยจดได้ไหมครับ" <a class="fnback" href="#fnr-2">กลับ</a></li>
-<li id="fn-3"><b>Class 8, 0:34:27</b> <a class="fnback" href="#fnr-3">กลับ</a></li>
-<li id="fn-4"><b>Class 8, 1:08:08</b> — "ข้อสอบถ้าให้เขียนก็เป็นจบแค่เนี่ย ผมให้คุณเต็ม" <a class="fnback" href="#fnr-4">กลับ</a></li>
-<li id="fn-5"><b>Class 8, 1:07:06</b> — "ทุกครั้งที่มี X_t หรือ differencing ของ X_t ให้คุณลบ intercept ตลอด" <a class="fnback" href="#fnr-5">กลับ</a></li>
-<li id="fn-6"><b>Class 8, 1:18:35</b> <a class="fnback" href="#fnr-6">กลับ</a></li>
-<li id="fn-7"><b>Class 8, 1:23:16</b> — "ผมย้ำเลยนะ ... ค่า forecast มันจะเป็นค่า differencing ... เอาไปคำนวณ accuracy มันจะผิด ... เด็กก็จะงงว่าทำไม ARIMA แพ้ตัวอื่นตลอดเลย" <a class="fnback" href="#fnr-7">กลับ</a></li>
-<li id="fn-8"><b>Class 9-2, 1:17:16</b> — "คุณใช้ข้างบนไปเถอะ" <a class="fnback" href="#fnr-8">กลับ</a></li>
-<li id="fn-9"><b>Class 6, 1:13:23; Class 10</b> <a class="fnback" href="#fnr-9">กลับ</a></li>
-<li id="fn-10"><b>Class 8, 0:26:01–0:27:20</b> — "เราจะไม่ค่อยแก้หรอก ... แต่เราเช็ค" <a class="fnback" href="#fnr-10">กลับ</a></li>
-<li id="fn-11"><b>Class 8, 0:28:04–0:28:59</b> <a class="fnback" href="#fnr-11">กลับ</a></li>
-<li id="fn-12"><b>Class 8, 0:29:09–0:30:17</b> <a class="fnback" href="#fnr-12">กลับ</a></li>
-<li id="fn-13"><b>Class 8, 0:32:51–0:33:59</b> — "ไม่เป็นไร แต่ถ้ามีหลาย ๆ จุด model นั้นอาจจะไม่เหมาะ" <a class="fnback" href="#fnr-13">กลับ</a></li>
-<li id="fn-14"><b>Class 8, 0:34:06–0:34:46</b> <a class="fnback" href="#fnr-14">กลับ</a></li>
-<li id="fn-15"><b>Class 8, 0:35:00–0:36:46</b> <a class="fnback" href="#fnr-15">กลับ</a></li>
-<li id="fn-16"><b>Class 8, 0:36:54</b> — "เราเอาความสัมพันธ์ไปแล้วอยู่ในโมเดล ARIMA เรียบร้อยแล้ว error term ก็ไม่ควรจะสัมพันธ์กัน" <a class="fnback" href="#fnr-16">กลับ</a></li>
-<li id="fn-17"><b>Class 8, 0:38:05</b> — "ไม่ต้องดู Q statistic ดู p-value" <a class="fnback" href="#fnr-17">กลับ</a></li>
-<li id="fn-18"><b>Class 8, 0:38:05–0:39:03</b> — "ไม่ได้เช็คว่าสัมพันธ์กันหรือเปล่า มันเช็คว่าโมเดลที่คุณได้เหมาะหรือเปล่า ... มีความเป็น random ไหม" <a class="fnback" href="#fnr-18">กลับ</a></li>
-<li id="fn-19"><b>Class 8, 0:39:59</b> — "ทุก lag อยากให้ p-value มาก" <a class="fnback" href="#fnr-19">กลับ</a></li>
-<li id="fn-20"><b>Class 8, 0:42:41–0:46:41</b> <a class="fnback" href="#fnr-20">กลับ</a></li>
-<li id="fn-21"><b>Class 8, 0:41:30</b> — "ถ้ามีจุดบางจุดอยู่ใต้เส้นน้ำเงิน ก็แสดงว่าแลกนั้นอาจจะไม่เหมาะ ... มีแค่สองจุดยังโอเค" <a class="fnback" href="#fnr-21">กลับ</a></li>
-<li id="fn-22"><b>Class 8, 0:41:30</b> — "ออโตเมติกไม่เช็ค ... พวกนี้คุณต้องทำด้วยมืออยู่" <a class="fnback" href="#fnr-22">กลับ</a></li>
-<li id="fn-23"><b>Class 8, 0:48:05</b> <a class="fnback" href="#fnr-23">กลับ</a></li>
-<li id="fn-24"><b>Class 8, 0:49:13</b> — "ไม่ต้อง take log เพราะแกว่งเท่า ๆ กัน" <a class="fnback" href="#fnr-24">กลับ</a></li>
-<li id="fn-25"><b>Class 8, 0:49:47</b> — "ไม่ได้เกิดจาก AR นะ มันเกิดจาก non-stationary ที่มาจาก trend" <a class="fnback" href="#fnr-25">กลับ</a></li>
-<li id="fn-26"><b>Class 8, 0:50:35–0:51:36</b> — "จะมีในใจ 2–3 model" <a class="fnback" href="#fnr-26">กลับ</a></li>
-<li id="fn-27"><b>Class 8, 0:51:48</b> — "สไลด์นี้ผมทำมาโบราณ ... 10 ปีที่แล้ว" <a class="fnback" href="#fnr-27">กลับ</a></li>
-<li id="fn-28"><b>Class 8, 1:04:40–1:08:32</b> <a class="fnback" href="#fnr-28">กลับ</a></li>
-<li id="fn-29"><b>Class 8, 1:04:40–1:08:32</b> — "ฟีเอามาจาก AR1 ... เตต้ามาจาก MA1 ... เตต้าคุณติดลบ ก็กลายเป็นลบ 0.8278" <a class="fnback" href="#fnr-29">กลับ</a></li>
-<li id="fn-30"><b>Class 8, 1:08:08</b> — "ถ้าทำ IS ไม่จำเป็นต้องเขียนขนาดนั้น เขียนว่า ARIMA(1,1,1) เขาก็ OK" <a class="fnback" href="#fnr-30">กลับ</a></li>
-<li id="fn-31"><b>Class 8, 1:09:38</b> <a class="fnback" href="#fnr-31">กลับ</a></li>
-<li id="fn-32"><b>Class 8, 1:10:49</b> <a class="fnback" href="#fnr-32">กลับ</a></li>
-<li id="fn-33"><b>Class 8, 0:53:22–0:57:04</b> — "เหมือนกันไหม ... ไม่เหมือนกัน ต่างกันนิดหนึ่ง" <a class="fnback" href="#fnr-33">กลับ</a></li>
-<li id="fn-34"><b>Class 8, 0:57:04</b> — "จะเหมือนกันเลย" <a class="fnback" href="#fnr-34">กลับ</a></li>
-<li id="fn-35"><b>Class 8, 0:58:07–1:00:06</b> — "แนะนำใช้ข้างล่าง" <a class="fnback" href="#fnr-35">กลับ</a></li>
-<li id="fn-36"><b>Class 9-2, 1:13:57–1:17:16</b> — "สมัยก่อนถ้าคุณไม่ undifferencing มันจะต่างกันเยอะ" และ "คุณใช้ข้างบนไปเถอะ" <a class="fnback" href="#fnr-36">กลับ</a></li>
-<li id="fn-37"><b>Class 8, 1:11:24</b> <a class="fnback" href="#fnr-37">กลับ</a></li>
-<li id="fn-38"><b>Class 8, 1:13:00–1:15:00</b> — "ตรงกลางต้องเป็น 1 เพราะคุณมี differencing" <a class="fnback" href="#fnr-38">กลับ</a></li>
-<li id="fn-39"><b>Class 8, 1:15:07</b> — "ข้างหน้าผมจะไม่ทำพวกนี้แล้ว ผมจะใช้ auto.arima" <a class="fnback" href="#fnr-39">กลับ</a></li>
-<li id="fn-40"><b>Class 8, 1:15:33–1:17:41</b> <a class="fnback" href="#fnr-40">กลับ</a></li>
-<li id="fn-41"><b>Class 8, 1:15:33–1:17:41</b> — "ไม่ต้องทำถึงขั้นนั้นนะครับ" <a class="fnback" href="#fnr-41">กลับ</a></li>
-<li id="fn-42"><b>Class 8, 1:17:48</b> <a class="fnback" href="#fnr-42">กลับ</a></li>
-<li id="fn-43"><b>Class 8, 1:18:35–1:19:56</b> — "มีแค่เตตาตัวเดียว โมเดลเขียนง่ายกว่า" <a class="fnback" href="#fnr-43">กลับ</a></li>
+<li id="fn-2"><b>Class 6, 1:13:23; Class 10</b> <a class="fnback" href="#fnr-2">กลับ</a></li>
+<li id="fn-3"><b>Class 8, 0:26:01–0:27:20</b> — "เราจะไม่ค่อยแก้หรอก ... แต่เราเช็ค" <a class="fnback" href="#fnr-3">กลับ</a></li>
+<li id="fn-4"><b>Class 8, 0:28:04–0:28:59</b> <a class="fnback" href="#fnr-4">กลับ</a></li>
+<li id="fn-5"><b>Class 8, 0:41:30</b> — "ออโตเมติกไม่เช็ค ... พวกนี้คุณต้องทำด้วยมืออยู่" <a class="fnback" href="#fnr-5">กลับ</a></li>
+<li id="fn-6"><b>Class 8, 0:29:09–0:30:17</b> <a class="fnback" href="#fnr-6">กลับ</a></li>
+<li id="fn-7"><b>Class 8, 0:32:51–0:33:59</b> — "ไม่เป็นไร แต่ถ้ามีหลาย ๆ จุด model นั้นอาจจะไม่เหมาะ" <a class="fnback" href="#fnr-7">กลับ</a></li>
+<li id="fn-8"><b>Class 8, 0:34:06–0:34:46</b> <a class="fnback" href="#fnr-8">กลับ</a></li>
+<li id="fn-9"><b>Class 8, 0:35:00–0:36:46</b> <a class="fnback" href="#fnr-9">กลับ</a></li>
+<li id="fn-10"><b>Class 8, 0:34:27</b> <a class="fnback" href="#fnr-10">กลับ</a></li>
+<li id="fn-11"><b>Class 8, 0:36:54</b> — "เราเอาความสัมพันธ์ไปแล้วอยู่ในโมเดล ARIMA เรียบร้อยแล้ว error term ก็ไม่ควรจะสัมพันธ์กัน" <a class="fnback" href="#fnr-11">กลับ</a></li>
+<li id="fn-12"><b>Class 8, 0:38:23–0:40:06</b> — "ช่วยจดได้ไหมครับ" <a class="fnback" href="#fnr-12">กลับ</a></li>
+<li id="fn-13"><b>Class 8, 0:38:05–0:39:03</b> — "ไม่ได้เช็คว่าสัมพันธ์กันหรือเปล่า มันเช็คว่าโมเดลที่คุณได้เหมาะหรือเปล่า ... มีความเป็น random ไหม" <a class="fnback" href="#fnr-13">กลับ</a></li>
+<li id="fn-14"><b>Class 8, 0:38:05</b> — "ไม่ต้องดู Q statistic ดู p-value" <a class="fnback" href="#fnr-14">กลับ</a></li>
+<li id="fn-15"><b>Class 8, 0:42:41–0:46:41</b> <a class="fnback" href="#fnr-15">กลับ</a></li>
+<li id="fn-16"><b>Class 8, 0:39:59</b> — "ทุก lag อยากให้ p-value มาก" <a class="fnback" href="#fnr-16">กลับ</a></li>
+<li id="fn-17"><b>Class 8, 0:41:30</b> — "ถ้ามีจุดบางจุดอยู่ใต้เส้นน้ำเงิน ก็แสดงว่าแลกนั้นอาจจะไม่เหมาะ ... มีแค่สองจุดยังโอเค" <a class="fnback" href="#fnr-17">กลับ</a></li>
+<li id="fn-18"><b>Class 8, 0:48:05</b> <a class="fnback" href="#fnr-18">กลับ</a></li>
+<li id="fn-19"><b>Class 8, 0:49:13</b> — "ไม่ต้อง take log เพราะแกว่งเท่า ๆ กัน" <a class="fnback" href="#fnr-19">กลับ</a></li>
+<li id="fn-20"><b>Class 8, 0:49:47</b> — "ไม่ได้เกิดจาก AR นะ มันเกิดจาก non-stationary ที่มาจาก trend" <a class="fnback" href="#fnr-20">กลับ</a></li>
+<li id="fn-21"><b>Class 8, 0:50:35–0:51:36</b> — "จะมีในใจ 2–3 model" <a class="fnback" href="#fnr-21">กลับ</a></li>
+<li id="fn-22"><b>Class 8, 0:51:48</b> — "สไลด์นี้ผมทำมาโบราณ ... 10 ปีที่แล้ว" <a class="fnback" href="#fnr-22">กลับ</a></li>
+<li id="fn-23"><b>Class 8, 1:07:06</b> — "ทุกครั้งที่มี X_t หรือ differencing ของ X_t ให้คุณลบ intercept ตลอด" <a class="fnback" href="#fnr-23">กลับ</a></li>
+<li id="fn-24"><b>Class 8, 1:04:40–1:08:32</b> <a class="fnback" href="#fnr-24">กลับ</a></li>
+<li id="fn-25"><b>Class 8, 1:04:40–1:08:32</b> — "ฟีเอามาจาก AR1 ... เตต้ามาจาก MA1 ... เตต้าคุณติดลบ ก็กลายเป็นลบ 0.8278" <a class="fnback" href="#fnr-25">กลับ</a></li>
+<li id="fn-26"><b>Class 8, 1:08:08</b> — "ข้อสอบถ้าให้เขียนก็เป็นจบแค่เนี่ย ผมให้คุณเต็ม" <a class="fnback" href="#fnr-26">กลับ</a></li>
+<li id="fn-27"><b>Class 8, 1:08:08</b> — "ถ้าทำ IS ไม่จำเป็นต้องเขียนขนาดนั้น เขียนว่า ARIMA(1,1,1) เขาก็ OK" <a class="fnback" href="#fnr-27">กลับ</a></li>
+<li id="fn-28"><b>Class 8, 1:09:38</b> <a class="fnback" href="#fnr-28">กลับ</a></li>
+<li id="fn-29"><b>Class 8, 1:10:49</b> <a class="fnback" href="#fnr-29">กลับ</a></li>
+<li id="fn-30"><b>Class 8, 0:53:22–0:57:04</b> — "เหมือนกันไหม ... ไม่เหมือนกัน ต่างกันนิดหนึ่ง" <a class="fnback" href="#fnr-30">กลับ</a></li>
+<li id="fn-31"><b>Class 8, 0:57:04</b> — "จะเหมือนกันเลย" <a class="fnback" href="#fnr-31">กลับ</a></li>
+<li id="fn-32"><b>Class 8, 0:58:07–1:00:06</b> — "แนะนำใช้ข้างล่าง" <a class="fnback" href="#fnr-32">กลับ</a></li>
+<li id="fn-33"><b>Class 9-2, 1:13:57–1:17:16</b> — "สมัยก่อนถ้าคุณไม่ undifferencing มันจะต่างกันเยอะ" และ "คุณใช้ข้างบนไปเถอะ" <a class="fnback" href="#fnr-33">กลับ</a></li>
+<li id="fn-34"><b>Class 8, 1:23:16</b> — "ผมย้ำเลยนะ ... ค่า forecast มันจะเป็นค่า differencing ... เอาไปคำนวณ accuracy มันจะผิด ... เด็กก็จะงงว่าทำไม ARIMA แพ้ตัวอื่นตลอดเลย" <a class="fnback" href="#fnr-34">กลับ</a></li>
+<li id="fn-35"><b>Class 9-2, 1:17:16</b> — "คุณใช้ข้างบนไปเถอะ" <a class="fnback" href="#fnr-35">กลับ</a></li>
+<li id="fn-36"><b>Class 8, 1:11:24</b> <a class="fnback" href="#fnr-36">กลับ</a></li>
+<li id="fn-37"><b>Class 8, 1:13:00–1:15:00</b> — "ตรงกลางต้องเป็น 1 เพราะคุณมี differencing" <a class="fnback" href="#fnr-37">กลับ</a></li>
+<li id="fn-38"><b>Class 8, 1:15:07</b> — "ข้างหน้าผมจะไม่ทำพวกนี้แล้ว ผมจะใช้ auto.arima" <a class="fnback" href="#fnr-38">กลับ</a></li>
+<li id="fn-39"><b>Class 8, 1:15:33–1:17:41</b> <a class="fnback" href="#fnr-39">กลับ</a></li>
+<li id="fn-40"><b>Class 8, 1:15:33–1:17:41</b> — "ไม่ต้องทำถึงขั้นนั้นนะครับ" <a class="fnback" href="#fnr-40">กลับ</a></li>
+<li id="fn-41"><b>Class 8, 1:17:48</b> <a class="fnback" href="#fnr-41">กลับ</a></li>
+<li id="fn-42"><b>Class 8, 1:18:35–1:19:56</b> — "มีแค่เตตาตัวเดียว โมเดลเขียนง่ายกว่า" <a class="fnback" href="#fnr-42">กลับ</a></li>
+<li id="fn-43"><b>Class 8, 1:18:35</b> <a class="fnback" href="#fnr-43">กลับ</a></li>
 <li id="fn-44"><b>Class 8, 1:20:00</b> — "ไม่กี่จุดยังพอโอเค" <a class="fnback" href="#fnr-44">กลับ</a></li>
 <li id="fn-45"><b>Class 8, 1:22:22</b> — "forecast ไม่ได้ยากเลย ใช้คำสั่ง forecast จบแล้ว ... ขั้นตอนนี้ [เลือกและตรวจโมเดล] สำคัญกว่า forecast" <a class="fnback" href="#fnr-45">กลับ</a></li>
 <li id="fn-46"><b>Class 9-2, 1:01:03</b> — "multi-step forecasting ผมยังไม่ได้ลง forecast ละเอียด" <a class="fnback" href="#fnr-46">กลับ</a></li>
