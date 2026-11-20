@@ -12,14 +12,41 @@
 <p class="kicker">2603630 TIME SERIES ANALYSIS · CBS Chula</p>
 <h1>Time Series Analysis — สรุปเตรียมสอบ</h1>
 
-<p>บทเรียน 11 บท เรียงตามที่อาจารย์สอนในคลิป Class 1–10 แต่ละบทอธิบายจากปัญหา แนวคิด สมการ ไปจนถึงตัวอย่างตัวเลข แสดงภาพสไลด์ทุกหน้าที่มีเนื้อหา รวมคำพูดของอาจารย์เรื่องข้อสอบพร้อมเวลาในคลิป ตัวเลขทุกตัวตรวจด้วยการรัน R จริง และท้ายบทมีแบบฝึกห้าแบบ: คำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดแล้วเทียบผล</p>
+<p>บทเรียน 13 บท เรียงตามที่อาจารย์สอนในคลิป Class 1–12 แต่ละบทอธิบายจากปัญหา แนวคิด สมการ ไปจนถึงตัวอย่างตัวเลข แสดงภาพสไลด์ทุกหน้าที่มีเนื้อหา รวมคำพูดของอาจารย์เรื่องข้อสอบพร้อมเวลาในคลิป ตัวเลขทุกตัวตรวจด้วยการรัน R จริง และท้ายบทมีแบบฝึกห้าแบบ: คำนวณ ทฤษฎีและพิสูจน์ อธิบายความเข้าใจ อ่านผลจาก R และรันโค้ดแล้วเทียบผล</p>
 
 <div class="box win">
 <div class="label">ลำดับของทั้งวิชา</div>
-<p>Lesson 1–3 วางพื้นฐาน: stochastic process, stationarity, ACF และการกำจัด trend Lesson 4 คือ smoothing และ decomposition Lesson 5–6 สร้างโมเดล MA, AR, ARMA, ARIMA Lesson 7 ระบุโมเดล ตรวจ causal/invertible และประมาณค่า Lesson 8 ตรวจ residual และพยากรณ์ Lesson 9 SARIMA Lesson 10 auto.arima, ETS และ tsCV ซึ่งเป็นแนวของข้อสอบภาคปฏิบัติ Lesson 11 ARIMAX, Granger และ VAR</p>
+<p>Lesson 1–3 วางพื้นฐาน: stochastic process, stationarity, ACF และการกำจัด trend Lesson 4 คือ smoothing และ decomposition Lesson 5–6 สร้างโมเดล MA, AR, ARMA, ARIMA Lesson 7 ระบุโมเดล ตรวจ causal/invertible และประมาณค่า Lesson 8 ตรวจ residual และพยากรณ์ Lesson 9 SARIMA Lesson 10 auto.arima, ETS และ tsCV ซึ่งเป็นแนวของข้อสอบภาคปฏิบัติ Lesson 11 ARIMAX, Granger และ VAR Lesson 12 ARCH/GARCH (โมเดลความแปรปรวน) และ NNAR Lesson 13 periodogram, Prophet และตารางเลือกโมเดลของทั้งวิชา</p>
 </div>
 
-<h2>บทเรียน (11 บท)</h2>
+<h2 id="plan">แผนอ่านหนึ่งวันให้พร้อมสอบ</h2>
+
+<p>เนื้อหาทั้ง 13 บทใช้เวลาอ่านราว 4 ชั่วโมง 10 นาที (ตัวเลขบนหัวแต่ละบท) แผนนี้แบ่งเป็นห้าช่วง แต่ละช่วงอ่านหลายบทต่อกันจนจบ แล้วค่อยทำแบบฝึกของช่วงนั้น เพราะคุณถนัดอ่านก่อนแล้วทำโจทย์ และบทในช่วงเดียวกันใช้เครื่องมือชุดเดียวกัน</p>
+
+<table>
+<tr><th>ช่วง</th><th>อ่าน</th><th>แล้วทำ</th><th>เวลา</th></tr>
+<tr><td>1. พื้นฐาน</td><td>Lesson 1–4 (70 นาที)</td><td>แบบฝึกกลุ่มคำนวณของ Lesson 1–3 (mean, autocovariance, ρ)</td><td>~1 ชม. 45 นาที</td></tr>
+<tr><td>2. แกนคณิต</td><td>Lesson 5–7 (80 นาที)</td><td>แบบฝึกกลุ่ม B ทฤษฎีและพิสูจน์ของ Lesson 5–7 โดยเปิดใบคำตอบ invertible/causal และไฟล์พิสูจน์ข้างล่างเทียบทุกข้อ</td><td>~2 ชม. 30 นาที</td></tr>
+<tr><td>3. ขั้นตอนวิเคราะห์ข้อมูลจริง</td><td>Lesson 8–10 (50 นาที)</td><td>แบบฝึก Lesson 10 กลุ่ม D–E (อ่านผลและรัน R: auto.arima, ets, tsCV)</td><td>~1 ชม. 45 นาที</td></tr>
+<tr><td>4. โมเดลเฉพาะทาง</td><td>Lesson 11–13 (50 นาที)</td><td>ข้อเลือกโมเดลใน Lesson 12–13 และ FINAL 2024 ข้อ 4 (CPALL, GARCH)</td><td>~1 ชม. 45 นาที</td></tr>
+<tr><td>5. ข้อสอบเก่า</td><td>—</td><td>FINAL 2025 ทั้งฉบับ แล้ว 2024, 2023 ย้อนลงไปตามที่อาจารย์แนะนำ</td><td>ที่เหลือของวัน</td></tr>
+</table>
+
+<p>เหตุผลที่จัดแบบนี้ ซึ่งมาจากสิ่งที่คุณบอกว่าตัวเองเป็น:</p>
+
+<table>
+<tr><th>ข้อมูลของคุณ</th><th>สิ่งที่แผนทำให้</th></tr>
+<tr><td>เรียน data science สถิติรู้แนวคิดแต่ต้องทวน</td><td>ช่วงที่ 1 อ่านเร็วได้ ส่วนที่ต้องทวนจริงคือสูตร E, Var, Cov ใน Lesson 1–2 ซึ่งทุกบทหลังใช้ซ้ำ จึงวางไว้ก่อนสุด ไม่ข้าม</td></tr>
+<tr><td>อ่อนเรื่องพิสูจน์และคำนวณมือ</td><td>ช่วงที่ 2 หนักที่สุดจึงอยู่ตอนเช้าที่ยังสด และให้เวลาแบบฝึกมากกว่าเวลาอ่าน เพราะข้อสอบให้คะแนนตามวิธีทำ ข้อสอบเปิดตำราได้ จึงฝึกลอกโครงของวิธีอาจารย์จากใบคำตอบแล้วเปลี่ยนตัวเลข แทนการจำสูตร</td></tr>
+<tr><td>อ่อนเรื่องเลือกโมเดลจากกราฟ</td><td>รูปที่ต้องอ่านกระจายอยู่สี่ที่: ตาราง ACF/PACF และกล่องลองเลื่อนค่าใน Lesson 5–6, ACF ฤดูกาลใน Lesson 9, ACF ของ return² ใน Lesson 12 และรูป periodogram สี่แบบกับตารางเลือกโมเดลใน Lesson 13 ช่วงที่ 4 ปิดด้วยตารางนั้นเพื่อรวมทั้งหมดไว้ที่เดียว</td></tr>
+<tr><td>รันโค้ดของอาจารย์ได้ แต่ติดเมื่อ error</td><td>ทุกตัวเลขในบทเรียนรันซ้ำจาก R_codes.txt แล้ว โค้ดที่พับไว้ในแต่ละบทมีคอมเมนต์บอกค่าที่ควรได้ ถ้าได้ไม่ตรงคือรู้ทันทีว่าผิดตรงไหน ช่วงที่ 3 และ 5 จึงทำใน R จริง ไม่ใช่แค่อ่าน</td></tr>
+<tr><td>สอบเปิดตำรา ใช้ R/Excel ได้</td><td>ไม่ต้องจำ แต่ต้องรู้ว่าจะเปิดหน้าไหน ตารางสรุปบนหัวแต่ละบทและกล่อง "⚠ กับดักข้อสอบ" คือจุดที่ควรเปิดตอนสอบ</td></tr>
+<tr><td>มีเวลาเต็มวัน อ่านก่อนแล้วทำโจทย์</td><td>อ่านทั้งหมดรวมแบบฝึกของช่วงใช้ราว 8 ชั่วโมง เหลือเวลาทำข้อสอบเก่าอย่างน้อยหนึ่งฉบับเต็มแบบจับเวลา</td></tr>
+</table>
+
+<p class="say">บทท้าย ๆ (Lesson 10–13) สั้นเพราะใช้เครื่องมือที่สร้างไว้ใน Lesson 5–9 ซ้ำ ไม่ได้แปลว่าออกสอบน้อย ข้อสอบภาคปฏิบัติ (เช่น FINAL 2025 ข้อ 5 ที่มี 22 คะแนน) ใช้ Lesson 9–13 เกือบทั้งหมด</p>
+
+<h2>บทเรียน (13 บท)</h2>
 <ol>
 <li><a href="lessons/0001-basic-knowledge-and-stochastic-process.html">Basic Knowledge — Time Series และ Stochastic Process</a> · <a href="lessons/0001-basic-knowledge-and-stochastic-process-exercises.html">แบบฝึก</a></li>
 <li><a href="lessons/0002-performance-evaluation-and-stationarity.html">Performance Evaluation และ Stationary Time Series</a> · <a href="lessons/0002-performance-evaluation-and-stationarity-exercises.html">แบบฝึก</a></li>
@@ -32,6 +59,8 @@
 <li><a href="lessons/0009-sarima.html">Seasonal ARIMA (SARIMA)</a> · <a href="lessons/0009-sarima-exercises.html">แบบฝึก</a></li>
 <li><a href="lessons/0010-auto-arima-ets-tscv.html">Full data analysis — auto.arima, ETS และ tsCV</a> · <a href="lessons/0010-auto-arima-ets-tscv-exercises.html">แบบฝึก</a></li>
 <li><a href="lessons/0011-multivariate-arimax-var.html">Multivariate — GLS, ARIMAX, Granger, CCF และ VAR</a> · <a href="lessons/0011-multivariate-arimax-var-exercises.html">แบบฝึก</a></li>
+<li><a href="lessons/0012-arch-garch-nnar.html">ARCH/GARCH — พยากรณ์ความผันผวน และ NNAR</a> · <a href="lessons/0012-arch-garch-nnar-exercises.html">แบบฝึก</a></li>
+<li><a href="lessons/0013-frequency-domain-prophet.html">Frequency domain, periodogram และ Facebook Prophet</a> · <a href="lessons/0013-frequency-domain-prophet-exercises.html">แบบฝึก</a></li>
 </ol>
 
 <h2>เอกสารเสริมสำหรับสอบ open book</h2>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 12: ARCH/GARCH และ NNAR</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 12</span>
+  <span><a href="0012-arch-garch-nnar.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 12: ARCH/GARCH และ NNAR</h1>
+<p>แบบฝึกแบ่งเป็นห้ากลุ่ม คือคำนวณ ทฤษฎี อ่านผลจาก R เลือกโมเดล และข้อสอบเก่า ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย ข้อ 12 คือข้อสอบจริง FINAL 2024 ข้อ 4 (12 คะแนน) ทำด้วย R ได้จากไฟล์ CPALL.txt ในโฟลเดอร์ข้อสอบเก่า</p>
+<p class="quiz-score"></p>
+
+<h3>กลุ่ม A: คำนวณ</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>ARCH(1)</span></div>
+<div class="qtext">ARCH(1) มี \(\alpha_0=0.1,\ \alpha_1=0.6\) และ \(u_{t-1}=-2\) ค่า \(\sigma_t^2\) เท่าไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ลืมยกกำลังสอง ใช้ 0.1 + 0.6(2)">σ²ₜ = 1.3</button>
+<button class="opt" data-correct="true" data-note="ถูก. 0.1 + 0.6(−2)² = 0.1 + 2.4 = 2.5 เครื่องหมายหายไปเพราะยกกำลังสอง">σ²ₜ = 2.5</button>
+<button class="opt" data-correct="false" data-note="ผิด. คงเครื่องหมายลบไว้ 0.1 + 0.6(−2) ค่าความแปรปรวนติดลบไม่ได้">σ²ₜ = −1.1</button>
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือความแปรปรวนระยะยาว α₀/(1 − α₁) ไม่ได้ใช้ u ของเมื่อวาน">σ²ₜ = 0.25</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 2</span><span>GARCH(1,1) ด้วยมือ</span></div>
+<div class="qtext">ugarchfit ของ GARCH(1,1) ได้ omega = 0.1182, alpha1 = 0.4722, beta1 = 0.4529 (ก) เขียนสมการ σ²ₜ (ข) ถ้า \(u_{t-1}=1.5\) และ \(\sigma^2_{t-1}=1\) จง σₜ (ค) ความแปรปรวนระยะยาวเท่าไร และ volatility จะค้างนานหรือไม่</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) \(\sigma_t^2=0.1182+0.4722\,u_{t-1}^2+0.4529\,\sigma_{t-1}^2\) และ \(u_t=\varepsilon_t\sigma_t\)</p>
+<p>(ข) σ²ₜ = 0.1182 + 0.4722(2.25) + 0.4529(1) = 1.634 จึงได้ σₜ = 1.278</p>
+<p>(ค) ω/(1 − α₁ − β₁) = 0.1182/(1 − 0.9251) = 1.578 หรือ sd 1.256 α₁ + β₁ = 0.925 ใกล้ 1 ความผันผวนจึงค้างหลายวันก่อนกลับสู่ระดับระยะยาว</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 3</span><span>นับ input และน้ำหนักของ NNAR</span></div>
+<div class="qtext">(ก) nnetar(watt) ได้ NNAR(16,1,9)[288] network ขนาดเท่าไร มีน้ำหนักกี่ตัว (ข) เพิ่ม xreg หนึ่งตัวแล้ว k เป็นเท่าไร</div>
+<textarea placeholder="เขียนวิธีทำ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(ก) input = 16 lag + 1 seasonal lag (X_{t−288}) = 17 node, hidden 9, output 1 จึงเป็น 17-9-1 น้ำหนัก = (17 + 1) × 9 + (9 + 1) × 1 = 172 (บวก 1 คือ bias ของแต่ละ node)</p>
+<p>(ข) input เพิ่มเป็น 18 k = (16 + 1 + 1 + 1)/2 = 9.5 ปัดเป็น 10 ตรงกับ NNAR(16,1,10)[288] ที่ R รายงาน</p>
+</div>
+</div>
+
+<h3>กลุ่ม B: ทฤษฎี</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>ความหมายของ ARCH</span></div>
+<div class="qtext">ใน ARCH(1) ถ้า \(u_{t-1}\) ใหญ่กว่าปกติมาก ข้อใดถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. สไลด์หน้า 11 บอกว่า u_t อาจใหญ่ เล็ก หรือกลาง ๆ ก็ได้">\(u_t\) จะมีค่าใหญ่ตามไปด้วย</button>
+<button class="opt" data-correct="false" data-note="ผิด. ε_t ไม่สัมพันธ์กับอดีต ทิศของ u_t จึงเดาไม่ได้">\(u_t\) จะมีเครื่องหมายเดียวกับ \(u_{t-1}\)</button>
+<button class="opt" data-correct="true" data-note="ถูก. σ²ₜ = α₀ + α₁u²ₜ₋₁ เพิ่มขึ้น ความไม่แน่นอนของ u_t เพิ่ม แต่ค่าเฉลี่ยยังเป็นศูนย์">ความแปรปรวนแบบมีเงื่อนไข \(\sigma_t^2\) เพิ่มขึ้น</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าเฉลี่ยของ u_t เป็นศูนย์เสมอ ARCH ไม่ได้โมเดลค่าเฉลี่ย">ค่าเฉลี่ยแบบมีเงื่อนไขของ \(u_t\) เพิ่มขึ้น</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 5</span><span>ทำไมต้องยกกำลังสอง</span></div>
+<div class="qtext">จากสมการ ARCH(1) \(u_t=\varepsilon_t\sqrt{\alpha_0+\alpha_1u_{t-1}^2}\) แสดงว่า \(u_t^2\) มีรูปแบบ AR(1) และอธิบายว่าทำไม ACF ของ u เป็นศูนย์ แต่ ACF ของ u² ไม่เป็น</div>
+<textarea placeholder="เขียนคำอธิบาย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>ยกกำลังสอง: \(u_t^2=\varepsilon_t^2(\alpha_0+\alpha_1u_{t-1}^2)\) เขียนใหม่เป็น \(u_t^2=\alpha_0+\alpha_1u_{t-1}^2+w_t\) โดย \(w_t=(\varepsilon_t^2-1)(\alpha_0+\alpha_1u_{t-1}^2)\) มีค่าเฉลี่ยศูนย์เพราะ E(ε²) = 1 จึงเป็น AR(1) ที่ φ = α₁ ACF ของ u² ที่ lag h จึงประมาณ α₁ʰ</p>
+<p>ส่วน \(E(u_tu_{t-1})=E(\varepsilon_t)E(\sigma_tu_{t-1})=0\) เพราะ ε_t ค่าเฉลี่ยศูนย์และไม่สัมพันธ์กับอดีต u จึงไม่สัมพันธ์กัน ขนาดส่งต่อกันได้แต่ทิศส่งต่อไม่ได้</p>
+</div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>NNAR กับ ARIMA</span></div>
+<div class="qtext">NNAR(p,P,0)ₛ ที่ไม่มี hidden node เทียบเท่าโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือที่สไลด์หน้า 30 เขียนไว้ แต่ตำแหน่งกลางคือ D (seasonal difference) ไม่ใช่ seasonal AR">ARIMA(p,0,0)(0,P,0)ₛ</button>
+<button class="opt" data-correct="false" data-note="ผิด. NNAR ไม่ difference ให้เอง จึงไม่มี d หรือ D">ARIMA(p,1,0)(P,1,0)ₛ</button>
+<button class="opt" data-correct="false" data-note="ผิด. input คือ lag ของ X ไม่ใช่ lag ของ shock จึงเป็น AR ไม่ใช่ MA">ARIMA(0,0,p)(0,0,P)ₛ</button>
+<button class="opt" data-correct="true" data-note="ถูก. input X_{t−1..t−p} คือ AR(p) และ X_{t−s..t−Ps} คือ seasonal AR(P) ไม่มี difference">ARIMA(p,0,0)(P,0,0)ₛ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม C: อ่านผลจาก R</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>ลำดับใน garch()</span></div>
+<div class="qtext"><code>garch(x, order = c(1, 2))</code> ของ package tseries ฟิตโมเดลใดตามสัญลักษณ์ในสไลด์</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อ่าน order ตรงตัว ลืมว่า garch() ใช้ c(q, p)">GARCH(1,2) มี α₁ และ β₁, β₂</button>
+<button class="opt" data-correct="false" data-note="ผิด. ARCH(2) ต้องพิมพ์ c(0, 2) ไม่มี β">ARCH(2) มี α₁, α₂ อย่างเดียว</button>
+<button class="opt" data-correct="false" data-note="ผิด. ARCH(1) คือ c(0, 1)">ARCH(1) มี α₁ อย่างเดียว</button>
+<button class="opt" data-correct="true" data-note="ถูก. c(q, p) = c(1, 2) คือ q = 1, p = 2 ได้ a0, a1, a2, b1 ตรงกับ output ของ rate.2000">GARCH(2,1) มี α₁, α₂ และ β₁</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>ArchTest</span></div>
+<div class="qtext"><code>ArchTest(x)</code> ได้ Chi-squared = 34.33, df = 12, p-value = 0.0006 สรุปอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. H0 คือไม่มี ARCH effect p &lt; 0.05 จึง reject ข้อมูลมี ARCH effect ใช้ ARCH/GARCH ได้">reject H0 ข้อมูลมี ARCH effect</button>
+<button class="opt" data-correct="false" data-note="ผิด. p-value ต่ำคือ reject ไม่ใช่ fail to reject">fail to reject H0 ไม่มี ARCH effect</button>
+<button class="opt" data-correct="false" data-note="ผิด. ArchTest ไม่ได้ทดสอบความนิ่ง นั่นคือ ADF">reject H0 ข้อมูลไม่นิ่งต้อง difference</button>
+<button class="opt" data-correct="false" data-note="ผิด. ArchTest ดูความสัมพันธ์ของ x² ไม่ได้ทดสอบความปกติ">reject H0 residual ไม่แจกแจงปกติ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>diagnostic ของ GARCH</span></div>
+<div class="qtext">GARCH(2,1) ของ rate.2000 ได้ Jarque-Bera p = 2.2e-13 และ Box-Ljung ของ Squared.Residuals p = 0.97 ข้อใดสรุปถูก</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. JB ไม่ผ่านเป็นเรื่องรองตามลำดับของอาจารย์ เทสต์สำคัญคือ Ljung-Box ของ residual² ซึ่งผ่าน">ใช้ไม่ได้เพราะ residual ไม่ปกติ</button>
+<button class="opt" data-correct="false" data-note="ผิด. p = 0.97 คือ fail to reject white noise ไม่ใช่ยังมีโครงสร้าง">residual² ยังมี ARCH effect เหลือ</button>
+<button class="opt" data-correct="true" data-note="ถูก. residual² เป็น white noise แล้ว ส่วน JB reject ความปกติ สไลด์จึงเรียกว่า best but not perfect">ดีที่สุดในที่ลอง แต่ residual ไม่ปกติ</button>
+<button class="opt" data-correct="false" data-note="ผิด. JB p ต่ำมากคือ reject ความปกติ">residual ปกติ และ residual² white noise</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>MAPE = Inf</span></div>
+<div class="qtext">NNAR พยากรณ์ unemployment ของ uschange แล้ว accuracy() ให้ MAPE = Inf สาเหตุคืออะไร</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. MAPE = mean(|e/y|) × 100 เมื่อ y = 0 จึงหารด้วยศูนย์ ใช้ RMSE หรือ MAE แทน">ค่าจริงใน test set เป็นศูนย์ได้</button>
+<button class="opt" data-correct="false" data-note="ผิด. ถ้า xreg ไม่ครบ forecast() จะ error ไม่ได้ให้ Inf">ไม่ได้ใส่ xreg ของ test set</button>
+<button class="opt" data-correct="false" data-note="ผิด. ความสุ่มทำให้ค่าเปลี่ยน แต่ไม่ทำให้เป็น Inf">NN สุ่มน้ำหนักต่างกันทุกครั้ง</button>
+<button class="opt" data-correct="false" data-note="ผิด. test set มี 7 ค่า ยังคำนวณได้">test set มีข้อมูลน้อยเกินไป</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม D: เลือกโมเดล</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 11</span><span>FINAL 2025 ข้อ 3 (บางส่วน)</span></div>
+<div class="qtext">ราคาปิดหุ้นเทคโนโลยีรายวัน ช่วงประกาศงบผันผวนสูงมาก ช่วงปกติผันผวนต่ำ return กระจุกเป็นช่วง ACF ไม่ชัดเจน แต่ ACF ของ squared return ลดแบบช้า ๆ ควรเลือกโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ไม่มีรูปแบบฤดูกาล และ ACF ของ return เองไม่มีโครงสร้างให้ SARIMA">SARIMA</button>
+<button class="opt" data-correct="true" data-note="ถูก. volatility clustering และ ACF ของ return² ลดช้า (u² เป็นแบบ AR) คือสัญญาณของ ARCH/GARCH ช่วงผันผวนอยู่นานจึงเหมาะกับ GARCH">GARCH</button>
+<button class="opt" data-correct="false" data-note="ผิด. มีอนุกรมเดียว ไม่มีตัวแปรอื่นที่ส่งผลต่อกัน">VAR</button>
+<button class="opt" data-correct="false" data-note="ผิด. Prophet เป็น mean model สำหรับ trend ฤดูกาลและวันหยุด ไม่ได้โมเดลความแปรปรวน">FB Prophet</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม E: ข้อสอบเก่า (ทำด้วย R)</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>FINAL 2024 ข้อ 4 (12 คะแนน)</span></div>
+<div class="qtext">\(x_t\) คืออัตราผลตอบแทนรายวันของหุ้น CPALL ปี 2566 จำนวน 278 วัน (CPALL.txt) (ก) เขียนชื่อตัวแบบที่เลือก เหตุผล และขั้นตอนการวิเคราะห์ (5 คะแนน) (ข) นำผลจาก R ที่จำเป็นพร้อมคำอธิบาย เขียนสมการตัวแบบ และสรุปผล (7 คะแนน)</div>
+<textarea placeholder="เขียนตัวแบบ เหตุผล ขั้นตอน ผล R และสมการ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p><b>(ก) ตัวแบบ GARCH(1,1)</b> เหตุผล: เป็นอัตราผลตอบแทนหุ้น ค่าเฉลี่ยใกล้ศูนย์ แต่มีช่วงผันผวนสูงสลับต่ำ (volatility clustering) เป้าหมายคือโมเดลความแปรปรวน ขั้นตอน: 1) ADF ตรวจความนิ่ง 2) plot ดู clustering 3) ArchTest ตรวจ ARCH effect 4) ลอง p, q = 1–2 เลือกจาก Ljung-Box ของ residual², ความ significant, Jarque-Bera 5) ugarchfit และ ugarchforecast</p>
+<p><b>(ข) ผล R</b> (รันซ้ำ): ADF p = 0.01 reject จึงนิ่ง · Ljung-Box ของ x² (lag 10) p = 2e-10 มีโครงสร้างในความแปรปรวน · ArchTest χ² = 34.33, df = 12, p = 0.0006 reject มี ARCH effect</p>
+<table>
+<tr><th>garch(x, order = c(q,p))</th><th>พารามิเตอร์</th><th>LB ของ residual²</th><th>JB</th></tr>
+<tr><td>c(0,1) ARCH(1)</td><td>ทุกตัว sig</td><td>0.49</td><td>0.31</td></tr>
+<tr><td>c(0,2) ARCH(2)</td><td>a2 p = 0.04</td><td>0.28</td><td>0.62</td></tr>
+<tr><td><b>c(1,1) GARCH(1,1)</b></td><td>a0 = 0.116, a1 = 0.463, b1 = 0.463 ทุกตัว sig</td><td><b>0.89</b></td><td>0.55</td></tr>
+<tr><td>c(1,2) GARCH(2,1)</td><td>a2, b1 ไม่ sig</td><td>0.0006</td><td>0.62</td></tr>
+</table>
+<p>GARCH(1,1) ผ่านทั้งสามเกณฑ์ดีที่สุด ugarchfit ได้ mu = 0.032 (ไม่ sig), omega = 0.118, alpha1 = 0.472, beta1 = 0.453 สมการ: \(x_t=0.032+u_t,\ u_t=\varepsilon_t\sigma_t,\ \sigma_t^2=0.118+0.472\,u_{t-1}^2+0.453\,\sigma_{t-1}^2\) ugarchforecast ให้ sigma 5 วันข้างหน้า 0.753, 0.801, 0.844, 0.882, 0.915 เพิ่มเข้าหาระดับระยะยาว √(0.118/0.075) ≈ 1.26 สรุป: return ของ CPALL มี volatility clustering ความผันผวนของวันนี้ขึ้นกับ shock เมื่อวาน (0.47) และความผันผวนเมื่อวาน (0.45) ใกล้เคียงกัน</p>
+<pre><code>x &lt;- scan("CPALL.txt"); adf.test(x); plot.ts(x); ArchTest(x)
+summary(garch(x, order = c(1,1)))    # ลอง c(0,1), c(0,2), c(1,2) เทียบ
+sp &lt;- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                 mean.model = list(armaOrder = c(0,0)))
+f &lt;- ugarchfit(sp, x); f; ugarchforecast(f, n.ahead = 5)</code></pre>
+</div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 13</span><span>ลำดับการตรวจ</span></div>
+<div class="qtext">ตอนเลือก p, q ของ GARCH อาจารย์ให้ดูเกณฑ์ตามลำดับใด (สำคัญที่สุดก่อน)</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. อาจารย์บอกว่าไม่จำเป็นต้องใช้ AIC">AIC ต่ำสุด แล้ว Ljung-Box แล้ว Jarque-Bera</button>
+<button class="opt" data-correct="false" data-note="ผิด. Jarque-Bera สำคัญน้อยที่สุด GARCH(2,1) ของ Dow ไม่ผ่าน JB ก็ยังเลือก">Jarque-Bera แล้ว Ljung-Box แล้ว significance</button>
+<button class="opt" data-correct="true" data-note="ถูก. Ljung-Box ของ residual² ต้องผ่านก่อน รองลงมาคือพารามิเตอร์ significant สุดท้ายคือ Jarque-Bera">Ljung-Box แล้ว significance แล้ว Jarque-Bera</button>
+<button class="opt" data-correct="false" data-note="ผิด. significance สำคัญรองจาก Ljung-Box">significance แล้ว Jarque-Bera แล้ว Ljung-Box</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>บอกได้ว่าเมื่อไรใช้ variance model และอ่านสัญญาณจาก ACF ของ return กับ return²</li>
+<li>คำนวณ σ²ₜ ของ ARCH(p) และ GARCH(1,1) ด้วยมือ และความแปรปรวนระยะยาว</li>
+<li>ทำครบห้าขั้น: ADF, plot, ArchTest, เลือก p, q ด้วย Ljung-Box/significance/JB, ugarchfit และ forecast</li>
+<li>จำกับดัก <code>garch(order = c(q,p))</code> กับ <code>ugarchspec(garchOrder = c(p,q))</code></li>
+<li>อ่าน NNAR(p,P,k)[s] ตรวจ k = (p + P + 1)/2 และรู้ว่า xreg ต้องมีค่าในอนาคต</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0012-arch-garch-nnar.html">← กลับไปที่บทเรียน Lesson 12</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

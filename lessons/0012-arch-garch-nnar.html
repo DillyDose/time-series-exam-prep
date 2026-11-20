@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 12: ARCH/GARCH และ NNAR</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/reader.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="0011-multivariate-arimax-var.html">← Lesson 11</a> · Lesson 12</span>
+  <span><a href="0012-arch-garch-nnar-exercises.html">แบบฝึก</a> · <a href="../index.html">สารบัญ</a></span>
+</nav>
+
+<p class="kicker">Slide 11 หน้า 1–37 — ARCH/GARCH และ Neural Network Autoregressive</p>
+<h1>ARCH/GARCH: พยากรณ์ความผันผวน และ NNAR</h1>
+<p class="readmeta">อ่านประมาณ 20 นาที · ข้อความ<mark class="src">ไฮไลต์</mark>คือคำแปลของถ้อยคำบนสไลด์ (ชี้เมาส์หรือแตะค้างเพื่อดูภาษาอังกฤษต้นฉบับ) ตัวเลขยก<sup class="fn"><a href="#fnotes">1</a></sup>คือนาทีในคลิปที่รวมไว้ท้ายบท</p>
+
+<p>ทุกโมเดลตั้งแต่ Lesson 4 ถึง 11 พยากรณ์ "ค่า" ของอนาคต บทนี้มีสองเรื่อง เรื่องแรกพยากรณ์ "ความกว้างของการแกว่ง" ของอนาคต ซึ่งการเงินเรียกว่า volatility<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup> เรื่องที่สองเอา neural network มาใช้กับ lag แบบเดียวกับ AR ข้อสอบเก่ามี ARCH/GARCH ราวปีละหนึ่งข้อ<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup> และควิซท้าย Class 12 ที่ให้ทำ ARCH/GARCH ครบทุกขั้นคือรูปแบบที่ final จะออกถ้าออก<sup class="fn"><a href="#fn-3" id="fnr-3">3</a></sup></p>
+
+<table class="map">
+<tr><th>คำถาม</th><th>โมเดล</th><th>อ่านจากอะไร</th><th>ตอน</th></tr>
+<tr><td>พรุ่งนี้ return จะแกว่งกว้างแค่ไหน</td><td>ARCH(p), GARCH(p,q)</td><td>ACF ของ return² เป็นแบบ AR, ArchTest reject</td><td><a href="#s1">1</a>–<a href="#s4">4</a></td></tr>
+<tr><td>พรุ่งนี้ค่าจะเป็นเท่าไร โดยให้ lag มีผลแบบไม่เป็นเส้นตรง</td><td>NNAR(p,P,k)[s]</td><td>เลือก p ด้วย AIC ของ AR เส้นตรง k ≈ ครึ่งของ input</td><td><a href="#s5">5</a></td></tr>
+</table>
+
+<p class="legend">สีในสมการ: \(\shk{\varepsilon_t}\) สีฟ้าคือ shock ที่มองไม่เห็น · \(\prm{\alpha},\prm{\beta}\) สีส้มคือพารามิเตอร์ที่ต้องประมาณ</p>
+
+<!-- ===================================================== -->
+<h2 id="s1">1. ทำไมต้องมีโมเดลของความแปรปรวน</h2>
+
+<h3 id="s1-mean">1.1 Mean model กับ variance model</h3>
+
+<p class="pic">พยากรณ์อากาศบอกว่าพรุ่งนี้ฝนตกเฉลี่ย 10 มม. ข้อมูลนี้ยังไม่พอถ้าต้องตัดสินใจจัดงานกลางแจ้ง เพราะอยากรู้ด้วยว่าอาจตกได้ถึง 60 มม. หรือไม่ ARIMA ให้ตัวเลขแรก ARCH/GARCH ให้ตัวเลขหลัง</p>
+
+<p>สไลด์สรุปไว้สองบรรทัด: <mark class="src" data-p="2" title="ARIMA is a mean model.">ARIMA เป็นโมเดลของค่าเฉลี่ย</mark> และ <mark class="src" data-p="2" title="ARCH/GARCH is a variance model.">ARCH/GARCH เป็นโมเดลของความแปรปรวน</mark> ใช้เมื่อเป้าหมายคือ <mark class="src" data-p="2" title="to analyze and forecast volatility, which is important for various financial applications, including asset allocation, trading strategies, and risk management">วิเคราะห์และพยากรณ์ความผันผวน ซึ่งสำคัญกับงานการเงิน เช่น การจัดสรรสินทรัพย์ กลยุทธ์การซื้อขาย และการบริหารความเสี่ยง</mark> ตัวอย่างที่อาจารย์ยกคือ Value at Risk<sup class="fn"><a href="#fn-4" id="fnr-4">4</a></sup></p>
+
+<table>
+<tr><th></th><th>Mean model (ARIMA, ETS, VAR)</th><th>Variance model (ARCH, GARCH)</th></tr>
+<tr><td>พยากรณ์อะไร</td><td>\(E(X_{t+h}\mid \text{อดีต})\)</td><td>\(\mathrm{Var}(X_{t+h}\mid \text{อดีต})=\sigma^2_{t+h}\)</td></tr>
+<tr><td>สมมติเรื่อง σ²</td><td>คงที่ตลอดเวลา ช่วงพยากรณ์ของ Lesson 8 จึงกว้างเท่ากันไม่ว่าตลาดสงบหรือวุ่น</td><td>เปลี่ยนตามอดีต ช่วงพยากรณ์กว้างขึ้นหลังวันที่แกว่งแรง</td></tr>
+<tr><td>ข้อมูลที่เหมาะ</td><td>ยอดขาย อุณหภูมิ</td><td>rate of return ของหุ้น ดัชนี ค่าเงิน</td></tr>
+</table>
+
+<p class="trap">สองแบบนี้ใช้ร่วมกันได้ <code>ugarchspec</code> มีทั้ง <code>mean.model</code> (ARMA) และ <code>variance.model</code> (GARCH) ในคำสั่งเดียว ตัวอย่างในบทนี้ตั้ง mean model เป็น ARMA(0,0) คือค่าเฉลี่ยคงที่ จึงพยากรณ์ค่าเฉลี่ยเป็นเส้นตรง แต่ sigma เปลี่ยนทุกวัน (ตอน 4)</p>
+
+<h3 id="s1-dow">1.2 Rate of return ของ Dow: ตัวมันดูเหมือน white noise แต่กำลังสองไม่ใช่</h3>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> ACF ของ return เงียบเหมือน white noise แต่ ACF ของ return² ทะลุเส้นหลาย lag ข้อมูลนี้จึงมีโครงสร้างซ่อนอยู่ในความแปรปรวน ไม่ใช่ในค่าเฉลี่ย</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p04.png" alt="Slide 11 หน้า 4: Dow Jones daily rates of return 1971–2020" loading="lazy">
+<figcaption>Slide 11 หน้า 4 — Dow Jones daily rates of return 1971–2020</figcaption>
+</figure>
+
+<p>อนุกรม rate of return รายวันของ Dow แกว่งรอบศูนย์ตลอด 50 ปี ค่าเฉลี่ยไม่ขยับ แต่ <mark class="src" data-p="4" title="The rates of return clearly look more variable during some time periods than they do in others.">บางช่วงแกว่งแรงกว่าช่วงอื่นอย่างชัดเจน</mark> เช่น Black Monday ปี 1987 และช่วงต้นของ COVID ADF test บอกว่าอนุกรมนี้นิ่ง<sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup> สไลด์อธิบายว่าความแปรปรวน <mark class="src" data-p="5" title="doesn’t change gradually in time but rather experiences sudden periods of increased and decreased variability (or volatility)">ไม่ได้เปลี่ยนอย่างค่อยเป็นค่อยไป แต่เพิ่มหรือลดอย่างฉับพลันเป็นช่วง ๆ</mark> และเรียกพฤติกรรมนี้ว่า <mark class="src" data-p="5" title="conditional heteroskedasticity">ความแปรปรวนไม่คงที่แบบมีเงื่อนไข (conditional heteroskedasticity)</mark></p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p06.png" alt="Slide 11 หน้า 6: ACF ของ return 1,000 วันตั้งแต่ ก.ค. 1999" loading="lazy">
+<figcaption>Slide 11 หน้า 6 — ACF ของ return 1,000 วันตั้งแต่ ก.ค. 1999</figcaption>
+</figure>
+
+<p>เมื่อดูใกล้ ๆ 1,000 วันแรกตั้งแต่กรกฎาคม 1999 <mark class="src" data-p="6" title="the sample autocorrelations behave like sample autocorrelations of white noise">ACF ของตัวอย่างเป็นเหมือน ACF ของ white noise</mark> ถ้าหยุดที่ขั้นตอนของ Lesson 7 จะสรุปว่าเป็น ARIMA(0,0,0) ไม่มีอะไรให้โมเดล และ <mark class="src" data-p="7" title="standard models such as ARMA and ARIMA are not designed to model this type of behavior">ARMA และ ARIMA ไม่ได้ออกแบบมาสำหรับพฤติกรรมนี้</mark></p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p08.png" alt="Slide 11 หน้า 8: ACF ของ return² มีลักษณะแบบ AR" loading="lazy">
+<figcaption>Slide 11 หน้า 8 — ACF ของ return² มีลักษณะแบบ AR</figcaption>
+</figure>
+
+<p>ทางออกคือยกกำลังสอง ค่าที่แกว่งบวกลบจะกลายเป็นบวกทั้งหมด<sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup> กราฟของ <mark class="src" data-p="7" title="the squared rates of return">rate of return ยกกำลังสอง</mark> เน้นยอดแหลมให้เห็นชัด และ <mark class="src" data-p="8" title="the sample autocorrelations of the squared data behave somewhat like the autocorrelations of an AR process. That is, the squared data are correlated.">ACF ของข้อมูลกำลังสองมีลักษณะคล้าย ACF ของ AR นั่นคือข้อมูลกำลังสองสัมพันธ์กัน</mark> ACF ลดลงช้า ๆ แบบที่ Lesson 6 สอนว่าเป็นสัญญาณของ AR</p>
+
+<p>Engle (1982) จึงเสนอ <mark class="src" data-p="8" title="the autoregressive conditional heteroskedastic (ARCH) model">โมเดล autoregressive conditional heteroskedastic (ARCH)</mark> โดย <mark class="src" data-p="8" title="Engle’s idea was to model the squared data as an AR process.">แนวคิดของ Engle คือมองข้อมูลกำลังสองเป็นกระบวนการ AR</mark> ชื่อของโมเดลบอกครบทั้งสามส่วน:</p>
+
+<table>
+<tr><th>คำในชื่อ</th><th>ความหมายบนสไลด์ (หน้า 9)</th></tr>
+<tr><td>AutoRegressive</td><td><mark class="src" data-p="9" title="depends on its own past.">ขึ้นกับอดีตของตัวเอง</mark></td></tr>
+<tr><td>Conditional</td><td><mark class="src" data-p="9" title="variance depends upon past information.">ความแปรปรวนขึ้นกับข้อมูลในอดีต</mark></td></tr>
+<tr><td>Heteroskedasticity</td><td><mark class="src" data-p="9" title="it is for non-constant variance.">ใช้กับความแปรปรวนที่ไม่คงที่</mark></td></tr>
+</table>
+
+<p class="trap">สไลด์หน้า 5 เขียนว่า <mark class="src" data-p="5" title="because the variance changes with time, this type of data should be modeled as a nonstationary process">เพราะความแปรปรวนเปลี่ยนตามเวลา ข้อมูลแบบนี้ควรมองเป็นกระบวนการที่ไม่นิ่ง</mark> แต่ ADF บอกว่านิ่ง สองข้อนี้ไม่ขัดกัน ADF ตรวจ unit root ในค่าเฉลี่ย (Lesson 7) ส่วนที่เปลี่ยนคือความแปรปรวน<b>แบบมีเงื่อนไข</b> (เมื่อรู้อดีต) ความแปรปรวนแบบไม่มีเงื่อนไขของ ARCH(1) เท่ากับ \(\prm{\alpha_0}/(1-\prm{\alpha_1})\) ซึ่งคงที่ (ตอน 2.1) ห้าม difference ข้อมูลแบบนี้เพื่อแก้ปัญหาความแปรปรวน เพราะ difference แก้ได้แค่ค่าเฉลี่ยที่เดิน</p>
+
+<details class="check"><summary>ACF ของ residual จาก ARIMA ผ่าน Ljung-Box แล้ว (p-value สูง) แปลว่าไม่ต้องใช้ GARCH ใช่ไหม</summary>
+<p>ไม่ใช่ สไลด์หน้า 19 เตือนว่า residual อาจดูเป็น white noise แต่ residual² ไม่เป็น ต้องตรวจ ACF หรือ Ljung-Box ของ residual² ด้วย หรือใช้ ArchTest</p>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 1–3, 5, 7 และ 9)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts11-p01.png" alt="Slide 11 หน้า 1: ARCH and GARCH Models (หน้าปก)" loading="lazy">
+<figcaption>Slide 11 หน้า 1 — ARCH and GARCH Models (หน้าปก)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p02.png" alt="Slide 11 หน้า 2: Why study ARCH/GARCH: ARIMA is a mean model, ARCH/GARCH is a variance model" loading="lazy">
+<figcaption>Slide 11 หน้า 2 — Why study ARCH/GARCH: ARIMA is a mean model, ARCH/GARCH is a variance model</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p03.png" alt="Slide 11 หน้า 3: Motivation: ความแปรปรวนเปลี่ยนตามเวลา" loading="lazy">
+<figcaption>Slide 11 หน้า 3 — Motivation: ความแปรปรวนเปลี่ยนตามเวลา</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p05.png" alt="Slide 11 หน้า 5: Conditional heteroskedasticity" loading="lazy">
+<figcaption>Slide 11 หน้า 5 — Conditional heteroskedasticity</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p07.png" alt="Slide 11 หน้า 7: กราฟ squared rates of return" loading="lazy">
+<figcaption>Slide 11 หน้า 7 — กราฟ squared rates of return</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p09.png" alt="Slide 11 หน้า 9: AutoRegressive Conditional Heteroskedasticity: ความหมายของชื่อ" loading="lazy">
+<figcaption>Slide 11 หน้า 9 — AutoRegressive Conditional Heteroskedasticity: ความหมายของชื่อ</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. ARCH(1) และ ARCH(p)</h2>
+
+<h3 id="s2-arch1">2.1 ARCH(1): ขนาดของวันนี้กำหนดความกว้างของพรุ่งนี้</h3>
+
+<p class="pic">คิดถึงคนเดินบนสะพานแขวน ถ้าเมื่อกี้สะพานโยกแรง ก้าวต่อไปก็มีโอกาสโยกแรงอีก แต่ไม่รู้ว่าจะโยกไปทางซ้ายหรือขวา ขนาดของการโยกส่งต่อกันได้ แต่ทิศทางเดาไม่ได้</p>
+
+<div class="eq">\[u_t=\shk{\varepsilon_t}\sqrt{\prm{\alpha_0}+\prm{\alpha_1}u_{t-1}^2}\qquad\Longleftrightarrow\qquad u_t=\shk{\varepsilon_t}\,\sigma_t,\quad \sigma_t^2=\prm{\alpha_0}+\prm{\alpha_1}u_{t-1}^2\]</div>
+<p class="say">ค่าวันนี้ = เสียงสุ่มมาตรฐาน × ความกว้างของวันนี้ และความกว้างของวันนี้คำนวณจากกำลังสองของค่าเมื่อวาน อาจารย์เขียนด้วยมือเป็น \(X_t=w_t\sigma_t\) ซึ่งคือสมการเดียวกัน<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup></p>
+
+<table class="sym">
+<tr><th>สัญลักษณ์</th><th>ความหมาย</th></tr>
+<tr><td>\(u_t\)</td><td>ข้อมูลที่ค่าเฉลี่ยเป็นศูนย์ เช่น rate of return หรือ residual จาก mean model</td></tr>
+<tr><td>\(\shk{\varepsilon_t}\)</td><td><mark class="src" data-p="10" title="zero-mean normally distributed white noise with unit variance">white noise แจกแจงปกติ ค่าเฉลี่ยศูนย์ ความแปรปรวนหนึ่ง</mark> ที่ไม่สัมพันธ์กับ \(u_{t-1}^2\)</td></tr>
+<tr><td>\(\prm{\alpha_0}>0,\ \prm{\alpha_1}\ge 0\)</td><td>ค่าคงที่ที่ต้องประมาณ \(\prm{\alpha_1}\) ยิ่งใหญ่ shock เมื่อวานยิ่งมีผล</td></tr>
+<tr><td>\(\sigma_t\)</td><td>volatility ของวันที่ t ซึ่งรู้ค่าได้ตั้งแต่สิ้นวัน t − 1</td></tr>
+</table>
+
+<p class="num">ให้ \(\prm{\alpha_0}=0.2,\ \prm{\alpha_1}=0.7\) ถ้าเมื่อวาน \(u_{t-1}=2\) ได้ \(\sigma_t^2=0.2+0.7(4)=3.0\) หรือ \(\sigma_t=1.73\) ถ้าเมื่อวาน \(u_{t-1}=0\) ได้ \(\sigma_t=\sqrt{0.2}=0.45\) วันหลังวันที่แกว่งแรงจึงมีช่วง ±2σ กว้างเกือบสี่เท่า ความแปรปรวนระยะยาวคือ \(0.2/(1-0.7)=0.67\) ซึ่งต้องมี \(\prm{\alpha_1}<1\)</p>
+
+<figure class="viz"><img src="../assets/viz/l12-arch.svg" alt="ARCH(1) จำลอง: แถบ ±2σ ขยายทันทีหลัง shock ใหญ่ แล้วค่อย ๆ แคบลง"></figure>
+<p>เส้นดำคือ ARCH(1) ที่จำลองด้วย \(\prm{\alpha_0}=0.2,\ \prm{\alpha_1}=0.7\) แถบฟ้าคือ ±2σₜ ที่คำนวณจากค่าเมื่อวาน หลังจุดที่วงไว้ แถบกว้างขึ้นทันที แล้วแคบลงเมื่อค่าที่ตามมาเล็ก ช่วงแกว่งแรงจึงมาเป็นกลุ่ม (volatility clustering) ขณะที่เส้นดำยังขึ้นลงสุ่มรอบศูนย์</p>
+
+<p class="trap">สไลด์หน้า 11 เน้นว่า <mark class="src" data-p="11" title="If u_{t−1} is “larger than usual” then there is increased uncertainty about the upcoming value of u_t.">ถ้า u_{t−1} ใหญ่กว่าปกติ ความไม่แน่นอนของ u_t ที่จะมาถึงก็เพิ่มขึ้น</mark> <mark class="src" data-p="11" title="However, it does not indicate that u_t itself will be large. It may be large, small, or “in the middle”.">แต่ไม่ได้บอกว่า u_t จะใหญ่ อาจใหญ่ เล็ก หรือกลาง ๆ ก็ได้</mark> ข้อสอบที่ถามว่า "shock ใหญ่เมื่อวานทำให้ return วันนี้สูงขึ้น" จึงผิด ที่สูงขึ้นคือ σₜ</p>
+
+<h3 id="s2-ar">2.2 u² เป็น AR(1): ทำไม ACF ของกำลังสองถึงทะลุเส้น</h3>
+
+<div class="eq">\[u_t^2=\prm{\alpha_0}+\prm{\alpha_1}u_{t-1}^2+\shk{w_t}\]</div>
+<p class="say">ย้ายสมการ ARCH(1) แล้ว \(u_t^2\) มีรูปเหมือน AR(1) ของ Lesson 5 ที่มี φ = \(\prm{\alpha_1}\) โดย \(\shk{w_t}\) เป็น <mark class="src" data-p="11" title="a zero mean with, uncorrelated noise process (proof omitted)">noise ค่าเฉลี่ยศูนย์ที่ไม่สัมพันธ์กัน (ละการพิสูจน์)</mark> ACF ของ u² ที่ lag h จึงลดลงประมาณ \(\prm{\alpha_1}^h\) ส่วน u เองไม่สัมพันธ์กันเลย</p>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> ยิ่ง α₁ ใหญ่ ACF ของ u² ยิ่งสูงและลดช้า ขณะที่ ACF ของ u เป็นศูนย์ทุกกรณี</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p13.png" alt="Slide 11 หน้า 13: ARCH(1) จำลองสามชุด: กราฟและ ACF ของ u" loading="lazy">
+<figcaption>Slide 11 หน้า 13 — ARCH(1) จำลองสามชุด: กราฟและ ACF ของ u</figcaption>
+</figure>
+
+<p>โค้ดหน้า 12 ใช้ <code>gen.arch.wge</code> สร้าง ARCH(1) 500 ค่าสามชุด คือ α₁ = 0.4, 0.7 และ 0.9 ACF ของ u ทั้งสามชุดอยู่ในเส้นประเกือบทั้งหมด อนุกรมที่ α₁ = 0.9 มีช่วงระเบิดสูงชัดที่สุดแต่ ACF ก็ยังเงียบ</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p15.png" alt="Slide 11 หน้า 15: กราฟและ ACF ของ u² สามชุด" loading="lazy">
+<figcaption>Slide 11 หน้า 15 — กราฟและ ACF ของ u² สามชุด</figcaption>
+</figure>
+
+<p>พอยกกำลังสอง ACF ที่ lag 1 ของ u² เป็น 0.32, 0.39 และ 0.57 ตามลำดับ (รันซ้ำด้วย seed 11) เพิ่มขึ้นตาม α₁ ตามสมการ AR(1) ข้างบน ค่าจริงต่ำกว่า α₁ เพราะ ACF ของกำลังสองถูกดึงลงด้วยค่าสุดโต่งไม่กี่ค่า แต่ทิศทางตรงกับทฤษฎี</p>
+
+<h3 id="s2-archp">2.3 ARCH(p) และ conditional variance</h3>
+
+<div class="eq">\[u_t=\shk{\varepsilon_t}\sqrt{\prm{\alpha_0}+\prm{\alpha_1}u_{t-1}^2+\cdots+\prm{\alpha_p}u_{t-p}^2},\qquad \sigma^2_{t\mid t-1}=\prm{\alpha_0}+\prm{\alpha_1}u_{t-1}^2+\cdots+\prm{\alpha_p}u_{t-p}^2\]</div>
+<p class="say">ARCH(p) ใช้กำลังสองของ p วันก่อน เพื่อ <mark class="src" data-p="16" title="models longer stretches of volatility">จับช่วงความผันผวนที่ยาวขึ้น</mark> และ u² เป็นแบบ AR(p) \(\sigma^2_{t\mid t-1}\) อ่านว่า "ความแปรปรวนของวันที่ t เมื่อรู้ข้อมูลถึงวันที่ t − 1" ซึ่งคือ <mark class="src" data-p="17" title="the conditional variance of u_t given data at times up to and including t − 1">ความแปรปรวนแบบมีเงื่อนไข</mark> ที่ใช้ในตอนต่อไป</p>
+
+<details class="check"><summary>ARCH(2) มี α₀ = 0.1, α₁ = 0.5, α₂ = 0.4 ถ้า u_{t−1} = 1 และ u_{t−2} = −2 จง σ²_t</summary>
+<p>σ²_t = 0.1 + 0.5(1)² + 0.4(−2)² = 0.1 + 0.5 + 1.6 = 2.2 เครื่องหมายลบหายไปเพราะยกกำลังสอง ทิศของ shock จึงไม่มีผลกับ volatility</p>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 10–12, 14, 16–17)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts11-p10.png" alt="Slide 11 หน้า 10: นิยาม ARCH(1)" loading="lazy">
+<figcaption>Slide 11 หน้า 10 — นิยาม ARCH(1)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p11.png" alt="Slide 11 หน้า 11: u² เป็น AR(1); u ใหญ่เพิ่มความไม่แน่นอน ไม่ได้ทำให้ u ใหญ่" loading="lazy">
+<figcaption>Slide 11 หน้า 11 — u² เป็น AR(1); u ใหญ่เพิ่มความไม่แน่นอน ไม่ได้ทำให้ u ใหญ่</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p12.png" alt="Slide 11 หน้า 12: โค้ดจำลอง ARCH(1): gen.arch.wge" loading="lazy">
+<figcaption>Slide 11 หน้า 12 — โค้ดจำลอง ARCH(1): gen.arch.wge</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p14.png" alt="Slide 11 หน้า 14: โค้ดกราฟและ ACF ของ u²" loading="lazy">
+<figcaption>Slide 11 หน้า 14 — โค้ดกราฟและ ACF ของ u²</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p16.png" alt="Slide 11 หน้า 16: นิยาม ARCH(p)" loading="lazy">
+<figcaption>Slide 11 หน้า 16 — นิยาม ARCH(p)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p17.png" alt="Slide 11 หน้า 17: u² เป็น AR(p) และ conditional variance" loading="lazy">
+<figcaption>Slide 11 หน้า 17 — u² เป็น AR(p) และ conditional variance</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s3">3. GARCH(p,q) และการตรวจโมเดล</h2>
+
+<h3 id="s3-garch">3.1 GARCH: เพิ่ม σ² ของเมื่อวานเข้าไป</h3>
+
+<p class="pic">ARCH จำแค่ "เมื่อวานโยกแรงแค่ไหน" GARCH จำเพิ่มว่า "ช่วงนี้ทั้งช่วงโยกแรงแค่ไหน" ผ่าน σ² ของเมื่อวาน ความผันผวนจึงค้างอยู่นานขึ้นด้วยพารามิเตอร์น้อยตัว</p>
+
+<div class="eq">\[u_t=\shk{\varepsilon_t}\sqrt{\prm{\alpha_0}+\prm{\alpha_1}u_{t-1}^2+\cdots+\prm{\alpha_p}u_{t-p}^2+\prm{\beta_1}\sigma^2_{t-1\mid t-2}+\cdots+\prm{\beta_q}\sigma^2_{t-q\mid t-q-1}}\]</div>
+<p class="say">GARCH(1,1) ที่อาจารย์เขียนบนกระดานคือ \(\sigma_t^2=\prm{\alpha_0}+\prm{\alpha_1}X_{t-1}^2+\prm{\beta_1}\sigma_{t-1}^2\)<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup> GARCH <mark class="src" data-p="18" title="analogous to the ARMA generalization of an AR model">ขยาย ARCH แบบเดียวกับที่ ARMA ขยาย AR</mark> (Bollerslev, 1986) ส่วน α คือ "AR" ของ u² และส่วน β คือค่าเฉลี่ยถ่วงน้ำหนักของ σ² ในอดีต</p>
+
+<table class="sym">
+<tr><th>สัญลักษณ์ในสไลด์นี้</th><th>ความหมาย</th></tr>
+<tr><td>p</td><td>จำนวน \(\prm{\alpha}\) คือ lag ของ u² (ส่วน ARCH)</td></tr>
+<tr><td>q</td><td>จำนวน \(\prm{\beta}\) คือ lag ของ σ² (ส่วน GARCH)</td></tr>
+<tr><td>GARCH(p,0)</td><td>ไม่มี β จึงเท่ากับ ARCH(p)<sup class="fn"><a href="#fn-9" id="fnr-9">9</a></sup></td></tr>
+</table>
+
+<table>
+<tr><th></th><th>ARCH(p)</th><th>GARCH(p,q)</th></tr>
+<tr><td>σ²ₜ ขึ้นกับ</td><td>u² ของ p วันก่อนเท่านั้น</td><td>u² ของ p วันก่อน และ σ² ของ q วันก่อน</td></tr>
+<tr><td>หน้าตาของกราฟ</td><td>bursty ระเบิดแล้วหายเร็ว</td><td>less bursty ช่วงผันผวนอยู่นานกว่า<sup class="fn"><a href="#fn-10" id="fnr-10">10</a></sup></td></tr>
+<tr><td>จำนวนพารามิเตอร์</td><td>ต้องใช้ p มากเพื่อจับช่วงยาว</td><td><mark class="src" data-p="19" title="a GARCH model can often be obtained that has fewer parameters than an appropriately fitting ARCH model">มักได้โมเดลที่พารามิเตอร์น้อยกว่า ARCH ที่ฟิตพอกัน</mark></td></tr>
+<tr><td>เทียบกับ mean model</td><td>เหมือน AR</td><td>เหมือน ARMA</td></tr>
+</table>
+
+<p class="trap">หลายตำรา (และ Wikipedia) ให้ p เป็นจำนวน β และ q เป็นจำนวน α ซึ่งกลับกับสไลด์นี้ ในข้อสอบให้ยึดสไลด์: GARCH(2,1) มี α₁, α₂ และ β₁ ตรงกับ output ของ R ในตอน 4</p>
+
+<h3 id="s3-diag">3.2 ตรวจโมเดลด้วย residual และ residual²</h3>
+
+<p>สไลด์หน้า 19 เตือนเรื่องที่เชื่อมกับ Lesson 8 โดยตรง: <mark class="src" data-p="19" title="It is possible for the residuals from an ARMA or ARIMA fit to appear to be white and pass the standard diagnostic tests, but for the squared residuals to not be white.">residual จาก ARMA หรือ ARIMA อาจดูเป็น white และผ่านการตรวจมาตรฐาน แต่ residual² ไม่เป็น white</mark> จึง <mark class="src" data-p="19" title="It is good practice to check the squared residuals, especially if conditional heteroskedasticity is suspected.">ควรตรวจ residual² เสมอ โดยเฉพาะเมื่อสงสัยว่ามี conditional heteroskedasticity</mark></p>
+
+<p>หลังฟิต GARCH แล้ว <mark class="src" data-p="20" title="A check for model appropriateness is to check the residuals to see if they appear to be white noise and to check for normality.">ตรวจความเหมาะสมโดยดูว่า residual เป็น white noise และแจกแจงปกติหรือไม่</mark> ด้วยสองเทสต์ ซึ่งเพิ่มเข้าตาราง H0 ที่สะสมมาตั้งแต่ Lesson 7:</p>
+
+<table>
+<tr><th>เทสต์</th><th>H0</th><th>อยากได้ผลแบบไหน</th><th>บท</th></tr>
+<tr><td>ADF <code>adf.test</code></td><td>ไม่นิ่ง (มี unit root)</td><td>reject (p &lt; 0.05)</td><td>Lesson 7</td></tr>
+<tr><td>Ljung-Box <code>Box.test</code></td><td><mark class="src" data-p="20" title="designed to test the null hypothesis of white noise">white noise</mark></td><td>fail to reject (p สูง)</td><td>Lesson 8</td></tr>
+<tr><td>Jarque-Bera</td><td><mark class="src" data-p="20" title="null hypothesis: normal distribution">แจกแจงปกติ</mark> (ดู <mark class="src" data-p="20" title="skewness and kurtosis">ความเบ้และความโด่ง</mark>)</td><td>fail to reject (p สูง)</td><td>บทนี้</td></tr>
+<tr><td>ArchTest (FinTS)</td><td>ไม่มี ARCH effect</td><td>reject ก่อนเริ่มสร้างโมเดล<sup class="fn"><a href="#fn-11" id="fnr-11">11</a></sup></td><td>บทนี้</td></tr>
+<tr><td>Granger</td><td>X ไม่ Granger-cause Y</td><td>reject ถ้าอยากใช้ X</td><td>Lesson 11</td></tr>
+</table>
+
+<h3 id="s3-sim">3.3 เลือก p, q และกับดักของคำสั่ง garch()</h3>
+
+<p>อาจารย์ให้ลอง p, q ตั้งแต่ 1 ถึง 3 แล้วตรวจตามลำดับ: Ljung-Box ของ residual² ต้องผ่านก่อน รองลงมาคือพารามิเตอร์ significant และสุดท้ายคือ Jarque-Bera ไม่จำเป็นต้องใช้ AIC<sup class="fn"><a href="#fn-12" id="fnr-12">12</a></sup> ลำดับนี้ต่างจาก Lesson 7 ที่ใช้ AIC เป็นหลัก เพราะเป้าหมายคือให้ residual² ไม่เหลือโครงสร้างความแปรปรวน</p>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> แม้รู้โมเดลจริงและมีข้อมูล 1,000 ค่า ค่าประมาณก็ยังคลาดได้มาก จึงต้องตัดสินด้วยการตรวจ residual ไม่ใช่ด้วยความใกล้ของพารามิเตอร์</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p22.png" alt="Slide 11 หน้า 22: ARCH(2), ARCH(3) และ GARCH(1,1) ที่จำลอง" loading="lazy">
+<figcaption>Slide 11 หน้า 22 — ARCH(2), ARCH(3) และ GARCH(1,1) ที่จำลอง</figcaption>
+</figure>
+
+<p>สไลด์หน้า 21 จำลอง ARCH(2), ARCH(3) และ GARCH(1,1) ทั้งสามแบบ <mark class="src" data-p="21" title="can model volatility that continues over a period of time">จับความผันผวนที่ต่อเนื่องเป็นช่วงได้</mark> พอฟิตกลับด้วย <code>garch()</code> GARCH(1,1) ที่ β₁ จริงเท่ากับ 0.5 ได้ค่าประมาณ 0.34 (รันซ้ำ) กราฟ GARCH ช่วงผันผวนยาวกว่า ARCH ตามตารางในตอน 3.1</p>
+
+<p class="trap">คำสั่ง <code>garch(x, order = c(q, p))</code> ของ tseries ใส่ลำดับกลับกับชื่อโมเดล<sup class="fn"><a href="#fn-13" id="fnr-13">13</a></sup> ARCH(2) คือ GARCH(2,0) ต้องพิมพ์ <code>order = c(0, 2)</code> และ GARCH(2,1) ต้องพิมพ์ <code>c(1, 2)</code> แต่ <code>ugarchspec(garchOrder = c(p, q))</code> ของ rugarch เรียงตามชื่อโมเดลตามปกติ<sup class="fn"><a href="#fn-14" id="fnr-14">14</a></sup> ข้อสอบที่ให้โค้ดมาให้อ่านจะใช้จุดนี้เป็นตัวหลอก</p>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 18–21)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts11-p18.png" alt="Slide 11 หน้า 18: นิยาม GARCH(p,q)" loading="lazy">
+<figcaption>Slide 11 หน้า 18 — นิยาม GARCH(p,q)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p19.png" alt="Slide 11 หน้า 19: GARCH ใช้พารามิเตอร์น้อยกว่า; ตรวจ squared residuals" loading="lazy">
+<figcaption>Slide 11 หน้า 19 — GARCH ใช้พารามิเตอร์น้อยกว่า; ตรวจ squared residuals</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p20.png" alt="Slide 11 หน้า 20: Jarque-Bera และ Ljung-Box" loading="lazy">
+<figcaption>Slide 11 หน้า 20 — Jarque-Bera และ Ljung-Box</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p21.png" alt="Slide 11 หน้า 21: Generating realizations from ARCH/GARCH" loading="lazy">
+<figcaption>Slide 11 หน้า 21 — Generating realizations from ARCH/GARCH</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. ทำครบทุกขั้น: rate of return ของ Dow ปี 2000</h2>
+
+<h3 id="s4-steps">4.1 ห้าขั้นตอนที่ข้อสอบจะถาม</h3>
+
+<p>ไฟล์ R_codes.txt จัดเป็นขั้นตอน 0–5 ใช้ข้อมูล <code>rate[7200:8199]</code> ของ tswge ซึ่งคือ <mark class="src" data-p="23" title="the first 1,000 trading days beginning in July 1999">1,000 วันทำการแรกนับจากกรกฎาคม 1999</mark></p>
+
+<table>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>ผลที่ได้</th><th>สรุป</th></tr>
+<tr><td>1</td><td><code>adf.test</code> (H0 ไม่นิ่ง)</td><td>p = 0.01</td><td>reject: นิ่ง ไม่ต้อง difference<sup class="fn"><a href="#fn-15" id="fnr-15">15</a></sup></td></tr>
+<tr><td>2</td><td><code>plot.ts</code></td><td>มีช่วงแกว่งแรงเป็นกลุ่ม</td><td>สงสัย volatility clustering</td></tr>
+<tr><td>3</td><td><code>ArchTest</code> (H0 ไม่มี ARCH effect)</td><td>χ² = 110.38, df = 12, p &lt; 2.2e-16</td><td>reject: มี ARCH effect ใช้ GARCH ได้</td></tr>
+<tr><td>4</td><td>ลอง p, q แล้ว <code>ugarchspec</code> + <code>ugarchfit</code></td><td>เลือก GARCH(2,1)</td><td>ตอน 4.2</td></tr>
+<tr><td>5</td><td><code>ugarchforecast</code></td><td>sigma 10 วัน</td><td>ตอน 4.3</td></tr>
+</table>
+
+<p class="trap">ArchTest ควรทำก่อนลอง p, q อาจารย์โชว์ GARCH(2,1) ก่อนเพราะรู้แล้วว่าใช้ได้ แต่ลำดับที่ถูกคือเทสต์ก่อน<sup class="fn"><a href="#fn-16" id="fnr-16">16</a></sup> ถ้า ArchTest ไม่ reject ก็ไม่มีความแปรปรวนให้โมเดล</p>
+
+<h3 id="s4-read">4.2 อ่าน output ของ GARCH(2,1)</h3>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> โมเดลที่ "ดีที่สุด" ยังมี α₁ ไม่ significant และไม่ผ่าน Jarque-Bera แต่ผ่านเทสต์สำคัญที่สุดคือ Ljung-Box ของ residual²</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p24.png" alt="Slide 11 หน้า 24: garch(rate.2000, order = c(1,2)): ค่าสัมประสิทธิ์และ diagnostic tests" loading="lazy">
+<figcaption>Slide 11 หน้า 24 — garch(rate.2000, order = c(1,2)): ค่าสัมประสิทธิ์และ diagnostic tests</figcaption>
+</figure>
+
+<p>สไลด์บอกว่า <mark class="src" data-p="24" title="the two that performed best in terms of producing residuals and squared residuals that were approximately white noise were GARCH(1,1) and GARCH(2,1) with a slight edge given to GARCH(2,1)">สองโมเดลที่ให้ residual และ residual² ใกล้ white noise ที่สุดคือ GARCH(1,1) และ GARCH(2,1) โดย GARCH(2,1) ดีกว่าเล็กน้อย</mark> อ่าน output ทีละบรรทัด:</p>
+
+<table>
+<tr><th>บรรทัด</th><th>ค่า</th><th>อ่านว่า</th></tr>
+<tr><td>a1</td><td>0.0157, p = 0.55</td><td>u² ของเมื่อวานไม่มีผลอย่างมีนัยสำคัญ</td></tr>
+<tr><td>a2</td><td>0.0937, p = 0.0004</td><td>u² ของสองวันก่อนมีผล</td></tr>
+<tr><td>b1</td><td>0.847, p &lt; 2e-16</td><td>σ² ของเมื่อวานคือตัวหลัก</td></tr>
+<tr><td>Jarque-Bera</td><td>p = 2.2e-13</td><td>reject: residual ไม่ปกติ</td></tr>
+<tr><td>Box-Ljung ของ Squared.Residuals</td><td>p = 0.97</td><td>fail to reject: residual² เป็น white noise โมเดลจับความแปรปรวนได้ครบ</td></tr>
+</table>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p25.png" alt="Slide 11 หน้า 25: สรุปผล GARCH(2,1) ของสไลด์" loading="lazy">
+<figcaption>Slide 11 หน้า 25 — สรุปผล GARCH(2,1) ของสไลด์</figcaption>
+</figure>
+
+<p>หน้า 25 สรุปตรงกับตาราง: <mark class="src" data-p="25" title="the main factor predicting volatility is the conditional variance σ²_{t−1|t−2}">ปัจจัยหลักที่พยากรณ์ความผันผวนคือ conditional variance ของเมื่อวาน</mark> (b1 = 0.847) <mark class="src" data-p="25" title="The Jarque-Bera test “doesn’t like” the skewness and kurtosis of the residuals at all and strongly rejects normality.">Jarque-Bera "ไม่ชอบ" ความเบ้และความโด่งของ residual เลย และ reject ความปกติอย่างแรง</mark> ขณะที่ <mark class="src" data-p="25" title="The Ljung-Box test on the squared residuals did not reject white noise">Ljung-Box ของ residual² ไม่ reject white noise</mark> จึงสรุปว่า <mark class="src" data-p="25" title="All things considered, the GARCH(2,1) model seems to be our best (but not perfect) choice.">เมื่อพิจารณาทุกอย่าง GARCH(2,1) เป็นตัวเลือกที่ดีที่สุด (แต่ไม่สมบูรณ์)</mark> ประโยคแรกของหน้านี้เขียนว่า <mark class="src" data-p="25" title="the data value two days ahead makes the most difference concerning the rate on day t">ค่าข้อมูล "สองวันข้างหน้า" ส่งผลต่อวันที่ t มากที่สุด</mark> ซึ่งหมายถึงสองวัน<b>ก่อน</b> (a2 > a1)</p>
+
+<h3 id="s4-fc">4.3 พยากรณ์ volatility ด้วย ugarch</h3>
+
+<div class="eq">\[\sigma_t^2=\prm{\omega}+\prm{\alpha_1}u_{t-1}^2+\prm{\alpha_2}u_{t-2}^2+\prm{\beta_1}\sigma_{t-1}^2\]</div>
+<p class="say"><code>ugarchfit</code> ใช้ชื่อ omega แทน α₀ และ mu คือค่าเฉลี่ยของ mean model<sup class="fn"><a href="#fn-17" id="fnr-17">17</a></sup> ได้ mu = 0.0028, omega = 0.0866, alpha1 = 0.0157, alpha2 = 0.0942, beta1 = 0.845 ใกล้กับ <code>garch()</code> อาจารย์ใช้ <code>garch()</code> ไว้ดูพารามิเตอร์และ ugarch ไว้พยากรณ์<sup class="fn"><a href="#fn-18" id="fnr-18">18</a></sup></p>
+
+<p class="num">ถ้าเมื่อวาน u = 1 สองวันก่อน u = 2 และ σ² เมื่อวาน = 1.2 ได้ σ²ₜ = 0.0866 + 0.0157(1) + 0.0942(4) + 0.845(1.2) = 1.49 หรือ σₜ = 1.22 ความแปรปรวนระยะยาวคือ ω/(1 − α₁ − α₂ − β₁) = 0.0866/0.0449 = 1.93 หรือ sd = 1.39 ผลรวม α + β = 0.955 ใกล้ 1 ความผันผวนจึงค้างอยู่นาน</p>
+
+<p>ผล <code>ugarchforecast</code> 10 วันข้างหน้าให้ sigma จาก 1.154 ขึ้นไปถึง 1.203<sup class="fn"><a href="#fn-19" id="fnr-19">19</a></sup> ค่าเพิ่มขึ้นช้า ๆ เพราะ volatility ปัจจุบันต่ำกว่าระดับระยะยาว 1.39 และค่อย ๆ กลับเข้าหาระดับนั้น ค่าพยากรณ์ของ series เองเป็นค่าคงที่ mu ทุกวัน เพราะตั้ง <code>armaOrder = c(0,0)</code><sup class="fn"><a href="#fn-20" id="fnr-20">20</a></sup></p>
+
+<p class="trap">rugarch มี GARCH หลายแบบ แต่คอร์สนี้สอนแค่ sGARCH (standard GARCH)<sup class="fn"><a href="#fn-21" id="fnr-21">21</a></sup> ถ้าโจทย์ให้ข้อมูลที่ยังไม่นิ่ง ให้ difference หรือใช้ return ก่อน แล้วค่อยเริ่มขั้นที่ 1</p>
+
+<details class="check"><summary>ArchTest ได้ p-value = 0.62 ควรทำอะไรต่อ</summary>
+<p>fail to reject H0 คือไม่พบ ARCH effect ไม่ต้องใช้ ARCH/GARCH ใช้ mean model เช่น ARIMA ตามปกติ</p>
+</details>
+
+<details class="fold"><summary>โค้ด R: ARCH analysis ครบทุกขั้น (R_codes.txt)</summary>
+<pre><code>library(tseries); library(rugarch); library(FinTS); library(tswge)
+data(rate); rate.2000 &lt;- rate[7200:8199]       # 1,000 วันตั้งแต่ ก.ค. 1999
+model &lt;- garch(rate.2000, order = c(1,2))        # c(q,p): GARCH(2,1) = α1, α2, β1
+summary(model)                                   # ค่าสัมประสิทธิ์ + Jarque-Bera + Box-Ljung ของ residual²
+adf.test(rate.2000)                              # ขั้น 1: H0 ไม่นิ่ง → p = 0.01 นิ่ง
+plot.ts(rate.2000)                               # ขั้น 2: ดู volatility clustering
+ArchTest(rate.2000)                              # ขั้น 3: H0 ไม่มี ARCH effect → p &lt; 2.2e-16
+rate_garch &lt;- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(2,1)),
+                         mean.model = list(armaOrder = c(0,0)))   # ขั้น 4: c(p,q) เรียงปกติ
+rate_fit &lt;- ugarchfit(data = rate.2000, spec = rate_garch)
+rate_fit                                         # mu, omega, alpha1, alpha2, beta1
+ugarchforecast(rate_fit, n.ahead = 10)           # ขั้น 5: sigma 1.154 ... 1.203</code></pre>
+<p>ไฟล์ของอาจารย์พิมพ์ <code>n.head=10</code> ซึ่ง R ไม่รู้จักและใช้ค่า default n.ahead = 10 แทน ผลจึงออกมาเป็น 10 วันเท่ากัน</p>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 23)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts11-p23.png" alt="Slide 11 หน้า 23: Dataset: The Dow daily rate of return (tswge rate)" loading="lazy">
+<figcaption>Slide 11 หน้า 23 — Dataset: The Dow daily rate of return (tswge rate)</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s5">5. NNAR: neural network ที่ใช้ lag เป็น input</h2>
+
+<h3 id="s5-nn">5.1 Neural network แบบ feed-forward</h3>
+
+<p class="pic">AR(p) คือการถ่วงน้ำหนัก lag แล้วบวกกันเป็นเส้นตรง neural network ทำแบบเดียวกันหลายชุดพร้อมกัน แล้วงอผลแต่ละชุดก่อนรวม จึงจับความสัมพันธ์ที่ไม่เป็นเส้นตรงได้</p>
+
+<p>Neural network <mark class="src" data-p="27" title="Neurons or nodes have weights that get adjusted as the learning proceeds">มี node ที่น้ำหนักถูกปรับระหว่างการเรียนรู้</mark> และ <mark class="src" data-p="27" title="There is an element of randomness. We would get different results">มีความสุ่มอยู่ในตัว รันแต่ละครั้งได้ผลต่างกัน</mark> แบบที่ใช้ในบทนี้คือ <mark class="src" data-p="28" title="a multilayer feed-forward network, where each layer of nodes receives inputs from the previous layers">feed-forward network หลายชั้น ที่แต่ละชั้นรับ input จากชั้นก่อนหน้า</mark> และ <mark class="src" data-p="28" title="The inputs to each node are combined using a weighted linear combination.">input ของแต่ละ node รวมกันด้วยผลรวมเชิงเส้นแบบถ่วงน้ำหนัก</mark> NNAR คือ Box-Jenkins บวก neural network ที่มี hidden layer ชั้นเดียว<sup class="fn"><a href="#fn-22" id="fnr-22">22</a></sup></p>
+
+<h3 id="s5-nnar">5.2 NNAR(p,P,k)[s]</h3>
+
+<p>เมื่อใช้กับอนุกรมเวลา <mark class="src" data-p="29" title="lagged values of the time series can be used as inputs to a neural network. We call this a neural network autoregression or NNAR model.">ใช้ค่า lag ของอนุกรมเป็น input ของ neural network เรียกว่า neural network autoregression หรือโมเดล NNAR</mark> โดย <mark class="src" data-p="29" title="We only consider feed-forward networks with one hidden layer">พิจารณาเฉพาะ feed-forward ที่มี hidden layer ชั้นเดียว</mark><sup class="fn"><a href="#fn-23" id="fnr-23">23</a></sup></p>
+
+<div class="eq">\[\text{NNAR}(p,P,k)_s:\quad \text{input}=X_{t-1},\dots,X_{t-p},\ X_{t-s},\dots,X_{t-Ps}\ \longrightarrow\ k\ \text{hidden node}\ \longrightarrow\ X_t\]</div>
+<p class="say">p คือจำนวน lag ปกติ P คือจำนวน seasonal lag k คือจำนวน node ใน hidden layer และ s คือความยาวฤดูกาล ไม่มีฤดูกาลเขียนเป็น NNAR(p,k) เช่น <mark class="src" data-p="30" title="a NNAR(8,4) model is a neural network with the last eight observations X_{t−1}, …, X_{t−8} used as inputs for forecasting the output X_t and with four neurons in the hidden layer">NNAR(8,4) ใช้ 8 ค่าล่าสุดเป็น input และมี 4 neuron ใน hidden layer</mark></p>
+
+<figure class="viz"><img src="../assets/viz/l12-nnar.svg" alt="NNAR(3,1,2)[12]: input สี่ตัว hidden สอง node output หนึ่ง"></figure>
+<p>ตัวอย่างบนสไลด์ <mark class="src" data-p="30" title="an NNAR(3,1,2)_12 model has inputs X_{t−1}, X_{t−2}, X_{t−3} and X_{t−12} and two neurons in the hidden layer">NNAR(3,1,2)₁₂ มี input X_{t−1}, X_{t−2}, X_{t−3} กับ X_{t−12} และสอง neuron ใน hidden layer</mark> input สีฟ้าคือ lag ปกติ สีส้มคือ seasonal lag เส้นทุกเส้นมีน้ำหนักของตัวเอง ถ้าตัด hidden layer ออก (k = 0) input จะต่อตรงไปที่ output และกลายเป็น AR เส้นตรง</p>
+
+<table>
+<tr><th>ถ้า k = 0</th><th>เท่ากับ</th></tr>
+<tr><td>NNAR(p,0)</td><td><mark class="src" data-p="30" title="A NNAR(p,0) model is equivalent to an ARIMA(p,0,0) model">ARIMA(p,0,0)</mark><sup class="fn"><a href="#fn-24" id="fnr-24">24</a></sup></td></tr>
+<tr><td>NNAR(p,P,0)ₛ</td><td>ARIMA(p,0,0)(P,0,0)ₛ</td></tr>
+</table>
+
+<p class="trap">สไลด์หน้า 30 เขียนว่า NNAR(p,P,0)ₛ <mark class="src" data-p="30" title="is the same equivalent to ARIMA(p,0,0)(0,P,0)_s">เทียบเท่า ARIMA(p,0,0)(0,P,0)ₛ</mark> ตำแหน่งกลางของวงเล็บฤดูกาลคือ D (seasonal difference, Lesson 9) ไม่ใช่ seasonal AR ค่าที่ถูกคือ (P,0,0)ₛ เพราะ input X_{t−s} คือ seasonal AR ไม่ได้ difference อะไรเลย และไม่มี d เพราะ NNAR ไม่ difference ให้เอง</p>
+
+<h3 id="s5-auto">5.3 nnetar() เลือกค่าให้เองอย่างไร</h3>
+
+<table>
+<tr><th>ค่า</th><th>ถ้าไม่กำหนด (สไลด์หน้า 32, 35)</th></tr>
+<tr><td>p</td><td><mark class="src" data-p="32" title="For non-seasonal time series, the default is the optimal number of lags (according to the AIC) for a linear AR(p) model.">ไม่มีฤดูกาล: จำนวน lag ที่ AIC ดีที่สุดของ AR(p) เส้นตรง</mark> มีฤดูกาล: <mark class="src" data-p="32" title="p is chosen from the optimal linear model fitted to the seasonally adjusted data">เลือกจากโมเดลเส้นตรงที่ดีที่สุดของข้อมูลที่ปรับฤดูกาลออกแล้ว</mark></td></tr>
+<tr><td>P</td><td><mark class="src" data-p="32" title="For seasonal time series, the default values are P=1">ข้อมูลมีฤดูกาลใช้ P = 1</mark></td></tr>
+<tr><td>k</td><td><mark class="src" data-p="32" title="If k is not specified, it is set to k=(p+P+1)/2 (rounded to the nearest integer).">k = (p + P + 1)/2 ปัดเป็นจำนวนเต็มที่ใกล้ที่สุด</mark></td></tr>
+<tr><td>repeats</td><td><mark class="src" data-p="35" title="Run the model several times (20 or more) - Aggregate the results (e.g. mean or median)">รันหลายครั้ง (20 ครั้งขึ้นไป) แล้วรวมผลด้วย mean หรือ median</mark> default 20<sup class="fn"><a href="#fn-25" id="fnr-25">25</a></sup></td></tr>
+<tr><td>trend</td><td><mark class="src" data-p="35" title="Remove trend component before modeling (Detrend or Differencing)">เอา trend ออกก่อนสร้างโมเดล (detrend หรือ differencing)</mark></td></tr>
+</table>
+
+<p class="say">การพยากรณ์ <mark class="src" data-p="32" title="When it comes to forecasting, the network is applied iteratively.">ใช้ network ซ้ำทีละก้าว</mark> ก้าวแรกใช้ข้อมูลจริง <mark class="src" data-p="32" title="For forecasting two steps ahead, we use the one-step forecast as an input, along with the historical data.">ก้าวที่สองใช้ค่าพยากรณ์ก้าวแรกเป็น input ร่วมกับข้อมูลในอดีต</mark> เหมือนการพยากรณ์ AR หลายก้าวใน Lesson 8</p>
+
+<h3 id="s5-elec">5.4 ข้อมูลไฟฟ้า: NNAR กับและไม่มี xreg</h3>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> อ่านชื่อโมเดลจาก output แล้วตรวจสูตร k ได้ทันที และ xreg ต้องมีค่าในอนาคตตอนพยากรณ์</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts11-p37.png" alt="Slide 11 หน้า 37: watt และค่าพยากรณ์จาก NNAR(16,1,9)[288]" loading="lazy">
+<figcaption>Slide 11 หน้า 37 — watt และค่าพยากรณ์จาก NNAR(16,1,9)[288]</figcaption>
+</figure>
+
+<p>ข้อมูลคือวัตต์ <mark class="src" data-p="36" title="Watts per 5 minutes">ทุก 5 นาที</mark> ของห้องชุดหนึ่งห้องนอน วันละ 24 × 12 = 288 ค่า จึงตั้ง <mark class="src" data-p="36" title="Daily seasonality → frequency = 288">ฤดูกาลรายวัน frequency = 288</mark><sup class="fn"><a href="#fn-26" id="fnr-26">26</a></sup> <code>nnetar(watt)</code> ให้ NNAR(16,1,9)[288] ตรวจ k: (16 + 1 + 1)/2 = 9 ตรงกัน network เป็น 17-9-1 คือ 17 input (16 lag + 1 seasonal lag) มีน้ำหนัก (17 + 1) × 9 + (9 + 1) = 172 ตัว ค่าพยากรณ์ 400 จุดทำซ้ำรูปแบบรายวันได้ดี</p>
+
+<p>จำนวนเครื่องใช้ไฟฟ้า <mark class="src" data-p="36" title="The number of appliances in use can be used as an external regressor (to improve forecasting)">ใช้เป็น external regressor ได้ (เพื่อพยากรณ์ให้ดีขึ้น)</mark> <code>nnetar(watt, xreg = data$appliances)</code> ได้ NNAR(16,1,10)[288] input เพิ่มหนึ่งตัวเป็น 18 k จึงเป็น (16 + 1 + 1 + 1)/2 = 9.5 ปัดเป็น 10 ตอนพยากรณ์ต้องส่ง xreg ของอนาคตด้วย โค้ดใช้ <code>y = rep(2, times = 120)</code> คือสมมุติว่ามีเครื่องใช้ 2 เครื่องตลอด 120 จุด เป็นเงื่อนไขเดียวกับ ARIMAX ใน Lesson 11 ที่ต้องรู้ X ของอนาคต</p>
+
+<p class="trap">ข้อมูล uschange ใช้ NNAR พยากรณ์ unemployment ด้วย regressor 4 ตัว แล้ว <code>accuracy</code> ให้ MAPE = Inf เพราะ unemployment (ค่าการเปลี่ยนแปลง) เป็นศูนย์ได้ และ MAPE หารด้วยค่าจริง (Lesson 2)<sup class="fn"><a href="#fn-27" id="fnr-27">27</a></sup> ใช้ RMSE หรือ MAE แทน อาจารย์เตือนอีกข้อว่าข้อมูลน้อย neural network ไม่จำเป็นต้องดีกว่า ARIMA<sup class="fn"><a href="#fn-28" id="fnr-28">28</a></sup></p>
+
+<details class="check"><summary>nnetar ของข้อมูลรายเดือนรายงาน NNAR(2,1,2)[12] input มีอะไรบ้าง และ k มาจากไหน</summary>
+<p>input คือ X_{t−1}, X_{t−2} และ X_{t−12} (สามตัว) k = (2 + 1 + 1)/2 = 2 ถ้าใส่ k = 0 จะเท่ากับ ARIMA(2,0,0)(1,0,0)₁₂</p>
+</details>
+
+<details class="fold"><summary>โค้ด R: nnetar กับข้อมูลไฟฟ้าและ uschange</summary>
+<pre><code>data &lt;- read.table("electric.txt", h = T)
+watt &lt;- ts(data$watt, frequency = 288)        # 5 นาที × 288 = 1 วัน
+set.seed(11); library(forecast)               # NN มีความสุ่ม ตั้ง seed ให้ผลซ้ำได้
+fit &lt;- nnetar(watt); fit                      # NNAR(16,1,9)[288], 20 networks 17-9-1
+autoplot(forecast(fit, h = 400, PI = F))      # PI = T ช้ามากกับข้อมูลใหญ่
+fit2 &lt;- nnetar(watt, xreg = data$appliances)  # NNAR(16,1,10)[288]
+forecast(fit2, xreg = rep(2, times = 120), PI = F)   # ต้องมี xreg อนาคต 120 ค่า
+# uschange: training 1:180, test 181:187
+model &lt;- nnetar(y = train_y, xreg = train_reg)
+accuracy(forecast(model, xreg = test_reg)$mean, test_y)   # MAPE = Inf</code></pre>
+</details>
+
+<p class="say">สรุปการเลือกโมเดลจากโจทย์ (เช่น FINAL 2025 ข้อ 3): ACF ของ return² ลดช้าและเป็นข้อมูลราคาหุ้น ใช้ GARCH ข้อมูลรายวันที่มีวันหยุดเทศกาลใช้ Prophet ซึ่งอยู่ใน <a href="0013-frequency-domain-prophet.html">Lesson 13</a> พร้อมตารางเลือกโมเดลทั้งวิชา</p>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 26–36)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts11-p26.png" alt="Slide 11 หน้า 26: Neural Network Autoregressive (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 11 หน้า 26 — Neural Network Autoregressive (หน้าคั่น)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p27.png" alt="Slide 11 หน้า 27: Neural networks quick facts" loading="lazy">
+<figcaption>Slide 11 หน้า 27 — Neural networks quick facts</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p28.png" alt="Slide 11 หน้า 28: Multilayer feed-forward network" loading="lazy">
+<figcaption>Slide 11 หน้า 28 — Multilayer feed-forward network</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p29.png" alt="Slide 11 หน้า 29: NNAR(p,k)" loading="lazy">
+<figcaption>Slide 11 หน้า 29 — NNAR(p,k)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p30.png" alt="Slide 11 หน้า 30: NNAR(8,4), NNAR(p,0) = ARIMA(p,0,0), NNAR(3,1,2)₁₂" loading="lazy">
+<figcaption>Slide 11 หน้า 30 — NNAR(8,4), NNAR(p,0) = ARIMA(p,0,0), NNAR(3,1,2)₁₂</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p31.png" alt="Slide 11 หน้า 31: NN autoregressive architecture" loading="lazy">
+<figcaption>Slide 11 หน้า 31 — NN autoregressive architecture</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p32.png" alt="Slide 11 หน้า 32: NNETAR(p,P,k) setting" loading="lazy">
+<figcaption>Slide 11 หน้า 32 — NNETAR(p,P,k) setting</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p33.png" alt="Slide 11 หน้า 33: Variations of neural networks; nnetar()" loading="lazy">
+<figcaption>Slide 11 หน้า 33 — Variations of neural networks; nnetar()</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p34.png" alt="Slide 11 หน้า 34: nnetar() arguments" loading="lazy">
+<figcaption>Slide 11 หน้า 34 — nnetar() arguments</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p35.png" alt="Slide 11 หน้า 35: NNAR: p by AIC, P = 1, repeats 20, remove trend" loading="lazy">
+<figcaption>Slide 11 หน้า 35 — NNAR: p by AIC, P = 1, repeats 20, remove trend</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts11-p36.png" alt="Slide 11 หน้า 36: Dataset: Electricity (watt, appliances, frequency 288)" loading="lazy">
+<figcaption>Slide 11 หน้า 36 — Dataset: Electricity (watt, appliances, frequency 288)</figcaption>
+</figure>
+</div></details>
+
+<p class="nextpage">ไฟล์ R_codes.txt และ electric.txt อยู่ในโฟลเดอร์ CLASS 11 ใช้ package tswge, tseries, rugarch, FinTS และ forecast ลองฝึกต่อใน<a href="0012-arch-garch-nnar-exercises.html">แบบฝึก Lesson 12</a> หรือไปต่อที่ <a href="0013-frequency-domain-prophet.html">Lesson 13</a></p>
+
+
+<!--REFS-->
+<details class="fold" id="fnotes"><summary>แหล่งอ้างอิง: นาทีในคลิป และหน้าสไลด์ที่ใช้</summary>
+<p>ตัวเลขยกในเนื้อหาชี้มาที่รายการนี้ แต่ละรายการระบุคลาสและนาทีของคลิป พร้อมถ้อยคำในคลิปเมื่อมี</p>
+<ol class="fnlist">
+<li id="fn-1"><b>Class 11, 0:01:43–0:01:59</b> — "Finance บางครั้งเราไม่ได้สนใจค่าในอนาคต" <a class="fnback" href="#fnr-1">กลับ</a></li>
+<li id="fn-2"><b>Class 11, 1:04:11</b> <a class="fnback" href="#fnr-2">กลับ</a></li>
+<li id="fn-3"><b>Class 12, 1:40:31–1:41:36</b> <a class="fnback" href="#fnr-3">กลับ</a></li>
+<li id="fn-4"><b>Class 11, 0:23:01–0:24:07</b> <a class="fnback" href="#fnr-4">กลับ</a></li>
+<li id="fn-5"><b>Class 11, 0:06:14–0:08:18</b> <a class="fnback" href="#fnr-5">กลับ</a></li>
+<li id="fn-6"><b>Class 11, 0:10:05–0:10:19</b> — "ค่าที่มันแกว่งขึ้นติดบวกลบบวกลบมันจะกลายเป็นบวก" <a class="fnback" href="#fnr-6">กลับ</a></li>
+<li id="fn-7"><b>Class 11, 0:13:29–0:15:48</b> <a class="fnback" href="#fnr-7">กลับ</a></li>
+<li id="fn-8"><b>Class 11, 0:15:48–0:21:00</b> <a class="fnback" href="#fnr-8">กลับ</a></li>
+<li id="fn-9"><b>Class 11, 0:37:26–0:37:36</b> <a class="fnback" href="#fnr-9">กลับ</a></li>
+<li id="fn-10"><b>Class 11, 0:22:00–0:22:22</b> — "มันจะคล้ายๆอันที่เป็น Arch แต่มันจะอยู่นานขึ้น" <a class="fnback" href="#fnr-10">กลับ</a></li>
+<li id="fn-11"><b>Class 11, 0:54:25–0:56:39</b> <a class="fnback" href="#fnr-11">กลับ</a></li>
+<li id="fn-12"><b>Class 11, 0:38:01–0:40:09</b> — "วิธีการเช็คว่า p กับ q เท่าไร ต้องจดนิดนึงนะครับ" <a class="fnback" href="#fnr-12">กลับ</a></li>
+<li id="fn-13"><b>Class 11, 0:45:16–0:45:41</b> — "มันจะเป็น QP มันไม่ใช่ PQ" <a class="fnback" href="#fnr-13">กลับ</a></li>
+<li id="fn-14"><b>Class 11, 0:57:42</b> <a class="fnback" href="#fnr-14">กลับ</a></li>
+<li id="fn-15"><b>Class 11, 0:55:02</b> — "แสงว่า Data Rate 2000 มันนิ่งแล้ว ไม่ต้อง differencing" <a class="fnback" href="#fnr-15">กลับ</a></li>
+<li id="fn-16"><b>Class 11, 0:56:05–0:56:13</b> — "จริงๆ สเต็บเนี่ยช่วยทำก่อนคุณรัน 2 1 นะครับ" <a class="fnback" href="#fnr-16">กลับ</a></li>
+<li id="fn-17"><b>Class 11, 0:56:39–1:00:48</b> <a class="fnback" href="#fnr-17">กลับ</a></li>
+<li id="fn-18"><b>Class 11, 1:00:48</b> <a class="fnback" href="#fnr-18">กลับ</a></li>
+<li id="fn-19"><b>Class 11, 1:02:11–1:02:28</b> — "1.154 จนถึง 1.203" <a class="fnback" href="#fnr-19">กลับ</a></li>
+<li id="fn-20"><b>Class 11, 1:01:51–1:02:56</b> <a class="fnback" href="#fnr-20">กลับ</a></li>
+<li id="fn-21"><b>Class 11, 1:03:57–1:04:16</b> <a class="fnback" href="#fnr-21">กลับ</a></li>
+<li id="fn-22"><b>Class 11, 1:08:18</b> <a class="fnback" href="#fnr-22">กลับ</a></li>
+<li id="fn-23"><b>Class 11, 1:11:26–1:13:35</b> <a class="fnback" href="#fnr-23">กลับ</a></li>
+<li id="fn-24"><b>Class 11, 1:14:30–1:14:36</b> — "ถ้า Hidden Layer เป็น 0 ไม่มีโนดอะไรเลย ก็คือ Run ปกติ Arima ทั่วๆ ไปเลย" <a class="fnback" href="#fnr-24">กลับ</a></li>
+<li id="fn-25"><b>Class 11, 1:15:30–1:15:36</b> — "ใน Network Network มัน Run ไม่ได้มี solution แค่อันเดียว" <a class="fnback" href="#fnr-25">กลับ</a></li>
+<li id="fn-26"><b>Class 11, 1:16:38–1:22:04</b> <a class="fnback" href="#fnr-26">กลับ</a></li>
+<li id="fn-27"><b>Class 11, 1:27:11–1:27:26</b> — "m a p e โฮมาเป็น infinity เพราะ unemployment มันเป็นศูนย์ได้" <a class="fnback" href="#fnr-27">กลับ</a></li>
+<li id="fn-28"><b>Class 11, 1:07:15</b> <a class="fnback" href="#fnr-28">กลับ</a></li>
+</ol>
+<table>
+<tr><th>หน้า</th><th>เนื้อหา</th><th>อยู่ในตอน</th></tr>
+<tr data-pages="1-9"><td>1–9</td><td>ทำไมต้อง ARCH/GARCH, Dow returns, ACF ของ return และ return²</td><td><a href="#s1">ตอน 1</a></td></tr>
+<tr data-pages="10-17"><td>10–17</td><td>ARCH(1), การจำลอง, ARCH(p)</td><td><a href="#s2">ตอน 2</a></td></tr>
+<tr data-pages="18-22"><td>18–22</td><td>GARCH(p,q), Jarque-Bera, Ljung-Box, การจำลอง</td><td><a href="#s3">ตอน 3</a></td></tr>
+<tr data-pages="23-25"><td>23–25</td><td>Dow rate of return ปี 2000 และ GARCH(2,1)</td><td><a href="#s4">ตอน 4</a></td></tr>
+<tr data-pages="26-37"><td>26–37</td><td>Neural network, NNAR, nnetar, ข้อมูลไฟฟ้า</td><td><a href="#s5">ตอน 5</a></td></tr>
+</table>
+<p>แหล่งอื่นที่ใช้: Class 11 ช่วง 0:00–1:30 (ตอน 1–5; ช่วง 0:24:07–0:30:46 เป็นคลิป YouTube ถอดไม่ได้), Class 12 ช่วง 1:40:31–1:41:36, ไฟล์ R_codes.txt และ electric.txt (CLASS 11), ค่าที่รันซ้ำใน R: ADF, ArchTest, ugarchfit, ugarchforecast, ACF ของ ARCH(1) จำลอง, nnetar</p>
+</details>
+
+</body>
+</html>

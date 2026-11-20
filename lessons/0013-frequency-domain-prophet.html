@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 13: Frequency domain และ Prophet</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<script defer src="../assets/reader.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="0012-arch-garch-nnar.html">← Lesson 12</a> · Lesson 13</span>
+  <span><a href="0013-frequency-domain-prophet-exercises.html">แบบฝึก</a> · <a href="../index.html">สารบัญ</a></span>
+</nav>
+
+<p class="kicker">Slide 12 หน้า 1–30 — Frequency domain และ Facebook Prophet</p>
+<h1>Frequency domain, periodogram และ Facebook Prophet</h1>
+<p class="readmeta">อ่านประมาณ 15 นาที · ข้อความ<mark class="src">ไฮไลต์</mark>คือคำแปลของถ้อยคำบนสไลด์ (ชี้เมาส์หรือแตะค้างเพื่อดูภาษาอังกฤษต้นฉบับ) ตัวเลขยก<sup class="fn"><a href="#fnotes">1</a></sup>คือนาทีในคลิปที่รวมไว้ท้ายบท</p>
+
+<p>บทสุดท้ายมีสองเรื่องที่ใช้ความคิดเดียวกัน คืออนุกรมเวลาเขียนเป็นผลรวมของคลื่นได้ เรื่องแรกใช้คลื่นเพื่อ<b>ค้นหา</b>ว่ามีรอบกี่วัน (periodogram) เรื่องที่สองใช้คลื่นเพื่อ<b>สร้าง</b> seasonal ใน Prophet ข้อสอบเก่าเคยมี periodogram อยู่บ้าง<sup class="fn"><a href="#fn-1" id="fnr-1">1</a></sup> และอาจารย์แนะนำให้ทำข้อสอบเก่าจากปีล่าสุดย้อนลงไป<sup class="fn"><a href="#fn-2" id="fnr-2">2</a></sup> บทนี้ปิดด้วยตารางเลือกโมเดลของทั้งวิชา</p>
+
+<table class="map">
+<tr><th>คำถาม</th><th>เครื่องมือ</th><th>ผลที่ได้</th><th>ตอน</th></tr>
+<tr><td>ข้อมูลมีรอบกี่หน่วยเวลา</td><td>periodogram <code>spectrum()</code></td><td>ความถี่เด่น f แล้ว T = 1/f</td><td><a href="#s1">1</a>–<a href="#s2">2</a></td></tr>
+<tr><td>รู้รอบแล้ว จะพยากรณ์อย่างไร</td><td>SARIMA ที่ s = T</td><td>ค่าพยากรณ์</td><td><a href="#s2">2</a></td></tr>
+<tr><td>ข้อมูลรายวัน มีวันหยุดเลื่อนได้ และตัวแปรภายนอก</td><td>Prophet</td><td>ค่าพยากรณ์ + ผลของวันหยุดและ regressor</td><td><a href="#s3">3</a>–<a href="#s4">4</a></td></tr>
+<tr><td>โจทย์แบบนี้ใช้โมเดลไหน</td><td>ตารางสรุปทั้งวิชา</td><td>SARIMA / ARIMAX / VAR / GARCH / Prophet</td><td><a href="#s5">5</a></td></tr>
+</table>
+
+<!-- ===================================================== -->
+<h2 id="s1">1. Frequency domain: มองข้อมูลเป็นผลรวมของคลื่น</h2>
+
+<h3 id="s1-what">1.1 สองมุมมองของข้อมูลชุดเดียว</h3>
+
+<p class="pic">เพลงหนึ่งเพลงดูได้สองแบบ แบบแรกคือเส้นคลื่นเสียงที่ขึ้นลงตามเวลา แบบที่สองคือแถบ equalizer ที่บอกว่าเสียงเบสกับเสียงแหลมดังแค่ไหน ทั้งสองแบบเป็นเพลงเดียวกัน แต่แบบที่สองบอกได้ทันทีว่ามีโน้ตอะไรซ้ำอยู่</p>
+
+<p>ทุกบทก่อนหน้าอยู่ใน time domain ทั้ง univariate และ multivariate<sup class="fn"><a href="#fn-3" id="fnr-3">3</a></sup> frequency domain <mark class="src" data-p="4" title="Represents the same data in terms of frequency components.">แสดงข้อมูลชุดเดิมในรูปของส่วนประกอบตามความถี่</mark> <mark class="src" data-p="4" title="Shows how much of each frequency (pattern) is present.">บอกว่าแต่ละความถี่ (รูปแบบ) มีอยู่มากแค่ไหน</mark> และ <mark class="src" data-p="4" title="Obtained through the Fourier Transform.">ได้มาจาก Fourier transform</mark></p>
+
+<table>
+<tr><th></th><th>Time domain</th><th>Frequency domain</th></tr>
+<tr><td>แสดงอะไร</td><td><mark class="src" data-p="7" title="Value by time">ค่าตามเวลา</mark></td><td><mark class="src" data-p="7" title="Energy by frequency">พลังงานตามความถี่</mark></td></tr>
+<tr><td>วิธี</td><td><mark class="src" data-p="7" title="SARIMA / ETS">SARIMA / ETS</mark></td><td><mark class="src" data-p="7" title="Periodogram">Periodogram</mark></td></tr>
+<tr><td>เป้าหมาย</td><td><mark class="src" data-p="7" title="Forecast using known period">พยากรณ์โดยใช้คาบที่รู้แล้ว</mark></td><td><mark class="src" data-p="7" title="Discover periodicities">ค้นหาคาบที่ซ่อนอยู่</mark></td></tr>
+<tr><td>เห็นชัด</td><td><mark class="src" data-p="7" title="Sudden changes → time domain">การเปลี่ยนแปลงฉับพลัน</mark></td><td><mark class="src" data-p="7" title="Repeated cycles or noise → frequency domain.">รอบที่ซ้ำหรือ noise</mark></td></tr>
+<tr><td>สรุปบทบาท</td><td><mark class="src" data-p="7" title="Time domain: modeling (how to forecast with them?)">modeling: จะพยากรณ์ด้วยรอบเหล่านั้นอย่างไร</mark></td><td><mark class="src" data-p="7" title="Frequency domain: discovery (what cycles exist?)">discovery: มีรอบอะไรอยู่บ้าง</mark></td></tr>
+</table>
+
+<p class="say">สองมุมมอง <mark class="src" data-p="7" title="Both contain the same information — just different perspectives.">มีข้อมูลเท่ากัน แค่มองคนละมุม</mark> และ <mark class="src" data-p="7" title="Together: complete understanding of your time series' structure">ใช้ร่วมกันจึงเข้าใจโครงสร้างของอนุกรมได้ครบ</mark><sup class="fn"><a href="#fn-4" id="fnr-4">4</a></sup> ตัวอย่างบนสไลด์คือร้านค้าที่ยอดขายรายวันมียอดพุ่งแบบสุ่ม <mark class="src" data-p="5" title="Time Domain: shows holiday spikes.">time domain เห็นยอดพุ่งช่วงวันหยุด</mark> ส่วน <mark class="src" data-p="5" title="Frequency Domain: reveals strong 7-day cycle (weekly seasonality).">frequency domain เผยรอบ 7 วันที่แรง (ฤดูกาลรายสัปดาห์)</mark></p>
+
+<p class="trap">สไลด์หน้า 5 บอกว่า <mark class="src" data-p="5" title="Mathematically, both cycles and seasonality are periodic patterns.">ในทางคณิตศาสตร์ ทั้ง cycle และ seasonality คือรูปแบบที่เป็นคาบ</mark> frequency domain จึงจับได้ทั้งสองอย่าง ต่างจาก Lesson 3–4 ที่แยก cycle (ยาวไม่คงที่) ออกจาก seasonal (ยาวคงที่) แต่ trend ไม่ใช่คาบ ต้อง difference ก่อน (ตอน 2.1)</p>
+
+<h3 id="s1-freq">1.2 ความถี่ คาบ และ amplitude</h3>
+
+<div class="eq">\[\omega=\frac{\text{จำนวนรอบ}}{\text{หน่วยเวลา}},\qquad T=\frac{1}{\omega}=\text{ความยาวของ 1 รอบ}\]</div>
+<p class="say">ความถี่ <mark class="src" data-p="8" title="tells us how many cycles (oscillations) occur per unit time in the signal">บอกว่าใน 1 หน่วยเวลามีกี่รอบ</mark> ไม่จำเป็นต้องเป็นจำนวนเต็ม คาบ T คือความยาวของหนึ่งรอบ<sup class="fn"><a href="#fn-5" id="fnr-5">5</a></sup> สองค่านี้เป็นส่วนกลับของกัน</p>
+
+<p class="num">ข้อมูลรายวันได้ความถี่ 0.1429 หมายถึงหนึ่งวันมี 0.1429 รอบ ยังไม่ครบรอบ<sup class="fn"><a href="#fn-6" id="fnr-6">6</a></sup> T = 1/0.1429 = 7 วัน คือรอบรายสัปดาห์ ข้อมูลรายเดือนได้ 0.0833 จะได้ T = 12 เดือน</p>
+
+<p>Amplitude <mark class="src" data-p="8" title="is the height or strength of an oscillation — how far the signal moves from its average (zero) level">คือความสูงหรือความแรงของการแกว่ง ว่าห่างจากระดับเฉลี่ยแค่ไหน</mark> ใน frequency domain <mark class="src" data-p="8" title="amplitude represents how strong each frequency component is in the signal">amplitude บอกว่าส่วนประกอบแต่ละความถี่แรงแค่ไหน</mark></p>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> คลื่นที่ซ้อนกันจนดูยุ่งใน time domain แยกเป็นแท่งชัด ๆ ใน frequency domain และยังแยกได้แม้มี noise</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p02.png" alt="Slide 12 หน้า 2: คลื่น 3 Hz, 6 Hz และ 3 + 6 Hz ในสองมุมมอง" loading="lazy">
+<figcaption>Slide 12 หน้า 2 — คลื่น 3 Hz, 6 Hz และ 3 + 6 Hz ในสองมุมมอง</figcaption>
+</figure>
+
+<p>คลื่น 3 Hz (3 รอบต่อวินาที) กับ 6 Hz รวมกันแล้วรูปใน time domain ไม่เหมือนคลื่นไหนเลย แต่ใน frequency domain เหลือแท่งสองแท่งที่ 3 และ 6 พอดี ความสูงของแต่ละแท่งคือ amplitude ของคลื่นนั้น</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p03.png" alt="Slide 12 หน้า 3: คลื่นเดียวกันเมื่อเติม noise" loading="lazy">
+<figcaption>Slide 12 หน้า 3 — คลื่นเดียวกันเมื่อเติม noise</figcaption>
+</figure>
+
+<p>เมื่อเติม noise จนตาแทบมองไม่เห็นคลื่นใน time domain แท่งที่ 3 และ 5 Hz ยังสูงกว่าแท่งอื่นชัดเจน noise กระจายพลังงานไปทุกความถี่เท่า ๆ กันจึงเป็นแท่งเตี้ย ๆ ทั่วแกน นี่คือเหตุผลที่ periodogram หาคาบได้ดีกว่าการดูกราฟด้วยตา</p>
+
+<figure class="viz"><img src="../assets/viz/l13-period.svg" alt="อนุกรมคาบ 7 วันในมุมมองเวลาและมุมมองความถี่ ยอดของ periodogram อยู่ที่ f = 1/7"></figure>
+<p>รูปบนคืออนุกรมรายวันที่ยอดซ้ำทุก 7 วัน รูปล่างคือ periodogram ของมัน ยอดเดียวที่ f = 1/7 ≈ 0.143 อ่านกลับเป็นคาบด้วย T = 1/f = 7 วัน ทุกโจทย์ periodogram ทำแค่สองขั้นนี้: หายอด แล้วกลับเศษเป็นส่วน</p>
+
+<h3 id="s1-fourier">1.3 Fourier transform และ periodogram</h3>
+
+<p>สไลด์หน้า 9 บอกว่า <mark class="src" data-p="9" title="A time series dataset (like any other sequence of numbers) can be written as a sum of sine and cosine functions with varying frequencies">อนุกรมเวลาใด ๆ เขียนเป็นผลรวมของ sine และ cosine ที่ความถี่ต่างกันได้</mark> เรียกว่า Fourier representation และเปลี่ยนคำถาม <mark class="src" data-p="9" title="from: “What happens over time?” to “What happens how often?”">จาก "เกิดอะไรขึ้นตามเวลา" เป็น "อะไรเกิดบ่อยแค่ไหน"</mark> Prophet ใช้ Fourier series ตัวเดียวกันนี้สร้าง seasonal (ตอน 3)<sup class="fn"><a href="#fn-7" id="fnr-7">7</a></sup></p>
+
+<div class="eq">\[X_k=\sum_{t=1}^{n}x_t\,e^{-i2\pi kt/n},\qquad e^{-i2\pi kt/n}=\cos\!\left(2\pi\tfrac{kt}{n}\right)-i\sin\!\left(2\pi\tfrac{kt}{n}\right)\]</div>
+<p class="say">DFT เอาข้อมูลไปคูณกับคลื่น cos และ sin ที่ความถี่ k/n แล้วบวกกัน ถ้าข้อมูลแกว่งตรงจังหวะกับคลื่นนั้น ผลรวมจะใหญ่ ถ้าไม่ตรงจังหวะ บวกกับลบจะหักล้างกันจนเล็ก สูตร Euler ใช้แค่เพื่อเขียน cos กับ sin รวมเป็นตัวเดียว FFT คือวิธีคำนวณ DFT ให้เร็ว ไม่อยู่ในเนื้อหาที่ต้องคำนวณเอง<sup class="fn"><a href="#fn-8" id="fnr-8">8</a></sup></p>
+
+<div class="eq">\[I_n(\omega)=\frac{1}{n}\left|\sum_{t=1}^{n}x_t\,e^{-i2\pi\omega t}\right|^2\]</div>
+<p class="say">periodogram คือขนาดยกกำลังสองของ DFT หารด้วย n <mark class="src" data-p="11" title="It shows how much power (variance) is contained at each frequency.">แสดงว่าแต่ละความถี่มีพลังงาน (ความแปรปรวน) อยู่เท่าไร</mark> และ <mark class="src" data-p="12" title="The periodogram estimates the power spectrum, which is proportional to the square of the amplitude.">ประมาณ power spectrum ซึ่งแปรผันตาม amplitude ยกกำลังสอง</mark></p>
+
+<table class="sym">
+<tr><th>คำ</th><th>คืออะไร</th></tr>
+<tr><td>Amplitude</td><td><mark class="src" data-p="12" title="amplitude is just the raw strength of oscillation">ความแรงดิบของการแกว่ง</mark></td></tr>
+<tr><td>Power spectrum</td><td>พลังงานต่อความถี่ ∝ amplitude² (ค่าของประชากร)</td></tr>
+<tr><td>Periodogram</td><td><mark class="src" data-p="12" title="a sample-based estimate of power per frequency unit">ค่าประมาณพลังงานต่อความถี่จากตัวอย่าง</mark> <mark class="src" data-p="11" title="does not estimate amplitude directly">ไม่ได้ประมาณ amplitude โดยตรง</mark></td></tr>
+<tr><td>Spectral density</td><td>\(\lambda(\omega)=\sum_h\gamma_h e^{-2\pi i\omega h}\) คือ Fourier transform ของ autocovariance</td></tr>
+</table>
+
+<p class="trap">บรรทัดสุดท้ายของตารางเชื่อมกับ Lesson 3: spectral density สร้างจาก \(\gamma_h\) ตัวเดียวกับที่ใช้ทำ ACF periodogram กับ correlogram จึงมีข้อมูลชุดเดียวกัน ACF ที่เป็นคลื่นซ้ำทุก 12 lag จะเป็นยอดที่ f = 1/12 ใน periodogram ถ้าโจทย์ให้แท่งสูงสองแท่ง แท่งที่ 3 Hz กับ 6 Hz ตอบเป็นความถี่ ไม่ต้องคำนวณคาบ แต่ถ้าถามว่า "ซ้ำทุกกี่วัน" ต้องกลับเป็น 1/f</p>
+
+<details class="check"><summary>periodogram ของข้อมูลรายไตรมาสมียอดที่ f = 0.25 ข้อมูลมีรอบกี่ไตรมาส และควรตั้ง frequency ใน ts() เท่าไร</summary>
+<p>T = 1/0.25 = 4 ไตรมาส คือรอบรายปี ตั้ง <code>ts(x, frequency = 4)</code> แล้วใช้ SARIMA ที่ s = 4</p>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 1, 4–12)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts12-p01.png" alt="Slide 12 หน้า 1: Introduction to time series analysis in the frequency domain (หน้าปก)" loading="lazy">
+<figcaption>Slide 12 หน้า 1 — Introduction to time series analysis in the frequency domain (หน้าปก)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p04.png" alt="Slide 12 หน้า 4: What is frequency domain?" loading="lazy">
+<figcaption>Slide 12 หน้า 4 — What is frequency domain?</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p05.png" alt="Slide 12 หน้า 5: When to use: business case รอบ 7 วัน" loading="lazy">
+<figcaption>Slide 12 หน้า 5 — When to use: business case รอบ 7 วัน</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p06.png" alt="Slide 12 หน้า 6: Frequency domain: discovery, Time domain: modeling" loading="lazy">
+<figcaption>Slide 12 หน้า 6 — Frequency domain: discovery, Time domain: modeling</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p07.png" alt="Slide 12 หน้า 7: ตารางเทียบ time domain กับ frequency domain" loading="lazy">
+<figcaption>Slide 12 หน้า 7 — ตารางเทียบ time domain กับ frequency domain</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p08.png" alt="Slide 12 หน้า 8: Frequency and amplitude" loading="lazy">
+<figcaption>Slide 12 หน้า 8 — Frequency and amplitude</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p09.png" alt="Slide 12 หน้า 9: Fourier representation" loading="lazy">
+<figcaption>Slide 12 หน้า 9 — Fourier representation</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p10.png" alt="Slide 12 หน้า 10: DFT และ spectral density" loading="lazy">
+<figcaption>Slide 12 หน้า 10 — DFT และ spectral density</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p11.png" alt="Slide 12 หน้า 11: Power spectrum" loading="lazy">
+<figcaption>Slide 12 หน้า 11 — Power spectrum</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p12.png" alt="Slide 12 หน้า 12: Periodogram ∝ amplitude²" loading="lazy">
+<figcaption>Slide 12 หน้า 12 — Periodogram ∝ amplitude²</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s2">2. อ่าน periodogram แล้วส่งต่อให้ time domain</h2>
+
+<h3 id="s2-shapes">2.1 รูป periodogram สี่แบบ</h3>
+
+<figure class="viz"><img src="../assets/viz/l13-patterns.svg" alt="periodogram สี่แบบ: peak แคบ, broad peak, ลดลง, แบน"></figure>
+<p>สี่รูปนี้คือ "ตาราง ACF/PACF" ของ frequency domain ดูแค่ว่ายอดแคบหรือกว้าง และพลังงานเทไปทางความถี่ต่ำหรือเท่ากันทุกความถี่ แล้วอ่านความหมายจากบรรทัดสีส้ม</p>
+
+<table>
+<tr><th>รูป</th><th>สไลด์หน้า 13 ว่า</th><th>ทำอะไรต่อ</th></tr>
+<tr><td>Peak แคบ</td><td><mark class="src" data-p="13" title="A high, narrow peak means there is a strong, consistent periodic component in the original time series at that specific frequency.">ยอดสูงและแคบ แปลว่ามีส่วนที่เป็นคาบแรงและสม่ำเสมอที่ความถี่นั้น</mark></td><td>T = 1/f แล้วตั้ง s ใน SARIMA</td></tr>
+<tr><td>Broad peak</td><td><mark class="src" data-p="13" title="suggest a range of frequencies contributing significantly to the variance, rather than a single dominant frequency">หลายความถี่ในช่วงหนึ่งมีส่วนต่อความแปรปรวน ไม่ใช่ความถี่เดียว</mark></td><td>รอบไม่คงที่ (cycle) เช่น AR(2) ที่รากเป็นจำนวนเชิงซ้อน (Lesson 6)</td></tr>
+<tr><td>Decreasing</td><td><mark class="src" data-p="13" title="lower frequencies (longer-term variations) have more power than higher frequencies (short-term variations) and often indicates positive autocorrelation (values tend to stay high or low for long periods)">ความถี่ต่ำ (การเปลี่ยนแปลงระยะยาว) มีพลังมากกว่าความถี่สูง มักแปลว่ามี autocorrelation บวก ค่ามักค้างสูงหรือต่ำเป็นเวลานาน</mark></td><td>AR ที่ φ > 0 หรือมี trend ถ้ายอดชิด f = 0 มาก ให้ difference</td></tr>
+<tr><td>Flat</td><td><mark class="src" data-p="13" title="across all frequencies suggests the data is close to white noise (no significant or predictable periodic patterns)">แบนทุกความถี่ แปลว่าใกล้ white noise ไม่มีรูปแบบคาบที่พยากรณ์ได้</mark></td><td>ไม่มีอะไรให้โมเดล เหมือน ACF ที่ไม่ทะลุเส้น</td></tr>
+</table>
+
+<p class="trap">Decreasing แปลว่าความถี่ต่ำมีพลังมาก ความถี่ต่ำคือคาบยาว<sup class="fn"><a href="#fn-9" id="fnr-9">9</a></sup> trend คือคาบที่ยาวไม่สิ้นสุด (f → 0) พลังงานของ trend จึงกองที่ f ใกล้ศูนย์และกลบยอดของฤดูกาล โค้ดของ traffic จึง difference ก่อนทำ periodogram</p>
+
+<h3 id="s2-traffic">2.2 ตัวอย่าง traffic และ sales</h3>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> periodogram ให้คำตอบเป็นตัวเลขเดียวที่ส่งต่อไปตั้ง frequency ของ ts() และ s ของ SARIMA ได้ทันที</p>
+
+<figure class="viz"><img src="../assets/viz/l13-real.svg" alt="periodogram ของ diff(traffic) มียอดที่ 0.144 และของ sales มียอดที่ 0.0833"></figure>
+<p>traffic.txt คือจำนวนผู้เข้าเว็บรายวัน (คอมเมนต์ในโค้ดเขียน 375 วัน แต่ไฟล์มี 365 แถว) หลัง <code>diff()</code> ยอดเด่นอยู่ที่ f = 0.144 คาบ 1/0.144 = 6.94 ≈ 7 วัน ไม่ได้ 7 พอดีเพราะ R คำนวณ periodogram ที่ความถี่เป็นขั้น 1/n เท่านั้น<sup class="fn"><a href="#fn-10" id="fnr-10">10</a></sup> sales.txt คือยอดขายรายเดือน 120 เดือน ยอดเด่นที่ 0.0833 คือ 12 เดือนพอดี และสูงกว่ายอดถัดไปราว 46 เท่า</p>
+
+<p>เมื่อรู้คาบแล้ว <mark class="src" data-p="14" title="The time domain (especially ARIMA with seasonal terms) is better when you already know the period">time domain (โดยเฉพาะ ARIMA ที่มีพจน์ฤดูกาล) เหมาะกว่าเมื่อรู้คาบแล้ว</mark> sales จึงตั้ง <code>ts(data, frequency = 12)</code> แล้วใช้ <code>auto.arima</code> ของ Lesson 10 ได้ ARIMA(0,0,0)(0,1,2)[12] with drift (sma1 = −1.049, sma2 = 0.177, drift = 0.491)<sup class="fn"><a href="#fn-11" id="fnr-11">11</a></sup> ส่วน frequency domain <mark class="src" data-p="14" title="is best when you don’t know the cycle length — for discovering hidden periodicities">เหมาะที่สุดเมื่อไม่รู้ความยาวรอบ เพื่อค้นหาคาบที่ซ่อนอยู่</mark></p>
+
+<p class="trap">อ่าน ARIMA(0,0,0)(0,1,2)[12] ตาม Lesson 9: d = 0 ไม่ difference ปกติ D = 1 difference ฤดูกาลหนึ่งครั้ง (x_t − x_{t−12}) และ Q = 2 คือ seasonal MA สองพจน์ที่ lag 12 กับ 24 ไม่ใช่ MA ที่ lag 1 กับ 2 sma1 ใกล้ −1 มักบอกว่า seasonal difference มากเกินไปเล็กน้อย แต่ auto.arima เลือกแบบนี้ด้วย AICc</p>
+
+<details class="check"><summary>periodogram ของข้อมูลรายวันที่ยังไม่ difference มียอดสูงสุดที่ f ≈ 0.003 และยอดเล็กที่ 0.143 ควรสรุปว่าอะไร</summary>
+<p>ยอดที่ f ≈ 0 คือ trend (คาบยาวมาก ~333 วัน หรือแค่ทิศทางขาขึ้น) กลบอยู่ ควร difference แล้วทำ periodogram ใหม่ ยอดที่ 0.143 คือรอบ 7 วันซึ่งน่าจะชัดขึ้นหลัง difference</p>
+</details>
+
+<details class="fold"><summary>โค้ด R: periodogram และส่งต่อให้ auto.arima</summary>
+<pre><code>data &lt;- ts(read.table("traffic.txt", h = T))
+data &lt;- diff(data)                                  # เอา trend ออกก่อน
+spectrum(data, log = "no")                          # log = "no" ให้ยอดเห็นชัด
+spec &lt;- spectrum(data, log = "no", plot = FALSE)
+dominant_freq &lt;- spec$freq[which.max(spec$spec)]    # 0.144
+1 / dominant_freq                                   # 6.94 ≈ 7 วัน
+
+sales &lt;- ts(read.table("sales.txt", h = T))
+spec &lt;- spectrum(sales, log = "no")                 # ยอดที่ 0.0833 → 12 เดือน
+sales &lt;- ts(sales, frequency = 12)                  # ส่งต่อให้ time domain
+fit &lt;- auto.arima(sales, seasonal = TRUE, stepwise = TRUE, approximation = FALSE)
+summary(fit); forecast(fit, h = 24)                 # ARIMA(0,0,0)(0,1,2)[12] with drift</code></pre>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 13–14)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts12-p13.png" alt="Slide 12 หน้า 13: Periodogram patterns: peaks, broad peaks, decreasing, flat" loading="lazy">
+<figcaption>Slide 12 หน้า 13 — Periodogram patterns: peaks, broad peaks, decreasing, flat</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p14.png" alt="Slide 12 หน้า 14: In practice: frequency domain เมื่อไม่รู้คาบ, time domain เมื่อรู้คาบ" loading="lazy">
+<figcaption>Slide 12 หน้า 14 — In practice: frequency domain เมื่อไม่รู้คาบ, time domain เมื่อรู้คาบ</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s3">3. Facebook Prophet: แนวคิดและส่วนประกอบ</h2>
+
+<h3 id="s3-idea">3.1 Decomposition ที่เติมวันหยุดและ regressor</h3>
+
+<p class="pic">Prophet ไม่ได้ถามว่า "ค่าเมื่อวานบอกอะไรเกี่ยวกับวันนี้" แบบ ARIMA แต่ถามว่า "วันนี้คือวันอะไรของปี วันอะไรของสัปดาห์ ใกล้วันหยุดไหม" แล้วเอาคำตอบมาบวกกัน เหมือนการฟิตเส้นโค้งผ่านปฏิทิน</p>
+
+<p>Prophet เป็น <mark class="src" data-p="16" title="Advance decomposition">decomposition ขั้นสูง</mark> ที่ <mark class="src" data-p="16" title="Used for forecasting univariate time series by decomposing the time series into pieces – similar to exponential smoothing">พยากรณ์อนุกรมตัวเดียวโดยแยกเป็นชิ้น ๆ คล้าย exponential smoothing</mark> (Lesson 4) Facebook เสนอในปี 2018 <mark class="src" data-p="17" title="originally for forecasting daily data with weekly and yearly seasonality, plus holiday effects">เดิมสำหรับข้อมูลรายวันที่มีฤดูกาลรายสัปดาห์และรายปี บวกผลของวันหยุด</mark><sup class="fn"><a href="#fn-12" id="fnr-12">12</a></sup> และ <mark class="src" data-p="17" title="It works best with time series that have strong seasonality and several seasons of historical data.">ทำงานดีที่สุดกับอนุกรมที่มีฤดูกาลแรงและมีข้อมูลย้อนหลังหลายฤดูกาล</mark></p>
+
+<div class="eq">\[y_t=c_t+s_t+h_t+x_t+\shk{\varepsilon_t}\]</div>
+<p class="say">ค่าที่เห็น = trend + ฤดูกาล + ผลของวันหยุด + ผลของตัวแปรภายนอก + error ทุกส่วนเป็นฟังก์ชันของวันที่ ไม่มี lag ของ y เลย จึงเป็น curve fitting ไม่ใช่ autoregression<sup class="fn"><a href="#fn-13" id="fnr-13">13</a></sup></p>
+
+<table class="sym">
+<tr><th>ส่วน</th><th>สร้างอย่างไร</th><th>เทียบกับบทก่อน</th></tr>
+<tr><td>\(c_t\) <mark class="src" data-p="18" title="Trend">trend</mark></td><td>เส้นตรงเป็นท่อน (piecewise) หักได้ที่ changepoint</td><td>trend ใน decomposition (Lesson 3–4)</td></tr>
+<tr><td>\(s_t\) <mark class="src" data-p="18" title="Seasonality">ฤดูกาล</mark></td><td>Fourier series (ผลรวม sin/cos) รายปี รายสัปดาห์ รายวัน</td><td>คลื่นใน frequency domain (ตอน 1)</td></tr>
+<tr><td>\(h_t\) <mark class="src" data-p="18" title="Holiday effects (or event effects)">ผลของวันหยุด (หรือเหตุการณ์)</mark></td><td>dummy ของวันหยุดพร้อมหน้าต่างก่อน/หลัง</td><td>ARIMA ต้องสร้าง dummy เองทุกวัน</td></tr>
+<tr><td>\(x_t\) <mark class="src" data-p="18" title="External regressors">ตัวแปรภายนอก</mark></td><td><code>add_regressor()</code></td><td>xreg ของ ARIMAX (Lesson 11)</td></tr>
+</table>
+
+<p class="trap">เพราะ Prophet ไม่ใช้ lag ของ y มันจึง <mark class="src" data-p="24" title="Not good with short term dynamics">ไม่เก่งเรื่องความเคลื่อนไหวระยะสั้น</mark> ถ้าวันนี้ยอดตกฮวบ พรุ่งนี้ Prophet ก็ยังพยากรณ์ตามปฏิทินเหมือนเดิม ขณะที่ AR จะดึงค่าพยากรณ์ลงตาม</p>
+
+<h3 id="s3-holiday">3.2 วันหยุดที่เลื่อนได้ และหน้าต่างก่อน/หลัง</h3>
+
+<p>วันหยุดอย่าง Easter หรือสงกรานต์ไม่ได้ตรงกับคาบที่แน่นอน ฤดูกาลแบบ s = 365 จึงจับไม่ได้ ตัวอย่างบนสไลด์คือช็อกโกแลตวันวาเลนไทน์: Prophet <mark class="src" data-p="22" title="Need to state Feb 14th as a key event and specify how many days before and after">ต้องระบุ 14 ก.พ. เป็นวันสำคัญ และระบุว่าก่อนและหลังกี่วัน</mark> ส่วนโมเดลอื่น <mark class="src" data-p="22" title="Need to create dummy variables for each day, if you believe they have different impacts">ต้องสร้าง dummy แยกทุกวัน ถ้าเชื่อว่าแต่ละวันมีผลต่างกัน</mark> คนส่วนใหญ่ซื้อก่อนวันที่ 14 บางคนซื้อหลัง จำนวนวันก่อนและหลังตั้งเองจากความรู้ทางธุรกิจ<sup class="fn"><a href="#fn-14" id="fnr-14">14</a></sup></p>
+
+<figure class="viz"><img src="../assets/viz/l13-prophet.svg" alt="Prophet: trend เส้นตรงเป็นท่อนพร้อม changepoint และหน้าต่างวันหยุด Easter"></figure>
+<p>รูปบน: เส้นส้มคือ trend ของ Prophet ที่หักได้ที่เส้นประ (changepoint) แต่ไม่มี changepoint ในช่วงท้ายของข้อมูล ถ้าข้อมูลเพิ่งหักหัวลง trend จะยังชี้ขึ้นต่อ ซึ่งคือสิ่งที่เกิดกับ DHS ในตอน 4 รูปล่าง: Easter ใน DHS ตั้งหน้าต่างตั้งแต่ 4 วันก่อนถึง 2 วันหลัง ทุกวันในแถบเหลืองได้ผลของวันหยุด</p>
+
+<p class="trap">หน้าต่างต้องยาวเท่ากันทุกปี Easter ทุกปีได้ −4 ถึง +2 เหมือนกันหมด อาจารย์เรียกว่าข้อจำกัดเพราะยืดหยุ่นไม่ได้<sup class="fn"><a href="#fn-15" id="fnr-15">15</a></sup></p>
+
+<h3 id="s3-param">3.3 พารามิเตอร์ที่ต้องตั้ง</h3>
+
+<table>
+<tr><th>argument</th><th>ความหมาย (สไลด์หน้า 23)</th></tr>
+<tr><td><code>holidays</code></td><td><mark class="src" data-p="23" title="The data-frame object that already prepared">data frame ของวันหยุดที่เตรียมไว้แล้ว</mark></td></tr>
+<tr><td><code>yearly/weekly/daily.seasonality</code></td><td>TRUE หรือ FALSE ข้อมูลรายวันเปิด weekly ข้อมูลรายชั่วโมงเปิด daily<sup class="fn"><a href="#fn-16" id="fnr-16">16</a></sup></td></tr>
+<tr><td><code>seasonality.mode</code></td><td><mark class="src" data-p="23" title="multiplicative or additive">multiplicative หรือ additive</mark> เหมือน Holt-Winters (Lesson 4)</td></tr>
+<tr><td><code>seasonality.prior.scale</code></td><td><mark class="src" data-p="23" title="Strength of seasonality (the higher, the stronger)">ความแรงของฤดูกาล (ยิ่งสูงยิ่งแรง)</mark></td></tr>
+<tr><td><code>holidays.prior.scale</code></td><td><mark class="src" data-p="23" title="Larger values allow the model to fit larger seasonal fluctuation">ค่ามากยอมให้ผลของวันหยุดใหญ่ขึ้น</mark></td></tr>
+<tr><td><code>changepoint.prior.scale</code></td><td><mark class="src" data-p="23" title="Does the trend change easily?">trend เปลี่ยนง่ายแค่ไหน</mark></td></tr>
+</table>
+
+<table>
+<tr><th>ข้อดี (หน้า 24)</th><th>ข้อเสีย</th></tr>
+<tr><td><mark class="src" data-p="24" title="Flexible">ยืดหยุ่น</mark></td><td><mark class="src" data-p="24" title="Complex programming">เขียนโปรแกรมซับซ้อน</mark></td></tr>
+<tr><td><mark class="src" data-p="24" title="Dynamic Events">รองรับเหตุการณ์ที่เลื่อนวันได้</mark></td><td><mark class="src" data-p="24" title="Can need intense optimization">อาจต้องปรับจูนหนัก</mark></td></tr>
+<tr><td><mark class="src" data-p="24" title="Great with regressor">ใช้กับ regressor ได้ดี</mark></td><td>ไม่เก่งเรื่องความเคลื่อนไหวระยะสั้น</td></tr>
+</table>
+
+<details class="check"><summary>ข้อมูลรายชั่วโมงของการใช้ไฟ ควรเปิด seasonality ตัวไหน</summary>
+<p>daily.seasonality = TRUE (รอบ 24 ชั่วโมงในหนึ่งวัน) และ weekly ถ้ามีข้อมูลหลายสัปดาห์ ข้อมูลรายวันจะไม่มีรอบภายในวัน จึงปิด daily</p>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 15–18, 22–24)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts12-p15.png" alt="Slide 12 หน้า 15: Facebook Prophet (หน้าคั่น)" loading="lazy">
+<figcaption>Slide 12 หน้า 15 — Facebook Prophet (หน้าคั่น)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p16.png" alt="Slide 12 หน้า 16: Concept: advance decomposition" loading="lazy">
+<figcaption>Slide 12 หน้า 16 — Concept: advance decomposition</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p17.png" alt="Slide 12 หน้า 17: Methodology: Taylor &amp; Letham (2018)" loading="lazy">
+<figcaption>Slide 12 หน้า 17 — Methodology: Taylor &amp; Letham (2018)</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p18.png" alt="Slide 12 หน้า 18: y_t = c_t + s_t + h_t + x_t + ε" loading="lazy">
+<figcaption>Slide 12 หน้า 18 — y_t = c_t + s_t + h_t + x_t + ε</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p22.png" alt="Slide 12 หน้า 22: Dynamic holiday: ช็อกโกแลตวันวาเลนไทน์" loading="lazy">
+<figcaption>Slide 12 หน้า 22 — Dynamic holiday: ช็อกโกแลตวันวาเลนไทน์</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p23.png" alt="Slide 12 หน้า 23: Model components: holidays, seasonality, prior scales" loading="lazy">
+<figcaption>Slide 12 หน้า 23 — Model components: holidays, seasonality, prior scales</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p24.png" alt="Slide 12 หน้า 24: Pros and cons" loading="lazy">
+<figcaption>Slide 12 หน้า 24 — Pros and cons</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s4">4. Prophet ใน R: data1 และ DHS</h2>
+
+<h3 id="s4-basic">4.1 ขั้นพื้นฐาน: ds, y, make_future_dataframe, predict</h3>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> Prophet ต้องการแค่สองคอลัมน์ชื่อ ds กับ y และ predict ให้ค่าทั้งย้อนหลังและอนาคตในตารางเดียว</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p20.png" alt="Slide 12 หน้า 20: data1.csv: ข้อมูลรายวัน 2905 วัน" loading="lazy">
+<figcaption>Slide 12 หน้า 20 — data1.csv: ข้อมูลรายวัน 2905 วัน</figcaption>
+</figure>
+
+<p>data1.csv เป็นข้อมูลรายวัน 2,905 วัน กราฟมีรูปแบบรายปีชัดและมีค่ากระโดดเป็นช่วง ๆ คอลัมน์ต้องชื่อ <code>ds</code> (date stamp) และ <code>y</code> และวันที่ต้องอยู่ในรูป ปี-เดือน-วัน จึงแปลงด้วย <code>strptime(..., "%m/%d/%Y")</code> แล้ว <code>as.Date</code><sup class="fn"><a href="#fn-17" id="fnr-17">17</a></sup></p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p21.png" alt="Slide 12 หน้า 21: forecast[1:3,] และกราฟค่าพยากรณ์" loading="lazy">
+<figcaption>Slide 12 หน้า 21 — forecast[1:3,] และกราฟค่าพยากรณ์</figcaption>
+</figure>
+
+<p><code>make_future_dataframe(m, periods = 100)</code> สร้างตารางวันที่ 2,905 + 100 = 3,005 วัน แล้ว <code>predict</code> คืนค่าทุกส่วนประกอบของทุกวัน คอลัมน์ที่ใช้คือ <code>yhat</code> (ค่าพยากรณ์) กับ <code>yhat_lower</code>, <code>yhat_upper</code> ส่วน trend, weekly, yearly คือแต่ละชิ้นของสมการในตอน 3.1 จุดดำในกราฟคือข้อมูลจริง เส้นฟ้าคือ yhat ที่ฟิตทั้งย้อนหลังและต่อไปอีก 100 วัน</p>
+
+<h3 id="s4-dhs">4.2 DHS: วันหยุด regressor และ test set</h3>
+
+<p class="lead"><b>ตัวอย่างนี้มีไว้ให้เห็นว่า</b> โมเดลที่ฟิตข้อมูลเก่าได้แนบมาก ยังพยากรณ์ผิดทิศได้ถ้า trend เพิ่งเปลี่ยนตอนท้าย</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p26.png" alt="Slide 12 หน้า 26: DHS: จำนวนคนในศูนย์พักพิงรายวัน 2014–2020" loading="lazy">
+<figcaption>Slide 12 หน้า 26 — DHS: จำนวนคนในศูนย์พักพิงรายวัน 2014–2020</figcaption>
+</figure>
+
+<p>DHS.csv คือจำนวนคนในศูนย์พักพิงคนไร้บ้านของนิวยอร์กรายวัน 7 ปี (y = Total Individuals in Shelter) จำนวนขึ้นช่วงแรก แกว่งเป็นรอบรายปี แล้วดิ่งลงในปี 2020 <mark class="src" data-p="25" title="Holidays: Easter and Thanksgiving that have an impact in the surrounding base.">วันหยุด Easter และ Thanksgiving มีผลกับวันรอบข้าง</mark> ตั้งหน้าต่าง Easter −4/+2 และ Thanksgiving −3/+1 แล้วรวมด้วย <code>bind_rows</code> <mark class="src" data-p="25" title="Exogeneous regressors: Christmas and Temperature.">ตัวแปรภายนอกคือ Christmas และอุณหภูมิ</mark> ใส่ด้วย <code>add_regressor</code> test set คือธันวาคม 2020 31 วัน<sup class="fn"><a href="#fn-18" id="fnr-18">18</a></sup></p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p27.png" alt="Slide 12 หน้า 27: Regressor coefficients ของ Christmas และ Temperature" loading="lazy">
+<figcaption>Slide 12 หน้า 27 — Regressor coefficients ของ Christmas และ Temperature</figcaption>
+</figure>
+
+<p>โมเดลตั้ง <code>seasonality.mode = 'multiplicative'</code> ค่าสัมประสิทธิ์จึงอ่านเป็นสัดส่วน คูณ 100 เป็นเปอร์เซ็นต์: <mark class="src" data-p="27" title="For each degree higher, the demand for shelter decreases (negative coefficient) by 0.16467%">อุณหภูมิสูงขึ้นทุก 1 องศา ความต้องการที่พักลดลง 0.16467%</mark> ส่วน <mark class="src" data-p="27" title="Christmas doesn’t really impact our model because it’s small (decreased by 0.0001549697*100 = 0.0154%)">Christmas แทบไม่มีผลเพราะค่าเล็ก (ลดลง 0.0154%)</mark> ผลของ Easter ที่ดึงจาก <code>forecast$easter</code> ติดลบ แปลว่าช่วง Easter มีคนน้อยกว่าระดับปกติ<sup class="fn"><a href="#fn-19" id="fnr-19">19</a></sup></p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p28.png" alt="Slide 12 หน้า 28: ค่าพยากรณ์ DHS: Didn't fit well at test set" loading="lazy">
+<figcaption>Slide 12 หน้า 28 — ค่าพยากรณ์ DHS: Didn't fit well at test set</figcaption>
+</figure>
+
+<p>สไลด์สรุปว่า <mark class="src" data-p="28" title="Didn’t fit well at test set">ฟิตไม่ดีใน test set</mark> เส้นฟ้าทับจุดดำแนบตลอด 2014–2019 แต่ช่วงปลาย 2020 ข้อมูลยังลงต่อ ขณะที่ค่าพยากรณ์ทรงตัวสูงกว่า</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p29.png" alt="Slide 12 หน้า 29: prophet_plot_components: trend, holidays, weekly, yearly, regressors" loading="lazy">
+<figcaption>Slide 12 หน้า 29 — prophet_plot_components: trend, holidays, weekly, yearly, regressors</figcaption>
+</figure>
+
+<p>กราฟส่วนประกอบแยกสมการ \(c_t+s_t+h_t+x_t\) ออกมาทีละแถว: holidays เป็นหนามลงสั้น ๆ ปีละสองครั้ง (Easter, Thanksgiving) weekly ต่ำสุดวันเสาร์ แต่ขนาดไม่ถึง 0.2% yearly แกว่งราว ±2% ซึ่งใหญ่กว่า weekly มาก และ regressor ที่ขึ้นลงเป็นรอบรายปีตามอุณหภูมิ</p>
+
+<figure class="thumb">
+<img src="../assets/slides/ts12-p30.png" alt="Slide 12 หน้า 30: changepoints และ accuracy ของ test set" loading="lazy">
+<figcaption>Slide 12 หน้า 30 — changepoints และ accuracy ของ test set</figcaption>
+</figure>
+
+<p><code>add_changepoints_to_plot</code> แสดง trend เป็นเส้นตรงหลายท่อน (piecewise regression) ที่หักที่เส้นประ<sup class="fn"><a href="#fn-20" id="fnr-20">20</a></sup> เส้นประหยุดก่อนช่วงท้ายของข้อมูล เพราะ Prophet วาง changepoint แค่ใน 80% แรกของ training set การดิ่งลงปี 2020 จึงไม่ถูกจับเป็น trend ใหม่ <code>accuracy(tail(forecast$yhat, 31), test$y)</code> ให้ RMSE = 1,331.5 และ ME = −1,325.1<sup class="fn"><a href="#fn-21" id="fnr-21">21</a></sup></p>
+
+<p class="num">ME กับ RMSE ขนาดเกือบเท่ากัน แปลว่า error เกือบทุกวันขนาดเท่ากันและไปทางเดียวกัน (ไม่ได้บางวันบวกบางวันลบ) และ ME ติดลบเพราะ forecast::accuracy นิยาม error = ค่าจริง − ค่าพยากรณ์ (Lesson 2) ค่าพยากรณ์จึงสูงเกินจริงราว 1,325 คนทุกวัน MAPE = 2.48% ดูเล็ก แต่เป็น bias ล้วน ๆ ตรงกับภาพของ changepoint ที่หายไปช่วงท้าย</p>
+
+<details class="check"><summary>ทำไม future ใน DHS ต้องเติมคอลัมน์ Christmas และ Temperature ก่อน predict</summary>
+<p>regressor เป็นส่วน x_t ของสมการ predict ต้องรู้ค่าของมันทุกวันที่จะพยากรณ์ เหมือน xreg ของ ARIMAX (Lesson 11) และ NNAR (Lesson 12) โค้ดจึงใช้ <code>future[,2:3] = data %&gt;% select(Christmas, Temperature)</code></p>
+</details>
+
+<details class="fold"><summary>โค้ด R: Prophet ของ DHS (ย่อจาก R_codes.txt)</summary>
+<pre><code>library(prophet); library(dplyr); library(forecast)
+data &lt;- read.csv("DHS.csv")
+data$Date &lt;- as.Date(strptime(data$Date, format = "%m/%d/%Y"))   # ปี-เดือน-วัน
+data &lt;- data %&gt;% select(Date, Total.Individuals.in.Shelter, Easter, Thanksgiving, Christmas, Temperature)
+colnames(data)[1:2] &lt;- c("ds", "y")                               # ชื่อบังคับ
+easter &lt;- tibble(holiday = "easter", ds = data$ds[data$Easter == 1],
+                 lower_window = -4, upper_window = 2)              # 4 วันก่อน 2 วันหลัง
+thanksgiving &lt;- tibble(holiday = "thanksgiving", ds = data$ds[data$Thanksgiving == 1],
+                       lower_window = -3, upper_window = 1)
+holidays &lt;- bind_rows(easter, thanksgiving)
+training &lt;- data %&gt;% filter(ds &lt;  "2020-12-01") %&gt;% select(ds, y, Christmas, Temperature)
+test     &lt;- data %&gt;% filter(ds &gt;= "2020-12-01") %&gt;% select(ds, y, Christmas, Temperature)
+m &lt;- prophet(holidays = holidays, yearly.seasonality = TRUE, weekly.seasonality = TRUE,
+             daily.seasonality = FALSE, seasonality.mode = "multiplicative")
+m &lt;- add_regressor(m, "Christmas"); m &lt;- add_regressor(m, "Temperature")
+m &lt;- fit.prophet(m, training)                     # add_regressor ต้องมาก่อน fit
+future &lt;- make_future_dataframe(m, periods = nrow(test))
+future[, 2:3] &lt;- data %&gt;% select(Christmas, Temperature)   # regressor ของอนาคต
+forecast &lt;- predict(m, future)
+prophet_plot_components(m, forecast)
+plot(m, forecast) + add_changepoints_to_plot(m)
+accuracy(tail(forecast$yhat, nrow(test)), test$y)          # ME −1325, RMSE 1332</code></pre>
+<p>ใช้ <code>prophet()</code> เปล่า ๆ ก่อน แล้วค่อย <code>add_regressor</code> และ <code>fit.prophet</code> เพราะถ้าส่งข้อมูลเข้า <code>prophet(data)</code> ตรง ๆ โมเดลจะฟิตทันทีโดยยังไม่มี regressor</p>
+</details>
+
+<details class="fold"><summary>สไลด์ต้นฉบับของตอนนี้ (หน้า 19 และ 25)</summary><div class="gallery">
+<figure>
+<img src="../assets/slides/ts12-p19.png" alt="Slide 12 หน้า 19: data1.csv: 2905 วัน รายวัน" loading="lazy">
+<figcaption>Slide 12 หน้า 19 — data1.csv: 2905 วัน รายวัน</figcaption>
+</figure>
+<figure>
+<img src="../assets/slides/ts12-p25.png" alt="Slide 12 หน้า 25: DHS.csv: Easter, Thanksgiving, Christmas, Temperature" loading="lazy">
+<figcaption>Slide 12 หน้า 25 — DHS.csv: Easter, Thanksgiving, Christmas, Temperature</figcaption>
+</figure>
+</div></details>
+
+<!-- ===================================================== -->
+<h2 id="s5">5. เลือกโมเดลจากโจทย์: ทั้งวิชา</h2>
+
+<p>FINAL 2025 ข้อ 3 ให้คำอธิบายข้อมูลหกชุดแล้วให้เลือกระหว่าง SARIMA, ARIMAX, VAR, GARCH และ FB Prophet อาจารย์ไม่ได้ให้เฉลย แต่แต่ละโมเดลมี "สัญญาณ" ที่ชี้ชัดจากบทที่เรียนมา:</p>
+
+<table>
+<tr><th>สัญญาณในโจทย์</th><th>โมเดล</th><th>บท</th></tr>
+<tr><td>อนุกรมเดียว มีฤดูกาลคาบคงที่ (รายเดือน s = 12) อาจมี trend</td><td>SARIMA</td><td>Lesson 9–10</td></tr>
+<tr><td>มีตัวแปร X ที่ส่งผลต่อ Y ทางเดียว และรู้ค่า X ล่วงหน้า (งบโฆษณา)</td><td>ARIMAX</td><td>Lesson 11</td></tr>
+<tr><td>หลายตัวแปรส่งผลต่อกันไปมา ต้องพยากรณ์ทุกตัว (GDP สองประเทศ)</td><td>VAR</td><td>Lesson 11</td></tr>
+<tr><td>return ของหุ้น ผันผวนเป็นกลุ่ม ACF ของ return² ลดช้า</td><td>GARCH</td><td>Lesson 12</td></tr>
+<tr><td>ข้อมูลรายวัน ฤดูกาลรายสัปดาห์/รายปี วันหยุดเลื่อนได้ trend หักได้</td><td>Prophet</td><td>Lesson 13</td></tr>
+<tr><td>ไม่รู้ว่ามีคาบเท่าไร</td><td>periodogram ก่อน แล้วค่อยเลือกจากแถวบน</td><td>Lesson 13</td></tr>
+</table>
+
+<table>
+<tr><th>ชุดข้อมูลใน FINAL 2025</th><th>ตอบ</th><th>เหตุผล</th></tr>
+<tr><td>ยอดสั่งซื้อรายวัน 5 ปี trend ขึ้น ศุกร์–เสาร์สูง ปีใหม่และสงกรานต์สูง</td><td>Prophet</td><td>รายวัน + weekly + วันหยุดที่ต้องตั้งหน้าต่าง</td></tr>
+<tr><td>ราคาหุ้นเทคโนโลยีรายวัน ผันผวนเป็นช่วง ACF ของ squared return ลดช้า</td><td>GARCH</td><td>volatility clustering</td></tr>
+<tr><td>ยอดขายรายสัปดาห์ ตอบสนองต่องบ Facebook Ads ชัดเจน</td><td>ARIMAX</td><td>Ads เป็น X ที่บริษัทกำหนดเอง</td></tr>
+<tr><td>นักท่องเที่ยวรายเดือน 10 ปี ธ.ค.–ม.ค. สูง trend ขึ้น โควิดตกแรง</td><td>Prophet (หรือ SARIMA + dummy โควิด)</td><td>สิ่งที่ต่างจากชุดกาแฟคือ trend ที่หักแรง Prophet รองรับด้วย changepoint</td></tr>
+<tr><td>GDP ไทยและสหรัฐรายไตรมาส ต้องการดูผลกระทบและการตอบสนองร่วมกัน</td><td>VAR</td><td>ส่งผลต่อกันสองทาง</td></tr>
+<tr><td>ยอดขายกาแฟรายเดือน 6 ปี ปลายปีสูง เม.ย.–พ.ค. ต่ำทุกปี</td><td>SARIMA</td><td>ฤดูกาลรายเดือนคงที่ ไม่มีอะไรเพิ่ม</td></tr>
+</table>
+
+<p class="trap">ชุดนักท่องเที่ยวเป็นข้อที่เถียงได้ เขียนเหตุผลกำกับเสมอเมื่อเป็นข้อเขียน คำที่ใช้ตัดสินคือ "ข้อมูลอะไรที่มีเพิ่ม": มี X ที่รู้ล่วงหน้าเป็น ARIMAX, X ที่ต้องพยากรณ์ด้วยเป็น VAR, ความแปรปรวนเป็นกลุ่มเป็น GARCH, รายวันกับวันหยุดเป็น Prophet ถ้าไม่มีอะไรเพิ่มเลยเป็น SARIMA</p>
+
+<p class="nextpage">ไฟล์ R_codes.txt, traffic.txt, sales.txt, data1.csv และ DHS.csv อยู่ในโฟลเดอร์ CLASS 12 ใช้ package forecast, prophet และ dplyr ลองฝึกต่อใน<a href="0013-frequency-domain-prophet-exercises.html">แบบฝึก Lesson 13</a> (มี FINAL 2025 ข้อ 5 ข้อมูล rain) หรือกลับไปที่<a href="../index.html">สารบัญ</a></p>
+
+
+<!--REFS-->
+<details class="fold" id="fnotes"><summary>แหล่งอ้างอิง: นาทีในคลิป และหน้าสไลด์ที่ใช้</summary>
+<p>ตัวเลขยกในเนื้อหาชี้มาที่รายการนี้ แต่ละรายการระบุคลาสและนาทีของคลิป พร้อมถ้อยคำในคลิปเมื่อมี</p>
+<ol class="fnlist">
+<li id="fn-1"><b>Class 12, 0:44:42–0:45:20</b> — "แล้วก็จะมี P-Logram อยู่นิดนึง" <a class="fnback" href="#fnr-1">กลับ</a></li>
+<li id="fn-2"><b>Class 12, 0:00:36–0:00:40</b> — "ให้เน้นจากทำปีล่าสุดก่อน ย้อนหลังลงไป" <a class="fnback" href="#fnr-2">กลับ</a></li>
+<li id="fn-3"><b>Class 12, 0:02:11–0:02:43</b> — "ไม่ว่าคุณจะทำเป็น Mountain Variate หรือ Union Variate เรา Forecast ที่ Time Domain" <a class="fnback" href="#fnr-3">กลับ</a></li>
+<li id="fn-4"><b>Class 12, 0:22:01–0:22:28</b> <a class="fnback" href="#fnr-4">กลับ</a></li>
+<li id="fn-5"><b>Class 12, 0:11:30–0:12:06</b> <a class="fnback" href="#fnr-5">กลับ</a></li>
+<li id="fn-6"><b>Class 12, 0:13:27–0:13:49</b> — "Frequency คือ 0.1429" <a class="fnback" href="#fnr-6">กลับ</a></li>
+<li id="fn-7"><b>Class 12, 0:15:58–0:21:16</b> <a class="fnback" href="#fnr-7">กลับ</a></li>
+<li id="fn-8"><b>Class 12, 0:20:51–0:21:16</b> — "เขาได้เปลี่ยนเป็น Fast Furrier Transform" <a class="fnback" href="#fnr-8">กลับ</a></li>
+<li id="fn-9"><b>Class 12, 0:37:44–0:37:49</b> — "ถ้าเกิด decreasing แสดงว่า frequency ต่ำ ๆ เนี่ย มันมีมันสูงกว่า frequency สูง ๆ" <a class="fnback" href="#fnr-9">กลับ</a></li>
+<li id="fn-10"><b>Class 12, 0:30:55–0:35:14</b> <a class="fnback" href="#fnr-10">กลับ</a></li>
+<li id="fn-11"><b>Class 12, 0:38:32–0:43:43</b> <a class="fnback" href="#fnr-11">กลับ</a></li>
+<li id="fn-12"><b>Class 12, 0:44:47</b> <a class="fnback" href="#fnr-12">กลับ</a></li>
+<li id="fn-13"><b>Class 12, 0:46:50–0:50:58</b> <a class="fnback" href="#fnr-13">กลับ</a></li>
+<li id="fn-14"><b>Class 12, 1:11:04–1:11:43</b> <a class="fnback" href="#fnr-14">กลับ</a></li>
+<li id="fn-15"><b>Class 12, 1:27:03–1:27:15</b> — "อาจจะเป็น Limitation อันหนึ่งก็ได้ เพราะว่ามันไม่สามารถ Flexible ได้" <a class="fnback" href="#fnr-15">กลับ</a></li>
+<li id="fn-16"><b>Class 12, 1:13:23</b> <a class="fnback" href="#fnr-16">กลับ</a></li>
+<li id="fn-17"><b>Class 12, 0:58:32–1:08:07</b> <a class="fnback" href="#fnr-17">กลับ</a></li>
+<li id="fn-18"><b>Class 12, 1:19:41–1:35:26</b> <a class="fnback" href="#fnr-18">กลับ</a></li>
+<li id="fn-19"><b>Class 12, 1:38:36–1:39:08</b> <a class="fnback" href="#fnr-19">กลับ</a></li>
+<li id="fn-20"><b>Class 12, 1:37:41–1:38:26</b> — "เส้นปล่ะคือนอดจุดที่เทรนมันเกิดเปลี่ยน" <a class="fnback" href="#fnr-20">กลับ</a></li>
+<li id="fn-21"><b>Class 12, 1:39:28</b> <a class="fnback" href="#fnr-21">กลับ</a></li>
+</ol>
+<table>
+<tr><th>หน้า</th><th>เนื้อหา</th><th>อยู่ในตอน</th></tr>
+<tr data-pages="1-12"><td>1–12</td><td>Frequency domain, ความถี่, amplitude, DFT, power spectrum, periodogram</td><td><a href="#s1">ตอน 1</a></td></tr>
+<tr data-pages="13-14"><td>13–14</td><td>รูป periodogram และการใช้งานจริง</td><td><a href="#s2">ตอน 2</a></td></tr>
+<tr data-pages="15-18"><td>15–18</td><td>แนวคิดและสมการของ Prophet</td><td><a href="#s3">ตอน 3</a></td></tr>
+<tr data-pages="19-21"><td>19–21</td><td>data1.csv</td><td><a href="#s4">ตอน 4</a></td></tr>
+<tr data-pages="22-24"><td>22–24</td><td>Dynamic holiday, พารามิเตอร์, ข้อดีข้อเสีย</td><td><a href="#s3">ตอน 3</a></td></tr>
+<tr data-pages="25-30"><td>25–30</td><td>DHS: วันหยุด regressor การพยากรณ์ changepoint</td><td><a href="#s4">ตอน 4</a></td></tr>
+</table>
+<p>แหล่งอื่นที่ใช้: Class 12 ช่วง 0:00–1:42 (ตอน 1–4; ช่วง 0:09:27–0:10:35 และ 0:51:58–0:54:27 เป็นคลิป YouTube ถอดไม่ได้), ไฟล์ R_codes.txt, traffic.txt และ sales.txt (CLASS 12) ที่รันซ้ำ, FINAL (2025) ข้อ 3 (ตอน 5) ค่าของ Prophet ใช้ output บนสไลด์</p>
+</details>
+
+</body>
+</html>

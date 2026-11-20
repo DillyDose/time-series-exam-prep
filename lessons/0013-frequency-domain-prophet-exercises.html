@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบฝึก Lesson 13: Frequency domain และ Prophet</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · แบบฝึก Lesson 13</span>
+  <span><a href="0013-frequency-domain-prophet.html">← กลับไปที่บทเรียน</a></span>
+</nav>
+
+<h1>แบบฝึก Lesson 13: Frequency domain และ Prophet</h1>
+<p>แบบฝึกแบ่งเป็นสี่กลุ่ม คือ periodogram, Prophet, เลือกโมเดล และข้อสอบเก่า ข้อเลือกตอบกดแล้วเห็นผลทันที ส่วนข้อเขียนให้ลองเขียนก่อนแล้วจึงกดดูเฉลย ข้อ 11–13 คือ FINAL 2025 ข้อ 3 และข้อ 5 ทำด้วย R ได้จากไฟล์ rain.txt ในโฟลเดอร์ข้อสอบเก่า</p>
+<p class="quiz-score"></p>
+
+<h3>กลุ่ม A: periodogram</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 1</span><span>ความถี่เป็นคาบ</span></div>
+<div class="qtext">ข้อมูลรายเดือน <code>spectrum()</code> ให้ยอดสูงสุดที่ f = 0.0833 ข้อมูลมีรอบเท่าไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. นี่คือความถี่ ต้องกลับเศษเป็นส่วน">0.0833 เดือนต่อรอบ</button>
+<button class="opt" data-correct="false" data-note="ผิด. คูณ 100 ไม่ใช่วิธีแปลงความถี่">8.33 เดือนต่อรอบ</button>
+<button class="opt" data-correct="true" data-note="ถูก. T = 1/f = 1/0.0833 = 12 เดือน ตั้ง ts(x, frequency = 12)">12 เดือนต่อรอบ</button>
+<button class="opt" data-correct="false" data-note="ผิด. 0.0833 × 12 = 1 คือจำนวนรอบต่อปี ไม่ใช่ความยาวรอบ">1 เดือนต่อรอบ</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 2</span><span>รูป periodogram</span></div>
+<div class="qtext">periodogram ของ residual จาก SARIMA แบนเท่ากันทุกความถี่ หมายความว่าอะไร</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. flat spectrum คือใกล้ white noise ไม่มีรอบที่เหลือให้โมเดล เหมือน Ljung-Box ที่ไม่ reject">residual ใกล้ white noise ไม่มีคาบเหลือ</button>
+<button class="opt" data-correct="false" data-note="ผิด. ถ้ามีรอบเหลือจะเห็นยอด ไม่ใช่เส้นแบน">residual ยังมีรอบฤดูกาลที่โมเดลจับไม่หมด</button>
+<button class="opt" data-correct="false" data-note="ผิด. trend ทำให้พลังงานกองที่ f ใกล้ศูนย์ (decreasing)">residual ยังมี trend ต้อง difference เพิ่ม</button>
+<button class="opt" data-correct="false" data-note="ผิด. broad peak คือหลายความถี่ใกล้กัน ไม่ใช่แบนทั้งแกน">residual มีวัฏจักรหลายความถี่ใกล้กัน</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 3</span><span>ก่อนทำ periodogram</span></div>
+<div class="qtext">periodogram ของข้อมูลรายวันที่ยังไม่แปลงอะไรเลย มีพลังงานกองสูงมากที่ f ใกล้ 0 แล้วลดลงเรื่อย ๆ ควรทำอะไรก่อน</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. f ใกล้ 0 คือคาบยาวมากจนไม่ใช่ฤดูกาล ตั้งเป็น s ไม่ได้">ตั้ง s เท่ากับ 1/f ของยอดนั้นใน SARIMA</button>
+<button class="opt" data-correct="false" data-note="ผิด. log ช่วยให้เห็นยอดเล็ก แต่ไม่ได้เอา trend ออก">เปลี่ยนเป็น log = &quot;yes&quot; แล้วอ่านใหม่</button>
+<button class="opt" data-correct="false" data-note="ผิด. แบบนี้คือ decreasing ไม่ใช่ flat ข้อมูลมีโครงสร้าง">สรุปว่าเป็น white noise ไม่ต้องโมเดล</button>
+<button class="opt" data-correct="true" data-note="ถูก. พลังงานที่ f ≈ 0 คือ trend ซึ่งกลบยอดฤดูกาล difference ก่อนแบบ traffic.txt แล้วทำ periodogram ใหม่">difference ข้อมูลก่อน แล้วทำ periodogram ใหม่</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 4</span><span>periodogram วัดอะไร</span></div>
+<div class="qtext">ข้อใดถูกเกี่ยวกับ periodogram ตามสไลด์</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. สไลด์บอกว่า periodogram ไม่ได้ประมาณ amplitude โดยตรง">ประมาณ amplitude ของแต่ละความถี่โดยตรง</button>
+<button class="opt" data-correct="true" data-note="ถูก. periodogram ประมาณ power spectrum ซึ่งแปรผันตาม amplitude ยกกำลังสอง คือความแปรปรวนต่อความถี่">ประมาณพลังงานต่อความถี่ ∝ amplitude²</button>
+<button class="opt" data-correct="false" data-note="ผิด. periodogram สร้างจาก DFT ของข้อมูล ไม่ได้ใช้ lag ของ residual">เป็น ACF ของ residual ที่เรียงตามความถี่</button>
+<button class="opt" data-correct="false" data-note="ผิด. พยากรณ์ทำใน time domain periodogram มีไว้ค้นหาคาบ">ให้ค่าพยากรณ์ตามความถี่ที่เลือก</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม B: Prophet</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 5</span><span>รูปแบบข้อมูล</span></div>
+<div class="qtext">ก่อนเรียก <code>prophet()</code> ข้อมูลต้องเตรียมอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="true" data-note="ถูก. ชื่อคอลัมน์บังคับ ds กับ y และวันที่ต้องอยู่ในรูป ปี-เดือน-วัน (strptime แล้ว as.Date)">คอลัมน์ ds เป็นวันที่ และ y เป็นค่า</button>
+<button class="opt" data-correct="false" data-note="ผิด. Prophet ใช้ data frame ที่มีวันที่ ไม่ใช่ ts ที่บอกแค่ frequency">แปลงเป็น ts() ที่ตั้ง frequency = 365</button>
+<button class="opt" data-correct="false" data-note="ผิด. Prophet ไม่ต้องการข้อมูลที่นิ่ง trend เป็นส่วนหนึ่งของสมการ">difference ข้อมูลให้นิ่งก่อนเสมอ</button>
+<button class="opt" data-correct="false" data-note="ผิด. Prophet ไม่ใช้ lag ของ y เลย">สร้างคอลัมน์ lag ของ y เป็น input</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 6</span><span>holiday window</span></div>
+<div class="qtext">ตั้ง Thanksgiving ด้วย <code>lower_window = -3, upper_window = 1</code> หมายความว่าอะไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. window บอกจำนวนวันรอบวันหยุด ไม่ใช่ขนาดของผล">ผลของวันหยุดลดลง 3 หน่วยและเพิ่ม 1 หน่วย</button>
+<button class="opt" data-correct="false" data-note="ผิด. lower เป็นลบคือก่อนวันหยุด สลับทิศ">1 วันก่อนถึง 3 วันหลังได้ผลของวันหยุด</button>
+<button class="opt" data-correct="false" data-note="ผิด. หน้าต่างต้องเท่ากันทุกปี นี่คือข้อจำกัดที่อาจารย์ชี้">ใช้ 3 วันในบางปีและ 1 วันในบางปี</button>
+<button class="opt" data-correct="true" data-note="ถูก. 3 วันก่อนถึง 1 วันหลัง รวมวันหยุดเป็น 5 วัน ทุกปีเท่ากัน">3 วันก่อนถึง 1 วันหลังได้ผลของวันหยุด</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 7</span><span>อ่าน regressor</span></div>
+<div class="qtext">Prophet ที่ตั้ง <code>seasonality.mode = 'multiplicative'</code> ได้สัมประสิทธิ์ Temperature = −0.0016468 อ่านว่าอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. multiplicative อ่านเป็นสัดส่วนของ trend ไม่ใช่จำนวนคน">อุณหภูมิสูงขึ้น 1 องศา คนลดลง 0.0016 คน</button>
+<button class="opt" data-correct="true" data-note="ถูก. คูณ 100 เป็นเปอร์เซ็นต์ คนในศูนย์พักพิงลดลง 0.165% ต่อองศา">อุณหภูมิสูงขึ้น 1 องศา คนลดลง 0.165%</button>
+<button class="opt" data-correct="false" data-note="ผิด. ค่าติดลบคือลดลง ไม่ใช่เพิ่มขึ้น">อุณหภูมิสูงขึ้น 1 องศา คนเพิ่มขึ้น 0.165%</button>
+<button class="opt" data-correct="false" data-note="ผิด. ขนาดของสัมประสิทธิ์ไม่ได้บอก p-value และสไลด์ตีความว่ามีผล">ค่าน้อยมาก อุณหภูมิจึงไม่มีผลเลย</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 8</span><span>อ่าน accuracy</span></div>
+<div class="qtext">Prophet ของ DHS ใน test set 31 วันได้ ME = −1325.1 และ RMSE = 1331.5 สรุปอย่างไร</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. error = ค่าจริง − ค่าพยากรณ์ ME ลบคือพยากรณ์สูงไป">พยากรณ์ต่ำกว่าจริงเกือบทุกวัน</button>
+<button class="opt" data-correct="false" data-note="ผิด. ถ้า error สุ่มบวกลบ ME จะใกล้ 0 ขณะที่ RMSE ใหญ่">error สุ่มบวกลบ หักล้างกันพอดี</button>
+<button class="opt" data-correct="true" data-note="ถูก. |ME| ≈ RMSE แปลว่า error เกือบทุกวันขนาดเท่ากันและทิศเดียวกัน ME ลบคือพยากรณ์สูงเกิน เพราะ trend ช่วงท้ายไม่มี changepoint">พยากรณ์สูงเกินจริงเกือบเท่ากันทุกวัน</button>
+<button class="opt" data-correct="false" data-note="ผิด. RMSE เทียบกับระดับข้อมูล ~55,000 แค่ราว 2.5% และมี bias ชัด ไม่ใช่สุ่ม">โมเดลผิดหมดเพราะ RMSE เกิน 1,000</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<h3>กลุ่ม C: เลือกโมเดล</h3>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 9</span><span>FINAL 2025 ข้อ 3</span></div>
+<div class="qtext">GDP ไทยและ GDP สหรัฐรายไตรมาส 20 ปี ต้องการวิเคราะห์ว่า GDP ไทยได้รับผลจาก GDP สหรัฐหรือไม่ และตอบสนองร่วมกันหรือไม่ ควรเลือกโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. ARIMAX ให้ X ส่งผลทางเดียวและต้องรู้ X ล่วงหน้า คำว่าตอบสนองร่วมกันคือสองทาง">ARIMAX ที่ใช้ GDP สหรัฐเป็น xreg</button>
+<button class="opt" data-correct="true" data-note="ถูก. สองตัวแปรส่งผลต่อกันและต้องพยากรณ์ทั้งคู่ VAR พร้อม Granger test ตอบได้ว่าใครส่งผลต่อใคร">VAR ของ GDP ทั้งสองประเทศ</button>
+<button class="opt" data-correct="false" data-note="ผิด. SARIMA ใช้ได้ทีละอนุกรม ตอบคำถามเรื่องผลกระทบระหว่างกันไม่ได้">SARIMA ของ GDP ไทยอย่างเดียว</button>
+<button class="opt" data-correct="false" data-note="ผิด. GARCH โมเดลความแปรปรวนของ return ไม่ใช่ความสัมพันธ์ระหว่างตัวแปร">GARCH ของ GDP ไทย</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz">
+<div class="qhead"><span>ข้อ 10</span><span>FINAL 2025 ข้อ 3</span></div>
+<div class="qtext">ยอดสั่งซื้อสินค้ารายวัน 5 ปี มีแนวโน้มเพิ่มขึ้น ศุกร์–เสาร์ยอดสูง และช่วงปีใหม่กับสงกรานต์ยอดสูง ควรเลือกโมเดลใด</div>
+<div class="options">
+<button class="opt" data-correct="false" data-note="ผิด. SARIMA จับรอบ 7 วันได้ แต่วันหยุดที่ต้องมีหน้าต่างก่อน/หลังต้องสร้าง dummy เอง">SARIMA ที่ s = 7</button>
+<button class="opt" data-correct="false" data-note="ผิด. ไม่มีตัวแปรอื่นที่ส่งผลต่อกัน">VAR ของยอดสั่งซื้อกับวันในสัปดาห์</button>
+<button class="opt" data-correct="true" data-note="ถูก. ข้อมูลรายวัน + weekly seasonality + วันหยุด + trend คือสิ่งที่ Prophet ออกแบบมาโดยตรง">FB Prophet พร้อม holidays</button>
+<button class="opt" data-correct="false" data-note="ผิด. ไม่มีเรื่องความผันผวนเป็นกลุ่ม">GARCH ของยอดสั่งซื้อรายวัน</button>
+</div>
+<div class="feedback"></div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 11</span><span>FINAL 2025 ข้อ 3 ทั้งข้อ (3 คะแนน)</span></div>
+<div class="qtext">เลือกโมเดล (SARIMA / ARIMAX / VAR / GARCH / FB Prophet) ให้ข้อมูลหกชุดพร้อมเหตุผลหนึ่งบรรทัด: (1) ยอดสั่งซื้อรายวัน ศุกร์–เสาร์สูง ปีใหม่–สงกรานต์สูง (2) ราคาหุ้นเทคโนโลยีรายวัน ผันผวนเป็นช่วง ACF ของ squared return ลดช้า (3) ยอดขายรายสัปดาห์ตอบสนองต่องบ Facebook Ads (4) นักท่องเที่ยวรายเดือน 10 ปี ธ.ค.–ม.ค. สูง trend ขึ้น โควิดตกแรง (5) GDP ไทยและสหรัฐ ผลกระทบและการตอบสนองร่วมกัน (6) ยอดขายกาแฟรายเดือน ปลายปีสูง เม.ย.–พ.ค. ต่ำ</div>
+<textarea placeholder="เขียนโมเดลและเหตุผลทีละชุด"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<p>(1) Prophet: รายวัน + weekly + วันหยุดที่ต้องมีหน้าต่าง (2) GARCH: volatility clustering, return² เป็นแบบ AR (3) ARIMAX: Ads เป็น X ที่บริษัทกำหนดเองและรู้ล่วงหน้า (4) Prophet: trend หักแรงช่วงโควิด รองรับด้วย changepoint (SARIMA พร้อม dummy โควิดเป็น xreg ก็ป้องกันได้ถ้าเขียนเหตุผล) (5) VAR: ส่งผลต่อกันสองทาง ใช้ Granger ดูทิศ (6) SARIMA: ฤดูกาลรายเดือนคงที่ ไม่มีข้อมูลอื่นเพิ่ม</p>
+<p>อาจารย์ไม่ได้ให้เฉลย ชุด (4) จึงเป็นข้อที่เถียงได้ หลักคือดูว่าโจทย์ให้ข้อมูลอะไร "เพิ่ม" จากอนุกรมเดี่ยวที่มีฤดูกาล</p>
+</div>
+</div>
+
+<h3>กลุ่ม D: ข้อสอบเก่า (ทำด้วย R)</h3>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 12</span><span>FINAL 2025 ข้อ 5a (2 คะแนน)</span></div>
+<div class="qtext">rain.txt คือปริมาณน้ำฝนรายเดือนที่ อ.นาทวี จ.สงขลา ม.ค. 2022 – พ.ย. 2025 (47 เดือน) สร้าง periodogram เพื่อหาความถี่และ cycle ที่เหมาะสม</div>
+<textarea placeholder="เขียนโค้ด ผล และการตีความ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>rain &lt;- read.table("rain.txt", header = TRUE)
+s &lt;- spectrum(rain$rain, log = "no")
+s$freq[which.max(s$spec)]          # 0.0833
+1 / s$freq[which.max(s$spec)]      # 12</code></pre>
+<p>ยอดเด่นที่ f = 0.0833 (power ≈ 920) คาบ T = 1/0.0833 = 12 เดือน คือรอบรายปีของฤดูฝน ยอดรองที่ f = 0.27 (คาบ ~3.7 เดือน) กับ f = 0.021 (คาบ 48 เดือน ≈ ความยาวข้อมูลทั้งหมด คือ trend) สูงไม่ถึงหนึ่งในสิบของยอดหลัก จึงใช้ cycle = 12 และตั้ง <code>ts(rain$rain, start = c(2022,1), frequency = 12)</code> สำหรับข้อต่อไป</p>
+</div>
+</div>
+
+<div class="quiz free">
+<div class="qhead"><span>ข้อ 13</span><span>FINAL 2025 ข้อ 5g (9 คะแนน)</span></div>
+<div class="qtext">ใช้ training ม.ค. 2022 – ธ.ค. 2024 (36 เดือน) และ test ม.ค. – พ.ย. 2025 (11 เดือน) สร้างสี่โมเดล: (1) auto.arima (stepwise = TRUE, approximation = FALSE) (2) แบบเดียวกันที่ใช้ storm เป็น xreg (3) nnetar (4) nnetar ที่ใช้ storm เป็น xreg เติมชื่อโมเดลจาก R และ RMSE ใน test set แล้วอภิปรายผล</div>
+<textarea placeholder="เติมตารางและอภิปราย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<table>
+<tr><th>ตัวแบบ</th><th>ชื่อจาก R (training)</th><th>RMSE test</th></tr>
+<tr><td>1</td><td>ARIMA(0,0,0)(0,1,0)[12] with drift</td><td>4.85</td></tr>
+<tr><td>2</td><td>Regression with ARIMA(0,0,0)(0,1,0)[12] errors (drift 1.02, storm 4.58)</td><td>5.00</td></tr>
+<tr><td>3</td><td>NNAR(1,1,2)[12]</td><td>≈ 5.6–6.3 (แล้วแต่ seed)</td></tr>
+<tr><td>4</td><td>NNAR(1,1,2)[12] + xreg storm</td><td>≈ 60–65</td></tr>
+</table>
+<p>อภิปราย: (ก) ARIMA ธรรมดาดีที่สุด เพราะข้อมูลมีแค่ seasonal กับ drift ชัดเจน (ตรงกับ periodogram ข้อ 12) และ training มีแค่ 36 เดือน (ข) storm ช่วยไม่ได้: สัมประสิทธิ์ 4.58 มม. แต่ใน test ผลของพายุไม่สม่ำเสมอ RMSE จึงแย่ลงเล็กน้อย (ค) NNAR ไม่ชนะ ARIMA เพราะข้อมูลน้อย ตรงกับที่อาจารย์เตือนใน Lesson 12 และผลขึ้นกับ seed (ง) NNAR + storm พังหนัก: training มีพายุแค่ไม่กี่เดือน network เรียนผลของ storm = 1 แบบสุดโต่ง พอ test มีพายุ (พ.ค., มิ.ย., ก.ย.–พ.ย.) ค่าพยากรณ์กระโดดไป ~150 มม. และค้างอยู่เพราะพยากรณ์ทีละก้าวใช้ค่าพยากรณ์ก่อนหน้าเป็น input ต่อ</p>
+<pre><code>x  &lt;- ts(rain$rain,  start = c(2022,1), frequency = 12)
+st &lt;- ts(rain$storm, start = c(2022,1), frequency = 12)
+tr &lt;- window(x, end = c(2024,12));  te &lt;- window(x, start = c(2025,1))
+s1 &lt;- window(st, end = c(2024,12)); s2 &lt;- window(st, start = c(2025,1))
+m1 &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE)
+m2 &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE, xreg = s1)
+set.seed(1); m3 &lt;- nnetar(tr)
+set.seed(1); m4 &lt;- nnetar(tr, xreg = s1)
+accuracy(forecast(m1, h = 11)$mean, te)      # RMSE 4.85
+accuracy(forecast(m2, xreg = s2)$mean, te)   # RMSE 5.00
+accuracy(forecast(m3, h = 11)$mean, te)
+accuracy(forecast(m4, xreg = s2)$mean, te)</code></pre>
+</div>
+</div>
+
+<div class="box win">
+<div class="label">สิ่งที่ควรทำได้หลังจบบทนี้</div>
+<ul>
+<li>อ่านยอดของ periodogram แล้วแปลง T = 1/f และตั้ง frequency ของ ts()</li>
+<li>บอกความหมายของรูป peak, broad peak, decreasing, flat และรู้ว่าต้อง difference ก่อนถ้ามี trend</li>
+<li>เขียนสมการ Prophet \(y_t=c_t+s_t+h_t+x_t+\varepsilon_t\) และบอกว่าแต่ละส่วนสร้างอย่างไร</li>
+<li>เตรียม ds/y, holiday window, add_regressor, make_future_dataframe และอ่าน yhat กับ accuracy</li>
+<li>เลือก SARIMA / ARIMAX / VAR / GARCH / Prophet จากคำอธิบายข้อมูล พร้อมเหตุผล</li>
+</ul>
+</div>
+
+<p class="nextpage"><a href="0013-frequency-domain-prophet.html">← กลับไปที่บทเรียน Lesson 13</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
