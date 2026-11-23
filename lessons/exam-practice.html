@@ -75,6 +75,19 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 
 <p>ทำข้อไหนได้แล้ว บอกผมว่า "ทักษะ N ทำได้แล้ว" ผมจะเปลี่ยนสถานะในตารางให้</p>
 
+<div class="method" id="class13">
+<b>อาจารย์บอกอะไรใน Class 13 (คาบเฉลยข้อสอบเก่า)</b>
+<ul>
+<li>ทำ PRACTICE 1–2 ก่อน แล้วย้อนข้อสอบเก่า PRACTICE เป็นภาค concept ข้อสอบเก่ามีภาค data analysis</li>
+<li>ภาค concept: พิสูจน์ความนิ่งแบบ PRACTICE 1 ข้อ 1 และ 5 กับตรวจราก causal/invertible ออกแทบทุกปี สองปีหลังถามแค่ causal/invertible ไม่ถึง ψ weights</li>
+<li>ข้อที่บอกว่าไม่ออก: PRACTICE 1 ข้อ 3 ที่ต้อง integrate sin · PRACTICE 2 ข้อ 2 บรรยาย ACF/PACF เพราะเปิดตำราได้</li>
+<li>พิสูจน์ \(|\rho_1|\le\tfrac12\) ต้องใช้แคลคูลัส แทนค่าทีละตัวได้ 0 คะแนน</li>
+<li>เน้นว่า AIC เทียบไม่ได้ระหว่างโมเดลที่ log กับไม่ log และระหว่าง ETS กับ ARIMA</li>
+<li>เขียนด้วยปากกาให้อ่านออก ทดในกระดาษทดก่อนแล้วค่อยเขียนลง โจทย์ที่เขียนว่า "กระชับและชัดเจน" ตอบสั้นได้เต็ม</li>
+</ul>
+<p>เฉลยในหน้านี้แก้ให้ตรงกับที่อาจารย์เฉลยแล้ว 5 ข้อ: 1.7, 8.2, 12.2, 14.1, 17.1 ข้อที่อาจารย์น่าจะพูดพลาดมีหมายเหตุไว้ในข้อ 6.3</p>
+</div>
+
 <h2 id="checklist">Checklist</h2>
 
 <div class="modebar" role="group" aria-label="เรียงลำดับ">
@@ -375,7 +388,7 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 <p>MA: \(b^2-4ac=2.2446-2.0876=0.1570\)</p>
 <p>\(x=\dfrac{1.4982\pm0.3962}{1.0438}\Rightarrow x=1.815,\ 1.056\)</p>
 <p>All roots exceed 1: the fitted model is causal and invertible.</p>
-<p>The AR roots (modulus 1.25) are close to the MA roots (1.06 and 1.81), so the AR and MA factors nearly cancel. This is evidence of parameter redundancy; a smaller model (for example AR(1) or MA(1)) may be adequate, which agrees with the ACF/PACF and the small differences in AIC.</p>
+<p>The AR roots (1.24 ± 0.10i) and the MA roots (1.06 and 1.81) are not equal or very close, so no factor cancels. There is no clear evidence of parameter redundancy.</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -384,7 +397,7 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 <tr><td>3</td><td>AR: D = −0.0151</td><td>\(1.6009^2=2.5629\) · \(4\times0.6445=2.5780\) · ลบกันติดลบนิดเดียว รากเชิงซ้อน (ก6) · \(\sqrt{0.0151}=0.1230\) · \(2a=1.2890\)</td></tr>
 <tr><td>4</td><td>modulus 1.246</td><td>\(1.6009/1.2890=1.242\) · \(0.1230/1.2890=0.095\) · เช็ก \(c/a=1/0.6445=1.552\) และ \(1.246^2=1.552\) ✓</td></tr>
 <tr><td>5</td><td>MA: 1.815, 1.056</td><td>\(1.4982^2=2.2446\) · \(4\times0.5219=2.0876\) · D = 0.1570 · \(\sqrt D=0.3962\) · \(2a=1.0438\) · \((1.4982+0.3962)/1.0438=1.815\) · \((1.4982-0.3962)/1.0438=1.056\)</td></tr>
-<tr><td>6</td><td>redundancy</td><td>รากสองฝั่งไม่เท่ากันพอดี แต่<b>ใกล้กัน</b> (ราว 1.1–1.8 ทั้งคู่) วงเล็บฝั่ง AR กับ MA จึงเกือบตัดกันได้ ประกอบกับ s.e. ใหญ่ และ AIC ของโมเดลเล็กต่างจาก ARMA(2,2) ไม่ถึง 2 จึงถือเป็นหลักฐานของ redundancy</td></tr>
+<tr><td>6</td><td>redundancy</td><td>เทียบรากสองฝั่ง ฝั่ง AR เป็นจำนวนเชิงซ้อน ฝั่ง MA เป็นจำนวนจริงสองตัว ไม่มีคู่ไหนเท่ากัน วงเล็บจึงตัดกันไม่ได้ · อาจารย์เฉลยใน Class 13 ว่า "รากไม่น่าจะใกล้เคียงกัน ก็ไม่น่าจะ redundant"</td></tr>
 </table>
 <p class="trap">⚠ จุดที่พลาดบ่อยที่สุด: ar2 = −0.6445 ต้องเข้าไปใน Φ เป็น <b>+0.6445</b> เพราะ Φ มีเครื่องหมายลบนำหน้า φ อยู่แล้ว ส่วน ma ใส่ตามที่ R ให้ ไม่ต้องกลับเครื่องหมาย</p>
 </div>
@@ -1257,7 +1270,7 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <tr><td>6</td><td>γ(1) = −0.25σ²</td><td>เลื่อน 1 ช่อง คู่ที่ตรงกันคือ (1, −0.5) และ (−0.5, −0.5) ได้ \(-0.5+0.25=-0.25\)</td></tr>
 <tr><td>7</td><td>γ(2) = −0.5σ²</td><td>เลื่อน 2 ช่อง เหลือคู่เดียว (1, −0.5)</td></tr>
 </table>
-<p class="trap">⚠ ข้อนี้ 15 คะแนนอยู่ที่ข้อ b ต้องเขียน γ ให้ครบทุก h ไม่ใช่แค่บอกว่า "mean คงที่ จึงนิ่ง"</p>
+<p class="trap">⚠ ข้อนี้ 15 คะแนนอยู่ที่ข้อ b ต้องเขียน γ ให้ครบทุก h ไม่ใช่แค่บอกว่า "mean คงที่ จึงนิ่ง" · ใน Class 13 อาจารย์บอกคำตอบ γ(0) ของ ∇X เป็น 1.25σ² ซึ่งน่าจะลอกมาจาก γ(0) ของ X_t ที่เป็น 1 + 0.25 คิดจริงได้ 1 + 0.25 + 0.25 = 1.5σ² ให้เขียนวิธีทำให้เห็นทุกพจน์ · อาจารย์บอกว่าแนวข้อนี้ "จะออกข้อสอบอยู่ในพาร์ทแรกที่เป็นคอนเซ็ปต์"</p>
 </div>
 </div>
 
@@ -1285,7 +1298,7 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <tr><td>5</td><td>\(\tfrac12(0-0)\)</td><td>t − s และ t + s เป็นจำนวนเต็มที่ไม่ใช่ 0 integral ของ cos ทั้งรอบได้ 0 ตาม ก16</td></tr>
 <tr><td>6</td><td>s = t ได้ ½</td><td>\(\cos(0)=1\) integrate 1 จาก 0 ถึง 1 ได้ 1 ส่วนอีกตัวยังเป็น 0</td></tr>
 </table>
-<p class="trap">⚠ เพราะ mean = 0 ทุกตัว \(Cov(X_t,X_s)=E(X_tX_s)\) ได้ตรง ๆ ตาม ก13</p>
+<p class="trap">⚠ อาจารย์บอกใน Class 13 ว่าข้อนี้ "ผมจะไม่ออก" เพราะต้อง integrate sin cos ให้ข้ามได้ ทำเป็นข้อเสริมถ้ามีเวลา</p>
 </div>
 </div>
 
@@ -1315,7 +1328,7 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <tr><td>6</td><td>h = 1</td><td>คูณครบ 4 คู่: \(w_t^2w_{t-1}w_{t+1}\), \(w_tw_{t-1}w_{t+1}^2\), \(w_t^3w_{t+1}\), \(w_t^2w_{t+1}^2\) สามคู่แรกมี w ที่อยู่ตัวเดียว E = 0 เหลือคู่สุดท้าย \(\sigma^2\cdot\sigma^2\)</td></tr>
 <tr><td>7</td><td>ลบ mean²</td><td>mean ไม่ใช่ 0 ต้องลบ \(E(X_t)E(X_{t+1})=\sigma^4/4\) ตาม ก13 ได้ 0</td></tr>
 </table>
-<p class="trap">⚠ โจทย์ไม่ได้บอกว่า normal ให้ตอบ γ(0) เป็น \(E(w_t^4)/4\) แล้วเขียนเพิ่มว่าถ้า normal ได้ \(3\sigma^4/4\) ตรวจด้วย simulation σ = 1.5 ได้ mean 1.12 เทียบ 1.125 และ variance 3.79 เทียบ 3.80</p>
+<p class="trap">⚠ อาจารย์เฉลยใน Class 13 โดยใช้สมบัติของ normal \(E(w^3)=0\) และ \(E(w^4)=3\sigma^4\) ได้ γ(0) = 3σ⁴/4 · อาจารย์บอกว่าข้อนี้ "ยากสุดแล้วถ้าจะออก" และ "ถ้าทำข้อนี้ได้ ข้อแรกของข้อสอบปีที่แล้วคุณก็ทำได้" ให้จำสมบัติ 4 ตัวนี้ไว้</p>
 </div>
 </div>
 
@@ -1391,6 +1404,7 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s4-psi">L7 ตอน 4.5</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 4 (8 คะแนน) · PRACTICE 2 ข้อ 3(e)</p>
 
 <p>ψ weights คือการเขียน \(X_t\) เป็นผลรวมของ shock ในอดีต (MA(∞)) ใช้ได้เมื่อ causal ส่วน π weights คือการเขียน \(w_t\) เป็นผลรวมของ X ในอดีต (AR(∞)) ใช้ได้เมื่อ invertible ดังนั้นต้อง<b>ตรวจรากก่อนเสมอ</b> (ทักษะ 1)</p>
+<p class="trap">⚠ อาจารย์บอกใน Class 13 ว่าข้อสอบสองปีหลังถามแค่ causal กับ invertible ไม่ถึง ψ weights ทักษะนี้จึงสำคัญน้อยลง ถ้าออก เขียนแค่ 4 เทอมแรกก็ได้เต็ม</p>
 
 <div class="method">
 <b>สองวิธี เลือกอันที่ถนัด</b>
@@ -1583,7 +1597,7 @@ What ARMA model does this suggest, and why?</div>
 <tr><td>3</td><td>หารด้วย −2</td><td>\(3950.5\div(-2)=-1975.25\) บวกหารลบได้ลบ ตาม ก2</td></tr>
 <tr><td>4</td><td>ตรวจกับ ARMA(2,2)</td><td>output ของ ARMA(2,2) ให้ทั้ง log L และ aic มา ใช้ยืนยันว่านับ k ถูกวิธี: \(3947.76+12=3959.76\) ✓</td></tr>
 </table>
-<p class="trap">⚠ ถ้าลืมนับ σ² จะได้ k = 4 และ log L = −1976.25 ผิดไป 1 ให้ตรวจกับ output ที่โจทย์ให้มาทุกครั้ง</p>
+<p class="trap">⚠ อาจารย์เฉลยใน Class 13 ว่านับ k = 4 ก็ได้ คือ φ₁, φ₂, θ₁, σ² ไม่นับ intercept ได้ log L = (8 − 3960.5)/2 = −1976.25 · นับ k = 5 รวม intercept ก็ได้ อาจารย์ให้คะแนนทั้งสองแบบ ขอให้เขียนบอกว่านับอะไรบ้าง</p>
 </div>
 </div>
 
@@ -1603,7 +1617,7 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <div class="model-answer">
 <div class="copy">
 <p>Models without an AR term (row 0) have much higher AIC, so an AR component is essential.</p>
-<p>The minimum is ARMA(4,4) with −239.73, but ARMA(1,1) has −237.98, only 1.75 higher with 6 fewer parameters. By parsimony ARMA(1,1)×(1,0,1)₁₂ is preferred.</p>
+<p>The minimum is ARMA(4,4) with −239.73, but it lies on the edge of the table, so a larger order might be even lower; the search range may be too small. ARMA(1,1) has −237.98, only 1.75 higher with 6 fewer parameters, so by parsimony ARMA(1,1)×(1,0,1)₁₂ is preferred. BIC can also be used to support the choice.</p>
 <p>Some entries are inconsistent: ARMA(3,1) (−211.95) is 13 higher than ARMA(3,0) (−224.96), but adding one parameter can increase AIC by at most 2. This shows numerical problems in the likelihood maximization, so the table should not be trusted blindly.</p>
 <p>Other analyses: residual diagnostics (ACF, Ljung-Box, QQ plot), significance of coefficients, roots for causality, invertibility and redundancy, and out-of-sample forecast accuracy.</p>
 </div>
@@ -1614,7 +1628,7 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <tr><td>3</td><td>6 พารามิเตอร์</td><td>ARMA(4,4) มี 8 ตัว ARMA(1,1) มี 2 ตัว ต่างกัน 6</td></tr>
 <tr><td>4</td><td>ขึ้นเกิน 2</td><td>ARMA(3,0) กับ ARMA(3,1) ซ้อนกัน ตัวใหญ่มี log L อย่างน้อยเท่าตัวเล็ก AIC จึงขึ้นได้ไม่เกิน 2 จากค่าปรับของพารามิเตอร์ที่เพิ่ม แต่ตารางขึ้น \(-211.95-(-224.96)=13.0\)</td></tr>
 </table>
-<p class="trap">⚠ ข้อ 4c ปี 2023 ให้ตารางของ log x ที่หน้าตาคล้ายกันมาก หลักคิดเหมือนกันทุกข้อ: หาต่ำสุด → ดูตัวที่ห่างไม่ถึง 2 แต่เล็กกว่า → ชี้ค่าผิดปกติ → บอกว่าต้องตรวจอะไรต่อ</p>
+<p class="trap">⚠ อาจารย์เฉลยใน Class 13: ตัวต่ำสุด (4,4) "อยู่ตามขอบพอดี อาจจะเลยได้" ไม่ค่อยเหมาะ · ข้อ 4c ปี 2023 ตารางคล้ายกันมาก อาจารย์เลือก (3,1) ซึ่งได้ −237.98 ใช้ BIC ประกอบก็ได้คะแนน หลักคิด: หาต่ำสุด → ดูว่าอยู่ขอบตารางไหม → หาตัวที่ห่างไม่ถึง 2 แต่เล็กกว่า → บอกว่าต้องตรวจอะไรต่อ</p>
 </div>
 </div>
 
@@ -1629,6 +1643,7 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <p>No. The two AIC values are computed from likelihoods of different data, x and log(x), so they are on different scales and cannot be compared directly. The much lower AIC of M2 comes from the smaller numbers of log(x), not from a better model.</p>
 <p>To decide on the log transformation, compare residual diagnostics: whether the residual variance is constant and whether the QQ plot is closer to normal (parts d and e).</p>
 </div>
+<p class="trap">⚠ อาจารย์บอกใน Class 13 ว่า "ข้อนี้ผมจะเน้น" โมเดลตระกูลเดียวกันแต่ข้อมูลแปลงต่างกัน log likelihood คิดบนข้อมูลคนละชุด AIC จึงเทียบไม่ได้ แบบเดียวกับ ETS กับ ARIMA</p>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
 <tr><td>1</td><td>σ² ต่างกันมาก</td><td>M1 σ² = 12881 · M2 σ² = 0.03632 · ค่าเล็กลงเพราะ log ย่อตัวเลข ไม่ใช่เพราะพยากรณ์แม่นขึ้น</td></tr>
@@ -2133,11 +2148,11 @@ si &lt;- si / mean(si)
 <p>(1) FB Prophet: daily data, weekly seasonality and holiday effects.</p>
 <p>(2) GARCH: volatility clustering; squared returns are autocorrelated.</p>
 <p>(3) ARIMAX: Ads is a known regressor that drives sales one-way.</p>
-<p>(4) FB Prophet: yearly seasonality plus a sharp break in trend during COVID, handled by changepoints. SARIMA with a COVID dummy as xreg is also defensible.</p>
+<p>(4) SARIMA: one monthly series with yearly seasonality and a trend.</p>
 <p>(5) VAR: the two GDP series affect each other.</p>
 <p>(6) SARIMA: one series with stable monthly seasonality and no extra information.</p>
 </div>
-<p class="trap">⚠ ชุด (4) เถียงได้ อาจารย์ไม่ได้เฉลย ให้เขียนเหตุผลหนึ่งบรรทัดเสมอ หลักคือดูว่าโจทย์ให้ข้อมูลอะไร "เพิ่ม" จากอนุกรมเดียวที่มีฤดูกาล</p>
+<p class="trap">⚠ อาจารย์เฉลยครบทั้ง 6 ชุดใน Class 13 ชุด (4) อาจารย์ตอบ SARIMA เพราะ "อนุกรมเวลามีแค่อันเดียว ... เป็น seasonal" ไม่ได้ให้น้ำหนักกับช่วงโควิด หลักคือดูว่าโจทย์ให้ข้อมูลอะไร "เพิ่ม" จากอนุกรมเดียวที่มีฤดูกาล</p>
 </div>
 </div>
 
@@ -2254,6 +2269,7 @@ si &lt;- si / mean(si)
 <p>AR(1) \(X_t=\phi X_{t-1}+w_t\), \(|\phi|&lt;1\): ACF \(\rho_h=\phi^h\), tails off exponentially (alternating if φ &lt; 0). PACF \(\phi_{11}=\phi\), zero for \(h\ge2\) (cuts off).</p>
 <p>ARMA(2,2): both ACF and PACF tail off; neither cuts off. The ACF decays after lag 2 as a mixture of exponential decay and damped sine waves, depending on the AR roots.</p>
 </div>
+<p class="trap">⚠ อาจารย์บอกใน Class 13 ว่าแนวบรรยาย ACF/PACF แบบนี้ "open book ผมคงไม่ออกหรอก" เพราะเปิดตารางสรุปได้</p>
 </div>
 </div>
 </section>
@@ -2273,21 +2289,24 @@ si &lt;- si / mean(si)
 <p>\(\gamma(0)=Var(w_t+\theta w_{t-1})=\sigma^2(1+\theta^2)\)</p>
 <p>\(\gamma(1)=Cov(w_t+\theta w_{t-1},\ w_{t+1}+\theta w_t)=\theta\sigma^2\)</p>
 <p>\(\rho(1)=\dfrac{\theta}{1+\theta^2}\)</p>
-<p>For every real θ: \((1-|\theta|)^2\ge0\)</p>
-<p>\(1-2|\theta|+\theta^2\ge0\ \Rightarrow\ 1+\theta^2\ge2|\theta|\)</p>
-<p>Divide both sides by \(2(1+\theta^2)&gt;0\): \(\dfrac{|\theta|}{1+\theta^2}\le\dfrac12\)</p>
-<p>Therefore \(|\rho(1)|\le\tfrac12\) for all θ, with equality when \(|\theta|=1\).</p>
+<p>\(\dfrac{d\rho(1)}{d\theta}=\dfrac{(1+\theta^2)(1)-\theta(2\theta)}{(1+\theta^2)^2}=\dfrac{1-\theta^2}{(1+\theta^2)^2}\)</p>
+<p>Set \(\dfrac{d\rho(1)}{d\theta}=0\Rightarrow1-\theta^2=0\Rightarrow\theta=\pm1\)</p>
+<p>\(|\theta|&lt;1\): derivative \(&gt;0\); \(|\theta|&gt;1\): derivative \(&lt;0\); and \(\rho(1)\to0\) as \(\theta\to\pm\infty\)</p>
+<p>Maximum at \(\theta=1\): \(\rho(1)=\dfrac{1}{1+1}=\dfrac12\); minimum at \(\theta=-1\): \(\rho(1)=-\dfrac12\)</p>
+<p>Therefore \(-\tfrac12\le\rho(1)\le\tfrac12\), i.e. \(|\rho(1)|\le\tfrac12\) for all θ.</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
 <tr><td>1</td><td>γ(0)</td><td>ก14: สัมประสิทธิ์ 1 กับ θ ยกกำลังสองแล้วบวก</td></tr>
 <tr><td>2</td><td>γ(1) = θσ²</td><td>มี \(w_t\) ร่วมกันตัวเดียว เลขหน้าคือ 1 กับ θ คูณกันได้ θ</td></tr>
-<tr><td>3</td><td>เริ่มจาก \((1-|\theta|)^2\ge0\)</td><td>อะไรยกกำลังสองก็ไม่ติดลบ เป็นจุดเริ่มที่จริงเสมอ</td></tr>
-<tr><td>4</td><td>กระจาย</td><td>\((a-b)^2=a^2-2ab+b^2\) และ \(|\theta|^2=\theta^2\)</td></tr>
-<tr><td>5</td><td>ย้าย \(-2|\theta|\)</td><td>ก1 ได้ \(1+\theta^2\ge2|\theta|\)</td></tr>
-<tr><td>6</td><td>หารสองข้าง</td><td>หารด้วยจำนวนบวก เครื่องหมาย ≥ ไม่กลับ · ซ้าย \(\frac{1+\theta^2}{2(1+\theta^2)}=\frac12\) ขวา \(\frac{2|\theta|}{2(1+\theta^2)}=\frac{|\theta|}{1+\theta^2}\) แล้วอ่านกลับข้าง</td></tr>
+<tr><td>3</td><td>ดิฟ ρ(1)</td><td>หาค่าสูงสุดต่ำสุดด้วยวิธีแคลคูลัส: ดิฟแล้วจับเท่ากับ 0 · กฎผลหาร \(\left(\frac{u}{v}\right)'=\frac{u'v-uv'}{v^2}\) โดย u = θ ได้ u' = 1 และ v = 1 + θ² ได้ v' = 2θ</td></tr>
+<tr><td>4</td><td>\(1-\theta^2\)</td><td>ตัวเศษ \((1+\theta^2)-2\theta^2=1-\theta^2\)</td></tr>
+<tr><td>5</td><td>θ = ±1</td><td>ตัวส่วนเป็นบวกเสมอ อนุพันธ์เป็น 0 เมื่อตัวเศษเป็น 0 · \(\theta^2=1\) ได้ θ = 1 หรือ −1</td></tr>
+<tr><td>6</td><td>เช็คเครื่องหมาย</td><td>ลองแทน θ = 0 ได้อนุพันธ์ = 1 เป็นบวก ฟังก์ชันขึ้น · θ = 2 ได้ \(-3/25\) เป็นลบ ฟังก์ชันลง ขึ้นแล้วลงที่ θ = 1 จุดนั้นคือค่าสูงสุด</td></tr>
+<tr><td>7</td><td>แทนกลับ</td><td>θ = 1 ได้ \(1/2\) · θ = −1 ได้ \(-1/2\)</td></tr>
+<tr><td>อีกวิธี</td><td>\((1-|\theta|)^2\ge0\)</td><td>กระจายได้ \(1+\theta^2\ge2|\theta|\) หารด้วย \(2(1+\theta^2)\) ได้ผลเดียวกัน สั้นกว่าแต่ไม่ใช่วิธีที่อาจารย์ใช้</td></tr>
 </table>
-<p class="trap">⚠ อาจารย์เล่าว่าข้อนี้ 30 คนพิสูจน์ได้ 2 คน การแทน θ ทีละค่าไม่นับเป็นการพิสูจน์</p>
+<p class="trap">⚠ อาจารย์ย้ำใน Class 13: ข้อนี้ให้ mathematical proof ถ้าแทน θ ไปเรื่อย ๆ แล้วบอกว่าไม่เกิน ½ "ผมให้คุณศูนย์" และใบ้ให้ดิฟแล้วจับเท่ากับศูนย์ ยังพูดด้วยว่า "ถ้าไม่เฉลยผมจะออกสอบ"</p>
 </div>
 </div>
 
@@ -2423,20 +2442,21 @@ s$freq[which.max(s$spec)]        # 0.0833
 <!-- OL1 -->
 <div class="quiz free" id="ol1">
 <div class="qhead"><span>ข้อ 17.1 · ข้อสอบจริง FINAL 2024 ข้อ 3ก (2 คะแนน)</span><span>OLS trend กับข้อมูลที่ ACF ลดช้า</span></div>
-<div class="qtext">Nile: <code>summary(lm(Nile ~ time(Nile)))</code> ได้ intercept 6129.46 และ slope −2.7143 (s.e. 0.5216, p = 1.07e-06) correlogram ของ Nile ลดลงช้า ผลนี้ใช้วิเคราะห์ได้หรือไม่ ระบุชื่อตัวแบบที่เกี่ยวข้อง</div>
+<div class="qtext">Nile: OLS \(x_t=\beta_0+\beta_1t+\varepsilon_t\) ด้วย <code>summary(lm(Nile ~ time(Nile)))</code> ได้ intercept 6129.46 และ slope −2.7143 (p = 1.07e-06) นิสิตคิดว่าผลลัพธ์นี้นำไปใช้ในการวิเคราะห์อนุกรมเวลาได้อย่างไร อธิบายให้ชัดเจนและกระชับ พร้อมบอกชื่อตัวแบบที่เกี่ยวข้อง</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Not reliably. OLS assumes independent errors, but the correlogram of Nile decays slowly, so the errors are autocorrelated. The slope estimate is still unbiased, but its standard error is too small, so the t-test and p-value (1.07e-06) are not valid.</p>
-<p>Better models: regression with autocorrelated errors fitted by GLS, or regression with ARIMA errors (ARIMAX); or remove the trend by differencing and fit ARIMA.</p>
+<p>The fitted line \(\hat T_t=6129.46-2.7143t\) is a linear trend: the flow falls by about 2.71 per year, and the slope is significant (p = 1.07e-06).</p>
+<p>Use: detrending. Subtract the trend, \(x_t-\hat T_t\), to get a detrended series, or use it as the trend line in a regression (classical) decomposition, \(F_t=(b_0+b_1t)SI_t\).</p>
+<p>Related models: detrending / decomposition with a linear trend.</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
-<tr><td>1</td><td>slope ยังใช้ได้ แต่ p ใช้ไม่ได้</td><td>error ที่สัมพันธ์กันทำให้ข้อมูลมีข้อมูลจริงน้อยกว่า 100 ค่า s.e. ที่ OLS คำนวณเลยเล็กเกินไป</td></tr>
-<tr><td>2</td><td>ชื่อโมเดล</td><td>GLS และ ARIMAX อยู่ใน<a href="0011-multivariate-arimax-var.html">L11</a> · differencing อยู่ใน<a href="0003-estimation-correlogram-and-detrending.html#s5">L3 ตอน 5</a></td></tr>
+<tr><td>1</td><td>regression บน t คือหาเส้น trend</td><td>โจทย์ถามว่าเอาไปใช้ทำอะไร ไม่ได้ถามว่าผิดตรงไหน คำตอบคือใช้ลบ trend ออก ดู<a href="0003-estimation-correlogram-and-detrending.html#s4-detrend">L3 ตอน 4.2</a></td></tr>
+<tr><td>2</td><td>ชื่อโมเดล</td><td>decomposition แบบ regression ที่ทำใน Excel ใน<a href="0004-smoothing-methods.html#s5-reg">L4 ตอน 5.2</a> ใช้เส้นนี้เป็นขั้นแรก</td></tr>
 </table>
-<p class="trap">⚠ Nile มีระดับลดลงแบบขั้นบันไดราวปี 1898 ไม่ใช่เส้นตรง เขียนเพิ่มได้ว่าเส้นตรงอาจไม่ใช่รูปแบบ trend ที่เหมาะ</p>
+<p class="trap">⚠ อาจารย์เฉลยใน Class 13: "ทำ regression เพื่อ detrend ก็ได้ ... decomposition ก็ได้" และโจทย์เขียนว่า "กระชับและชัดเจน" ตอบสั้นแค่นี้ได้เต็ม เรื่อง error ที่สัมพันธ์กันและ GLS ไม่ใช่สิ่งที่ข้อนี้ถาม</p>
 </div>
 </div>
 </section>
