@@ -37,7 +37,23 @@ table.why td:first-child { white-space: nowrap; text-align: center; }
 .rule .rid { font-weight: 700; color: #c25e00; }
 .src-q { font-size: 0.85rem; color: #6b655b; }
 .stub { color: #6b655b; font-style: italic; }
-.copy p { overflow-x: auto; }
+/* คำตอบที่ลอกได้: บรรทัดละสมการ มีเลขบรรทัด ไม่ตัดขึ้นบรรทัดใหม่ */
+.copy { counter-reset: ln; padding: 0.6em 0.8em 0.5em; font-size: 0.9rem; }
+.copy p {
+  counter-increment: ln; position: relative; margin: 0; padding: 0.35em 0.4em 0.35em 2.2em;
+  border-bottom: 1px dashed #dcd6ca; overflow-x: auto; overflow-y: hidden; line-height: 1.6;
+}
+.copy p:last-of-type { border-bottom: 0; }
+.copy p::before {
+  content: counter(ln); position: absolute; left: 0; top: 0.45em; width: 1.6em; text-align: right;
+  font: 600 0.72rem -apple-system, "Helvetica Neue", Arial, sans-serif; color: #9a9384;
+}
+.copy .katex { font-size: 1.02em; white-space: nowrap; }
+table.why td .katex { font-size: 0.95em; }
+table.why td:nth-child(2) { min-width: 9em; }
+.copy .katex-display { margin: 0; }
+.copy table.why { white-space: normal; }
+.qtext .katex-display, .model-answer .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; }
 table.why td, table.check td { overflow-wrap: anywhere; }
 @media (max-width: 600px) {
   table.why, table.check { display: block; overflow-x: auto; max-width: 100%; }
