@@ -53,6 +53,9 @@ table.why td .katex { font-size: 0.95em; }
 table.why td:nth-child(2) { min-width: 9em; }
 .copy .katex-display { margin: 0; }
 .copy table.why { white-space: normal; }
+figure.qfig { margin: 0.7em 0; }
+figure.qfig img { display: block; max-width: 100%; height: auto; border: 1px solid #e2ddd3; border-radius: 4px; background: #fff; }
+figure.qfig figcaption { font-size: 0.8rem; color: #6b655b; margin-top: 0.25em; }
 .qtext .katex-display, .model-answer .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; }
 table.why td, table.check td { overflow-wrap: anywhere; }
 @media (max-width: 600px) {
@@ -535,6 +538,9 @@ mean(arimaerror^2, na.rm = TRUE)</code></pre>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
+<figure class="qfig"><img src="../assets/practice/rain-m1-tsdiag.png" alt="tsdiag(m1, gof = 12) ที่ควรได้" loading="lazy"><figcaption>tsdiag(m1, gof = 12) ที่ควรได้</figcaption></figure>
+<figure class="qfig"><img src="../assets/practice/rain-m1-qq.png" alt="hist และ QQ plot ของ rstandard(m1)" loading="lazy"><figcaption>hist และ QQ plot ของ rstandard(m1)</figcaption></figure>
+
 <pre class="out">Coefficients:
          ma1    sma1  intercept
       0.8207  0.7143    40.7630
@@ -579,6 +585,9 @@ tsdiag(m1, gof = 12):
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
+<figure class="qfig"><img src="../assets/practice/rain-m2-tsdiag.png" alt="tsdiag(m2, gof = 12) ที่ควรได้" loading="lazy"><figcaption>tsdiag(m2, gof = 12) ที่ควรได้</figcaption></figure>
+<figure class="qfig"><img src="../assets/practice/rain-m2-qq.png" alt="hist และ QQ plot ของ rstandard(m2)" loading="lazy"><figcaption>hist และ QQ plot ของ rstandard(m2)</figcaption></figure>
+
 <pre class="out">ARIMA(0,0,0)(0,1,0)[12] with drift
        drift
       1.0965
@@ -690,6 +699,8 @@ Feb 2026       64.86492</pre>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
+<figure class="qfig"><img src="../assets/practice/air-tsdiag.png" alt="tsdiag ของ airline model บน log(AirPassengers)" loading="lazy"><figcaption>tsdiag ของ airline model บน log(AirPassengers)</figcaption></figure>
+
 <pre><code>y &lt;- log(AirPassengers)
 a &lt;- auto.arima(y, stepwise = T, approximation = F); a
 qqnorm(rstandard(a)); qqline(rstandard(a))
@@ -726,6 +737,66 @@ tsCV MSE: arima 0.001259   ets 0.001712</pre>
 <tr><td>5</td><td>AIC −483 กับ −208</td><td>เทียบกันไม่ได้ ARIMA คิด likelihood หลัง difference ETS คิดบนข้อมูล log ทั้งชุด ต้องใช้ tsCV</td></tr>
 </table>
 <p class="trap">⚠ ARIMA(0,1,1)(0,1,1)[12] เรียกว่า airline model เจอบ่อยมากในข้อมูลรายเดือนที่มีทั้ง trend และฤดูกาล</p>
+</div>
+</div>
+
+<!-- RP6 -->
+<div class="quiz free" id="rp6">
+<div class="qhead"><span>ข้อ 2.6 · ดัดแปลง</span><span>ทั้งขั้นตอนกับข้อมูลของอาจารย์ german.txt</span></div>
+<div class="qtext">ข้อมูลเงินเฟ้อเยอรมนีรายเดือน <code>german.txt</code> ใน Class 9 เริ่ม ม.ค. 2008 จบ ต.ค. 2017 (ก) ใช้ auto.arima เขียนโมเดลและตรวจ assumption (ข) พยากรณ์ 3 เดือนข้างหน้า (ค) ใช้ ets แล้วเทียบด้วย tsCV แบบ h = 1</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<figure class="qfig"><img src="../assets/practice/german-tsdiag.png" alt="tsdiag ของ auto.arima บน german.txt" loading="lazy"><figcaption>tsdiag ของ auto.arima บน german.txt</figcaption></figure>
+<figure class="qfig"><img src="../assets/practice/german-qq.png" alt="hist และ QQ plot ของ rstandard" loading="lazy"><figcaption>hist และ QQ plot ของ rstandard</figcaption></figure>
+<pre class="out">ARIMA(1,0,2)(0,1,1)[12]
+          ar1     ma1     ma2     sma1
+      -0.7947  0.7786  0.2115  -0.7618
+s.e.   0.1201  0.1469  0.1013   0.1291
+sigma^2 = 0.04883:  log likelihood = 6.38   AIC=-2.77   BIC=10.55
+shapiro.test(rstandard): p-value = 0.2263
+forecast: Nov 2017 0.081   Dec 2017 0.324   Jan 2018 -0.621
+ETS(A,N,A)   forecast: 0.015  0.376  -0.528
+tsCV MSE: ets 0.0863   arima 0.0770</pre>
+<div class="copy">
+<p>(a) Model: ARIMA(1,0,2)(0,1,1)[12]</p>
+<p>\((1+0.7947B)(1-B^{12})X_t=(1+0.7786B+0.2115B^2)(1-0.7618B^{12})w_t,\quad w_t\sim iid\ N(0,\ 0.04883)\)</p>
+<p>tsdiag: standardized residuals between −2.96 and 2.24, within ±3; ACF of residuals within the bounds; Ljung-Box p-values 0.80–1.00, above 0.05 at every lag → residuals are uncorrelated.</p>
+<p>QQ plot close to the line; Shapiro-Wilk p-value = 0.226 > 0.05 → residuals are normal. The model is adequate.</p>
+<p>(b) Forecasts: Nov 2017 = 0.081, Dec 2017 = 0.324, Jan 2018 = −0.621.</p>
+<p>(c) ets gives ETS(A,N,A). tsCV MSE: ARIMA 0.0770 &lt; ETS 0.0863, so ARIMA is more accurate.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td><code>ts(data, start = 2008, frequency = 12)</code></td><td>ข้อมูลเริ่ม ม.ค. 2008 เขียนแค่ปีได้เพราะเริ่มเดือนแรก ถ้าเริ่ม มี.ค. ใช้ <code>start = c(2008, 3)</code> ตามคอมเมนต์ในไฟล์อาจารย์</td></tr>
+<tr><td>2</td><td>\((1+0.7947B)\)</td><td>ar1 = −0.7947 ฝั่ง AR กลับเครื่องหมาย ลบกลายเป็นบวก</td></tr>
+<tr><td>3</td><td>\((1-B^{12})\)</td><td>(0,1,1)[12] ตัวกลางคือ D = 1 · ไม่มีตัว d ฝั่ง non-seasonal</td></tr>
+<tr><td>4</td><td>\((1+0.7786B+0.2115B^2)\)</td><td>ma1, ma2 ใส่ตาม R</td></tr>
+<tr><td>5</td><td>\((1-0.7618B^{12})\)</td><td>sma1 = −0.7618 ใส่ตาม R</td></tr>
+<tr><td>6</td><td>ETS(A,N,A)</td><td>error บวก ไม่มี trend ฤดูกาลบวก · alpha กับ gamma เกือบ 0 คือ level และฤดูกาลแทบคงที่</td></tr>
+</table>
+<p class="trap">⚠ output ของ R ที่ได้เทียบกับที่อาจารย์ได้ใน Class 9 ได้เลย ถ้าโมเดลตรงกัน แปลว่าสคริปต์ที่ดัดแปลงถูกต้อง</p>
+</div>
+</div>
+
+<!-- RP7 -->
+<div class="quiz free" id="rp7">
+<div class="qhead"><span>ข้อ 2.7 · ดัดแปลง</span><span>ลืมใส่ frequency</span></div>
+<div class="qtext">นิสิตคนหนึ่งเขียน <code>g0 &lt;- ts(read.table("german.txt", h = F)[, 1])</code> แล้วรัน auto.arima ได้ <code>ARIMA(0,0,1) with non-zero mean</code> sigma^2 = 0.1055 ส่วนเพื่อนที่ใส่ frequency = 12 ได้ ARIMA(1,0,2)(0,1,1)[12] sigma^2 = 0.0488 เกิดอะไรขึ้น และโมเดลไหนถูก</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>Without <code>frequency = 12</code>, R treats the data as non-seasonal, so auto.arima cannot add seasonal terms and fits only ARIMA(0,0,1).</p>
+<p>The seasonal model has a much smaller error variance (0.0488 vs 0.1055), and inflation has a monthly pattern, so ARIMA(1,0,2)(0,1,1)[12] is correct.</p>
+<p>The AIC of the two models should not be compared: one has a seasonal difference and the other does not.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ไม่มี [12] ต่อท้าย</td><td>ชื่อโมเดลไม่มีวงเล็บฤดูกาลเลย เป็นสัญญาณว่าลืม frequency</td></tr>
+<tr><td>2</td><td>σ² ห่างกันเท่าตัว</td><td>error ที่ใหญ่กว่าคือรูปแบบฤดูกาลที่ไม่ได้ใส่ในโมเดล ไปค้างอยู่ใน residual</td></tr>
+</table>
+<p class="trap">⚠ ก่อนรันอะไรให้พิมพ์ชื่อ ts ออกมาดูก่อน ถ้า R แสดงเป็นตารางเดือน Jan–Dec แปลว่าตั้ง frequency ถูกแล้ว</p>
 </div>
 </div>
 </section>
@@ -872,6 +943,46 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.68  RMSE test 10.44</pre>
 <tr><td>ก</td><td>xreg ต้องมีค่าในอนาคต</td><td>สมการมี storm อยู่ในตัว ไม่มีค่า storm ก็คำนวณไม่ได้</td></tr>
 <tr><td>ข</td><td>ทำ scenario</td><td>เป็นวิธีมาตรฐานเมื่อ X ในอนาคตไม่แน่นอน</td></tr>
 <tr><td>ค</td><td>ไม้บรรทัดเดียวกัน</td><td>AIC เทียบได้เฉพาะโมเดลตระกูลเดียวกันที่ใช้ข้อมูลชุดเดียวกัน</td></tr>
+</table>
+</div>
+</div>
+
+<!-- X5 -->
+<div class="quiz free" id="x5">
+<div class="qhead"><span>ข้อ 3.5 · ดัดแปลง</span><span>เขียนสมการ ARIMAX และแปลค่าสัมประสิทธิ์</span></div>
+<div class="qtext">ฟิต rain ช่วง training ด้วย <code>auto.arima(tr, stepwise = T, approximation = F, xreg = s1)</code> ได้ <code>Regression with ARIMA(0,0,0)(0,1,0)[12] errors</code> drift = 1.02 และ xreg (storm) = 4.58 (ก) เขียนโมเดล (ข) ถ้าเดือนหน้ามีพายุ ค่าพยากรณ์จะต่างจากกรณีไม่มีพายุเท่าไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) \(y_t=1.02\,t+4.58\,\text{storm}_t+\eta_t,\qquad (1-B^{12})\eta_t=w_t,\quad w_t\sim iid\ N(0,\sigma^2)\)</p>
+<p>(b) A storm month adds 4.58 mm to the forecast compared with a month without a storm, all else equal.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>สองบรรทัด</td><td>ARIMAX เขียนเป็น regression หนึ่งบรรทัด ส่วน error η ที่เป็น ARIMA อีกหนึ่งบรรทัด ตามรูปใน L11</td></tr>
+<tr><td>2</td><td>4.58</td><td>storm เป็น 0 หรือ 1 สัมประสิทธิ์ของมันคือผลต่างระหว่างมีกับไม่มีพายุตรง ๆ</td></tr>
+</table>
+<p class="trap">⚠ ARIMAX ต้องรู้ storm ของเดือนที่จะพยากรณ์ ถ้าไม่รู้ ต้องทำ scenario ทั้งสองแบบ</p>
+</div>
+</div>
+
+<!-- X6 -->
+<div class="quiz free" id="x6">
+<div class="qhead"><span>ข้อ 3.6 · ดัดแปลง</span><span>เลือกโมเดลจากตาราง RMSE</span></div>
+<div class="qtext">ข้อมูลยอดขายรายสัปดาห์ แบ่ง train/test แล้วได้ RMSE บน test: ARIMA 12.4 · ARIMAX (ราคา) 9.8 · NNAR 15.1 (σ² ใน train = 2.3) · NNAR + ราคา 31.0 จงเลือกโมเดลและอธิบายผลทั้งตาราง</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>ARIMAX with price is the most accurate (RMSE 9.8): price carries real information about sales.</p>
+<p>NNAR fits the training data very closely (σ² = 2.3) but its test RMSE is high, which is overfitting.</p>
+<p>NNAR with price is the worst (31.0): the network learns an unstable response to price and recursive forecasts amplify it.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ดู RMSE test เท่านั้น</td><td>ตัวเลขใน train บอกแค่ว่าเข้ากับข้อมูลที่เห็นแล้วแค่ไหน</td></tr>
+<tr><td>2</td><td>อภิปรายทุกแถว</td><td>แบบเดียวกับ 2025 ข้อ 5g ที่ให้คะแนนการอภิปราย</td></tr>
 </table>
 </div>
 </div>
@@ -1055,6 +1166,72 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <p class="trap">⚠ drift ไม่ใช่ intercept แบบ μ: drift คูณกับ t ส่วน intercept ไม่มี t</p>
 </div>
 </div>
+
+<!-- W7 -->
+<div class="quiz free" id="w7">
+<div class="qhead"><span>ข้อ 4.7 · ดัดแปลง</span><span>SARIMA ที่มี AR ฤดูกาลและ intercept</span></div>
+<div class="qtext"><pre class="out">arima(x, order = c(1,0,0), seasonal = list(order = c(1,0,0), period = 12))
+        ar1    sar1  intercept
+     0.5200  0.3100    15.2000
+sigma^2 estimated as 2.4</pre>เขียนโมเดลในรูป backshift</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\((1-0.52B)(1-0.31B^{12})(X_t-15.2)=w_t,\qquad w_t\sim iid\ N(0,\ 2.4)\)</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>\((1-0.52B)\)</td><td>ar1 บวก กลับเป็นลบ</td></tr>
+<tr><td>2</td><td>\((1-0.31B^{12})\)</td><td>sar1 คือ AR ฤดูกาล กลับเครื่องหมายเหมือน ar ใช้ \(B^{12}\)</td></tr>
+<tr><td>3</td><td>\(X_t-15.2\)</td><td>ไม่มี difference R จึงมี intercept คือ mean</td></tr>
+<tr><td>4</td><td>ฝั่งขวาเหลือ \(w_t\)</td><td>ไม่มี ma ไม่มี sma</td></tr>
+</table>
+</div>
+</div>
+
+<!-- W8 -->
+<div class="quiz free" id="w8">
+<div class="qhead"><span>ข้อ 4.8 · ดัดแปลง</span><span>ARIMA(0,1,1) with drift แบบที่อาจารย์เขียนใน L8</span></div>
+<div class="qtext"><code>Arima(x, order = c(0,1,1), include.drift = TRUE)</code> ได้ ma1 = −0.45, drift = 0.8, sigma^2 = 1.9 เขียนโมเดลสองแบบ แบบมี t และแบบที่ใช้ \(\nabla X_t\)</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\((1-B)(X_t-0.8\,t)=(1-0.45B)w_t,\qquad w_t\sim iid\ N(0,\ 1.9)\)</p>
+<p>\(\nabla X_t-0.8=w_t-0.45w_{t-1}\)</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>กระจาย \((1-B)\)</td><td>\(0.8t-0.8(t-1)=0.8\) ตัว t หาย เหลือค่าคงที่ 0.8 ซึ่งคือ mean ของผลต่าง</td></tr>
+<tr><td>2</td><td>แบบที่สอง</td><td>เหมือนที่อาจารย์เขียนใน L8: \(\nabla X_t-0.0049=0.3481(\nabla X_{t-1}-0.0049)-0.8278w_{t-1}+w_t\) คือเอาค่าคงที่ไปลบจาก \(\nabla X\)</td></tr>
+</table>
+<p class="trap">⚠ drift ของ d = 1 คือค่าเฉลี่ยของผลต่างต่อหนึ่งช่วงเวลา ไม่ต้องคูณ 12 แบบ seasonal difference ในข้อ 4.6</p>
+</div>
+</div>
+
+<!-- W9 -->
+<div class="quiz free" id="w9">
+<div class="qhead"><span>ข้อ 4.9 · ดัดแปลง</span><span>ARIMAX จาก output</span></div>
+<div class="qtext"><pre class="out">Regression with ARIMA(1,0,0) errors
+         ar1  intercept   price
+      0.6000    50.0000  -2.3000
+sigma^2 = 4.1</pre>เขียนโมเดล</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\(y_t=50-2.3\,\text{price}_t+\eta_t\)</p>
+<p>\((1-0.6B)\eta_t=w_t,\qquad w_t\sim iid\ N(0,\ 4.1)\)</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>แยกสองบรรทัด</td><td>regression บรรทัดแรก error ที่เป็น AR(1) บรรทัดที่สอง</td></tr>
+<tr><td>2</td><td>−2.3</td><td>ราคาขึ้น 1 หน่วย ยอดขายลด 2.3 หน่วย</td></tr>
+</table>
+<p class="trap">⚠ อย่าใส่ \((1-0.6B)\) คูณ \(y_t\) ตรง ๆ ตัว AR อยู่ที่ error ไม่ได้อยู่ที่ y</p>
+</div>
+</div>
 </section>
 
 <section class="unit" id="u-diag" data-rank="5" data-lesson="8">
@@ -1084,6 +1261,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="quiz free" id="d1">
 <div class="qhead"><span>ข้อ 5.1 · ข้อสอบจริง FINAL 2022 ข้อ 6e (2 คะแนน)</span><span>ACF ของ residual อย่างเดียว</span></div>
 <div class="qtext">Fig. 3 shows the ACF of the residuals from fitting an ARMA(2,2) model: ค่าที่ lag 0 สูงเท่ากับ 1 ส่วน lag 1–25 เป็นแท่งสั้น อยู่ในเส้นประเกือบทั้งหมด มีแท่งเดียวราว lag 18 ที่แตะเส้นประ Comment on which modeling assumptions this figure supports, and which it does not support.</div>
+<figure class="qfig"><img src="../assets/practice/f22-q6e-resid-acf.png" alt="Fig. 3 จากข้อสอบ FINAL 2022: ACF ของ residual จาก ARMA(2,2)" loading="lazy"><figcaption>Fig. 3 จากข้อสอบ FINAL 2022: ACF ของ residual จาก ARMA(2,2)</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1104,6 +1282,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="quiz free" id="d2">
 <div class="qhead"><span>ข้อ 5.2 · ข้อสอบจริง FINAL 2022 ข้อ 7c (3 คะแนน)</span><span>ACF + QQ แล้วถามสิ่งที่ยังไม่ได้ตรวจ</span></div>
 <div class="qtext">Residuals from \(ARIMA(1,0,1)\times(1,0,1)_{12}\): (A) sample ACF อยู่ในเส้นประทุก lag (B) normal QQ plot เรียงตามเส้นตรงเกือบทั้งหมด ปลายสองข้างเบนเล็กน้อย What do you conclude? Also explain at least one relevant property that is NOT checked by these plots, and describe how you could check it.</div>
+<figure class="qfig"><img src="../assets/practice/f22-q7c-diag.png" alt="Fig. 5 จากข้อสอบ FINAL 2022: (A) ACF ของ residual (B) normal QQ plot" loading="lazy"><figcaption>Fig. 5 จากข้อสอบ FINAL 2022: (A) ACF ของ residual (B) normal QQ plot</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1125,6 +1304,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="quiz free" id="d3">
 <div class="qhead"><span>ข้อ 5.3 · ข้อสอบจริง FINAL 2023 ข้อ 4d (2 คะแนน)</span><span>เทียบ ACF ของ residual สองโมเดล</span></div>
 <div class="qtext">M1 ฟิตกับ x และ M2 ฟิตกับ log(x) ด้วย \(ARIMA(3,0,0)\times(0,1,1)_{12}\) เหมือนกัน (a1) ACF ของ residual M1 มีแท่งหลุดเส้นประเล็กน้อยราว lag 0.75, 1.1 และ 2.1 ปี (b1) ACF ของ M2 มีแท่งหลุดเส้นประเล็กน้อยราว lag 0.5, 1.1, 1.8 และ 2.2 ปี Compare (a1) and (b1). What does this tell you about M1 and M2?</div>
+<figure class="qfig"><img src="../assets/practice/f23-q4-diag.png" alt="Fig. 2 จากข้อสอบ FINAL 2023: (a1)(a2) ของ M1 และ (b1)(b2) ของ M2" loading="lazy"><figcaption>Fig. 2 จากข้อสอบ FINAL 2023: (a1)(a2) ของ M1 และ (b1)(b2) ของ M2</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1145,6 +1325,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="quiz free" id="d4">
 <div class="qhead"><span>ข้อ 5.4 · ข้อสอบจริง FINAL 2023 ข้อ 4e (2 คะแนน)</span><span>เทียบ QQ plot สองโมเดล</span></div>
 <div class="qtext">(a2) QQ plot ของ M1: จุดโค้ง หางขวายาวไปถึงราว 600 ขณะที่หางซ้ายถึงแค่ราว −400 (b2) QQ plot ของ M2: จุดเรียงตามเส้นตรงเกือบทั้งหมด มีจุดต่ำผิดปกติสองสามจุดที่หางซ้าย Compare (a2) and (b2). What does this tell you about M1 and M2?</div>
+<figure class="qfig"><img src="../assets/practice/f23-q4-diag.png" alt="Fig. 2 จากข้อสอบ FINAL 2023: ดูแถวล่าง (a2) กับ (b2)" loading="lazy"><figcaption>Fig. 2 จากข้อสอบ FINAL 2023: ดูแถวล่าง (a2) กับ (b2)</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1166,6 +1347,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="quiz free" id="d5">
 <div class="qhead"><span>ข้อ 5.5 · ข้อสอบจริง PRACTICE 2 ข้อ 1 (5 คะแนน)</span><span>tsdiag สามกราฟ</span></div>
 <div class="qtext">ผลจาก <code>tsdiag()</code>: standardized residuals อยู่ในช่วง ±3 · ACF ของ residual มีแท่ง lag 1 และ 3 ใกล้เส้นประ · p-value ของ Ljung-Box อยู่ใต้เส้น 0.05 ทุก lag ตั้งแต่ lag 2 Do the diagnostics indicate a good fit or a bad fit? Why?</div>
+<figure class="qfig"><img src="../assets/practice/p2-q1-tsdiag.png" alt="กราฟจากข้อสอบ PRACTICE 2 ข้อ 1: ผลของ tsdiag()" loading="lazy"><figcaption>กราฟจากข้อสอบ PRACTICE 2 ข้อ 1: ผลของ tsdiag()</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1206,6 +1388,69 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
 <tr><td>1</td><td>0.596 ใหญ่แค่ไหน</td><td>ข้อมูล 47 เดือน เส้นประอยู่ที่ \(2/\sqrt{47}=0.29\) · 0.596 เกินเส้นไปเกือบเท่าตัว</td></tr>
 <tr><td>2</td><td>ทำไม A ตก</td><td>A ไม่มี difference ใช้ค่าเฉลี่ยคงที่ 40.76 แต่ฝนเพิ่มขึ้นทุกปี รูปแบบที่จับไม่ได้ไปค้างอยู่ใน residual</td></tr>
+</table>
+</div>
+</div>
+
+<!-- D7 -->
+<div class="quiz free" id="d7">
+<div class="qhead"><span>ข้อ 5.7 · ดัดแปลง</span><span>tsdiag ที่หลุดที่ lag 12</span></div>
+<div class="qtext">ข้อมูลรายเดือน 10 ปี ฟิต <code>arima(x, order = c(1,0,0))</code> แล้ว <code>tsdiag()</code> ได้กราฟข้างล่าง โมเดลผ่านไหม ควรแก้อย่างไร</div>
+<figure class="qfig"><img src="../assets/practice/simA-tsdiag.png" alt="tsdiag ของ AR(1) บนข้อมูลรายเดือน" loading="lazy"><figcaption>tsdiag ของ AR(1) บนข้อมูลรายเดือน</figcaption></figure>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>Standardized residuals are within ±3: no outliers.</p>
+<p>ACF of residuals has a large spike at lag 1.0 year (lag 12, about 0.40), above the bounds.</p>
+<p>Ljung-Box p-values drop below 0.05 from lag 12 onward → residuals are correlated.</p>
+<p>The model is not adequate: yearly seasonality is left in the residuals. Add a seasonal term, for example ARIMA(1,0,0)(1,0,0)[12].</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>แกน Lag 1.0</td><td>ข้อมูล frequency 12 R เขียน lag เป็นปี 1.0 คือ 12 เดือน</td></tr>
+<tr><td>2</td><td>p ตกตั้งแต่ lag 12</td><td>ก่อน lag 12 ยังผ่าน แปลว่าส่วน non-seasonal พอแล้ว ที่ขาดคือฤดูกาล</td></tr>
+</table>
+</div>
+</div>
+
+<!-- D8 -->
+<div class="quiz free" id="d8">
+<div class="qhead"><span>ข้อ 5.8 · ดัดแปลง</span><span>Ljung-Box ผ่าน แต่ไม่ normal</span></div>
+<div class="qtext">ฟิต AR(1) ได้ Ljung-Box p-value 0.90–0.99 ทุก lag แต่ hist และ QQ plot เป็นแบบข้างล่าง shapiro.test(rstandard) ได้ p = 8.7e-11 และมี standardized residual 3 จุดเกิน ±3 สรุปอย่างไร</div>
+<figure class="qfig"><img src="../assets/practice/simB-qq.png" alt="hist และ QQ plot ของ rstandard" loading="lazy"><figcaption>hist และ QQ plot ของ rstandard</figcaption></figure>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>Residuals are uncorrelated (Ljung-Box p &gt; 0.05), so the dependence is captured.</p>
+<p>But they are not normal: the QQ plot bends away at both ends (heavy tails), Shapiro-Wilk p = 8.7e-11 &lt; 0.05, and three standardized residuals exceed ±3 (outliers).</p>
+<p>Point forecasts are fine, but prediction intervals based on normality are too narrow. Check the outliers or use a transformation.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>หางเบนออกทั้งสองข้าง</td><td>ข้อมูลมีค่าสุดโต่งบ่อยกว่า normal เรียกว่าหางหนา</td></tr>
+<tr><td>2</td><td>ผ่านครึ่งเดียว</td><td>ข้อสอบชอบถามว่า "which assumptions are supported" ต้องแยกตอบทีละเรื่อง</td></tr>
+</table>
+</div>
+</div>
+
+<!-- D9 -->
+<div class="quiz free" id="d9">
+<div class="qhead"><span>ข้อ 5.9 · ดัดแปลง</span><span>สิ่งที่ tsdiag ไม่ได้ตรวจ</span></div>
+<div class="qtext">ผลตอบแทนรายวัน 400 วัน ACF ของ residual อยู่ในเส้นประ และ Ljung-Box p 0.18–0.65 แต่ ACF ของ residual² เป็นแบบกราฟขวา ArchTest p = 1.1e-15 สรุปอย่างไร</div>
+<figure class="qfig"><img src="../assets/practice/simC-acf.png" alt="ACF ของ residual และของ residual²" loading="lazy"><figcaption>ACF ของ residual และของ residual²</figcaption></figure>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>The residuals are uncorrelated, but the squared residuals are strongly autocorrelated and ArchTest rejects H0 (p = 1.1e-15).</p>
+<p>The variance is not constant: there is volatility clustering. The mean model is fine, but the variance should be modelled with ARCH/GARCH.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ไม่สัมพันธ์ ≠ อิสระ</td><td>residual อาจไม่สัมพันธ์กันแต่ขนาดของมันยังเกาะกลุ่มกันได้</td></tr>
+<tr><td>2</td><td>ตอบข้อ "NOT checked"</td><td>แบบเดียวกับ 2022 ข้อ 7c: constant variance ไม่ได้ตรวจด้วย ACF ของ residual ต้องดู residual²</td></tr>
 </table>
 </div>
 </div>
@@ -1430,6 +1675,73 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <tr><td>2</td><td>ลองแทน t</td><td>สมมติ \(c=\pi/2\): t = 1 ได้ Var = \(\sigma^2\cos^2(\pi/2)=0\) · t = 2 ได้ \(\sigma^2\cos^2(\pi)=\sigma^2\) ต่างกัน</td></tr>
 </table>
 <p class="trap">⚠ เทียบกับข้อ 6.4: sin ของตัวสุ่ม U ที่อยู่<b>ในวงเล็บ</b>นิ่งได้ แต่ตัวสุ่มคูณ<b>นอก</b> cos แบบข้อนี้ไม่นิ่ง</p>
+</div>
+</div>
+
+<!-- S9 -->
+<div class="quiz free" id="s9">
+<div class="qhead"><span>ข้อ 6.9 · ดัดแปลง (แบบฝึกท้ายสไลด์ Class 2)</span><span>ผลคูณที่ห่างกันสองช่วง</span></div>
+<div class="qtext">\(X_t=w_tw_{t-2}\) โดย \(w_t\sim iid\ N(0,\sigma^2)\) ตรวจว่า stationary หรือไม่</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\(E(X_t)=E(w_t)E(w_{t-2})=0\)</p>
+<p>\(\gamma(0)=E(w_t^2w_{t-2}^2)=E(w_t^2)E(w_{t-2}^2)=\sigma^4\)</p>
+<p>\(\gamma(1)=E(w_tw_{t-2}\,w_{t+1}w_{t-1})=0\) (four different w, each with mean 0)</p>
+<p>\(\gamma(2)=E(w_tw_{t-2}\,w_{t+2}w_t)=E(w_t^2)E(w_{t-2})E(w_{t+2})=\sigma^2\cdot0\cdot0=0\)</p>
+<p>\(\gamma(h)=0\) for \(h\ge3\). Mean and autocovariance do not depend on t, so \(X_t\) is stationary (white noise).</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>h = 1</td><td>\(X_{t+1}=w_{t+1}w_{t-1}\) ไม่มี w ตัวไหนซ้ำกับ \(X_t=w_tw_{t-2}\) เลย แยก E ได้หมด ตาม ก12</td></tr>
+<tr><td>2</td><td>h = 2</td><td>\(X_{t+2}=w_{t+2}w_t\) มี \(w_t\) ซ้ำ รวมเป็น \(w_t^2\) แต่ยังเหลือ \(w_{t-2}\) และ \(w_{t+2}\) ที่อยู่ตัวเดียว ผลคูณจึงเป็น 0</td></tr>
+</table>
+<p class="trap">⚠ เทียบกับ FINAL 2025 ข้อ 1 ที่เป็น \(w_tw_{t-1}\) วิธีเดียวกันทุกตัว ต่างแค่ lag ที่มี w ซ้ำ</p>
+</div>
+</div>
+
+<!-- S10 -->
+<div class="quiz free" id="s10">
+<div class="qhead"><span>ข้อ 6.10 · ดัดแปลง</span><span>ต้องใช้ E(w³) และ E(w⁴)</span></div>
+<div class="qtext">\(X_t=w_t+w_{t-1}^2\) โดย \(w_t\sim iid\ N(0,\sigma^2)\) หา mean และ autocovariance แล้วตรวจความนิ่ง</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\(E(X_t)=E(w_t)+E(w_{t-1}^2)=0+\sigma^2=\sigma^2\)</p>
+<p>\(\gamma(0)=Var(w_t)+Var(w_{t-1}^2)=\sigma^2+(E(w^4)-[E(w^2)]^2)=\sigma^2+(3\sigma^4-\sigma^4)=\sigma^2+2\sigma^4\)</p>
+<p>\(\gamma(1)=Cov(w_t+w_{t-1}^2,\ w_{t+1}+w_t^2)=Cov(w_t,w_t^2)=E(w_t^3)-E(w_t)E(w_t^2)=0\)</p>
+<p>\(\gamma(h)=0\) for \(h\ge2\). Mean \(\sigma^2\) and \(\gamma(0)=\sigma^2+2\sigma^4\) do not depend on t: stationary.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>Var ของผลบวก</td><td>\(w_t\) กับ \(w_{t-1}^2\) อิสระกัน Cov ข้ามตัวเป็น 0 เหลือ Var แต่ละตัวบวกกัน</td></tr>
+<tr><td>2</td><td>\(Var(w^2)\)</td><td>ก13: \(E(w^4)-[E(w^2)]^2\) และ ก12: normal มี \(E(w^4)=3\sigma^4\)</td></tr>
+<tr><td>3</td><td>h = 1</td><td>คู่ที่มีเวลาตรงกันมีคู่เดียวคือ \(w_t\) กับ \(w_t^2\) · \(E(w^3)=0\) สำหรับ normal</td></tr>
+</table>
+<p class="trap">⚠ อาจารย์บอกใน Class 13 ว่าโจทย์แนวนี้ต้องจำสมบัติของ normal 4 ตัว: E(w) = 0, E(w²) = σ², E(w³) = 0, E(w⁴) = 3σ⁴</p>
+</div>
+</div>
+
+<!-- S11 -->
+<div class="quiz free" id="s11">
+<div class="qhead"><span>ข้อ 6.11 · ดัดแปลง</span><span>trend เส้นตรงแล้ว difference</span></div>
+<div class="qtext">\(X_t=5+0.3t+w_t\) (ก) นิ่งไหม (ข) \(\nabla X_t\) นิ่งไหม หา \(\gamma(h)\)</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) \(E(X_t)=5+0.3t\) depends on t → not stationary.</p>
+<p>(b) \(\nabla X_t=[5+0.3t+w_t]-[5+0.3(t-1)+w_{t-1}]=0.3+w_t-w_{t-1}\)</p>
+<p>\(E(\nabla X_t)=0.3\); \(\gamma(0)=2\sigma^2\), \(\gamma(1)=-\sigma^2\), \(\gamma(h)=0\) for \(h\ge2\) → stationary.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>0.3</td><td>\(0.3t-0.3(t-1)=0.3\) ค่าคงที่ 5 ตัดกันหาย</td></tr>
+<tr><td>2</td><td>สัมประสิทธิ์ 1, −1</td><td>ก14: \(\gamma(0)=\sigma^2(1+1)\) และ \(\gamma(1)=\sigma^2(1)(-1)\)</td></tr>
+</table>
+<p class="trap">⚠ ผลต่างนี้คือ MA(1) ที่ θ = −1 รากเท่ากับ 1 ไม่ invertible คือ over-differencing ของ white noise เชื่อมกับข้อ 1.10</p>
 </div>
 </div>
 </section>
@@ -1753,6 +2065,50 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <p class="trap">⚠ BIC ลงโทษหนักกว่า AIC เมื่อ \(\ln n&gt;2\) คือเมื่อ n เกิน 7 BIC จึงมักเลือกโมเดลที่เล็กกว่า</p>
 </div>
 </div>
+
+<!-- A8 -->
+<div class="quiz free" id="a8">
+<div class="qhead"><span>ข้อ 8.8 · ดัดแปลง</span><span>AIC กับ BIC เลือกไม่ตรงกัน</span></div>
+<div class="qtext">n = 100 · AR(1) ได้ log L = −210.4 (k = 3) · ARMA(2,1) ได้ log L = −206.9 (k = 5) คำนวณ AIC, BIC แล้วเลือกโมเดล</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>AR(1): \(AIC=420.8+6=426.8\), \(BIC=420.8+3\ln100=420.8+13.8=434.6\)</p>
+<p>ARMA(2,1): \(AIC=413.8+10=423.8\), \(BIC=413.8+5\ln100=413.8+23.0=436.8\)</p>
+<p>AIC prefers ARMA(2,1) (423.8 &lt; 426.8); BIC prefers AR(1) (434.6 &lt; 436.8) because BIC penalizes extra parameters more.</p>
+<p>The AIC difference is 3, so both are reasonable; check residual diagnostics and choose the simpler model if both pass.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>−2 log L</td><td>\(-2\times(-210.4)=420.8\) ลบคูณลบเป็นบวก</td></tr>
+<tr><td>2</td><td>\(\ln100=4.605\)</td><td>คูณจำนวนพารามิเตอร์ \(3\times4.605=13.8\) · \(5\times4.605=23.0\)</td></tr>
+</table>
+<p class="trap">⚠ ใน Class 13 อาจารย์บอกว่าใช้ BIC ประกอบได้ ให้คะแนนเหมือนกัน</p>
+</div>
+</div>
+
+<!-- A9 -->
+<div class="quiz free" id="a9">
+<div class="qhead"><span>ข้อ 8.9 · ดัดแปลง</span><span>คู่ไหนเทียบ AIC ได้</span></div>
+<div class="qtext">ข้อมูลชุดเดียวกัน คู่ไหนเทียบ AIC ได้ (ก) ARIMA(1,1,1) กับ ARIMA(0,1,2) (ข) ARIMA(1,0,1) บน x กับ ARIMA(1,0,1) บน log x (ค) ETS(A,A,N) กับ ARIMA(0,2,2) (ง) ARIMA(1,0,0) กับ ARIMA(1,1,0) (จ) ARIMA(2,0,0) กับ ARIMA(2,0,0) ที่มี xreg</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) Yes: same data, same d.</p>
+<p>(b) No: likelihoods are on different scales (x vs log x).</p>
+<p>(c) No: ETS and ARIMA compute the likelihood differently.</p>
+<p>(d) No: different d, so the likelihoods use different data (x vs ∇x).</p>
+<p>(e) Yes: same response y and same d; the regression term is just extra parameters.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>หลักเดียว</td><td>เทียบได้เมื่อ likelihood คิดจากข้อมูลชุดเดียวกันในสเกลเดียวกัน</td></tr>
+</table>
+<p class="trap">⚠ ข้อ (ข) คือ 2023 ข้อ 4b ที่อาจารย์บอกว่า "ข้อนี้ผมจะเน้น" และข้อ (ค) คือ 2024 ข้อ 3ง</p>
+</div>
+</div>
 </section>
 
 <section class="unit" id="u-garch" data-rank="9" data-lesson="12">
@@ -1782,6 +2138,8 @@ ugarchforecast(f, n.ahead = 3)                # Step 5 พยากรณ์ sig
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
+<figure class="qfig"><img src="../assets/practice/cpall-plot.png" alt="plot.ts ของ CPALL เห็นช่วงผันผวนสูงสลับต่ำ" loading="lazy"><figcaption>plot.ts ของ CPALL เห็นช่วงผันผวนสูงสลับต่ำ</figcaption></figure>
+
 <pre class="out">adf.test p-value = 0.01 · plot.ts(x): ช่วงผันผวนสูงสลับต่ำ
 ArchTest: Chi-squared = 34.333, df = 12, p-value = 0.0005976
 garch order   params                               LB resid^2   JB
@@ -1844,6 +2202,7 @@ c(1,1)        a0 0.066, a1 0.244, b1 0.618  all sig         0.016     0.509
 c(1,2)        a0 0.143, a1 0.125, a2 0.305, b1 0.263 all sig 0.934     0.986
 ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
                                alpha2 0.3186  beta1 0.2583   (all p &lt; 0.002)</pre></div>
+<figure class="qfig"><img src="../assets/practice/return-plot.png" alt="plot.ts ของ return.txt" loading="lazy"><figcaption>plot.ts ของ return.txt</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2196,6 +2555,7 @@ si &lt;- si / mean(si)
 <div class="quiz free" id="ch3">
 <div class="qhead"><span>ข้อ 12.3 · ข้อสอบจริง FINAL 2025 ข้อ 4 (3 คะแนน)</span><span>อ่าน CCF ให้ผู้บริหารฟัง</span></div>
 <div class="qtext">ข้อมูลรายสัปดาห์ของห้างดอกบัว <code>ccf(sales, coupon)</code> มีแท่งเดียวที่เกินเส้นประชัดเจน อยู่ที่ lag +3 สูงราว 0.85 แท่งอื่นอยู่ในเส้นประ · <code>ccf(sales, bogo)</code> ทุกแท่งอยู่ในเส้นประ สูงสุดราว 0.23 อธิบายผลให้ผู้บริหารฟัง ให้เกิด insight ทางธุรกิจ</div>
+<figure class="qfig"><img src="../assets/practice/f25-q4-ccf.png" alt="กราฟจากข้อสอบ FINAL 2025 ข้อ 4: ccf(sales, coupon) และ ccf(sales, bogo)" loading="lazy"><figcaption>กราฟจากข้อสอบ FINAL 2025 ข้อ 4: ccf(sales, coupon) และ ccf(sales, bogo)</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2212,6 +2572,49 @@ si &lt;- si / mean(si)
 <tr><td>3</td><td>ภาษาผู้บริหาร</td><td>ข้อนี้ให้คะแนน insight ให้บอกว่าต้องทำอะไร ไม่ใช่บอกแค่ตัวเลข</td></tr>
 </table>
 <p class="trap">⚠ ถ้าสลับลำดับเป็น <code>ccf(coupon, sales)</code> แท่งเดียวกันจะย้ายไปอยู่ที่ lag −3 อ่านลำดับในคำสั่งก่อนตีความทุกครั้ง</p>
+</div>
+</div>
+
+<!-- CH4 -->
+<div class="quiz free" id="ch4">
+<div class="qhead"><span>ข้อ 12.4 · ดัดแปลง</span><span>อ่าน CCF ที่ X นำ Y</span></div>
+<div class="qtext"><code>ccf(sales, ads)</code> ของข้อมูลรายสัปดาห์ 120 สัปดาห์ ได้กราฟข้างล่าง แท่งสูงสุด 0.76 ที่ lag +2 อธิบายให้ผู้บริหาร</div>
+<figure class="qfig"><img src="../assets/practice/simF-ccf.png" alt="ccf(sales, ads)" loading="lazy"><figcaption>ccf(sales, ads)</figcaption></figure>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p><code>ccf(sales, ads)</code> at lag k is the correlation between sales at week t + k and ads at week t.</p>
+<p>The peak 0.76 at lag +2 is far above the bounds (±0.18): ad spending is followed by higher sales about two weeks later.</p>
+<p>Insight: plan ad campaigns two weeks before the sales period you want to boost; ads could also be used as a lagged regressor (ARIMAX).</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ขอบ 0.18</td><td>\(2/\sqrt{120}=0.18\)</td></tr>
+<tr><td>2</td><td>lag บวก</td><td>ตัวแรกในคำสั่งคือ sales ที่ t + k ตามหลังตัวที่สองคือ ads ที่ t</td></tr>
+</table>
+</div>
+</div>
+
+<!-- CH5 -->
+<div class="quiz free" id="ch5">
+<div class="qhead"><span>ข้อ 12.5 · ดัดแปลง</span><span>เลือกโมเดลชุดใหม่</span></div>
+<div class="qtext">เลือก SARIMA / ARIMAX / VAR / GARCH / Prophet: (1) ผลตอบแทน bitcoin รายวัน ช่วงผันผวนเกาะกลุ่ม (2) ความต้องการไฟฟ้ารายชั่วโมง ใช้พยากรณ์อุณหภูมิของกรมอุตุฯ เป็นตัวช่วย (3) ดอกเบี้ย เงินเฟ้อ และอัตราว่างงาน ต้องการดูว่าส่งผลกันไปมา (4) ลูกค้าร้านอาหารรายวัน เสาร์–อาทิตย์สูง วันสงกรานต์และปีใหม่สูง (5) ยอดขายไอศกรีมรายเดือน 8 ปี มีฤดูกาลรายปี ไม่มีข้อมูลอื่น (6) ยอดขายรายเดือนที่บริษัทกำหนดราคาเอง</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(1) GARCH: volatility clustering.</p>
+<p>(2) ARIMAX: temperature forecast is a known regressor driving demand one way.</p>
+<p>(3) VAR: the three variables affect each other.</p>
+<p>(4) FB Prophet: daily data, weekly pattern and holidays.</p>
+<p>(5) SARIMA: one series with stable yearly seasonality.</p>
+<p>(6) ARIMAX: price is set by the company and known in advance.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ดูสิ่งที่ "เพิ่ม"</td><td>อนุกรมเดียวมีฤดูกาลคือ SARIMA · มี X รู้ล่วงหน้าคือ ARIMAX · ส่งผลกันไปมาคือ VAR · ความผันผวนคือ GARCH · รายวันมีวันหยุดคือ Prophet</td></tr>
+</table>
 </div>
 </div>
 </section>
@@ -2259,6 +2662,7 @@ si &lt;- si / mean(si)
 <div class="quiz free" id="ap2">
 <div class="qhead"><span>ข้อ 13.2 · ข้อสอบจริง FINAL 2022 ข้อ 6a (3 คะแนน)</span><span>ทายโมเดลจาก ACF/PACF</span></div>
 <div class="qtext">ข้อมูล neuron T = 415 · ACF: lag 1 ราว 0.12 เกินเส้นประ ±0.1 เล็กน้อย lag อื่นอยู่ในเส้น · PACF: lag 1 ราว 0.13 เกินเส้น lag อื่นอยู่ในเส้นแม้จะมีบางแท่งเข้าใกล้ What ARMA model does this suggest, and why?</div>
+<figure class="qfig"><img src="../assets/practice/f22-q6-acf-pacf.png" alt="Fig. 2 จากข้อสอบ FINAL 2022: (a) ACF (b) PACF ของ X_t" loading="lazy"><figcaption>Fig. 2 จากข้อสอบ FINAL 2022: (a) ACF (b) PACF ของ X_t</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2278,6 +2682,7 @@ si &lt;- si / mean(si)
 <div class="quiz free" id="ap3">
 <div class="qhead"><span>ข้อ 13.3 · ข้อสอบจริง PRACTICE 1 ข้อ 2 (5 คะแนน)</span><span>scatter plot ของ lag</span></div>
 <div class="qtext">ภาพ lag scatterplot ของ MA(q): lag 1 จุดเอียงลงชัดเจน · lag 2 จุดเอียงขึ้นเล็กน้อย · lag 3 และ lag 4 เป็นก้อนกลมไม่มีทิศ Make an educated guess about q.</div>
+<figure class="qfig"><img src="../assets/practice/p1-q2-scatter.png" alt="กราฟจากข้อสอบ PRACTICE 1 ข้อ 2: lag 1–4 scatterplot" loading="lazy"><figcaption>กราฟจากข้อสอบ PRACTICE 1 ข้อ 2: lag 1–4 scatterplot</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2306,6 +2711,31 @@ si &lt;- si / mean(si)
 <p>ARMA(2,2): both ACF and PACF tail off; neither cuts off. The ACF decays after lag 2 as a mixture of exponential decay and damped sine waves, depending on the AR roots.</p>
 </div>
 <p class="trap">⚠ อาจารย์บอกใน Class 13 ว่าแนวบรรยาย ACF/PACF แบบนี้ "open book ผมคงไม่ออกหรอก" เพราะเปิดตารางสรุปได้</p>
+</div>
+</div>
+
+<!-- AP5 -->
+<div class="quiz free" id="ap5">
+<div class="qhead"><span>ข้อ 13.5 · ดัดแปลง</span><span>ทายโมเดลจาก ACF/PACF สามชุด</span></div>
+<div class="qtext">อนุกรมนิ่ง 300 ค่าสามชุด ได้ ACF และ PACF ตามกราฟ ชุดไหนเป็น AR(2), MA(2), ARMA(1,1)</div>
+<figure class="qfig"><img src="../assets/practice/simD1-acfpacf.png" alt="ชุด 1" loading="lazy"><figcaption>ชุด 1</figcaption></figure>
+<figure class="qfig"><img src="../assets/practice/simD2-acfpacf.png" alt="ชุด 2" loading="lazy"><figcaption>ชุด 2</figcaption></figure>
+<figure class="qfig"><img src="../assets/practice/simD3-acfpacf.png" alt="ชุด 3" loading="lazy"><figcaption>ชุด 3</figcaption></figure>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>Series 1: ACF tails off slowly; PACF has spikes at lags 1–2 then cuts off → AR(2).</p>
+<p>Series 2: ACF has spikes at lags 1–2 then cuts off; PACF tails off with alternating signs → MA(2).</p>
+<p>Series 3: both ACF and PACF tail off with no clear cut-off → ARMA(1,1).</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ชุด 1</td><td>PACF lag 1 = 0.66, lag 2 = 0.32 แล้วอยู่ในเส้น ±0.115</td></tr>
+<tr><td>2</td><td>ชุด 2</td><td>ACF lag 1 = 0.58, lag 2 = 0.27 แล้วอยู่ในเส้น</td></tr>
+<tr><td>3</td><td>ชุด 3</td><td>ACF ลดจาก 0.87 ช้า ๆ PACF ยังมีแท่งหลุดเส้นที่ lag 4 ไม่ตัดชัด</td></tr>
+</table>
+<p class="trap">⚠ ข้อมูลจริงไม่เคยตัดสวยเท่าตาราง ดูว่าฝั่งไหน "ตัด" ชัดกว่า ถ้าทั้งสองฝั่งค่อย ๆ ลด ให้ตอบ ARMA</p>
 </div>
 </div>
 </section>
@@ -2366,6 +2796,25 @@ si &lt;- si / mean(si)
 <p class="trap">⚠ ข้อ b คือเหตุผลที่ต้องมี invertibility ดู<a href="#g2">ข้อ 1.2</a></p>
 </div>
 </div>
+
+<!-- M3 -->
+<div class="quiz free" id="m3">
+<div class="qhead"><span>ข้อ 14.3 · ดัดแปลง</span><span>θ ติดลบกับ 1/θ</span></div>
+<div class="qtext">MA(1) สองตัว θ = −0.5 และ θ = −2 หา ρ₁ ของทั้งคู่ แล้วบอกว่าควรใช้ตัวไหน</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\(\rho_1=\dfrac{-0.5}{1+0.25}=-0.4,\qquad \rho_1=\dfrac{-2}{1+4}=-0.4\)</p>
+<p>Both give the same ACF, so the data cannot tell them apart. Choose θ = −0.5 because \(|\theta|&lt;1\) (invertible).</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ตัวส่วน</td><td>\((-0.5)^2=0.25\) · \((-2)^2=4\) ยกกำลังสองแล้วเป็นบวกเสมอ</td></tr>
+<tr><td>2</td><td>เครื่องหมาย ρ₁</td><td>ตามเครื่องหมายของ θ เพราะตัวส่วนเป็นบวก</td></tr>
+</table>
+</div>
+</div>
 </section>
 
 <section class="unit" id="u-period" data-rank="15" data-lesson="13">
@@ -2379,6 +2828,8 @@ si &lt;- si / mean(si)
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
+<figure class="qfig"><img src="../assets/practice/rain-periodogram.png" alt="spectrum(rain$rain, log = "no") ยอดสูงสุดที่ f = 0.0833" loading="lazy"><figcaption>spectrum(rain$rain, log = "no") ยอดสูงสุดที่ f = 0.0833</figcaption></figure>
+
 <pre><code>rain &lt;- read.table("rain.txt", header = TRUE)
 s &lt;- spectrum(rain$rain, log = "no")
 s$freq[which.max(s$spec)]        # 0.0833
@@ -2409,6 +2860,26 @@ s$freq[which.max(s$spec)]        # 0.0833
 <p>(b) With a ts of frequency 12, the axis is in cycles per year. f = 1 means one cycle per year, T = 1 year = 12 months.</p>
 </div>
 <p class="trap">⚠ ข้อ ข คือกับดักที่เจอบ่อย: ตัวเลขแกนเปลี่ยนตามว่าส่ง ts หรือตัวเลขธรรมดา ให้ดูว่าส่งอะไรเข้าไปก่อนแปลค่า</p>
+</div>
+</div>
+
+<!-- PG3 -->
+<div class="quiz free" id="pg3">
+<div class="qhead"><span>ข้อ 15.3 · ดัดแปลง</span><span>periodogram ข้อมูลรายไตรมาส</span></div>
+<div class="qtext">ข้อมูลรายไตรมาส 80 ค่า <code>spectrum(q, log = "no")</code> ได้กราฟข้างล่าง ยอดสูงสุดอยู่ที่ f = 0.25 ข้อมูลมีรอบเท่าไร และควรตั้ง ts อย่างไร</div>
+<figure class="qfig"><img src="../assets/practice/simE-periodogram.png" alt="periodogram ของข้อมูลรายไตรมาส" loading="lazy"><figcaption>periodogram ของข้อมูลรายไตรมาส</figcaption></figure>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>Peak at f = 0.25 cycles per quarter → period \(T=1/0.25=4\) quarters = one year.</p>
+<p>Set <code>ts(q, frequency = 4)</code> before fitting a seasonal model.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>1/0.25</td><td>ความถี่คือรอบต่อหนึ่งช่วงเวลา คาบคือกลับเศษเป็นส่วน</td></tr>
+<tr><td>2</td><td>ยอดเล็กใกล้ f = 0</td><td>คือ trend ไม่ใช่รอบ ไม่ต้องเลือก</td></tr>
+</table>
 </div>
 </div>
 </section>
@@ -2466,6 +2937,28 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
 <tr><td>1</td><td>\(1/\sqrt n\)</td><td>ถ้าเป็น white noise \(\hat\rho(h)\) แจกแจงประมาณ normal ที่ mean 0 และ sd \(1/\sqrt n\)</td></tr>
 <tr><td>2</td><td>1.96</td><td>ค่า z ของ 95% สองข้าง</td></tr>
+</table>
+</div>
+</div>
+
+<!-- SA3 -->
+<div class="quiz free" id="sa3">
+<div class="qhead"><span>ข้อ 16.3 · ดัดแปลง</span><span>sample ACF ห้าจุด</span></div>
+<div class="qtext">ข้อมูล 4, 6, 5, 9, 11 คำนวณ \(\hat\rho(1)\), \(\hat\rho(2)\) และ \(\nabla x_t\) ด้วยมือ</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>\(\bar x=35/5=7\); deviations: −3, −1, −2, 2, 4; \(\sum(x_t-\bar x)^2=9+1+4+4+16=34\)</p>
+<p>Lag 1: \((-3)(-1)+(-1)(-2)+(-2)(2)+(2)(4)=3+2-4+8=9\Rightarrow\hat\rho(1)=9/34=0.265\)</p>
+<p>Lag 2: \((-3)(-2)+(-1)(2)+(-2)(4)=6-2-8=-4\Rightarrow\hat\rho(2)=-4/34=-0.118\)</p>
+<p>\(\nabla x_t\): —, 2, −1, 4, 2. Bounds \(\pm2/\sqrt5=\pm0.894\): no lag is significant.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>ผลคูณ lag 1</td><td>คู่ติดกัน 4 คู่: ตัวที่ 1×2, 2×3, 3×4, 4×5 ของค่าเบี่ยง</td></tr>
+<tr><td>2</td><td>ผลคูณ lag 2</td><td>คู่ห่างกันสอง 3 คู่: 1×3, 2×4, 3×5</td></tr>
+<tr><td>3</td><td>ไม่หาร n − h</td><td>ทั้งบนและล่างหาร n เท่ากัน ตัดกันได้ ใช้ผลรวมตรง ๆ</td></tr>
 </table>
 </div>
 </div>
