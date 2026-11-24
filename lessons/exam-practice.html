@@ -17,6 +17,7 @@
 table.check { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 table.check th, table.check td { border-bottom: 1px solid #e2ddd3; padding: 0.4em 0.45em; text-align: left; vertical-align: top; }
 table.check td.st { white-space: nowrap; }
+#checktable td:nth-child(3), #checktable td:nth-child(1) { white-space: nowrap; }
 table.check tr.done td { background: #eef6ee; }
 table.check tr.empty td { color: #8b857a; }
 .tag { display: inline-block; font-size: 0.75rem; padding: 0.05em 0.5em; border-radius: 4px; background: #f1ece2; margin-right: 0.25em; white-space: nowrap; }
@@ -94,36 +95,36 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <h2 id="checklist">Checklist</h2>
 
 <div class="modebar" role="group" aria-label="เรียงลำดับ">
-  <button type="button" data-mode="lesson" aria-pressed="true">เรียงตามบท</button>
-  <button type="button" data-mode="rank" aria-pressed="false">เรียงตามความสำคัญ</button>
+  <button type="button" data-mode="lesson" aria-pressed="false">เรียงตามบท</button>
+  <button type="button" data-mode="rank" aria-pressed="true">เรียงตามความสำคัญ</button>
 </div>
 <p class="progress" id="progress"></p>
 
 <table class="check" id="checktable">
-<thead><tr><th>#</th><th>ทักษะ</th><th>บท</th><th>เคยออก</th><th>สถานะ</th></tr></thead>
+<thead><tr><th>ลำดับ</th><th>ทักษะ</th><th>บท</th><th>ปีล่าสุดที่ออก</th><th>เคยออก</th><th>สถานะ</th></tr></thead>
 <tbody>
-<tr data-rank="1" data-lesson="7" data-unit="u-roots" data-done="1" data-ready="1"><td>1</td><td><a href="#u-roots">ราก ARMA: causal, invertible, redundancy</a> <span class="tag math">คณิต</span></td><td>L7</td><td>ทุกฉบับ (8 ข้อ ~66 คะแนน)</td><td class="st"></td></tr>
-<tr data-rank="2" data-lesson="10" data-unit="u-rpipe" data-done="1" data-ready="1"><td>2</td><td><a href="#u-rpipe">R: SARIMA, auto.arima, ets, พยากรณ์, tsCV</a> <span class="tag r">R</span></td><td>L10</td><td>2025 ข้อ 5b–e</td><td class="st"></td></tr>
-<tr data-rank="3" data-lesson="11" data-unit="u-rxreg" data-done="0" data-ready="1"><td>3</td><td><a href="#u-rxreg">R: ตัวแปรภายนอก ARIMAX, NNAR, RMSE บน test set</a> <span class="tag r">R</span></td><td>L11</td><td>2023 ข้อ 5, 2025 ข้อ 5g</td><td class="st"></td></tr>
-<tr data-rank="4" data-lesson="8" data-unit="u-write" data-done="0" data-ready="1"><td>4</td><td><a href="#u-write">เขียนโมเดลจาก output ของ R</a> <span class="tag read">อ่าน output</span></td><td>L8</td><td>2022, 2023, 2024, 2025 (5 ข้อ)</td><td class="st"></td></tr>
-<tr data-rank="5" data-lesson="8" data-unit="u-diag" data-done="0" data-ready="1"><td>5</td><td><a href="#u-diag">ตรวจ residual: ACF, QQ, Ljung-Box</a> <span class="tag read">อ่าน output</span></td><td>L8</td><td>2022, 2023, PRACTICE 2 (5 ข้อ)</td><td class="st"></td></tr>
-<tr data-rank="6" data-lesson="2" data-unit="u-stat" data-done="0" data-ready="1"><td>6</td><td><a href="#u-stat">พิสูจน์ความนิ่ง: mean และ autocovariance</a> <span class="tag math">คณิต</span></td><td>L2</td><td>2023, 2025, PRACTICE 1 (6 ข้อ)</td><td class="st"></td></tr>
-<tr data-rank="7" data-lesson="7" data-unit="u-psi" data-done="0" data-ready="1"><td>7</td><td><a href="#u-psi">ψ weights และ π weights</a> <span class="tag math">คณิต</span></td><td>L7</td><td>2022 ข้อ 4, PRACTICE 2 ข้อ 3e</td><td class="st"></td></tr>
-<tr data-rank="8" data-lesson="7" data-unit="u-aic" data-done="0" data-ready="1"><td>8</td><td><a href="#u-aic">เลือกโมเดลด้วย AIC และ log-likelihood</a> <span class="tag read">อ่าน output</span></td><td>L7</td><td>2022, 2023, 2024 (7 ข้อย่อย)</td><td class="st"></td></tr>
-<tr data-rank="9" data-lesson="12" data-unit="u-garch" data-done="0" data-ready="1"><td>9</td><td><a href="#u-garch">R: GARCH ครบขั้น</a> <span class="tag r">R</span></td><td>L12</td><td>2024 ข้อ 4</td><td class="st"></td></tr>
-<tr data-rank="10" data-lesson="7" data-unit="u-yw" data-done="0" data-ready="1"><td>10</td><td><a href="#u-yw">Yule-Walker: ประมาณ φ และ σ² จาก γ̂(h)</a> <span class="tag math">คณิต</span></td><td>L7</td><td>2022 ข้อ 5, PRACTICE 2 ข้อ 5</td><td class="st"></td></tr>
-<tr data-rank="11" data-lesson="4" data-unit="u-decomp" data-done="0" data-ready="1"><td>11</td><td><a href="#u-decomp">Multiplicative decomposition และ seasonal index</a> <span class="tag math">คณิต</span></td><td>L4</td><td>2022 ข้อ 8, 2025 ข้อ 5f</td><td class="st"></td></tr>
-<tr data-rank="12" data-lesson="13" data-unit="u-choose" data-done="0" data-ready="1"><td>12</td><td><a href="#u-choose">เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF</a> <span class="tag read">ความเข้าใจ</span></td><td>L13</td><td>2022 ข้อ 3, 2025 ข้อ 3–4</td><td class="st"></td></tr>
-<tr data-rank="13" data-lesson="6" data-unit="u-acfpacf" data-done="0" data-ready="1"><td>13</td><td><a href="#u-acfpacf">บรรยาย ACF/PACF และทายโมเดลจากกราฟ</a> <span class="tag read">ความเข้าใจ</span></td><td>L6</td><td>2022, PRACTICE 1–2 (4 ข้อ)</td><td class="st"></td></tr>
-<tr data-rank="14" data-lesson="5" data-unit="u-ma1" data-done="0" data-ready="1"><td>14</td><td><a href="#u-ma1">MA(1): ρ₁, |ρ₁| ≤ ½, θ กับ 1/θ</a> <span class="tag math">คณิต</span></td><td>L5</td><td>2023 ข้อ 2, PRACTICE 1 ข้อ 4</td><td class="st"></td></tr>
-<tr data-rank="15" data-lesson="13" data-unit="u-period" data-done="0" data-ready="1"><td>15</td><td><a href="#u-period">R: periodogram หาความถี่และคาบ</a> <span class="tag r">R</span></td><td>L13</td><td>2025 ข้อ 5a</td><td class="st"></td></tr>
-<tr data-rank="16" data-lesson="3" data-unit="u-sacf" data-done="0" data-ready="1"><td>16</td><td><a href="#u-sacf">sample ACF ด้วยมือ, correlogram, ∇xₜ</a> <span class="tag math">คณิต</span></td><td>L3</td><td>2024 ข้อ 2, 3ข</td><td class="st"></td></tr>
-<tr data-rank="17" data-lesson="3" data-unit="u-detrend" data-done="0" data-ready="1"><td>17</td><td><a href="#u-detrend">Detrending และ OLS trend ที่ error สัมพันธ์กัน</a> <span class="tag math">คณิต</span></td><td>L3</td><td>2024 ข้อ 3ก</td><td class="st"></td></tr>
-<tr data-rank="18" data-lesson="10" data-unit="u-etsarima" data-done="0" data-ready="1"><td>18</td><td><a href="#u-etsarima">ETS(A,N,N) กับ ARIMA(0,1,1)</a> <span class="tag read">ความเข้าใจ</span></td><td>L10</td><td>2024 ข้อ 3จ</td><td class="st"></td></tr>
+<tr data-rank="1" data-lesson="7" data-unit="u-roots" data-done="1" data-ready="1"><td>1</td><td><a href="#u-roots">ทักษะ 1 · ราก ARMA: causal, invertible, redundancy</a> <span class="tag math">คณิต</span></td><td>L7</td><td>2024, 2025</td><td>ทุกฉบับ (8 ข้อ ~66 คะแนน)</td><td class="st"></td></tr>
+<tr data-rank="2" data-lesson="10" data-unit="u-rpipe" data-done="1" data-ready="1"><td>2</td><td><a href="#u-rpipe">ทักษะ 2 · R: SARIMA, auto.arima, ets, พยากรณ์, tsCV</a> <span class="tag r">R</span></td><td>L10</td><td>2025</td><td>2025 ข้อ 5b–e</td><td class="st"></td></tr>
+<tr data-rank="3" data-lesson="11" data-unit="u-rxreg" data-done="0" data-ready="1"><td>3</td><td><a href="#u-rxreg">ทักษะ 3 · R: ตัวแปรภายนอก ARIMAX, NNAR, RMSE บน test set</a> <span class="tag r">R</span></td><td>L11</td><td>2025</td><td>2023 ข้อ 5, 2025 ข้อ 5g</td><td class="st"></td></tr>
+<tr data-rank="5" data-lesson="8" data-unit="u-write" data-done="0" data-ready="1"><td>5</td><td><a href="#u-write">ทักษะ 4 · เขียนโมเดลจาก output ของ R</a> <span class="tag read">อ่าน output</span></td><td>L8</td><td>2024, 2025</td><td>2022, 2023, 2024, 2025 (5 ข้อ)</td><td class="st"></td></tr>
+<tr data-rank="6" data-lesson="8" data-unit="u-diag" data-done="0" data-ready="1"><td>6</td><td><a href="#u-diag">ทักษะ 5 · ตรวจ residual: ACF, QQ, Ljung-Box</a> <span class="tag read">อ่าน output</span></td><td>L8</td><td>2025 (5b–c)</td><td>2022, 2023, PRACTICE 2 (5 ข้อ)</td><td class="st"></td></tr>
+<tr data-rank="4" data-lesson="2" data-unit="u-stat" data-done="0" data-ready="1"><td>4</td><td><a href="#u-stat">ทักษะ 6 · พิสูจน์ความนิ่ง: mean และ autocovariance</a> <span class="tag math">คณิต</span></td><td>L2</td><td>2025</td><td>2023, 2025, PRACTICE 1 (6 ข้อ)</td><td class="st"></td></tr>
+<tr data-rank="17" data-lesson="7" data-unit="u-psi" data-done="0" data-ready="1"><td>17</td><td><a href="#u-psi">ทักษะ 7 · ψ weights และ π weights</a> <span class="tag math">คณิต</span></td><td>L7</td><td>—</td><td>2022 ข้อ 4, PRACTICE 2 ข้อ 3e</td><td class="st"></td></tr>
+<tr data-rank="10" data-lesson="7" data-unit="u-aic" data-done="0" data-ready="1"><td>10</td><td><a href="#u-aic">ทักษะ 8 · เลือกโมเดลด้วย AIC และ log-likelihood</a> <span class="tag read">อ่าน output</span></td><td>L7</td><td>2024</td><td>2022, 2023, 2024 (7 ข้อย่อย)</td><td class="st"></td></tr>
+<tr data-rank="7" data-lesson="12" data-unit="u-garch" data-done="0" data-ready="1"><td>7</td><td><a href="#u-garch">ทักษะ 9 · R: GARCH ครบขั้น</a> <span class="tag r">R</span></td><td>L12</td><td>2024</td><td>2024 ข้อ 4</td><td class="st"></td></tr>
+<tr data-rank="16" data-lesson="7" data-unit="u-yw" data-done="0" data-ready="1"><td>16</td><td><a href="#u-yw">ทักษะ 10 · Yule-Walker: ประมาณ φ และ σ² จาก γ̂(h)</a> <span class="tag math">คณิต</span></td><td>L7</td><td>—</td><td>2022 ข้อ 5, PRACTICE 2 ข้อ 5</td><td class="st"></td></tr>
+<tr data-rank="9" data-lesson="4" data-unit="u-decomp" data-done="0" data-ready="1"><td>9</td><td><a href="#u-decomp">ทักษะ 11 · Multiplicative decomposition และ seasonal index</a> <span class="tag math">คณิต</span></td><td>L4</td><td>2025</td><td>2022 ข้อ 8, 2025 ข้อ 5f</td><td class="st"></td></tr>
+<tr data-rank="8" data-lesson="13" data-unit="u-choose" data-done="0" data-ready="1"><td>8</td><td><a href="#u-choose">ทักษะ 12 · เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF</a> <span class="tag read">ความเข้าใจ</span></td><td>L13</td><td>2025</td><td>2022 ข้อ 3, 2025 ข้อ 3–4</td><td class="st"></td></tr>
+<tr data-rank="18" data-lesson="6" data-unit="u-acfpacf" data-done="0" data-ready="1"><td>18</td><td><a href="#u-acfpacf">ทักษะ 13 · บรรยาย ACF/PACF และทายโมเดลจากกราฟ</a> <span class="tag read">ความเข้าใจ</span></td><td>L6</td><td>—</td><td>2022, PRACTICE 1–2 (4 ข้อ)</td><td class="st"></td></tr>
+<tr data-rank="15" data-lesson="5" data-unit="u-ma1" data-done="0" data-ready="1"><td>15</td><td><a href="#u-ma1">ทักษะ 14 · MA(1): ρ₁, |ρ₁| ≤ ½, θ กับ 1/θ</a> <span class="tag math">คณิต</span></td><td>L5</td><td>—</td><td>2023 ข้อ 2, PRACTICE 1 ข้อ 4</td><td class="st"></td></tr>
+<tr data-rank="11" data-lesson="13" data-unit="u-period" data-done="0" data-ready="1"><td>11</td><td><a href="#u-period">ทักษะ 15 · R: periodogram หาความถี่และคาบ</a> <span class="tag r">R</span></td><td>L13</td><td>2025</td><td>2025 ข้อ 5a</td><td class="st"></td></tr>
+<tr data-rank="12" data-lesson="3" data-unit="u-sacf" data-done="0" data-ready="1"><td>12</td><td><a href="#u-sacf">ทักษะ 16 · sample ACF ด้วยมือ, correlogram, ∇xₜ</a> <span class="tag math">คณิต</span></td><td>L3</td><td>2024</td><td>2024 ข้อ 2, 3ข</td><td class="st"></td></tr>
+<tr data-rank="14" data-lesson="3" data-unit="u-detrend" data-done="0" data-ready="1"><td>14</td><td><a href="#u-detrend">ทักษะ 17 · Detrending และ OLS trend ที่ error สัมพันธ์กัน</a> <span class="tag math">คณิต</span></td><td>L3</td><td>2024</td><td>2024 ข้อ 3ก</td><td class="st"></td></tr>
+<tr data-rank="13" data-lesson="10" data-unit="u-etsarima" data-done="0" data-ready="1"><td>13</td><td><a href="#u-etsarima">ทักษะ 18 · ETS(A,N,N) กับ ARIMA(0,1,1)</a> <span class="tag read">ความเข้าใจ</span></td><td>L10</td><td>2024</td><td>2024 ข้อ 3จ</td><td class="st"></td></tr>
 </tbody>
 </table>
 
-<p class="src-q">ลำดับความสำคัญคิดจากคะแนนรวมที่เคยออก ความใหม่ของข้อสอบ (2024–2025 ถ่วงหนักกว่า) และเรื่องที่ต้องคำนวณมือ</p>
+<p class="src-q">ลำดับความสำคัญ (ปรับ 24 พ.ย.): ทักษะที่ออกใน FINAL 2024–2025 ขึ้นก่อน เรียงตามคะแนน ทักษะที่ออกแค่ฉบับเก่าหรือที่อาจารย์บอกใน Class 13 ว่าไม่ออกย้ายไปท้าย ได้แก่ 14, 10, 7, 13 · เลขทักษะเดิมไม่เปลี่ยน ใช้ปุ่ม "เรียงตามความสำคัญ" เพื่อดูตามลำดับนี้</p>
 
 <h2 id="rules">กฎพื้นฐานที่ใช้ในเฉลย</h2>
 
@@ -988,7 +989,7 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.68  RMSE test 10.44</pre>
 </div>
 </section>
 
-<section class="unit" id="u-write" data-rank="4" data-lesson="8">
+<section class="unit" id="u-write" data-rank="5" data-lesson="8">
 <h2>ทักษะ 4: เขียนโมเดลจาก output ของ R</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s5-out">L7 ตอน 5.6</a>, <a href="0008-diagnostic-and-forecasting.html#s2-write">L8 ตอน 2.2</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 6d, 7b · 2023 ข้อ 4a · 2024 ข้อ 3ค · 2025 ข้อ 5b</p>
 
@@ -1234,7 +1235,7 @@ sigma^2 = 4.1</pre>เขียนโมเดล</div>
 </div>
 </section>
 
-<section class="unit" id="u-diag" data-rank="5" data-lesson="8">
+<section class="unit" id="u-diag" data-rank="6" data-lesson="8">
 <h2>ทักษะ 5: ตรวจ residual — ACF, QQ, Ljung-Box</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0008-diagnostic-and-forecasting.html#s1">L8 ตอน 1</a>, <a href="0008-diagnostic-and-forecasting.html#s2-valid">ตอน 2.3</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 6e, 7c · 2023 ข้อ 4d, 4e · PRACTICE 2 ข้อ 1</p>
 
@@ -1456,7 +1457,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 </div>
 </section>
 
-<section class="unit" id="u-stat" data-rank="6" data-lesson="2">
+<section class="unit" id="u-stat" data-rank="4" data-lesson="2">
 <h2>ทักษะ 6: พิสูจน์ความนิ่ง — mean และ autocovariance</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0002-performance-evaluation-and-stationarity.html#s4">L2 ตอน 4</a> · <b>เคยออก:</b> FINAL 2023 ข้อ 3 · 2025 ข้อ 1 · PRACTICE 1 ข้อ 1, 3, 5, 6</p>
 
@@ -1747,7 +1748,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 </section>
 
 <!-- ============================================================ -->
-<section class="unit" id="u-psi" data-rank="7" data-lesson="7">
+<section class="unit" id="u-psi" data-rank="17" data-lesson="7">
 <h2>ทักษะ 7: ψ weights และ π weights</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s4-psi">L7 ตอน 4.5</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 4 (8 คะแนน) · PRACTICE 2 ข้อ 3(e)</p>
 
@@ -1882,7 +1883,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 </section>
 
 <!-- ============================================================ -->
-<section class="unit" id="u-aic" data-rank="8" data-lesson="7">
+<section class="unit" id="u-aic" data-rank="10" data-lesson="7">
 <h2>ทักษะ 8: เลือกโมเดลด้วย AIC และ log-likelihood</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s3-aic">L7 ตอน 3.3–3.4</a>, <a href="0010-auto-arima-ets-tscv.html">L10</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 6b, 6c, 7a · 2023 ข้อ 4b, 4c · 2024 ข้อ 3ง, 3ฉ</p>
 
@@ -2111,7 +2112,7 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 </div>
 </section>
 
-<section class="unit" id="u-garch" data-rank="9" data-lesson="12">
+<section class="unit" id="u-garch" data-rank="7" data-lesson="12">
 <h2>ทักษะ 9: R — GARCH ครบขั้น</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0012-arch-garch-nnar.html">L12</a> · <b>เคยออก:</b> FINAL 2024 ข้อ 4 (12 คะแนน, ข้อมูล CPALL) ซึ่งมีเฉลยอยู่ใน<a href="0012-arch-garch-nnar-exercises.html">แบบฝึก L12 ข้อ 12</a></p>
 <div class="method">
@@ -2247,7 +2248,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 </div>
 </section>
 
-<section class="unit" id="u-yw" data-rank="10" data-lesson="7">
+<section class="unit" id="u-yw" data-rank="16" data-lesson="7">
 <h2>ทักษะ 10: Yule-Walker — ประมาณ φ และ σ² จาก γ̂(h)</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s5-ar1">L7 ตอน 5.2–5.4</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 5 (8 คะแนน) · PRACTICE 2 ข้อ 5 (10 คะแนน)</p>
 
@@ -2390,7 +2391,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 </div>
 </section>
 
-<section class="unit" id="u-decomp" data-rank="11" data-lesson="4">
+<section class="unit" id="u-decomp" data-rank="9" data-lesson="4">
 <h2>ทักษะ 11: Multiplicative decomposition และ seasonal index</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0004-smoothing-methods.html#s5-reg">L4 ตอน 5.2</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 8 (10 คะแนน) · 2025 ข้อ 5f (3 คะแนน)</p>
 
@@ -2493,7 +2494,7 @@ si &lt;- si / mean(si)
 </div>
 </section>
 
-<section class="unit" id="u-choose" data-rank="12" data-lesson="13">
+<section class="unit" id="u-choose" data-rank="8" data-lesson="13">
 <h2>ทักษะ 12: เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0013-frequency-domain-prophet.html">L13 ตอน 5</a>, <a href="0011-multivariate-arimax-var.html">L11</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 3 · 2025 ข้อ 3, 4</p>
 
@@ -2619,7 +2620,7 @@ si &lt;- si / mean(si)
 </div>
 </section>
 
-<section class="unit" id="u-acfpacf" data-rank="13" data-lesson="6">
+<section class="unit" id="u-acfpacf" data-rank="18" data-lesson="6">
 <h2>ทักษะ 13: บรรยาย ACF/PACF และทายโมเดลจากกราฟ</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0006-ar2-pacf-and-arima.html#s3-sum">L6 ตอน 3.6</a>, <a href="0009-sarima.html">L9</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 2, 6a · PRACTICE 1 ข้อ 2 · PRACTICE 2 ข้อ 2</p>
 
@@ -2740,7 +2741,7 @@ si &lt;- si / mean(si)
 </div>
 </section>
 
-<section class="unit" id="u-ma1" data-rank="14" data-lesson="5">
+<section class="unit" id="u-ma1" data-rank="15" data-lesson="5">
 <h2>ทักษะ 14: MA(1) — ρ₁, |ρ₁| ≤ ½, θ กับ 1/θ</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0005-ma-and-ar-models.html#s3-prop">L5 ตอน 3.3–3.4</a> · <b>เคยออก:</b> FINAL 2023 ข้อ 2 (10 คะแนน) · PRACTICE 1 ข้อ 4 (10 คะแนน)</p>
 
@@ -2817,7 +2818,7 @@ si &lt;- si / mean(si)
 </div>
 </section>
 
-<section class="unit" id="u-period" data-rank="15" data-lesson="13">
+<section class="unit" id="u-period" data-rank="11" data-lesson="13">
 <h2>ทักษะ 15: R — periodogram หาความถี่และคาบ</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0013-frequency-domain-prophet.html">L13</a> · <b>เคยออก:</b> FINAL 2025 ข้อ 5a (2 คะแนน)</p>
 
@@ -2884,7 +2885,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 </div>
 </section>
 
-<section class="unit" id="u-sacf" data-rank="16" data-lesson="3">
+<section class="unit" id="u-sacf" data-rank="12" data-lesson="3">
 <h2>ทักษะ 16: sample ACF ด้วยมือ, correlogram, ∇xₜ</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0003-estimation-correlogram-and-detrending.html#s1-calc">L3 ตอน 1.2</a>, <a href="0003-estimation-correlogram-and-detrending.html#s2-band">ตอน 2.1</a> · <b>เคยออก:</b> FINAL 2024 ข้อ 2 (4 คะแนน), 3ข (2 คะแนน)</p>
 
@@ -2964,7 +2965,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 </div>
 </section>
 
-<section class="unit" id="u-detrend" data-rank="17" data-lesson="3">
+<section class="unit" id="u-detrend" data-rank="14" data-lesson="3">
 <h2>ทักษะ 17: Detrending และ OLS trend ที่ error สัมพันธ์กัน</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0003-estimation-correlogram-and-detrending.html#s4">L3 ตอน 4</a>, <a href="0011-multivariate-arimax-var.html">L11 (GLS)</a> · <b>เคยออก:</b> FINAL 2024 ข้อ 3ก · ข้อพิสูจน์ detrending ของ PRACTICE 1 ข้อ 6 อยู่ใน<a href="#s6">ข้อ 6.6</a></p>
 
@@ -2990,7 +2991,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 </div>
 </section>
 
-<section class="unit" id="u-etsarima" data-rank="18" data-lesson="10">
+<section class="unit" id="u-etsarima" data-rank="13" data-lesson="10">
 <h2>ทักษะ 18: ETS(A,N,N) กับ ARIMA(0,1,1)</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s1-ses">L7 ตอน 1.3</a>, <a href="0010-auto-arima-ets-tscv.html">L10</a> · <b>เคยออก:</b> FINAL 2024 ข้อ 3จ (2 คะแนน)</p>
 
@@ -3087,8 +3088,8 @@ s$freq[which.max(s$spec)]        # 0.0833
   document.querySelectorAll(".modebar button").forEach(function (b) {
     b.addEventListener("click", function () { apply(b.dataset.mode); });
   });
-  var saved = "lesson";
-  try { saved = localStorage.getItem("practiceMode") || "lesson"; } catch (e) {}
+  var saved = "rank";
+  try { saved = localStorage.getItem("practiceMode") || "rank"; } catch (e) {}
   apply(saved);
 })();
 </script>
