@@ -484,36 +484,48 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 
 <div class="method">
 <b>โค้ดชุดเดียวใช้ได้ทั้งข้อ 5b–5e</b>
-<pre><code>library(forecast)
+<pre><code>library(TSA)
+library(forecast)
 rain &lt;- read.table("rain.txt", header = TRUE)
 x &lt;- ts(rain$rain, start = c(2022, 1), frequency = 12)
 
-# b: โมเดลที่โจทย์กำหนด
+# b: โมเดลที่โจทย์กำหนด                               (Class 8 บรรทัด 157)
 m1 &lt;- arima(x, order = c(0,0,1), seasonal = list(order = c(0,0,1), period = 12))
 m1
-Box.test(m1$residuals, lag = 12, type = "Ljung-Box", fitdf = 2)
-shapiro.test(m1$residuals)
+hist(rstandard(m1), xlab = "Standardised residuals")  # Class 7–10 ชุดตรวจ residual
+qqnorm(rstandard(m1))
+qqline(rstandard(m1))
+shapiro.test(rstandard(m1))
+tsdiag(m1, gof = 12, omit.initial = T)
 
-# c: auto.arima
-m2 &lt;- auto.arima(x, stepwise = TRUE, approximation = FALSE)
+# c: auto.arima                                        (Class 9 บรรทัด 25–52)
+m2 &lt;- auto.arima(x, stepwise = T, approximation = F)
 m2
-Box.test(m2$residuals, lag = 12, type = "Ljung-Box", fitdf = 1)
-shapiro.test(m2$residuals)
+hist(rstandard(m2), xlab = "Standardised residuals")
+qqnorm(rstandard(m2))
+qqline(rstandard(m2))
+shapiro.test(rstandard(m2))
+tsdiag(m2, gof = 12, omit.initial = T)
 forecast(m2, h = 3)
 
-# d: ets
+# d: ets                                               (Class 9 บรรทัด 64–69)
 m3 &lt;- ets(x)
 m3
 forecast(m3, h = 3)
 
-# e: tsCV แบบ leave-one-out คือ h = 1
-fa &lt;- function(y, h) forecast(auto.arima(y, stepwise = TRUE, approximation = FALSE), h = h)
-fe &lt;- function(y, h) forecast(ets(y), h = h)
-ea &lt;- tsCV(x, fa, h = 1)
-ee &lt;- tsCV(x, fe, h = 1)
-mean(ea^2, na.rm = TRUE)
-mean(ee^2, na.rm = TRUE)</code></pre>
-<p>ตั้ง <code>frequency = 12</code> ทุกครั้งที่ข้อมูลเป็นรายเดือน ถ้าลืม R จะไม่รู้ว่ามี seasonal และ auto.arima กับ ets จะไม่ใส่ส่วนฤดูกาลให้ ค่า fitdf ใน Box.test คือจำนวนพารามิเตอร์ AR และ MA ที่ประมาณ ไม่นับ intercept หรือ drift</p>
+# e: tsCV แบบ leave-one-out คือ h = 1                 (Class 9 บรรทัด 81–92)
+forecastets &lt;- function(x, h) {
+  forecast(ets(x), h = h)
+}
+forecastarima &lt;- function(x, h) {
+  forecast(auto.arima(x, stepwise = T, approximation = F), h = h)
+}
+etserror   &lt;- tsCV(x, forecastets, h = 1)
+arimaerror &lt;- tsCV(x, forecastarima, h = 1)
+mean(etserror^2, na.rm = TRUE)
+mean(arimaerror^2, na.rm = TRUE)</code></pre>
+<p>ชื่อตัวแปรและลำดับคำสั่งตามไฟล์ R_codes ของอาจารย์ ต่างกันแค่สองจุด: ชื่อข้อมูลเปลี่ยนเป็น rain และในฟังก์ชัน <code>forecastarima</code> ย้าย <code>stepwise</code> กับ <code>approximation</code> เข้าไปไว้ใน <code>auto.arima()</code> ตามที่โจทย์สั่ง ในไฟล์อาจารย์สองค่านี้อยู่ใน <code>forecast()</code> ซึ่ง R จะไม่ใช้</p>
+<p>ต้องโหลด <code>library(TSA)</code> ก่อน ไม่อย่างนั้น <code>rstandard()</code> ใช้กับโมเดล arima ไม่ได้ · ตั้ง <code>frequency = 12</code> ทุกครั้งที่ข้อมูลเป็นรายเดือน ถ้าลืม auto.arima กับ ets จะไม่ใส่ส่วนฤดูกาลให้</p>
 </div>
 
 <!-- RP1 -->
@@ -529,13 +541,19 @@ mean(ee^2, na.rm = TRUE)</code></pre>
 s.e.  0.0720  0.2758     3.8943
 sigma^2 estimated as 88.72:  log likelihood = -176.65,  aic = 361.31
 
-Box-Ljung test: X-squared = 49.076, df = 10, p-value = 3.944e-07
-Shapiro-Wilk normality test: W = 0.97323, p-value = 0.3498</pre>
+Shapiro-Wilk normality test (rstandard): W = 0.97323, p-value = 0.3498
+
+tsdiag(m1, gof = 12):
+  Standardized Residuals  อยู่ระหว่าง -1.59 ถึง 2.38
+  ACF of Residuals        lag 1 = 0.375, lag 2 = 0.596, lag 3 = 0.376 เกินเส้นประ
+  Ljung-Box p-values      lag 1 = 0.008 และใกล้ 0 ทุก lag ตั้งแต่ lag 2</pre>
 <div class="copy">
 <p>\(X_t-40.7630=(1+0.8207B)(1+0.7143B^{12})w_t,\qquad w_t\sim iid\ N(0,\ 88.72)\)</p>
 <p>Invertible: root of \(1+0.8207x\) is \(-1.218\), \(|-1.218|&gt;1\); root of \(1+0.7143x^{12}\) has modulus \(1.4^{1/12}&gt;1\).</p>
-<p>Ljung-Box: p-value \(=3.9\times10^{-7}&lt;0.05\) → reject H0, residuals are still correlated.</p>
-<p>Shapiro-Wilk: p-value \(=0.35&gt;0.05\) → residuals are normal.</p>
+<p>Standardized residuals lie between −1.59 and 2.38, within ±3: no outliers.</p>
+<p>ACF of residuals: lags 1–3 (0.375, 0.596, 0.376) are outside the bounds.</p>
+<p>Ljung-Box p-values are below 0.05 at every lag (0.008 at lag 1, ≈ 0 after) → reject H0, residuals are still correlated.</p>
+<p>Histogram and QQ plot are close to normal; Shapiro-Wilk p-value \(=0.35&gt;0.05\) → residuals are normal.</p>
 <p>The model is not adequate: the residuals are not white noise. The model has no differencing, so it cannot follow the upward trend and the yearly pattern in rain.</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
@@ -546,8 +564,9 @@ Shapiro-Wilk normality test: W = 0.97323, p-value = 0.3498</pre>
 <tr><td>4</td><td>ไม่มีวงเล็บฝั่ง X</td><td>order และ seasonal มีเลข AR เป็น 0 ทั้งคู่ Φ(B) = 1</td></tr>
 <tr><td>5</td><td>N(0, 88.72)</td><td>sigma^2 ใน output คือ σ² ของ w</td></tr>
 <tr><td>6</td><td>ราก −1.218</td><td>\(1+0.8207x=0\) ได้ \(x=-1/0.8207=-1.218\) ขนาดเกิน 1 ตาม ก7</td></tr>
-<tr><td>7</td><td>df = 10</td><td>lag 12 ลบพารามิเตอร์ MA 2 ตัวคือ ma1 กับ sma1 เหลือ 10</td></tr>
-<tr><td>8</td><td>p = 3.9e-7</td><td>e-07 คือคูณ \(10^{-7}\) ค่า 0.00000039 น้อยกว่า 0.05 มาก ปฏิเสธ H0 ที่บอกว่าโมเดลเหมาะสม</td></tr>
+<tr><td>7</td><td>tsdiag แผงบน</td><td>standardized residual ไม่มีจุดไหนเกิน ±3</td></tr>
+<tr><td>8</td><td>tsdiag แผงกลาง</td><td>เส้นประอยู่ที่ \(\pm2/\sqrt{47}=\pm0.29\) · lag 1–3 สูงกว่าเส้น</td></tr>
+<tr><td>9</td><td>tsdiag แผงล่าง</td><td>ทุกจุดอยู่<b>ใต้</b>เส้น 0.05 ปฏิเสธ H0 ที่บอกว่าโมเดลเหมาะสม</td></tr>
 </table>
 <p class="trap">⚠ Shapiro ผ่านไม่ได้ช่วยให้โมเดลผ่าน ข้อสำคัญที่สุดคือ residual ต้องไม่สัมพันธ์กัน ข้อนี้ตกตั้งแต่ Ljung-Box</p>
 </div>
@@ -567,8 +586,12 @@ s.e.  0.0835
 sigma^2 = 36.21:  log likelihood = -111.97
 AIC=227.94   AICc=228.31   BIC=231.05
 
-Box-Ljung test: X-squared = 8.1893, df = 11, p-value = 0.6962
-Shapiro-Wilk normality test: W = 0.95799, p-value = 0.08956
+Shapiro-Wilk normality test (rstandard): W = 0.95799, p-value = 0.08956
+
+tsdiag(m2, gof = 12):
+  Standardized Residuals  อยู่ระหว่าง -2.41 ถึง 1.73 · 12 ค่าแรกเป็น 0 เพราะ seasonal difference
+  ACF of Residuals        อยู่ในเส้นประ มีแค่ lag 13 แตะเส้น
+  Ljung-Box p-values      0.55 ถึง 0.90 เหนือเส้น 0.05 ทุก lag
 
          Point Forecast    Lo 95    Hi 95
 Dec 2025       63.60565 51.81180 75.39951
@@ -577,8 +600,9 @@ Feb 2026       65.80546 54.01160 77.59932</pre>
 <div class="copy">
 <p>Model: \(ARIMA(0,0,0)\times(0,1,0)_{12}\) with drift</p>
 <p>\((1-B^{12})(X_t-1.0965\,t)=w_t,\qquad w_t\sim iid\ N(0,\ 36.21)\)</p>
-<p>Ljung-Box: p-value \(=0.696&gt;0.05\) → residuals are uncorrelated.</p>
-<p>Shapiro-Wilk: p-value \(=0.090&gt;0.05\) → residuals are normal.</p>
+<p>Standardized residuals lie between −2.41 and 1.73, within ±3: no outliers.</p>
+<p>ACF of residuals is within the bounds; Ljung-Box p-values are 0.55–0.90, above 0.05 at every lag → residuals are uncorrelated.</p>
+<p>QQ plot is close to the line; Shapiro-Wilk p-value \(=0.090&gt;0.05\) → residuals are normal.</p>
 <p>The model is adequate. Forecasts: Dec 2025 = 63.61, Jan 2026 = 71.38, Feb 2026 = 65.81 mm.</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
@@ -586,7 +610,7 @@ Feb 2026       65.80546 54.01160 77.59932</pre>
 <tr><td>1</td><td>\((1-B^{12})\)</td><td>(0,1,0)[12] มี D = 1 คือ seasonal difference หนึ่งครั้ง \(X_t-X_{t-12}\) = ฝนเดือนนี้ลบเดือนเดียวกันปีก่อน</td></tr>
 <tr><td>2</td><td>\(X_t-1.0965\,t\)</td><td>drift คือความชันของเส้นตรงต่อเดือน R เขียนโมเดลเป็น X ลบเส้นตรงแล้วค่อย difference</td></tr>
 <tr><td>3</td><td>13.158</td><td>กระจายวงเล็บ: \(1.0965t-1.0965(t-12)=1.0965\times12=13.158\) เขียนอีกแบบได้ \(X_t-X_{t-12}=13.158+w_t\) คือฝนเพิ่มจากปีก่อนเฉลี่ย 13.158 มม.</td></tr>
-<tr><td>4</td><td>df = 11</td><td>lag 12 ลบ 1 เพราะ fitdf = 1</td></tr>
+<tr><td>4</td><td>12 ค่าแรกเป็น 0</td><td>seasonal difference ใช้ข้อมูลปีแรกเป็นจุดตั้งต้น residual ช่วงนั้นจึงเป็น 0 ไม่ใช่ปัญหาของโมเดล</td></tr>
 <tr><td>5</td><td>63.61</td><td>พยากรณ์ = เดือนเดียวกันปีก่อน + 13.158 ฝน Dec 2024 = 50.448 บวก 13.158 ได้ 63.606 ตรงกับ output</td></tr>
 </table>
 <p class="trap">⚠ Shapiro p = 0.0896 ผ่านแบบเฉียด ๆ ให้เขียนตัวเลขจริงลงไป ไม่ต้องเขียนว่า "normal ชัดเจน"</p>
@@ -667,27 +691,29 @@ Feb 2026       64.86492</pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <pre><code>y &lt;- log(AirPassengers)
-a &lt;- auto.arima(y, stepwise = TRUE, approximation = FALSE); a
-Box.test(a$residuals, lag = 24, type = "Ljung-Box", fitdf = 2)
-shapiro.test(a$residuals)
+a &lt;- auto.arima(y, stepwise = T, approximation = F); a
+qqnorm(rstandard(a)); qqline(rstandard(a))
+shapiro.test(rstandard(a))
+tsdiag(a, gof = 24, omit.initial = T)
 f &lt;- forecast(a, h = 3); exp(f$mean)
 e &lt;- ets(y); e
-ea &lt;- tsCV(y, fa, h = 1, initial = 60); ee &lt;- tsCV(y, fe, h = 1, initial = 60)
-mean(ea^2, na.rm = TRUE); mean(ee^2, na.rm = TRUE)</code></pre>
+arimaerror &lt;- tsCV(y, forecastarima, h = 1, initial = 60)
+etserror   &lt;- tsCV(y, forecastets,   h = 1, initial = 60)
+mean(arimaerror^2, na.rm = TRUE); mean(etserror^2, na.rm = TRUE)</code></pre>
 <pre class="out">ARIMA(0,1,1)(0,1,1)[12]
           ma1     sma1
       -0.4018  -0.5569
 s.e.   0.0896   0.0731
 sigma^2 = 0.001371:  log likelihood = 244.7   AIC=-483.4
-Box-Ljung: X-squared = 26.446, df = 22, p-value = 0.233
-Shapiro-Wilk: W = 0.98637, p-value = 0.1674
+tsdiag: standardized residuals -3.20 to 2.93 · ACF inside bounds · Ljung-Box p 0.28 to 0.95
+Shapiro-Wilk (rstandard): W = 0.98637, p-value = 0.1674
 log forecasts: 6.110  6.054  6.172     exp: 450.4  425.7  479.0
 ETS(M,A,M)   AIC = -208.34
 tsCV MSE: arima 0.001259   ets 0.001712</pre>
 <div class="copy">
 <p>(a) \((1-B)(1-B^{12})\log X_t=(1-0.4018B)(1-0.5569B^{12})w_t,\quad w_t\sim iid\ N(0,\ 0.001371)\)</p>
 <p>Invertible: roots \(1/0.4018=2.49&gt;1\) and \(B^{12}\)-root modulus \((1/0.5569)^{1/12}&gt;1\).</p>
-<p>Ljung-Box p-value \(=0.233&gt;0.05\), Shapiro-Wilk p-value \(=0.167&gt;0.05\): residuals are white noise and normal. The model is adequate.</p>
+<p>tsdiag: one standardized residual just below −3 (−3.20), the rest within ±3; ACF of residuals within the bounds; Ljung-Box p-values 0.28–0.95, above 0.05 at every lag. Shapiro-Wilk p-value \(=0.167&gt;0.05\). Residuals are white noise and normal; the model is adequate.</p>
 <p>(b) Forecasts on the log scale 6.110, 6.054, 6.172; back-transform with exp: Jan 1961 ≈ 450, Feb ≈ 426, Mar ≈ 479 passengers (thousands).</p>
 <p>(c) tsCV MSE: ARIMA 0.00126 &lt; ETS(M,A,M) 0.00171, so ARIMA is more accurate.</p>
 </div>
@@ -1038,11 +1064,18 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <div class="method">
 <b>ตรวจ 3 เรื่อง ตอบด้วยหลักฐาน 1 บรรทัดต่อเรื่อง</b>
 <table class="why">
-<tr><th>เรื่อง</th><th>ดูจาก</th><th>ผ่านเมื่อ</th></tr>
-<tr><td>ไม่สัมพันธ์กัน</td><td>ACF ของ residual · p-value ของ Ljung-Box</td><td>แท่งอยู่ในเส้นประเกือบทั้งหมด · p-value เกิน 0.05 ทุก lag</td></tr>
-<tr><td>normal</td><td>QQ plot · Shapiro-Wilk</td><td>จุดเรียงตามเส้นตรง · p-value เกิน 0.05</td></tr>
-<tr><td>ไม่มี outlier, variance คงที่</td><td>standardized residual ตามเวลา</td><td>อยู่ในช่วง ±3 และความกว้างพอ ๆ กันตลอด</td></tr>
+<tr><th>เรื่อง</th><th>คำสั่งของอาจารย์</th><th>ผ่านเมื่อ</th></tr>
+<tr><td>ไม่มี outlier, variance คงที่</td><td><code>tsdiag()</code> แผงบน Standardized Residuals</td><td>อยู่ในช่วง ±3 และความกว้างพอ ๆ กันตลอด</td></tr>
+<tr><td>ไม่สัมพันธ์กัน</td><td><code>tsdiag()</code> แผงกลาง ACF และแผงล่าง Ljung-Box</td><td>แท่งอยู่ในเส้นประเกือบทั้งหมด · จุดอยู่เหนือเส้น 0.05 ทุก lag</td></tr>
+<tr><td>normal</td><td><code>hist(rstandard())</code> · <code>qqnorm()</code> + <code>qqline()</code> · <code>shapiro.test()</code></td><td>ระฆังคว่ำ · จุดเรียงตามเส้นตรง · p-value เกิน 0.05</td></tr>
 </table>
+<pre><code>library(TSA)
+hist(rstandard(fit), xlab = "Standardised residuals")
+qqnorm(rstandard(fit))
+qqline(rstandard(fit))
+shapiro.test(rstandard(fit))
+tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
+<p>ชุดนี้อาจารย์รันซ้ำหลังฟิตโมเดลทุกตัวใน R_codes ของ Class 7, 8, 10 <code>gof</code> คือ lag สูงสุดของ Ljung-Box ข้อมูลสั้นใช้ 12 ก็พอ</p>
 <p>ทั้งสามเรื่อง H0 คือสิ่งที่อยากให้เป็น <b>p-value มากคือผ่าน</b> ตรงข้ามกับ ADF ที่ H0 คือไม่นิ่ง</p>
 <p>เรื่องที่สามกราฟข้างบนไม่ได้ตรวจ: variance ที่เปลี่ยนเป็นช่วง ๆ ตรวจด้วย ACF ของ residual² หรือ <code>ArchTest()</code> ดู<a href="0012-arch-garch-nnar.html">L12</a></p>
 </div>
@@ -1154,17 +1187,20 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <div class="qhead"><span>ข้อ 5.6 · ดัดแปลง</span><span>เลือกโมเดลจากผล diagnostic ใน R</span></div>
 <div class="qtext">ข้อมูล rain ฟิตสองโมเดล
 <pre class="out">โมเดล A ARIMA(0,0,1)(0,0,1)[12]
-  Ljung-Box (lag 12): p-value = 3.9e-07   Shapiro-Wilk: p-value = 0.350
-  residual ACF lag 1-3: 0.375 0.596 0.376
+  tsdiag: std. residuals -1.59 to 2.38 · ACF lag 1-3 = 0.375 0.596 0.376
+          Ljung-Box p-values 0.008 at lag 1, about 0 from lag 2
+  shapiro.test(rstandard): p-value = 0.350
 โมเดล B ARIMA(0,0,0)(0,1,0)[12] with drift
-  Ljung-Box (lag 12): p-value = 0.696     Shapiro-Wilk: p-value = 0.090</pre>
+  tsdiag: std. residuals -2.41 to 1.73 · ACF inside bounds
+          Ljung-Box p-values 0.55 to 0.90
+  shapiro.test(rstandard): p-value = 0.090</pre>
 โมเดลไหนผ่าน diagnostic เพราะอะไร</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Model A fails: Ljung-Box p-value \(3.9\times10^{-7}&lt;0.05\) and residual ACF at lag 2 = 0.596 is large, so residuals are correlated. Normality is fine (p = 0.35) but this does not rescue the model.</p>
-<p>Model B passes: Ljung-Box p-value 0.696 &gt; 0.05 (uncorrelated) and Shapiro-Wilk p-value 0.090 &gt; 0.05 (normal). Model B is adequate.</p>
+<p>Model A fails: Ljung-Box p-values are below 0.05 at every lag and residual ACF at lag 2 = 0.596 is large, so residuals are correlated. Normality is fine (p = 0.35) but this does not rescue the model.</p>
+<p>Model B passes: no outliers, ACF within the bounds, Ljung-Box p-values above 0.05 at every lag (uncorrelated), Shapiro-Wilk p-value 0.090 &gt; 0.05 (normal). Model B is adequate.</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1726,15 +1762,15 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <b>ขั้นตอนตามที่อาจารย์ใช้ใน Class 11</b>
 <pre><code>library(tseries); library(FinTS); library(rugarch)
 x &lt;- scan("CPALL.txt")
-adf.test(x)                                   # 1 นิ่งไหม
-Box.test(x,   lag = 10, type = "Ljung-Box")   # 2 ค่าเฉลี่ยมีโครงสร้างไหม
-Box.test(x^2, lag = 10, type = "Ljung-Box")   # 3 ความแปรปรวนมีโครงสร้างไหม
-ArchTest(x)                                   # 4 มี ARCH effect ไหม
-summary(garch(x, order = c(1, 1)))            # 5 ลองหลาย order เทียบ
+adf.test(x)                                   # Step 1 นิ่งไหม (H0: non stationary)
+plot.ts(x)                                    # Step 2 ดู volatility clustering
+ArchTest(x)                                   # Step 3 มี ARCH effect ไหม (H0: no ARCH effect)
+summary(garch(x, order = c(1, 1)))            # ลองหลาย order เทียบ recall order = c(q, p)
 sp &lt;- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1, 1)),
                  mean.model = list(armaOrder = c(0, 0)))
-f &lt;- ugarchfit(sp, x); f                      # 6 สมการสุดท้าย
-ugarchforecast(f, n.ahead = 3)                # 7 พยากรณ์ sigma</code></pre>
+f &lt;- ugarchfit(sp, x); f                      # Step 4 สมการสุดท้าย
+ugarchforecast(f, n.ahead = 3)                # Step 5 พยากรณ์ sigma</code></pre>
+<p>ลำดับและคอมเมนต์ Step 1–5 ตามไฟล์ R_codes ของ Class 11 ส่วน <code>summary(garch())</code> มาจากตัวอย่าง rate.2000 ในไฟล์เดียวกัน ใช้เลือก order</p>
 <p>เลือก order ตามลำดับที่อาจารย์ให้: (1) Ljung-Box ของ residual² ต้องผ่าน (2) พารามิเตอร์ significant (3) Jarque-Bera สำคัญน้อยสุด</p>
 <p><b>กับดักลำดับตัวเลข:</b> <code>garch(order = c(จำนวน β, จำนวน α))</code> ของ tseries กลับด้านกับ <code>garchOrder = c(จำนวน α, จำนวน β)</code> ของ rugarch</p>
 </div>
@@ -1746,7 +1782,7 @@ ugarchforecast(f, n.ahead = 3)                # 7 พยากรณ์ sigma</c
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<pre class="out">adf.test p-value = 0.01 · Ljung-Box x (lag 10) p = 0.031 · Ljung-Box x^2 (lag 10) p = 2.0e-10
+<pre class="out">adf.test p-value = 0.01 · plot.ts(x): ช่วงผันผวนสูงสลับต่ำ
 ArchTest: Chi-squared = 34.333, df = 12, p-value = 0.0005976
 garch order   params                               LB resid^2   JB
 c(0,1)        a0 0.538, a1 0.517  all sig            0.491     0.308
@@ -1756,7 +1792,7 @@ ugarchfit sGARCH(1,1): mu 0.0318 (p 0.46)  omega 0.1182 (p 0.011)
                        alpha1 0.4722 (p 0.000)  beta1 0.4529 (p 0.000)</pre>
 <div class="copy">
 <p>Model: GARCH(1,1).</p>
-<p>Reason: x is a daily stock return; ADF p = 0.01 → stationary. Ljung-Box of \(x^2\) p = 2e-10 and ArchTest p = 0.0006 → volatility clustering (ARCH effect), so the variance must be modelled.</p>
+<p>Reason: x is a daily stock return; ADF p = 0.01 → stationary. The time plot shows volatility clustering and ArchTest p = 0.0006 → ARCH effect, so the variance must be modelled.</p>
 <p>Steps: compare ARCH(1), GARCH(1,1), GARCH(2,1). GARCH(1,1) has all parameters significant, Ljung-Box of squared residuals p = 0.89 and Jarque-Bera p = 0.55, the best of the three.</p>
 <p>\(x_t=0.0318+u_t,\quad u_t=\sigma_t\varepsilon_t,\quad \varepsilon_t\sim iid\ N(0,1)\)</p>
 <p>\(\sigma_t^2=0.1182+0.4722\,u_{t-1}^2+0.4529\,\sigma_{t-1}^2\)</p>
@@ -1765,7 +1801,7 @@ ugarchfit sGARCH(1,1): mu 0.0318 (p 0.46)  omega 0.1182 (p 0.011)
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>มาจากไหน</th></tr>
 <tr><td>1</td><td>x นิ่ง</td><td>ADF มี H0 = ไม่นิ่ง · p = 0.01 น้อยกว่า 0.05 ปฏิเสธ H0</td></tr>
-<tr><td>2</td><td>มี ARCH effect</td><td>x² มี autocorrelation และ ArchTest ปฏิเสธ H0 = ไม่มี ARCH effect</td></tr>
+<tr><td>2</td><td>มี ARCH effect</td><td>กราฟเห็นช่วงผันผวนเกาะกลุ่ม และ ArchTest ปฏิเสธ H0 = ไม่มี ARCH effect</td></tr>
 <tr><td>3</td><td>c(1,2) ตก</td><td>LB ของ residual² p = 0.0006 ต่ำกว่า 0.05 ข้อสำคัญที่สุดตกแล้ว</td></tr>
 <tr><td>4</td><td>ARCH(1) ผ่านแต่แพ้</td><td>ผ่านทุกเกณฑ์เหมือนกัน แต่ GARCH(1,1) LB 0.888 สูงกว่า 0.491 และ JB ดีกว่า</td></tr>
 <tr><td>5</td><td>alpha1 + beta1 = 0.925</td><td>น้อยกว่า 1 ความแปรปรวนไม่ระเบิด · ใกล้ 1 แปลความได้ว่าความผันผวนค้างนาน</td></tr>
