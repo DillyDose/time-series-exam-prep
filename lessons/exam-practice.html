@@ -806,65 +806,319 @@ tsCV MSE: ets 0.0863   arima 0.0770</pre>
 
 <section class="unit" id="u-rxreg" data-rank="3" data-lesson="11">
 <h2>ทักษะ 3: R — ตัวแปรภายนอก ARIMAX, NNAR, RMSE บน test set</h2>
-<p class="unit-meta"><b>บทที่สอน:</b> <a href="0011-multivariate-arimax-var.html">L11</a>, <a href="0012-arch-garch-nnar.html">L12</a> · <b>เคยออก:</b> FINAL 2023 ข้อ 5 (15 คะแนน) · 2025 ข้อ 5g (9 คะแนน)</p>
+<p class="unit-meta"><b>บทที่สอน:</b> <a href="0011-multivariate-arimax-var.html">L11</a>, <a href="0012-arch-garch-nnar.html">L12</a> · <b>เคยออก:</b> FINAL 2025 ข้อ 5g 9 คะแนน · FINAL 2023 ข้อ 5 เป็นสไตล์เก่า อยู่ท้ายหัวข้อ</p>
+
+<p>โจทย์ปี 2025 อธิบายข้อมูลให้ก่อน ให้ starter code มา แล้วสั่งทีละตัวแบบว่าใช้ function อะไร หัวข้อนี้จัดแบบเดียวกัน ทุกข้อใช้ข้อมูล rain ชุดเดียว รัน setup ด้านล่างครั้งเดียวแล้วทำข้อไหนก่อนก็ได้ ข้อ 3.2 ถึง 3.5 ไม่ต้องใช้ผลของกันและกัน</p>
 
 <div class="method">
-<b>แม่แบบ train/test ที่มีตัวแปรภายนอก</b>
-<pre><code>x  &lt;- ts(rain$rain,  start = c(2022, 1), frequency = 12)
-st &lt;- ts(rain$storm, start = c(2022, 1), frequency = 12)
-tr &lt;- window(x,  end = c(2024, 12));  te &lt;- window(x,  start = c(2025, 1))
-s1 &lt;- window(st, end = c(2024, 12));  s2 &lt;- window(st, start = c(2025, 1))
+<b>ข้อมูลที่โจทย์ให้: rain.txt</b>
+<p>ปริมาณน้ำฝนรายเดือนจากสถานีอากาศที่ อ.นาทวี จ.สงขลา ม.ค. 2022 ถึง พ.ย. 2025 รวม 47 แถว</p>
+<table class="why">
+<tr><th>คอลัมน์ในไฟล์</th><th>ความหมาย</th><th>แถวแรก</th></tr>
+<tr><td><code>year</code>, <code>month</code></td><td>เดือนที่เก็บข้อมูล</td><td>2022, Jan</td></tr>
+<tr><td><code>storm</code></td><td>เดือนนั้นมีพายุดีเปรสชันหรือพายุอื่น 1 คือเกิด 0 คือไม่เกิด ใช้เป็น external regressor</td><td>0</td></tr>
+<tr><td><code>rain</code></td><td>ปริมาณน้ำฝน หน่วย มม. เป็นตัวที่ต้องพยากรณ์</td><td>17.62</td></tr>
+</table>
+<table class="why">
+<tr><th>ชุด</th><th>แถว</th><th>ช่วงเวลา</th><th>จำนวนเดือน</th></tr>
+<tr><td>Training set</td><td>1–36</td><td>Jan 2022 – Dec 2024</td><td>36</td></tr>
+<tr><td>Test set</td><td>37–47</td><td>Jan 2025 – Nov 2025</td><td>11</td></tr>
+</table>
+<p class="trap">⚠ โจทย์เขียน Storm กับ Rain ตัวใหญ่ แต่ในไฟล์เป็นตัวเล็ก ต้องพิมพ์ <code>rain$rain</code> กับ <code>rain$storm</code> ตัวใหญ่จะได้ NULL</p>
+</div>
 
-m1 &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE)             # ARIMA
-m2 &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE, xreg = s1)  # ARIMAX
-set.seed(1); m3 &lt;- nnetar(tr)                                            # NNAR
-set.seed(1); m4 &lt;- nnetar(tr, xreg = s1)                                 # NNAR + xreg
+<div class="method">
+<b>Setup: starter code ของโจทย์ บวก 4 บรรทัดที่ต้องเติมเอง</b>
+<pre><code>library(forecast)
 
-accuracy(forecast(m1, h = 11)$mean, te)
-accuracy(forecast(m2, xreg = s2)$mean, te)
-accuracy(forecast(m3, h = 11)$mean, te)
-accuracy(forecast(m4, xreg = s2)$mean, te)</code></pre>
-<p>จุดที่ต้องจำ 3 จุด</p>
-<ol>
-<li>xreg ตอนฟิตใช้ช่วง train ตอนพยากรณ์ต้องส่ง xreg ของช่วง test ให้ R ด้วย และไม่ต้องใส่ h เพราะ R นับจากจำนวนแถวของ xreg</li>
-<li>ตั้ง <code>set.seed()</code> ก่อน nnetar ทุกครั้ง network เริ่มจากน้ำหนักสุ่ม ผลจึงเปลี่ยนทุกรอบ</li>
-<li>RMSE อ่านจากคอลัมน์ RMSE ของ <code>accuracy()</code> ค่าน้อยกว่าคือแม่นกว่า</li>
-</ol>
+# 1. Read data                                   ← โจทย์ให้
+rain &lt;- read.table("rain.txt", header = TRUE)
+# 2. Training and test sets (rows 1–36 and 37–47) ← โจทย์ให้
+training_set &lt;- rain[1:36, ]
+test_set     &lt;- rain[37:47, ]
+
+# 3. เติมเอง
+tr &lt;- ts(training_set$rain, start = c(2022, 1), frequency = 12)   # rain ช่วง train
+te &lt;- test_set$rain                                               # rain ช่วง test ไว้เทียบ
+s1 &lt;- training_set$storm                                          # storm ช่วง train
+s2 &lt;- test_set$storm                                              # storm ช่วง test</code></pre>
+<table class="why">
+<tr><th>บรรทัด</th><th>ทำไม</th></tr>
+<tr><td><code>ts(..., frequency = 12)</code></td><td>บอก R ว่าข้อมูลรายเดือน auto.arima จะลอง seasonal 12 และ nnetar จะใส่ lag 12 ให้ ถ้าลืม จะได้โมเดลไม่มีฤดูกาล</td></tr>
+<tr><td><code>te</code> ไม่ต้องเป็น ts</td><td>ใช้แค่เทียบกับค่าพยากรณ์ใน <code>accuracy()</code> R เทียบทีละตำแหน่ง</td></tr>
+<tr><td><code>s1</code> กับ <code>s2</code></td><td>ตอนฟิตใช้ storm ช่วง train ตอนพยากรณ์ต้องส่ง storm ช่วง test ให้ R ด้วย</td></tr>
+</table>
 </div>
 
 <!-- X1 -->
 <div class="quiz free" id="x1">
-<div class="qhead"><span>ข้อ 3.1 · ข้อสอบจริง FINAL 2025 ข้อ 5g (9 คะแนน)</span><span>4 โมเดล เติมตาราง RMSE แล้วอภิปราย</span></div>
-<div class="qtext">Training Jan 2022 – Dec 2024 (36 เดือน) Test Jan – Nov 2025 (11 เดือน) สร้าง (1) auto.arima (2) auto.arima + storm เป็น xreg (3) nnetar (4) nnetar + storm เติมชื่อโมเดลจาก R และ RMSE บน test set แล้วอภิปรายว่าทำไมผลเป็นแบบนั้น</div>
-<textarea placeholder="เติมตารางและอภิปราย"></textarea>
+<div class="qhead"><span>ข้อ 3.1 · อุ่นเครื่อง</span><span>ดูข้อมูลก่อนฟิต</span></div>
+<div class="qtext">รัน setup แล้วตอบ (ก) training set มีกี่เดือนที่เกิดพายุ (ข) test set เกิดพายุเดือนไหนบ้าง (ค) ถ้าตัวแบบใช้ storm เป็น xreg ข้อมูลข้อ ข สำคัญอย่างไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
+<pre><code>sum(training_set$storm)
+test_set[test_set$storm == 1, c("year", "month")]</code></pre>
+<pre class="out">[1] 10
+   year month
+41 2025   May
+42 2025   Jun
+45 2025   Sep
+46 2025   Oct
+47 2025   Nov</pre>
 <div class="copy">
-<table class="why">
-<tr><th>ตัวแบบ</th><th>ชื่อจาก R</th><th>RMSE test</th></tr>
-<tr><td>1</td><td>ARIMA(0,0,0)(0,1,0)[12] with drift</td><td>4.85</td></tr>
-<tr><td>2</td><td>Regression with ARIMA(0,0,0)(0,1,0)[12] errors</td><td>5.00</td></tr>
-<tr><td>3</td><td>NNAR(1,1,2)[12]</td><td>≈ 5.6–6.3 ขึ้นกับ seed</td></tr>
-<tr><td>4</td><td>NNAR(1,1,2)[12] with storm</td><td>≈ 60–65</td></tr>
-</table>
-<p>Model 1 is the most accurate. The rain series has a clear yearly pattern and an upward drift, which seasonal differencing with drift captures well; only 36 training months are available, so simpler models win.</p>
-<p>Adding storm does not help: its coefficient is about 4.6 mm, but the effect of storms in the test period is irregular, so RMSE rises slightly to 5.00.</p>
-<p>NNAR needs much more data than 36 points, so it is worse than ARIMA and depends on the random seed.</p>
-<p>NNAR with storm fails badly: storms are rare in training, the network learns an extreme response, and recursive forecasts carry the jump forward.</p>
+<p>(a) 10 of the 36 training months had a storm.</p>
+<p>(b) In the test set, storms occur in May, Jun, Sep, Oct and Nov 2025.</p>
+<p>(c) A model with storm as a regressor needs these future storm values to forecast, and its forecasts change in exactly those five months.</p>
 </div>
-<table class="why"><caption>อ่านทีละขั้น</caption>
-<tr><th>ขั้น</th><th>ทำอะไร</th><th>ทำไม</th></tr>
-<tr><td>1</td><td>ชื่อโมเดล 2</td><td>auto.arima ที่มี xreg R เรียกว่า "Regression with ARIMA errors" คือ ARIMAX ให้ลอกชื่อตามที่ R พิมพ์</td></tr>
-<tr><td>2</td><td>NNAR(1,1,2)[12]</td><td>ใช้ lag 1 หนึ่งตัว lag ฤดูกาล 1 ตัว และ hidden node 2 ตัว ดู<a href="0012-arch-garch-nnar.html">L12</a></td></tr>
-<tr><td>3</td><td>อภิปรายครบ 4 แถว</td><td>ข้อนี้ให้ 1 คะแนนสำหรับอภิปราย ให้ตอบทั้งว่าตัวไหนชนะและทำไมตัวที่แพ้ถึงแพ้</td></tr>
+<table class="why"><caption>ทำไมต้องดูก่อน</caption>
+<tr><th>ขั้น</th><th>ดูอะไร</th><th>ได้อะไร</th></tr>
+<tr><td>1</td><td>storm ใน train</td><td>10 เดือนพอให้ ARIMAX ประมาณผลของพายุได้ แต่น้อยสำหรับ neural network</td></tr>
+<tr><td>2</td><td>storm ใน test</td><td>ใช้อธิบายข้อ 3.5 ที่ค่าพยากรณ์กระโดดตั้งแต่ มิ.ย.</td></tr>
 </table>
-<p class="trap">⚠ เฉลยเต็มพร้อมโค้ดอยู่ใน<a href="0013-frequency-domain-prophet-exercises.html">แบบฝึก L13 ข้อ 13</a> ตัวเลข NNAR ของแต่ละคนจะไม่ตรงกันเป๊ะ ให้เขียน seed ที่ใช้ลงในคำตอบ</p>
 </div>
 </div>
 
 <!-- X2 -->
 <div class="quiz free" id="x2">
-<div class="qhead"><span>ข้อ 3.2 · ข้อสอบจริง FINAL 2023 ข้อ 5 Choice 1 (15 คะแนน)</span><span>เพิ่มตัวแปรอธิบายให้ cmort</span></div>
+<div class="qhead"><span>ข้อ 3.2 · ตัวแบบ 1 ของ 2025 ข้อ 5g</span><span>auto.arima ไม่มี xreg</span></div>
+<div class="qtext">ใช้ <code>auto.arima()</code> กับ <code>tr</code> กำหนด stepwise = TRUE และ approximation = FALSE ได้ตัวแบบอะไร และ RMSE บน test set เท่าไร</div>
+<textarea placeholder="เขียนชื่อโมเดลและ RMSE"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>m1 &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE)
+m1
+f1 &lt;- forecast(m1, h = 11)
+accuracy(f1$mean, te)</code></pre>
+<pre class="out">ARIMA(0,0,0)(0,1,0)[12] with drift
+       drift
+      1.0684
+s.e.  0.1085
+sigma^2 = 42.47:  log likelihood = -78.53
+AIC=161.06   AICc=161.63   BIC=163.41
+
+               ME     RMSE      MAE       MPE     MAPE
+Test set 1.070851 4.845553 4.189353 0.5984012 7.180635</pre>
+<div class="copy">
+<p>Model 1: ARIMA(0,0,0)(0,1,0)[12] with drift. Test RMSE = 4.85.</p>
+<p>The model takes a seasonal difference of lag 12 and adds a drift of 1.07 mm per month, so each month is forecast as the same month last year plus the trend.</p>
+</div>
+<table class="why"><caption>อ่าน output</caption>
+<tr><th>ขั้น</th><th>ตัวเลข</th><th>อ่านว่า</th></tr>
+<tr><td>1</td><td><code>h = 11</code></td><td>test มี 11 เดือน พยากรณ์ให้ยาวเท่ากัน</td></tr>
+<tr><td>2</td><td>(0,1,0)[12]</td><td>ไม่มี AR MA เหลือแค่ seasonal difference ครั้งเดียว</td></tr>
+<tr><td>3</td><td>drift 1.07</td><td>แนวโน้มเพิ่มเดือนละประมาณ 1.07 มม.</td></tr>
+<tr><td>4</td><td>RMSE 4.85</td><td>อ่านคอลัมน์ RMSE ในแถว Test set</td></tr>
+</table>
+</div>
+</div>
+
+<!-- X3 -->
+<div class="quiz free" id="x3">
+<div class="qhead"><span>ข้อ 3.3 · ตัวแบบ 2 ของ 2025 ข้อ 5g</span><span>auto.arima ใช้ storm เป็น xreg</span></div>
+<div class="qtext">ใช้ <code>auto.arima()</code> แบบเดียวกับข้อ 3.2 แต่ใส่ storm เป็น external regressor ได้ตัวแบบอะไร สัมประสิทธิ์ของ storm เท่าไร และ RMSE บน test set เท่าไร</div>
+<textarea placeholder="เขียนชื่อโมเดล สัมประสิทธิ์ และ RMSE"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>m2 &lt;- auto.arima(tr, stepwise = TRUE, approximation = FALSE, xreg = s1)
+m2
+f2 &lt;- forecast(m2, xreg = s2)        # ไม่ใส่ h  R นับจากความยาวของ s2
+accuracy(f2$mean, te)</code></pre>
+<pre class="out">Regression with ARIMA(0,0,0)(0,1,0)[12] errors
+       drift    xreg
+      1.0208  4.5755
+s.e.  0.1033  2.2959
+sigma^2 = 38.1:  log likelihood = -76.69
+AIC=159.38   AICc=160.58   BIC=162.92
+
+               ME     RMSE      MAE      MPE     MAPE
+Test set 1.642794 4.996273 4.345338 1.888537 7.648522</pre>
+<div class="copy">
+<p>Model 2: Regression with ARIMA(0,0,0)(0,1,0)[12] errors, with storm as the regressor. Test RMSE = 5.00.</p>
+<p>The storm coefficient is 4.58 mm: a storm month has 4.58 mm more rain than a month without a storm, all else equal.</p>
+</div>
+<table class="why"><caption>อ่าน output</caption>
+<tr><th>ขั้น</th><th>ตัวเลข</th><th>อ่านว่า</th></tr>
+<tr><td>1</td><td>Regression with ARIMA errors</td><td>R เรียก ARIMAX แบบนี้ ลอกชื่อตามที่ R พิมพ์ลงตาราง</td></tr>
+<tr><td>2</td><td>xreg 4.58</td><td>storm เป็น 0 หรือ 1 ตัวเลขนี้คือผลต่างของฝนระหว่างมีกับไม่มีพายุ</td></tr>
+<tr><td>3</td><td>4.58 ÷ 2.30 = 1.99</td><td>เกือบถึง 2 ผลของพายุมีอยู่แต่ไม่แรงมาก</td></tr>
+</table>
+<p class="trap">⚠ ถ้าเขียน <code>forecast(m2, h = 11)</code> จะ error <code>Number of regressors does not match fitted model</code> ต้องส่ง <code>xreg = s2</code> เสมอ</p>
+</div>
+</div>
+
+<!-- X4 -->
+<div class="quiz free" id="x4">
+<div class="qhead"><span>ข้อ 3.4 · ตัวแบบ 3 ของ 2025 ข้อ 5g</span><span>nnetar ไม่มี xreg</span></div>
+<div class="qtext">ใช้ <code>nnetar()</code> กับ <code>tr</code> ได้ตัวแบบอะไร ตัวเลขในชื่อแปลว่าอะไร และ RMSE บน test set เท่าไร</div>
+<textarea placeholder="เขียนชื่อโมเดล ความหมาย และ RMSE"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>set.seed(1)
+m3 &lt;- nnetar(tr)
+m3
+f3 &lt;- forecast(m3, h = 11)
+accuracy(f3$mean, te)</code></pre>
+<pre class="out">NNAR(1,1,2)[12]
+Test set RMSE = 5.59      (seed 1)
+seed 2 → 12.92   seed 3 → 5.24</pre>
+<div class="copy">
+<p>Model 3: NNAR(1,1,2)[12], using set.seed(1). Test RMSE = 5.59.</p>
+<p>The network uses rain one month ago and rain twelve months ago as inputs, with 2 nodes in one hidden layer.</p>
+</div>
+<table class="why"><caption>อ่านชื่อ NNAR(p,P,k)[m]</caption>
+<tr><th>ตำแหน่ง</th><th>ค่า</th><th>อ่านว่า</th></tr>
+<tr><td>p</td><td>1</td><td>ใช้ lag 1 คือเดือนก่อน</td></tr>
+<tr><td>P</td><td>1</td><td>ใช้ lag ฤดูกาล 1 ตัว คือ lag 12</td></tr>
+<tr><td>k</td><td>2</td><td>hidden node 2 ตัว</td></tr>
+<tr><td>m</td><td>12</td><td>ความยาวฤดูกาลจาก frequency = 12</td></tr>
+</table>
+<p class="trap">⚠ network เริ่มจากน้ำหนักสุ่ม เปลี่ยน seed แล้ว RMSE เปลี่ยนได้ตั้งแต่ 5.2 ถึง 12.9 ตั้ง <code>set.seed()</code> ก่อน nnetar ทุกครั้ง และเขียน seed ที่ใช้ลงในคำตอบ</p>
+</div>
+</div>
+
+<!-- X5 -->
+<div class="quiz free" id="x5">
+<div class="qhead"><span>ข้อ 3.5 · ตัวแบบ 4 ของ 2025 ข้อ 5g</span><span>nnetar ใช้ storm เป็น xreg</span></div>
+<div class="qtext">ใช้ <code>nnetar()</code> แบบเดียวกับข้อ 3.4 แต่ใส่ storm เป็น external regressor ได้ตัวแบบอะไร RMSE บน test set เท่าไร ดูค่าพยากรณ์ 11 เดือนแล้วอธิบายว่าเกิดอะไรขึ้น</div>
+<textarea placeholder="เขียนชื่อโมเดล RMSE และสิ่งที่เห็นในค่าพยากรณ์"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>set.seed(1)
+m4 &lt;- nnetar(tr, xreg = s1)
+m4
+f4 &lt;- forecast(m4, xreg = s2)
+round(f4$mean, 1)
+accuracy(f4$mean, te)</code></pre>
+<pre class="out">NNAR(1,1,2)[12]
+      Jan   Feb   Mar   Apr   May   Jun   Jul   Aug   Sep   Oct   Nov
+2025  46.4  46.8  46.1  45.1  45.8 152.7 149.7 155.1 160.0 160.3 161.8
+Test set RMSE = 64.52     (seed 1)
+seed 2 → 70.84   seed 3 → 58.30</pre>
+<div class="copy">
+<p>Model 4: NNAR(1,1,2)[12] with storm as the regressor, using set.seed(1). Test RMSE = 64.52.</p>
+<p>The forecasts jump from about 46 mm to about 153 mm in June, when a storm occurs, and stay near 150–160 mm even in July and August, which have no storm. Actual rain in the test set is far below this.</p>
+<p>The network learned an extreme response to storm from only 36 months, and because NNAR forecasts recursively, each high forecast is fed back as the lag-1 input for the next month, so the jump carries forward.</p>
+</div>
+<table class="why"><caption>อ่านค่าพยากรณ์</caption>
+<tr><th>ขั้น</th><th>เห็นอะไร</th><th>เพราะ</th></tr>
+<tr><td>1</td><td>มิ.ย. กระโดดเป็น 153</td><td>มิ.ย. มี storm = 1 network ให้น้ำหนักกับ storm สูงเกินจริง</td></tr>
+<tr><td>2</td><td>ก.ค. ส.ค. ยังสูง ทั้งที่ไม่มีพายุ</td><td>พยากรณ์ทีละก้าว ค่าพยากรณ์เดือนก่อนกลายเป็น lag 1 ของเดือนถัดไป</td></tr>
+<tr><td>3</td><td>RMSE ราว 60</td><td>แย่กว่าตัวแบบอื่นสิบเท่า ทุก seed ที่ลองได้ผลแบบเดียวกัน</td></tr>
+</table>
+</div>
+</div>
+
+<!-- X6 -->
+<div class="quiz free" id="x6">
+<div class="qhead"><span>ข้อ 3.6 · ข้อสอบจริง FINAL 2025 ข้อ 5g 9 คะแนน</span><span>เติมตาราง 4 ตัวแบบ แล้วอภิปราย</span></div>
+<div class="qtext">นำผลจากข้อ 3.2 ถึง 3.5 มาเติมตาราง ตัวแบบใน training set ให้ระบุชื่อตามที่ R พิมพ์ เช่น NNAR(8,1,4)[12] หรือ ARIMA(1,0,1)(1,1,1)[12] แล้วอภิปรายว่าทำไมผลถึงเป็นแบบนั้น จุดละ 1 คะแนน รวม 8 คะแนน อภิปราย 1 คะแนน</div>
+<textarea placeholder="เติมตารางและอภิปราย"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<table class="why">
+<tr><th>ตัวแบบ</th><th>ตัวแบบอนุกรมเวลาใน Training set</th><th>ค่า RMSE ใน Test set</th></tr>
+<tr><td>1</td><td>ARIMA(0,0,0)(0,1,0)[12] with drift</td><td>4.85</td></tr>
+<tr><td>2</td><td>Regression with ARIMA(0,0,0)(0,1,0)[12] errors</td><td>5.00</td></tr>
+<tr><td>3</td><td>NNAR(1,1,2)[12]</td><td>5.59 · seed 1</td></tr>
+<tr><td>4</td><td>NNAR(1,1,2)[12] with storm</td><td>64.52 · seed 1</td></tr>
+</table>
+<p>Model 1 is the most accurate. The rain series has a clear yearly pattern and an upward trend, which a seasonal difference with drift captures well, and with only 36 training months a simple model wins.</p>
+<p>Adding storm does not help: its coefficient is 4.58 mm and only borderline significant, so it adds little information, and RMSE rises slightly to 5.00.</p>
+<p>NNAR needs much more data than 36 points, so it is worse than ARIMA and depends on the random seed.</p>
+<p>NNAR with storm fails badly: the network learns an extreme response to storm, and recursive forecasts carry the June jump into the following months.</p>
+</div>
+<table class="why"><caption>อภิปรายให้ครบ</caption>
+<tr><th>ขั้น</th><th>เขียนอะไร</th><th>ทำไม</th></tr>
+<tr><td>1</td><td>ตัวไหนชนะ พร้อมตัวเลข</td><td>เทียบ RMSE บน test ค่าน้อยกว่าคือแม่นกว่า</td></tr>
+<tr><td>2</td><td>ทำไมตัวที่แพ้ถึงแพ้ ทุกแถว</td><td>คะแนนอภิปรายให้ที่เหตุผล ไม่ใช่แค่บอกผู้ชนะ</td></tr>
+<tr><td>3</td><td>seed ของ NNAR</td><td>ตัวเลข NNAR ของแต่ละคนไม่ตรงกัน ผู้ตรวจต้องรู้ว่ารันแบบไหน</td></tr>
+</table>
+<p class="trap">⚠ เฉลยแบบเต็มพร้อมโค้ดชุดเดียวอยู่ใน<a href="0013-frequency-domain-prophet-exercises.html">แบบฝึก L13 ข้อ 13</a></p>
+</div>
+</div>
+
+<!-- X7 -->
+<div class="quiz free" id="x7">
+<div class="qhead"><span>ข้อ 3.7 · ดัดแปลง</span><span>เขียนสมการ ARIMAX และแปลค่าสัมประสิทธิ์</span></div>
+<div class="qtext">จาก output ของข้อ 3.3 ที่ได้ drift = 1.02 และ xreg = 4.58 (ก) เขียนตัวแบบ (ข) ถ้าเดือนหน้ามีพายุ ค่าพยากรณ์จะต่างจากกรณีไม่มีพายุเท่าไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) \(y_t=1.02\,t+4.58\,\text{storm}_t+\eta_t,\qquad (1-B^{12})\eta_t=w_t,\quad w_t\sim iid\ N(0,\sigma^2)\)</p>
+<p>(b) A storm month adds 4.58 mm to the forecast compared with a month without a storm, all else equal.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
+<tr><td>1</td><td>สองบรรทัด</td><td>ARIMAX เขียน regression หนึ่งบรรทัด และ error η ที่เป็น ARIMA อีกหนึ่งบรรทัด ตามรูปใน L11</td></tr>
+<tr><td>2</td><td>1.02 t</td><td>drift คือความชันต่อเดือนของ regression</td></tr>
+<tr><td>3</td><td>(1 − B¹²)η</td><td>error เป็น ARIMA(0,0,0)(0,1,0)[12] มีแค่ seasonal difference</td></tr>
+</table>
+</div>
+</div>
+
+<!-- X8 -->
+<div class="quiz free" id="x8">
+<div class="qhead"><span>ข้อ 3.8 · ดัดแปลง</span><span>คำถามความเข้าใจที่ต่อจาก 5g ได้</span></div>
+<div class="qtext">(ก) ถ้าจะพยากรณ์ฝน Dec 2025 ด้วยตัวแบบ 2 ต้องรู้อะไรเพิ่ม (ข) ถ้าไม่รู้ว่าเดือนหน้าจะมีพายุไหม ควรทำอย่างไร (ค) ทำไมใช้ RMSE บน test set เลือกระหว่าง ARIMA กับ NNAR ไม่ใช้ AIC</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) The value of storm for Dec 2025. ARIMAX needs future values of every regressor.</p>
+<p>(b) Either forecast storm first, use scenarios with storm = 0 and storm = 1, or use a model without the regressor such as Model 1.</p>
+<p>(c) NNAR has no likelihood-based AIC comparable to ARIMA. Test-set RMSE measures every model the same way, on data the models did not see.</p>
+</div>
+<table class="why"><caption>ทำไมตอบแบบนี้</caption>
+<tr><th>ข้อ</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
+<tr><td>ก</td><td>xreg ต้องมีค่าในอนาคต</td><td>สมการมี storm อยู่ในตัว ไม่มีค่า storm ก็คำนวณไม่ได้</td></tr>
+<tr><td>ข</td><td>ทำ scenario</td><td>เป็นวิธีมาตรฐานเมื่อ X ในอนาคตไม่แน่นอน</td></tr>
+<tr><td>ค</td><td>ไม้บรรทัดเดียวกัน</td><td>AIC เทียบได้เฉพาะโมเดลตระกูลเดียวกันที่ใช้ข้อมูลชุดเดียวกัน</td></tr>
+</table>
+</div>
+</div>
+
+<!-- X9 -->
+<div class="quiz free" id="x9">
+<div class="qhead"><span>ข้อ 3.9 · ดัดแปลง</span><span>เลือกโมเดลจากตาราง RMSE</span></div>
+<div class="qtext">ข้อมูลยอดขายรายสัปดาห์ 3 ปี มีราคาสินค้าเป็นตัวแปรภายนอก แบ่ง train/test แล้วได้ RMSE บน test ดังนี้ ARIMA 12.4 · ARIMAX ใช้ราคา 9.8 · NNAR 15.1 โดย σ² ใน train = 2.3 · NNAR ใช้ราคา 31.0 จงเลือกโมเดลและอธิบายผลทั้งตาราง</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>ARIMAX with price is the most accurate (RMSE 9.8): price carries real information about sales.</p>
+<p>NNAR fits the training data very closely (σ² = 2.3) but its test RMSE is high, which is overfitting.</p>
+<p>NNAR with price is the worst (31.0): the network learns an unstable response to price and recursive forecasts amplify it.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำไม</th></tr>
+<tr><td>1</td><td>ดู RMSE test เท่านั้น</td><td>ตัวเลขใน train บอกแค่ว่าเข้ากับข้อมูลที่เห็นแล้วแค่ไหน</td></tr>
+<tr><td>2</td><td>อภิปรายทุกแถว</td><td>แบบเดียวกับ 2025 ข้อ 5g ที่ให้คะแนนการอภิปราย</td></tr>
+</table>
+</div>
+</div>
+
+<details class="fold">
+<summary>สไตล์เก่า: FINAL 2023 ข้อ 5 รายงานปลายเปิดที่อ้างถึงโมเดลในคลาส · ปี 2024–2025 ไม่ออกแบบนี้ ทำเป็นตัวเลือกเสริม</summary>
+
+<div class="method">
+<b>ข้อมูลที่โจทย์ปี 2023 ไม่ได้อธิบาย</b>
+<p><code>lap</code> อยู่ใน package astsa ไม่ต้องอ่านไฟล์ เป็นข้อมูลรายสัปดาห์ของ Los Angeles ปี 1970 ถึงสัปดาห์ที่ 40 ของปี 1979 รวม 508 สัปดาห์ ตั้ง frequency 52 ไว้แล้ว</p>
+<table class="why">
+<tr><th>คอลัมน์</th><th>ความหมาย</th><th>บทบาทในข้อนี้</th></tr>
+<tr><td><code>cmort</code></td><td>อัตราการตายจากโรคหัวใจและหลอดเลือด</td><td>ตัวที่ต้องพยากรณ์</td></tr>
+<tr><td><code>tempr</code>, <code>part</code></td><td>อุณหภูมิ และฝุ่นละออง</td><td>ตัวแปรที่อาจารย์ใช้ในคลาส</td></tr>
+<tr><td><code>rh</code>, <code>co</code>, <code>so2</code>, <code>no2</code>, <code>hycarb</code>, <code>o3</code></td><td>ความชื้นสัมพัทธ์ และมลพิษชนิดต่าง ๆ</td><td>ตัวแปรที่ข้อ 3.10 ให้ลองเพิ่ม</td></tr>
+<tr><td><code>tmort</code>, <code>rmort</code></td><td>อัตราตายรวม และจากโรคระบบหายใจ</td><td>ไม่ใช้</td></tr>
+</table>
+<p>"โมเดลในคลาส" คือ VAR(2) ใน Class 10 ที่ใช้ <code>cardiac</code> จาก package tswge มีแค่ cmort, tempr, part ค่าตรงกับ lap ทุกตัว อาจารย์ใช้ 52 สัปดาห์สุดท้ายเป็น test set ดู<a href="0011-multivariate-arimax-var.html">L11</a></p>
+</div>
+
+<!-- X10 -->
+<div class="quiz free" id="x10">
+<div class="qhead"><span>ข้อ 3.10 · ข้อสอบจริง FINAL 2023 ข้อ 5 Choice 1 (15 คะแนน)</span><span>เพิ่มตัวแปรอธิบายให้ cmort</span></div>
 <div class="qtext">โหลด <code>lap</code> จาก package astsa ใช้ cmort เป็นตัวแปรตาม ในคลาสใช้แค่ tempr กับ part ให้สร้างโมเดลที่ใช้ตัวแปรอื่นเพิ่ม แล้วบอกว่าดีขึ้นหรือไม่ ใช้ 52 สัปดาห์สุดท้ายเป็น test set</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -918,19 +1172,19 @@ rstandard −2.74 ถึง 3.64   Shapiro p = 0.177   Ljung-Box p: lag 10 0.864
 <tr><td>5</td><td>−2.86 และ −2.33</td><td>rh: \(-0.0815\div0.0285=-2.86\) · no2: \(-0.4151\div0.1780=-2.33\)</td></tr>
 <tr><td>6</td><td>ตัวที่ไม่ผ่าน</td><td>tempr −0.81 · co 0.77 · so2 1.18 · o3 1.78 ขนาดไม่ถึง 2</td></tr>
 </table>
-<p class="trap">⚠ ข้อนี้เป็นรายงาน 15 คะแนน ให้ใส่ทั้ง output, เหตุผลที่เลือกตัวแปร, ตัวเลขเทียบ และข้อสรุป ข้อ 3.3 แสดงว่า SARIMA ที่ไม่มี xreg ได้ RMSE test 6.82 ดีกว่าทั้งสองโมเดลนี้ ถ้าใส่ไว้เทียบด้วยจะได้รายงานที่ครบกว่า</p>
+<p class="trap">⚠ ข้อนี้เป็นรายงาน 15 คะแนน ให้ใส่ทั้ง output, เหตุผลที่เลือกตัวแปร, ตัวเลขเทียบ และข้อสรุป ข้อ 3.11 แสดงว่า SARIMA ที่ไม่มี xreg ได้ RMSE test 6.82 ดีกว่าทั้งสองโมเดลนี้ ถ้าใส่ไว้เทียบด้วยจะได้รายงานที่ครบกว่า</p>
 <p class="trap">⚠ auto.arima บนข้อมูลรายสัปดาห์ช้า ถ้าในห้องสอบรอไม่ไหว ให้เปลี่ยนเป็น <code>approximation = T</code> แล้วเขียนบอกในรายงานว่าใช้ค่าประมาณ ชื่อโมเดลอาจต่างจากข้างบน</p>
 </div>
 </div>
 
-<!-- X3 -->
-<div class="quiz free" id="x3">
-<div class="qhead"><span>ข้อ 3.3 · ข้อสอบจริง FINAL 2023 ข้อ 5 Choice 2</span><span>ตัวแปรเดิม เปลี่ยนวิธี</span></div>
+<!-- X11 -->
+<div class="quiz free" id="x11">
+<div class="qhead"><span>ข้อ 3.11 · ข้อสอบจริง FINAL 2023 ข้อ 5 Choice 2</span><span>ตัวแปรเดิม เปลี่ยนวิธี</span></div>
 <div class="qtext">ใช้แค่ tempr กับ part เหมือนในคลาสที่ใช้ VAR(2) แต่เปลี่ยนเป็นวิธีอื่นอีก 2 วิธี เทียบ RMSE บน 52 สัปดาห์สุดท้าย แล้วสรุป</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<pre><code># ใช้ con_training, con_test, x1_training, x1_test จากข้อ 3.2
+<pre><code># ใช้ con_training, con_test, x1_training, x1_test จากข้อ 3.10
 arima0 &lt;- auto.arima(con_training, stepwise = T, approximation = F)        # ฐานเทียบ
 accuracy(con_test, forecast(arima0, h = 52)$mean)
 
@@ -966,67 +1220,7 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</
 <p class="trap">⚠ ผลที่ได้ไม่ต้องดีขึ้นก็ได้คะแนน โจทย์ให้คะแนนที่วิธีคิด ตัวเลขเทียบ และการอธิบายว่าทำไมผลออกมาแบบนั้น</p>
 </div>
 </div>
-
-<!-- X4 -->
-<div class="quiz free" id="x4">
-<div class="qhead"><span>ข้อ 3.4 · ดัดแปลง</span><span>คำถามความเข้าใจที่ต่อจาก 5g ได้</span></div>
-<div class="qtext">(ก) ถ้าจะพยากรณ์ฝน Dec 2025 ด้วยโมเดล 2 ของข้อ 3.1 ต้องรู้อะไรเพิ่ม (ข) ถ้าไม่รู้ว่าเดือนหน้าจะมีพายุไหม ควรทำอย่างไร (ค) ทำไม RMSE บน test set ถึงเชื่อได้มากกว่า AIC ในการเลือกระหว่าง ARIMA กับ NNAR</div>
-<textarea placeholder="เขียนคำตอบ"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<div class="copy">
-<p>(a) The value of storm for Dec 2025. ARIMAX needs future values of every regressor.</p>
-<p>(b) Either forecast storm first, use scenarios (storm = 0 and storm = 1), or use a model without the regressor such as Model 1.</p>
-<p>(c) NNAR has no likelihood-based AIC comparable to ARIMA. Test-set RMSE measures every model the same way, on data the models did not see.</p>
-</div>
-<table class="why"><caption>ทำไมตอบแบบนี้</caption>
-<tr><th>ข้อ</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
-<tr><td>ก</td><td>xreg ต้องมีค่าในอนาคต</td><td>สมการมี storm อยู่ในตัว ไม่มีค่า storm ก็คำนวณไม่ได้</td></tr>
-<tr><td>ข</td><td>ทำ scenario</td><td>เป็นวิธีมาตรฐานเมื่อ X ในอนาคตไม่แน่นอน</td></tr>
-<tr><td>ค</td><td>ไม้บรรทัดเดียวกัน</td><td>AIC เทียบได้เฉพาะโมเดลตระกูลเดียวกันที่ใช้ข้อมูลชุดเดียวกัน</td></tr>
-</table>
-</div>
-</div>
-
-<!-- X5 -->
-<div class="quiz free" id="x5">
-<div class="qhead"><span>ข้อ 3.5 · ดัดแปลง</span><span>เขียนสมการ ARIMAX และแปลค่าสัมประสิทธิ์</span></div>
-<div class="qtext">ฟิต rain ช่วง training ด้วย <code>auto.arima(tr, stepwise = T, approximation = F, xreg = s1)</code> ได้ <code>Regression with ARIMA(0,0,0)(0,1,0)[12] errors</code> drift = 1.02 และ xreg (storm) = 4.58 (ก) เขียนโมเดล (ข) ถ้าเดือนหน้ามีพายุ ค่าพยากรณ์จะต่างจากกรณีไม่มีพายุเท่าไร</div>
-<textarea placeholder="เขียนคำตอบ"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<div class="copy">
-<p>(a) \(y_t=1.02\,t+4.58\,\text{storm}_t+\eta_t,\qquad (1-B^{12})\eta_t=w_t,\quad w_t\sim iid\ N(0,\sigma^2)\)</p>
-<p>(b) A storm month adds 4.58 mm to the forecast compared with a month without a storm, all else equal.</p>
-</div>
-<table class="why"><caption>อธิบายทีละขั้น</caption>
-<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
-<tr><td>1</td><td>สองบรรทัด</td><td>ARIMAX เขียนเป็น regression หนึ่งบรรทัด ส่วน error η ที่เป็น ARIMA อีกหนึ่งบรรทัด ตามรูปใน L11</td></tr>
-<tr><td>2</td><td>4.58</td><td>storm เป็น 0 หรือ 1 สัมประสิทธิ์ของมันคือผลต่างระหว่างมีกับไม่มีพายุตรง ๆ</td></tr>
-</table>
-<p class="trap">⚠ ARIMAX ต้องรู้ storm ของเดือนที่จะพยากรณ์ ถ้าไม่รู้ ต้องทำ scenario ทั้งสองแบบ</p>
-</div>
-</div>
-
-<!-- X6 -->
-<div class="quiz free" id="x6">
-<div class="qhead"><span>ข้อ 3.6 · ดัดแปลง</span><span>เลือกโมเดลจากตาราง RMSE</span></div>
-<div class="qtext">ข้อมูลยอดขายรายสัปดาห์ แบ่ง train/test แล้วได้ RMSE บน test: ARIMA 12.4 · ARIMAX (ราคา) 9.8 · NNAR 15.1 (σ² ใน train = 2.3) · NNAR + ราคา 31.0 จงเลือกโมเดลและอธิบายผลทั้งตาราง</div>
-<textarea placeholder="เขียนคำตอบ"></textarea>
-<button class="reveal-btn">เฉลย</button>
-<div class="model-answer">
-<div class="copy">
-<p>ARIMAX with price is the most accurate (RMSE 9.8): price carries real information about sales.</p>
-<p>NNAR fits the training data very closely (σ² = 2.3) but its test RMSE is high, which is overfitting.</p>
-<p>NNAR with price is the worst (31.0): the network learns an unstable response to price and recursive forecasts amplify it.</p>
-</div>
-<table class="why"><caption>อธิบายทีละขั้น</caption>
-<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
-<tr><td>1</td><td>ดู RMSE test เท่านั้น</td><td>ตัวเลขใน train บอกแค่ว่าเข้ากับข้อมูลที่เห็นแล้วแค่ไหน</td></tr>
-<tr><td>2</td><td>อภิปรายทุกแถว</td><td>แบบเดียวกับ 2025 ข้อ 5g ที่ให้คะแนนการอภิปราย</td></tr>
-</table>
-</div>
-</div>
+</details>
 </section>
 
 <section class="unit" id="u-write" data-rank="5" data-lesson="8">
