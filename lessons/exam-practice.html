@@ -869,39 +869,57 @@ accuracy(forecast(m4, xreg = s2)$mean, te)</code></pre>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<pre><code>library(forecast); library(astsa)
+<p><code>lap</code> ไม่ต้องอ่านไฟล์ โหลด astsa แล้วใช้ได้เลย เป็นข้อมูลรายสัปดาห์ 1970 ถึงสัปดาห์ 40 ของ 1979 รวม 508 สัปดาห์ ตั้ง frequency 52 ไว้แล้ว คอลัมน์ cmort, tempr, part ตรงกับ <code>cardiac</code> ที่อาจารย์ใช้ทำ VAR ใน Class 10 ทุกค่า โค้ดข้างล่างเขียนตามขั้น ARIMAX ของอาจารย์ใน Class 10 และตัด train/test ที่จุดเดียวกับ VAR ของอาจารย์</p>
+<pre><code>library(forecast); library(astsa); library(TSA)
 y  &lt;- lap[, "cmort"]
-X1 &lt;- cbind(tempr = lap[, "tempr"], part = lap[, "part"])
-X2 &lt;- cbind(X1, rh = lap[, "rh"], co = lap[, "co"], so2 = lap[, "so2"],
-            no2 = lap[, "no2"], o3 = lap[, "o3"])
-m1 &lt;- auto.arima(y, xreg = X1); m2 &lt;- auto.arima(y, xreg = X2)
-n &lt;- length(y); tr &lt;- 1:(n - 52); te &lt;- (n - 51):n
-ytr &lt;- ts(y[tr], frequency = 52)
-k1 &lt;- Arima(ytr, order = c(2,1,2), seasonal = c(0,0,2), xreg = X1[tr, ])
-k2 &lt;- Arima(ytr, order = c(3,1,1), seasonal = c(0,0,2), xreg = X2[tr, ])
-accuracy(forecast(k1, xreg = X1[te, ])$mean, y[te])
-accuracy(forecast(k2, xreg = X2[te, ])$mean, y[te])</code></pre>
-<pre class="out">m1: Regression with ARIMA(2,1,2)(0,0,2)[52] errors   AICc = 3151.1
-m2: Regression with ARIMA(3,1,1)(0,0,2)[52] errors   AICc = 3142.84
-         tempr    part      rh      co     so2     no2      o3
-coef   -0.1458  0.1102 -0.0960  0.1975  0.4625 -0.1800  0.2075
-s.e.    0.0858  0.0460  0.0263  0.2380  0.4885  0.1707  0.1398
-RMSE test: tempr+part 7.04   all 7 variables 6.54</pre>
+X1 &lt;- lap[, c("tempr", "part")]                                   # ตัวแปรในคลาส
+X2 &lt;- lap[, c("tempr", "part", "rh", "co", "so2", "no2", "o3")]   # เพิ่มอีก 5 ตัว
+
+# แบ่ง train/test แบบ VAR ของอาจารย์: test = 52 สัปดาห์สุดท้าย
+con_training &lt;- window(y,  end = c(1978, 40));  con_test &lt;- window(y,  start = c(1978, 41))
+x1_training  &lt;- window(X1, end = c(1978, 40));  x1_test  &lt;- window(X1, start = c(1978, 41))
+x2_training  &lt;- window(X2, end = c(1978, 40));  x2_test  &lt;- window(X2, start = c(1978, 41))
+
+# ARIMAX แบบในคลาส
+arimax1 &lt;- auto.arima(con_training, stepwise = T, approximation = F, xreg = x1_training)
+arimax1
+accuracy(con_test, forecast(arimax1, xreg = x1_test)$mean)
+
+# ARIMAX ที่เพิ่มตัวแปร
+arimax2 &lt;- auto.arima(con_training, stepwise = T, approximation = F, xreg = x2_training)
+arimax2
+accuracy(con_test, forecast(arimax2, xreg = x2_test)$mean)
+
+# Diagnostic ของโมเดลใหม่
+hist(rstandard(arimax2)); qqnorm(rstandard(arimax2)); qqline(rstandard(arimax2))
+shapiro.test(rstandard(arimax2))
+tsdiag(arimax2, gof = 30, omit.initial = T)</code></pre>
+<pre class="out">train 456 สัปดาห์  test 52 สัปดาห์   แต่ละ auto.arima ใช้เวลาประมาณ 2–3 นาที
+
+arimax1: Regression with ARIMA(3,1,2)(1,0,0)[52] errors   AICc = 2849.06   RMSE test 7.25
+arimax2: Regression with ARIMA(2,1,1)(1,0,0)[52] errors   AICc = 2839.59   RMSE test 7.13
+          tempr    part      rh      co     so2     no2      o3
+coef    -0.0741  0.1376 -0.0815  0.1999  0.6199 -0.4151  0.2811
+s.e.     0.0916  0.0539  0.0285  0.2613  0.5236  0.1780  0.1575
+rstandard −2.74 ถึง 3.64   Shapiro p = 0.177   Ljung-Box p: lag 10 0.864  lag 20 0.069  lag 30 0.030</pre>
 <div class="copy">
-<p>Model with tempr and part: Regression with ARIMA(2,1,2)(0,0,2)[52] errors, AICc = 3151.1, test RMSE = 7.04.</p>
-<p>Model with seven pollution and weather variables: Regression with ARIMA(3,1,1)(0,0,2)[52] errors, AICc = 3142.8, test RMSE = 6.54.</p>
-<p>Both models use d = 1, so their AICc can be compared: the larger model has lower AICc and lower test RMSE, so it improves the class model.</p>
-<p>Significant regressors (|coef/s.e.| &gt; 2): part (2.40) and relative humidity rh (−3.65). co, so2, no2 and o3 are not significant; a smaller model with tempr, part and rh is a reasonable final choice.</p>
+<p>Class model (tempr, part): Regression with ARIMA(3,1,2)(1,0,0)[52] errors, AICc = 2849.06, test RMSE = 7.25.</p>
+<p>Extended model (tempr, part, rh, co, so2, no2, o3): Regression with ARIMA(2,1,1)(1,0,0)[52] errors, AICc = 2839.59, test RMSE = 7.13.</p>
+<p>Both models use d = 1 and the same training data, so their AICc can be compared: the extended model has lower AICc and lower test RMSE, so the extra variables improve the class model.</p>
+<p>Significant regressors (|coef/s.e.| &gt; 2): part (2.55), rh (−2.86) and no2 (−2.33); tempr, co, so2 and o3 are not significant, so a smaller model with part, rh and no2 is a reasonable next step.</p>
+<p>Residuals look normal (Shapiro p = 0.177), but the Ljung-Box p-value falls below 0.05 at lag 30, so some autocorrelation remains.</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
-<tr><td>1</td><td>เทียบ AICc ได้</td><td>เทียบ AIC ได้เมื่อโมเดลใช้ข้อมูลชุดเดียวกันและ difference เท่ากัน ทั้งสองตัวมี d = 1 ไม่มี D</td></tr>
-<tr><td>2</td><td>2.40</td><td>part: \(0.1102\div0.0460=2.40\) เกิน 2</td></tr>
-<tr><td>3</td><td>−3.65</td><td>rh: \(-0.0960\div0.0263=-3.65\) ขนาดเกิน 2</td></tr>
-<tr><td>4</td><td>ตัวที่ไม่ผ่าน</td><td>co \(0.1975\div0.2380=0.83\) · so2 0.95 · no2 −1.05 · o3 1.48 · tempr −1.70 ขนาดไม่ถึง 2 ทั้งหมด</td></tr>
-<tr><td>5</td><td>train/test ใช้ Arima</td><td>ใช้ order ที่ auto.arima เลือกจากข้อมูลทั้งหมด แล้วฟิตเฉพาะช่วง train ด้วย <code>Arima()</code> เร็วกว่าให้ auto.arima ค้นใหม่กับข้อมูลรายสัปดาห์ซึ่งช้ามาก</td></tr>
+<tr><td>1</td><td><code>window(..., end = c(1978, 40))</code></td><td>เหมือน <code>cardiacTrain</code> ของอาจารย์ ข้อมูลจบที่ 1979 สัปดาห์ 40 ถอยไป 52 สัปดาห์คือ 1978 สัปดาห์ 40</td></tr>
+<tr><td>2</td><td><code>lap[, c("tempr", "part")]</code></td><td>เลือกหลายคอลัมน์ได้ ts หลายตัวแปร ใช้ window ตัดช่วงเหมือน y ได้เลย</td></tr>
+<tr><td>3</td><td>เทียบ AICc ได้</td><td>ข้อมูล train ชุดเดียวกัน d = 1 เท่ากัน ไม่มี D ทั้งคู่</td></tr>
+<tr><td>4</td><td>2.55</td><td>part: \(0.1376\div0.0539=2.55\) เกิน 2</td></tr>
+<tr><td>5</td><td>−2.86 และ −2.33</td><td>rh: \(-0.0815\div0.0285=-2.86\) · no2: \(-0.4151\div0.1780=-2.33\)</td></tr>
+<tr><td>6</td><td>ตัวที่ไม่ผ่าน</td><td>tempr −0.81 · co 0.77 · so2 1.18 · o3 1.78 ขนาดไม่ถึง 2</td></tr>
 </table>
-<p class="trap">⚠ ข้อนี้เป็นรายงาน 15 คะแนน ให้ใส่ทั้ง output, เหตุผลที่เลือกตัวแปร, ตัวเลขเทียบ และข้อสรุป Ljung-Box ของโมเดลใหญ่ได้ p = 0.041 ซึ่งต่ำกว่า 0.05 เล็กน้อย ควรเขียนบอกไว้ด้วยว่ายังเหลือ correlation นิดหน่อย</p>
+<p class="trap">⚠ ข้อนี้เป็นรายงาน 15 คะแนน ให้ใส่ทั้ง output, เหตุผลที่เลือกตัวแปร, ตัวเลขเทียบ และข้อสรุป ข้อ 3.3 แสดงว่า SARIMA ที่ไม่มี xreg ได้ RMSE test 6.82 ดีกว่าทั้งสองโมเดลนี้ ถ้าใส่ไว้เทียบด้วยจะได้รายงานที่ครบกว่า</p>
+<p class="trap">⚠ auto.arima บนข้อมูลรายสัปดาห์ช้า ถ้าในห้องสอบรอไม่ไหว ให้เปลี่ยนเป็น <code>approximation = T</code> แล้วเขียนบอกในรายงานว่าใช้ค่าประมาณ ชื่อโมเดลอาจต่างจากข้างบน</p>
 </div>
 </div>
 
@@ -912,20 +930,40 @@ RMSE test: tempr+part 7.04   all 7 variables 6.54</pre>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
-<pre class="out">ARIMA ไม่มี xreg  ARIMA(2,1,2)(0,0,2)[52]         RMSE test 7.22
-ARIMAX tempr+part  Regression with ARIMA errors   RMSE test 7.04
-NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.68  RMSE test 10.44</pre>
+<pre><code># ใช้ con_training, con_test, x1_training, x1_test จากข้อ 3.2
+arima0 &lt;- auto.arima(con_training, stepwise = T, approximation = F)        # ฐานเทียบ
+accuracy(con_test, forecast(arima0, h = 52)$mean)
+
+set.seed(11)
+nnar1 &lt;- nnetar(con_training, xreg = x1_training)
+nnar1
+accuracy(con_test, forecast(nnar1, xreg = x1_test, PI = F)$mean)
+
+# VAR(2) ของอาจารย์ใน Class 10 ไว้เทียบ
+library(vars); library(tswge); data(cardiac)
+cardiacTrain &lt;- window(cardiac, start = c(1970,1), end = c(1978,40))
+cardiacTest  &lt;- window(cardiac, start = c(1978,41), end = c(1979,40))
+CMortVAR2 &lt;- VAR(cardiacTrain, type = "both", season = 52, p = 2)
+preds2 &lt;- predict(CMortVAR2, n.ahead = 52)
+sqrt(mean((cardiacTest[,"cmort"] - preds2$fcst$cmort[,1])^2))</code></pre>
+<pre class="out">VAR(2) ในคลาส      tempr+part ทั้งสามเป็น endogenous          RMSE test 6.35
+ARIMA ไม่มี xreg   ARIMA(2,0,0)(1,1,0)[52] with drift          RMSE test 6.82
+ARIMAX tempr+part  Regression with ARIMA(3,1,2)(1,0,0)[52]     RMSE test 7.25
+NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</pre>
 <div class="copy">
-<p>Approach 1, ARIMAX (regression with ARIMA errors): cmort depends on current tempr and part, and the error follows ARIMA(2,1,2)(0,0,2)[52]. Test RMSE 7.04, better than ARIMA without regressors (7.22).</p>
-<p>Approach 2, NNAR with xreg: NNAR(15,1,10)[52] fits the training data very closely (σ² = 1.68) but the test RMSE is 10.44, so it overfits.</p>
-<p>Conclusion: ARIMAX is the best of these approaches. Unlike VAR, ARIMAX treats tempr and part as known inputs, so their future values are needed for forecasting.</p>
+<p>Approach 1, ARIMAX (regression with ARIMA errors): Regression with ARIMA(3,1,2)(1,0,0)[52] errors, test RMSE 7.25.</p>
+<p>Approach 2, NNAR with xreg: NNAR(15,1,10)[52] fits the training data very closely (σ² = 1.44) but its test RMSE is 12.21, so it overfits.</p>
+<p>Neither approach beats the class VAR(2) (test RMSE 6.35), and ARIMAX is even worse than a SARIMA without regressors (6.82): the seasonal difference D = 1 captures the yearly pattern better than tempr does.</p>
+<p>Conclusion: keep VAR(2). Unlike ARIMAX, VAR also forecasts tempr and part itself, so it does not need their future values.</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
-<tr><td>1</td><td>มี ARIMA ไม่มี xreg ไว้เทียบ</td><td>ต้องมีฐานเทียบก่อน ถึงจะบอกได้ว่าตัวแปรภายนอกช่วยจริง 7.22 ลดเหลือ 7.04</td></tr>
-<tr><td>2</td><td>σ² ต่ำแต่ test แย่</td><td>เข้ากับ train ได้ดีมากแต่พยากรณ์ของใหม่แย่คือ overfit network มี 201 น้ำหนักแต่ train มีแค่ 456 สัปดาห์</td></tr>
-<tr><td>3</td><td>ARIMAX กับ VAR ต่างกัน</td><td>VAR ให้ทุกตัวแปรพยากรณ์กันเอง ARIMAX ให้ X เป็นตัวที่รู้ค่าอยู่แล้ว ดู<a href="0011-multivariate-arimax-var.html">L11</a></td></tr>
+<tr><td>1</td><td>มี VAR(2) และ ARIMA ไม่มี xreg ไว้เทียบ</td><td>โจทย์ถามว่าปรับปรุงโมเดลในคลาสได้ไหม ต้องมีตัวเลขของโมเดลเดิมก่อน</td></tr>
+<tr><td>2</td><td>ไม่เทียบ AIC ระหว่าง ARIMA กับ ARIMAX</td><td>ARIMA มี D = 1 ส่วน ARIMAX มี d = 1 ข้อมูลที่ใช้คิด likelihood ไม่เหมือนกัน ใช้ RMSE บน test แทน</td></tr>
+<tr><td>3</td><td>σ² ต่ำแต่ test แย่</td><td>เข้ากับ train ได้ดีมากแต่พยากรณ์ของใหม่แย่คือ overfit network มี 201 น้ำหนักแต่ train มีแค่ 456 สัปดาห์</td></tr>
+<tr><td>4</td><td>ARIMAX กับ VAR ต่างกัน</td><td>VAR ให้ทุกตัวแปรพยากรณ์กันเอง ARIMAX ให้ X เป็นตัวที่รู้ค่าอยู่แล้ว ดู<a href="0011-multivariate-arimax-var.html">L11</a></td></tr>
 </table>
+<p class="trap">⚠ ผลที่ได้ไม่ต้องดีขึ้นก็ได้คะแนน โจทย์ให้คะแนนที่วิธีคิด ตัวเลขเทียบ และการอธิบายว่าทำไมผลออกมาแบบนั้น</p>
 </div>
 </div>
 
