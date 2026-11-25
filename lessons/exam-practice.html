@@ -107,7 +107,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <tbody>
 <tr data-rank="1" data-lesson="7" data-unit="u-roots" data-done="1" data-ready="1"><td>1</td><td><a href="#u-roots">ทักษะ 1 · ราก ARMA: causal, invertible, redundancy</a> <span class="tag math">คณิต</span></td><td>L7</td><td>2024, 2025</td><td>ทุกฉบับ (8 ข้อ ~66 คะแนน)</td><td class="st"></td></tr>
 <tr data-rank="2" data-lesson="10" data-unit="u-rpipe" data-done="1" data-ready="1"><td>2</td><td><a href="#u-rpipe">ทักษะ 2 · R: SARIMA, auto.arima, ets, พยากรณ์, tsCV</a> <span class="tag r">R</span></td><td>L10</td><td>2025</td><td>2025 ข้อ 5b–e</td><td class="st"></td></tr>
-<tr data-rank="3" data-lesson="11" data-unit="u-rxreg" data-done="0" data-ready="1"><td>3</td><td><a href="#u-rxreg">ทักษะ 3 · R: ตัวแปรภายนอก ARIMAX, NNAR, RMSE บน test set</a> <span class="tag r">R</span></td><td>L11</td><td>2025</td><td>2023 ข้อ 5, 2025 ข้อ 5g</td><td class="st"></td></tr>
+<tr data-rank="3" data-lesson="11" data-unit="u-rxreg" data-done="1" data-ready="1"><td>3</td><td><a href="#u-rxreg">ทักษะ 3 · R: ตัวแปรภายนอก ARIMAX, NNAR, RMSE บน test set</a> <span class="tag r">R</span></td><td>L11</td><td>2025</td><td>2023 ข้อ 5, 2025 ข้อ 5g</td><td class="st"></td></tr>
 <tr data-rank="5" data-lesson="8" data-unit="u-write" data-done="0" data-ready="1"><td>5</td><td><a href="#u-write">ทักษะ 4 · เขียนโมเดลจาก output ของ R</a> <span class="tag read">อ่าน output</span></td><td>L8</td><td>2024, 2025</td><td>2022, 2023, 2024, 2025 (5 ข้อ)</td><td class="st"></td></tr>
 <tr data-rank="6" data-lesson="8" data-unit="u-diag" data-done="0" data-ready="1"><td>6</td><td><a href="#u-diag">ทักษะ 5 · ตรวจ residual: ACF, QQ, Ljung-Box</a> <span class="tag read">อ่าน output</span></td><td>L8</td><td>2025 (5b–c)</td><td>2022, 2023, PRACTICE 2 (5 ข้อ)</td><td class="st"></td></tr>
 <tr data-rank="4" data-lesson="2" data-unit="u-stat" data-done="0" data-ready="1"><td>4</td><td><a href="#u-stat">ทักษะ 6 · พิสูจน์ความนิ่ง: mean และ autocovariance</a> <span class="tag math">คณิต</span></td><td>L2</td><td>2025</td><td>2023, 2025, PRACTICE 1 (6 ข้อ)</td><td class="st"></td></tr>
@@ -264,7 +264,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <!-- G3 -->
 <div class="quiz free" id="g3">
 <div class="qhead"><span>ข้อ 1.3 · ข้อสอบจริง FINAL 2023 ข้อ 1 (10 คะแนน)</span><span>รากเชิงซ้อนที่มีส่วนจริง</span></div>
-<div class="qtext">Determine if the following ARMA(2,1) process is invertible (or causal). Show your work.
+<div class="qtext">ตรวจสอบว่า ARMA(2,1) ต่อไปนี้ invertible หรือ causal ไหม แสดงวิธีทำ
 \[X_t=0.75X_{t-1}-0.5625X_{t-2}+w_t+1.25w_{t-1}\]</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -295,7 +295,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <!-- G4 -->
 <div class="quiz free" id="g4">
 <div class="qhead"><span>ข้อ 1.4 · ข้อสอบจริง FINAL 2022 ข้อ 1 (5 คะแนน)</span><span>AR รากจริง ตกหนึ่งตัว, MA รากเชิงซ้อน</span></div>
-<div class="qtext">Determine if the following ARMA(2,2) process is invertible (or causal). Show your work.
+<div class="qtext">ตรวจสอบว่า ARMA(2,2) ต่อไปนี้ invertible หรือ causal ไหม แสดงวิธีทำ
 \[X_t+1.9X_{t-1}+0.88X_{t-2}=w_t+0.2w_{t-1}+0.7w_{t-2}\]</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -327,7 +327,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <!-- G5 -->
 <div class="quiz free" id="g5">
 <div class="qhead"><span>ข้อ 1.5 · ข้อสอบจริง PRACTICE 2 ข้อ 3(a)–(d)</span><span>เขียน Φ, θ แล้วบอก p, q</span></div>
-<div class="qtext">Consider \(X_t+0.81X_{t-2}=w_t+\tfrac13w_{t-1}\), \(w_t\sim WN(0,1)\). (a) Write down Φ(B) and θ(B). (b) Find the roots. (c) Identify p and q (be careful of parameter redundancy). (d) Is the process causal? invertible?</div>
+<div class="qtext">กำหนด \(X_t+0.81X_{t-2}=w_t+\tfrac13w_{t-1}\), \(w_t\sim WN(0,1)\) (a) เขียน Φ(B) และ θ(B) (b) หาราก (c) ระบุ p และ q ระวัง parameter redundancy (d) process นี้ causal ไหม invertible ไหม</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -353,7 +353,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <!-- G6 -->
 <div class="quiz free" id="g6">
 <div class="qhead"><span>ข้อ 1.6 · ข้อสอบจริง PRACTICE 2 ข้อ 4</span><span>ไม่ผ่านทั้งคู่</span></div>
-<div class="qtext">Consider \(X_t-3X_{t-1}=w_t+2w_{t-1}-8w_{t-2}\), \(w_t\sim WN(0,1)\). (a) Write down Φ(B) and θ(B). (b) Find the roots. (c) Is the process causal? invertible?</div>
+<div class="qtext">กำหนด \(X_t-3X_{t-1}=w_t+2w_{t-1}-8w_{t-2}\), \(w_t\sim WN(0,1)\) (a) เขียน Φ(B) และ θ(B) (b) หาราก (c) process นี้ causal ไหม invertible ไหม</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -383,7 +383,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
          ar1      ar2      ma1     ma2  intercept
       1.6009  -0.6445  -1.4982  0.5219    26.4163
 s.e.  0.1886   0.1839   0.2104  0.2094     0.7954</pre>
-Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. Is there evidence for parameter redundancy?</div>
+หารากของพหุนาม AR และ MA ของ ARMA(2,2) ที่ฟิตได้ มีหลักฐานว่ามี parameter redundancy ไหม</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1227,7 +1227,7 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</
 <h2>ทักษะ 4: เขียนโมเดลจาก output ของ R</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s5-out">L7 ตอน 5.6</a>, <a href="0008-diagnostic-and-forecasting.html#s2-write">L8 ตอน 2.2</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 6d, 7b · 2023 ข้อ 4a · 2024 ข้อ 3ค · 2025 ข้อ 5b</p>
 
-<p>โจทย์มักเขียนว่า "Write out the fitted model, carefully stating all the model assumptions" คะแนนแบ่งเป็นสองส่วน คือสมการที่ถูกเครื่องหมาย กับรายการ assumption</p>
+<p>โจทย์มักสั่งให้เขียนโมเดลที่ฟิตได้พร้อมระบุ assumption ให้ครบ คะแนนแบ่งเป็นสองส่วน คือสมการที่ถูกเครื่องหมาย กับรายการ assumption</p>
 
 <div class="method">
 <b>แปลง output เป็นสมการ 6 ขั้น</b>
@@ -1245,12 +1245,12 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</
 <!-- W1 -->
 <div class="quiz free" id="w1">
 <div class="qhead"><span>ข้อ 4.1 · ข้อสอบจริง FINAL 2022 ข้อ 6d (5 คะแนน)</span><span>ARMA(2,2) มี intercept</span></div>
-<div class="qtext">Fitting an ARMA(2,2) model gives:
+<div class="qtext">ฟิต ARMA(2,2) ได้ผลดังนี้
 <pre class="out">         ar1      ar2      ma1     ma2  intercept
       1.6009  -0.6445  -1.4982  0.5219    26.4163
 s.e.  0.1886   0.1839   0.2104  0.2094     0.7954
 sigma^2 estimated as 791.7:  log likelihood = -1973.88,  aic = 3959.76</pre>
-Write out the fitted model, carefully stating all the model assumptions.</div>
+เขียนโมเดลที่ฟิตได้ พร้อมระบุ assumption ของโมเดลให้ครบ</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1279,7 +1279,7 @@ Write out the fitted model, carefully stating all the model assumptions.</div>
      0.9139  0.0403   0.9998  -0.9884    -0.0060
 s.e. 0.0114  0.0277   0.0002   0.0080     0.1354
 sigma^2 estimated as 0.006561</pre>
-Write out the fitted model, carefully stating all the model assumptions.</div>
+เขียนโมเดลที่ฟิตได้ พร้อมระบุ assumption ของโมเดลให้ครบ</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1310,7 +1310,7 @@ Write out the fitted model, carefully stating all the model assumptions.</div>
      0.9197  0.1577  -0.1710  -0.8080
 s.e. 0.0434  0.0592   0.0438   0.0285
 sigma^2 estimated as 0.03632:  log likelihood = 117.48,  aic = -224.96</pre>
-Write out the fitted model for M2, carefully stating all the model assumptions.</div>
+เขียนโมเดล M2 ที่ฟิตได้ พร้อมระบุ assumption ของโมเดลให้ครบ</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1579,7 +1579,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- D1 -->
 <div class="quiz free" id="d1">
 <div class="qhead"><span>ข้อ 5.1 · ข้อสอบจริง FINAL 2022 ข้อ 6e (2 คะแนน)</span><span>ACF ของ residual อย่างเดียว</span></div>
-<div class="qtext">Fig. 3 shows the ACF of the residuals from fitting an ARMA(2,2) model: ค่าที่ lag 0 สูงเท่ากับ 1 ส่วน lag 1–25 เป็นแท่งสั้น อยู่ในเส้นประเกือบทั้งหมด มีแท่งเดียวราว lag 18 ที่แตะเส้นประ Comment on which modeling assumptions this figure supports, and which it does not support.</div>
+<div class="qtext">Fig. 3 คือ ACF ของ residuals จากการฟิต ARMA(2,2) ค่าที่ lag 0 สูงเท่ากับ 1 ส่วน lag 1–25 เป็นแท่งสั้น อยู่ในเส้นประเกือบทั้งหมด มีแท่งเดียวราว lag 18 ที่แตะเส้นประ กราฟนี้สนับสนุน assumption ใดของโมเดล และไม่สนับสนุนข้อใด</div>
 <figure class="qfig"><img src="../assets/practice/f22-q6e-resid-acf.png" alt="Fig. 3 จากข้อสอบ FINAL 2022: ACF ของ residual จาก ARMA(2,2)" loading="lazy"><figcaption>Fig. 3 จากข้อสอบ FINAL 2022: ACF ของ residual จาก ARMA(2,2)</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -1593,14 +1593,14 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <tr><td>1</td><td>ACF ตอบได้แค่เรื่องความสัมพันธ์</td><td>ACF วัด correlation ระหว่าง residual กับตัวเองย้อนหลัง ไม่ได้บอกรูปร่างการแจกแจง</td></tr>
 <tr><td>2</td><td>แท่งเดียวที่แตะเส้น</td><td>เส้นประคือขอบ 95% ดู 20 lag มีโอกาสหลุดโดยบังเอิญราว 1 แท่ง</td></tr>
 </table>
-<p class="trap">⚠ คำว่า "does not support" ในข้อนี้หมายถึงตรวจไม่ได้ ไม่ใช่ตรวจแล้วตก</p>
+<p class="trap">⚠ คำว่า "ไม่สนับสนุน" ในข้อนี้หมายถึงกราฟนี้ตรวจไม่ได้ ไม่ใช่ตรวจแล้วตก</p>
 </div>
 </div>
 
 <!-- D2 -->
 <div class="quiz free" id="d2">
 <div class="qhead"><span>ข้อ 5.2 · ข้อสอบจริง FINAL 2022 ข้อ 7c (3 คะแนน)</span><span>ACF + QQ แล้วถามสิ่งที่ยังไม่ได้ตรวจ</span></div>
-<div class="qtext">Residuals from \(ARIMA(1,0,1)\times(1,0,1)_{12}\): (A) sample ACF อยู่ในเส้นประทุก lag (B) normal QQ plot เรียงตามเส้นตรงเกือบทั้งหมด ปลายสองข้างเบนเล็กน้อย What do you conclude? Also explain at least one relevant property that is NOT checked by these plots, and describe how you could check it.</div>
+<div class="qtext">Residuals จาก \(ARIMA(1,0,1)\times(1,0,1)_{12}\) (A) sample ACF อยู่ในเส้นประทุก lag (B) normal QQ plot เรียงตามเส้นตรงเกือบทั้งหมด ปลายสองข้างเบนเล็กน้อย สรุปว่าอย่างไร และอธิบายคุณสมบัติที่เกี่ยวข้องอย่างน้อยหนึ่งข้อที่กราฟเหล่านี้ไม่ได้ตรวจ พร้อมบอกวิธีตรวจ</div>
 <figure class="qfig"><img src="../assets/practice/f22-q7c-diag.png" alt="Fig. 5 จากข้อสอบ FINAL 2022: (A) ACF ของ residual (B) normal QQ plot" loading="lazy"><figcaption>Fig. 5 จากข้อสอบ FINAL 2022: (A) ACF ของ residual (B) normal QQ plot</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -1622,7 +1622,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- D3 -->
 <div class="quiz free" id="d3">
 <div class="qhead"><span>ข้อ 5.3 · ข้อสอบจริง FINAL 2023 ข้อ 4d (2 คะแนน)</span><span>เทียบ ACF ของ residual สองโมเดล</span></div>
-<div class="qtext">M1 ฟิตกับ x และ M2 ฟิตกับ log(x) ด้วย \(ARIMA(3,0,0)\times(0,1,1)_{12}\) เหมือนกัน (a1) ACF ของ residual M1 มีแท่งหลุดเส้นประเล็กน้อยราว lag 0.75, 1.1 และ 2.1 ปี (b1) ACF ของ M2 มีแท่งหลุดเส้นประเล็กน้อยราว lag 0.5, 1.1, 1.8 และ 2.2 ปี Compare (a1) and (b1). What does this tell you about M1 and M2?</div>
+<div class="qtext">M1 ฟิตกับ x และ M2 ฟิตกับ log(x) ด้วย \(ARIMA(3,0,0)\times(0,1,1)_{12}\) เหมือนกัน (a1) ACF ของ residual M1 มีแท่งหลุดเส้นประเล็กน้อยราว lag 0.75, 1.1 และ 2.1 ปี (b1) ACF ของ M2 มีแท่งหลุดเส้นประเล็กน้อยราว lag 0.5, 1.1, 1.8 และ 2.2 ปี เทียบ (a1) กับ (b1) บอกอะไรเกี่ยวกับ M1 และ M2</div>
 <figure class="qfig"><img src="../assets/practice/f23-q4-diag.png" alt="Fig. 2 จากข้อสอบ FINAL 2023: (a1)(a2) ของ M1 และ (b1)(b2) ของ M2" loading="lazy"><figcaption>Fig. 2 จากข้อสอบ FINAL 2023: (a1)(a2) ของ M1 และ (b1)(b2) ของ M2</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -1643,7 +1643,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- D4 -->
 <div class="quiz free" id="d4">
 <div class="qhead"><span>ข้อ 5.4 · ข้อสอบจริง FINAL 2023 ข้อ 4e (2 คะแนน)</span><span>เทียบ QQ plot สองโมเดล</span></div>
-<div class="qtext">(a2) QQ plot ของ M1: จุดโค้ง หางขวายาวไปถึงราว 600 ขณะที่หางซ้ายถึงแค่ราว −400 (b2) QQ plot ของ M2: จุดเรียงตามเส้นตรงเกือบทั้งหมด มีจุดต่ำผิดปกติสองสามจุดที่หางซ้าย Compare (a2) and (b2). What does this tell you about M1 and M2?</div>
+<div class="qtext">(a2) QQ plot ของ M1: จุดโค้ง หางขวายาวไปถึงราว 600 ขณะที่หางซ้ายถึงแค่ราว −400 (b2) QQ plot ของ M2: จุดเรียงตามเส้นตรงเกือบทั้งหมด มีจุดต่ำผิดปกติสองสามจุดที่หางซ้าย เทียบ (a2) กับ (b2) บอกอะไรเกี่ยวกับ M1 และ M2</div>
 <figure class="qfig"><img src="../assets/practice/f23-q4-diag.png" alt="Fig. 2 จากข้อสอบ FINAL 2023: ดูแถวล่าง (a2) กับ (b2)" loading="lazy"><figcaption>Fig. 2 จากข้อสอบ FINAL 2023: ดูแถวล่าง (a2) กับ (b2)</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -1665,7 +1665,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- D5 -->
 <div class="quiz free" id="d5">
 <div class="qhead"><span>ข้อ 5.5 · ข้อสอบจริง PRACTICE 2 ข้อ 1 (5 คะแนน)</span><span>tsdiag สามกราฟ</span></div>
-<div class="qtext">ผลจาก <code>tsdiag()</code>: standardized residuals อยู่ในช่วง ±3 · ACF ของ residual มีแท่ง lag 1 และ 3 ใกล้เส้นประ · p-value ของ Ljung-Box อยู่ใต้เส้น 0.05 ทุก lag ตั้งแต่ lag 2 Do the diagnostics indicate a good fit or a bad fit? Why?</div>
+<div class="qtext">ผลจาก <code>tsdiag()</code>: standardized residuals อยู่ในช่วง ±3 · ACF ของ residual มีแท่ง lag 1 และ 3 ใกล้เส้นประ · p-value ของ Ljung-Box อยู่ใต้เส้น 0.05 ทุก lag ตั้งแต่ lag 2 ผล diagnostics บอกว่าโมเดลฟิตดีหรือไม่ดี เพราะอะไร</div>
 <figure class="qfig"><img src="../assets/practice/p2-q1-tsdiag.png" alt="กราฟจากข้อสอบ PRACTICE 2 ข้อ 1: ผลของ tsdiag()" loading="lazy"><figcaption>กราฟจากข้อสอบ PRACTICE 2 ข้อ 1: ผลของ tsdiag()</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -1749,7 +1749,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
 <tr><td>1</td><td>หางเบนออกทั้งสองข้าง</td><td>ข้อมูลมีค่าสุดโต่งบ่อยกว่า normal เรียกว่าหางหนา</td></tr>
-<tr><td>2</td><td>ผ่านครึ่งเดียว</td><td>ข้อสอบชอบถามว่า "which assumptions are supported" ต้องแยกตอบทีละเรื่อง</td></tr>
+<tr><td>2</td><td>ผ่านครึ่งเดียว</td><td>ข้อสอบชอบถามว่ากราฟสนับสนุน assumption ไหนบ้าง ต้องแยกตอบทีละเรื่อง</td></tr>
 </table>
 </div>
 </div>
@@ -1820,7 +1820,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- S2 -->
 <div class="quiz free" id="s2">
 <div class="qhead"><span>ข้อ 6.2 · ข้อสอบจริง FINAL 2023 ข้อ 3 (5 คะแนน)</span><span>ตัวสุ่มตัวเดียวคูณ \((-1)^t\)</span></div>
-<div class="qtext">X เป็นตัวแปรสุ่มที่มี mean 0 กำหนด \(Y_t=(-1)^tX\) Is this process stationary? Specify the mean and autocovariance function.</div>
+<div class="qtext">X เป็นตัวแปรสุ่มที่มี mean 0 กำหนด \(Y_t=(-1)^tX\) process นี้ stationary ไหม ระบุ mean และ autocovariance function</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1846,7 +1846,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- S3 -->
 <div class="quiz free" id="s3">
 <div class="qhead"><span>ข้อ 6.3 · ข้อสอบจริง PRACTICE 1 ข้อ 1 (20 คะแนน)</span><span>trend เส้นตรง + MA แล้ว difference</span></div>
-<div class="qtext">\(X_t=-2t+w_t+0.5w_{t-1}\), \(w_t\sim N(0,\sigma^2)\) (a) Prove \(X_t\) is nonstationary. (b) Is \(\nabla X_t=X_t-X_{t-1}\) stationary? Justify.</div>
+<div class="qtext">\(X_t=-2t+w_t+0.5w_{t-1}\), \(w_t\sim N(0,\sigma^2)\) (a) พิสูจน์ว่า \(X_t\) nonstationary (b) \(\nabla X_t=X_t-X_{t-1}\) stationary ไหม ให้เหตุผล</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -1905,7 +1905,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- S5 -->
 <div class="quiz free" id="s5">
 <div class="qhead"><span>ข้อ 6.5 · ข้อสอบจริง PRACTICE 1 ข้อ 5 (10 คะแนน)</span><span>ผลคูณที่มี \(w_t^2\)</span></div>
-<div class="qtext">\(\{w_t\}\) เป็น \(WN(0,\sigma^2)\) ที่เป็นอิสระต่อกัน กำหนด \(X_t=w_t[w_{t-1}+w_t]/2\) Find the mean and autocovariance function of \(\{X_t\}\).</div>
+<div class="qtext">\(\{w_t\}\) เป็น \(WN(0,\sigma^2)\) ที่เป็นอิสระต่อกัน กำหนด \(X_t=w_t[w_{t-1}+w_t]/2\) หา mean และ autocovariance function ของ \(\{X_t\}\)</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2084,7 +2084,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- H1 -->
 <div class="quiz free" id="h1">
 <div class="qhead"><span>ข้อ 7.1 · ข้อสอบจริง FINAL 2022 ข้อ 4 (8 คะแนน)</span><span>ARMA(1,1): ψ และ π ห้าตัว</span></div>
-<div class="qtext">Consider \(X_t-0.5X_{t-1}=w_t+0.4w_{t-1}\), \(w_t\sim WN(0,\sigma^2)\).<br>(a) Is \(X_t\) causal? If it is causal, compute \(\psi_0,\dots,\psi_4\) in \(X_t=\sum_{j=0}^\infty\psi_jw_{t-j}\).<br>(b) Is \(X_t\) invertible? If it is invertible, compute \(\pi_0,\dots,\pi_4\) in \(w_t=\sum_{j=0}^\infty\pi_jX_{t-j}\).</div>
+<div class="qtext">กำหนด \(X_t-0.5X_{t-1}=w_t+0.4w_{t-1}\), \(w_t\sim WN(0,\sigma^2)\)<br>(a) \(X_t\) causal ไหม ถ้า causal ให้คำนวณ \(\psi_0,\dots,\psi_4\) ใน \(X_t=\sum_{j=0}^\infty\psi_jw_{t-j}\)<br>(b) \(X_t\) invertible ไหม ถ้า invertible ให้คำนวณ \(\pi_0,\dots,\pi_4\) ใน \(w_t=\sum_{j=0}^\infty\pi_jX_{t-j}\)</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2119,7 +2119,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <!-- H2 -->
 <div class="quiz free" id="h2">
 <div class="qhead"><span>ข้อ 7.2 · ข้อสอบจริง PRACTICE 2 ข้อ 3(e) (6 คะแนน)</span><span>ψ ของ AR(2) ด้วยการเทียบสัมประสิทธิ์</span></div>
-<div class="qtext">จาก \(X_t+0.81X_{t-2}=w_t+\tfrac13w_{t-1}\) ซึ่ง causal (<a href="#g5">ข้อ 1.5</a>) find the first five coefficients \(\psi_0,\dots,\psi_4\) in the MA(∞) representation.</div>
+<div class="qtext">จาก \(X_t+0.81X_{t-2}=w_t+\tfrac13w_{t-1}\) ซึ่ง causal (<a href="#g5">ข้อ 1.5</a>) หาสัมประสิทธิ์ห้าตัวแรก \(\psi_0,\dots,\psi_4\) ในรูป MA(∞)</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2226,7 +2226,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
  1  3961.0  3962.6  3964.6  3966.6
  2  3962.6  3960.5  3959.7  3961.7
  3  3964.6  3965.4  3962.6  3968.3</pre>
-What ARMA model does this suggest, and why?</div>
+ข้อมูลนี้ชี้ไปที่ ARMA แบบไหน เพราะอะไร</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2246,7 +2246,7 @@ What ARMA model does this suggest, and why?</div>
 <!-- A2 -->
 <div class="quiz free" id="a2">
 <div class="qhead"><span>ข้อ 8.2 · ข้อสอบจริง FINAL 2022 ข้อ 6c (3 คะแนน)</span><span>ย้อนหา log-likelihood จาก AIC</span></div>
-<div class="qtext">จากตารางในข้อ 8.1 Find the log likelihood of an ARMA(2,1) model, and explain your calculation.</div>
+<div class="qtext">จากตารางในข้อ 8.1 หา log likelihood ของ ARMA(2,1) และอธิบายวิธีคำนวณ</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2278,7 +2278,7 @@ What ARMA model does this suggest, and why?</div>
   2  -211.9459  -212.5350  -236.8260  -223.7059  -224.7305
   3  -224.9618  -211.9458  -236.1537  -234.4135  -232.4061
   4  -229.8224  -221.1222  -236.4941  -235.2162  -239.7320</pre>
-Discuss briefly what you learn from the AIC table. Explain why AIC may not be the only criterion, and list other analyses you would carry out.</div>
+อภิปรายสั้นๆ ว่าตาราง AIC บอกอะไร อธิบายว่าทำไม AIC อาจไม่ใช่เกณฑ์เดียว และบอกการวิเคราะห์อื่นที่ควรทำ</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2302,7 +2302,7 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <!-- A4 -->
 <div class="quiz free" id="a4">
 <div class="qhead"><span>ข้อ 8.4 · ข้อสอบจริง FINAL 2023 ข้อ 4b (2 คะแนน)</span><span>AIC ของ x กับ log x</span></div>
-<div class="qtext">M1 ฟิตกับ x ได้ aic = 6451.51 · M2 ฟิตกับ log(x) ด้วยโมเดลเดียวกันได้ aic = −224.96 Can the above analysis determine whether a log transformation is appropriate? Explain.</div>
+<div class="qtext">M1 ฟิตกับ x ได้ aic = 6451.51 · M2 ฟิตกับ log(x) ด้วยโมเดลเดียวกันได้ aic = −224.96 ผลข้างต้นบอกได้ไหมว่าควรแปลงด้วย log อธิบาย</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2586,10 +2586,10 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <!-- Y1 -->
 <div class="quiz free" id="y1">
 <div class="qhead"><span>ข้อ 10.1 · ข้อสอบจริง FINAL 2022 ข้อ 5 (8 คะแนน)</span><span>AR(2) จาก γ̂(h)</span></div>
-<div class="qtext">For 100 observations, the sample autocovariances are
+<div class="qtext">ข้อมูล 100 ค่า ได้ sample autocovariance ดังนี้
 <pre class="out">h        0      1      2      3      4      5
 γ̂(h)  2.400  0.072  0.792  0.019  0.124  0.181</pre>
-(a) Model the data as AR(2). Estimate \(\phi_1\) and \(\phi_2\). (b) Estimate the white noise variance \(\sigma^2\).</div>
+(a) ใช้ AR(2) กับข้อมูลนี้ ประมาณ \(\phi_1\) และ \(\phi_2\) (b) ประมาณ white noise variance \(\sigma^2\)</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2619,7 +2619,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <!-- Y2 -->
 <div class="quiz free" id="y2">
 <div class="qhead"><span>ข้อ 10.2 · ข้อสอบจริง PRACTICE 2 ข้อ 5 (10 คะแนน)</span><span>ข้อมูลเดียวกัน แต่เป็น AR(1)</span></div>
-<div class="qtext">ใช้ γ̂(h) ชุดเดียวกับข้อ 10.1 (a) Model the data as AR(1). Estimate φ. (b) Estimate \(\sigma^2\).</div>
+<div class="qtext">ใช้ γ̂(h) ชุดเดียวกับข้อ 10.1 (a) ใช้ AR(1) กับข้อมูลนี้ ประมาณ φ (b) ประมาณ \(\sigma^2\)</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2832,7 +2832,7 @@ si &lt;- si / mean(si)
 <!-- CH1 -->
 <div class="quiz free" id="ch1">
 <div class="qhead"><span>ข้อ 12.1 · ข้อสอบจริง FINAL 2022 ข้อ 3 (5 คะแนน)</span><span>GLS, ARIMAX, VAR</span></div>
-<div class="qtext">Briefly describe how to select the forecasting model for time-series data with external regressor. Compare GLS, ARIMAX and VAR, and explain when to choose each.</div>
+<div class="qtext">อธิบายสั้นๆ ว่าเลือกโมเดลพยากรณ์อย่างไรเมื่ออนุกรมเวลามี external regressor เทียบ GLS, ARIMAX และ VAR และบอกว่าควรเลือกแต่ละตัวเมื่อไร</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2958,7 +2958,7 @@ si &lt;- si / mean(si)
 <!-- AP1 -->
 <div class="quiz free" id="ap1">
 <div class="qhead"><span>ข้อ 13.1 · ข้อสอบจริง FINAL 2022 ข้อ 2 (5 คะแนน)</span><span>บรรยาย ACF และ PACF รวมแบบฤดูกาล</span></div>
-<div class="qtext">Thoroughly describe the important characteristics of the ACF and PACF for (a) \(AR(2)_3\) (b) \(MA(2)_4\) (c) ARIMA(2,1,0) (d) \(MA(4)_2\)</div>
+<div class="qtext">อธิบายลักษณะสำคัญของ ACF และ PACF ให้ละเอียด สำหรับ (a) \(AR(2)_3\) (b) \(MA(2)_4\) (c) ARIMA(2,1,0) (d) \(MA(4)_2\)</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -2980,7 +2980,7 @@ si &lt;- si / mean(si)
 <!-- AP2 -->
 <div class="quiz free" id="ap2">
 <div class="qhead"><span>ข้อ 13.2 · ข้อสอบจริง FINAL 2022 ข้อ 6a (3 คะแนน)</span><span>ทายโมเดลจาก ACF/PACF</span></div>
-<div class="qtext">ข้อมูล neuron T = 415 · ACF: lag 1 ราว 0.12 เกินเส้นประ ±0.1 เล็กน้อย lag อื่นอยู่ในเส้น · PACF: lag 1 ราว 0.13 เกินเส้น lag อื่นอยู่ในเส้นแม้จะมีบางแท่งเข้าใกล้ What ARMA model does this suggest, and why?</div>
+<div class="qtext">ข้อมูล neuron T = 415 · ACF: lag 1 ราว 0.12 เกินเส้นประ ±0.1 เล็กน้อย lag อื่นอยู่ในเส้น · PACF: lag 1 ราว 0.13 เกินเส้น lag อื่นอยู่ในเส้นแม้จะมีบางแท่งเข้าใกล้ ข้อมูลนี้ชี้ไปที่ ARMA แบบไหน เพราะอะไร</div>
 <figure class="qfig"><img src="../assets/practice/f22-q6-acf-pacf.png" alt="Fig. 2 จากข้อสอบ FINAL 2022: (a) ACF (b) PACF ของ X_t" loading="lazy"><figcaption>Fig. 2 จากข้อสอบ FINAL 2022: (a) ACF (b) PACF ของ X_t</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -3000,7 +3000,7 @@ si &lt;- si / mean(si)
 <!-- AP3 -->
 <div class="quiz free" id="ap3">
 <div class="qhead"><span>ข้อ 13.3 · ข้อสอบจริง PRACTICE 1 ข้อ 2 (5 คะแนน)</span><span>scatter plot ของ lag</span></div>
-<div class="qtext">ภาพ lag scatterplot ของ MA(q): lag 1 จุดเอียงลงชัดเจน · lag 2 จุดเอียงขึ้นเล็กน้อย · lag 3 และ lag 4 เป็นก้อนกลมไม่มีทิศ Make an educated guess about q.</div>
+<div class="qtext">ภาพ lag scatterplot ของ MA(q): lag 1 จุดเอียงลงชัดเจน · lag 2 จุดเอียงขึ้นเล็กน้อย · lag 3 และ lag 4 เป็นก้อนกลมไม่มีทิศ คาดว่า q เท่าไร</div>
 <figure class="qfig"><img src="../assets/practice/p1-q2-scatter.png" alt="กราฟจากข้อสอบ PRACTICE 1 ข้อ 2: lag 1–4 scatterplot" loading="lazy"><figcaption>กราฟจากข้อสอบ PRACTICE 1 ข้อ 2: lag 1–4 scatterplot</figcaption></figure>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
@@ -3020,7 +3020,7 @@ si &lt;- si / mean(si)
 <!-- AP4 -->
 <div class="quiz free" id="ap4">
 <div class="qhead"><span>ข้อ 13.4 · ข้อสอบจริง PRACTICE 2 ข้อ 2 (5 คะแนน)</span><span>MA(1), AR(1), ARMA(2,2)</span></div>
-<div class="qtext">Describe in detail the important characteristics of the ACF and PACF for the MA(1), AR(1), and ARMA(2,2) processes. Be thorough.</div>
+<div class="qtext">อธิบายลักษณะสำคัญของ ACF และ PACF ของ MA(1), AR(1) และ ARMA(2,2) ให้ละเอียด</div>
 <textarea placeholder="เขียนคำตอบ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -3066,7 +3066,7 @@ si &lt;- si / mean(si)
 <!-- M1 -->
 <div class="quiz free" id="m1">
 <div class="qhead"><span>ข้อ 14.1 · ข้อสอบจริง FINAL 2023 ข้อ 2 (10 คะแนน)</span><span>พิสูจน์ |ρ₁| ≤ ½</span></div>
-<div class="qtext">For MA(1) \(X_t=w_t+\theta w_{t-1}\), mathematically prove that \(|\rho(1)|\le1/2\) for all values of θ.</div>
+<div class="qtext">สำหรับ MA(1) \(X_t=w_t+\theta w_{t-1}\) พิสูจน์ทางคณิตศาสตร์ว่า \(|\rho(1)|\le1/2\) ทุกค่า θ</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
@@ -3098,7 +3098,7 @@ si &lt;- si / mean(si)
 <!-- M2 -->
 <div class="quiz free" id="m2">
 <div class="qhead"><span>ข้อ 14.2 · ข้อสอบจริง PRACTICE 1 ข้อ 4 (10 คะแนน)</span><span>θ = 0.8 และ θ กับ 1/θ</span></div>
-<div class="qtext">MA(1) \(X_t=w_t+\theta w_{t-1}\) (a) Determine the ACF when θ = 0.8 (b) Show that replacing θ by 1/θ does not change the ACF.</div>
+<div class="qtext">MA(1) \(X_t=w_t+\theta w_{t-1}\) (a) หา ACF เมื่อ θ = 0.8 (b) แสดงว่าเปลี่ยน θ เป็น 1/θ แล้ว ACF ไม่เปลี่ยน</div>
 <textarea placeholder="เขียนวิธีทำ"></textarea>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
