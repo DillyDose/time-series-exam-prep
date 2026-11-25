@@ -203,11 +203,11 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <p>\(x=\dfrac{0.6\pm\sqrt{0.36-0.32}}{0.16}=\dfrac{0.6\pm0.2}{0.16}\ \Rightarrow\ x=5,\ 2.5\)</p>
 <p><b>Invertible:</b> \(\theta(x)=-0.32x^2+0.4x+1=0\), \(a=-0.32,\ b=0.4,\ c=1\)</p>
 <p>\(x=\dfrac{-0.4\pm\sqrt{0.16+1.28}}{-0.64}=\dfrac{-0.4\pm1.2}{-0.64}\ \Rightarrow\ x=-1.25,\ 2.5\)</p>
-<p>Common root \(x=2.5\): common factor \((1-0.4B)\)</p>
+<p>มีรากร่วม \(x=2.5\) ได้ตัวประกอบร่วม \((1-0.4B)\)</p>
 <p>\((1-0.4B)(1-0.2B)X_t=(1-0.4B)(1+0.8B)w_t\)</p>
-<p>Parameter redundancy: \((1-0.2B)X_t=(1+0.8B)w_t\), an ARMA(1,1)</p>
-<p>Root of \(1-0.2x\): \(x=5,\ |5|&gt;1\) → causal. Root of \(1+0.8x\): \(x=-1.25,\ |-1.25|=1.25&gt;1\) → invertible.</p>
-<p>Therefore the process is ARMA(1,1), causal and invertible.</p>
+<p>Parameter redundancy ตัดตัวประกอบร่วมออก เหลือ \((1-0.2B)X_t=(1+0.8B)w_t\) เป็น ARMA(1,1)</p>
+<p>รากของ \(1-0.2x\) คือ \(x=5,\ |5|&gt;1\) → causal รากของ \(1+0.8x\) คือ \(x=-1.25,\ |-1.25|=1.25&gt;1\) → invertible</p>
+<p>สรุป เป็น ARMA(1,1) ที่ causal และ invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -244,9 +244,9 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <p>\(b^2-4ac=0-1=-1&lt;0\)</p>
 <p>\(x=\dfrac{0\pm\sqrt{-1}}{0.5}=\pm\dfrac{i}{0.5}=\pm2i\)</p>
 <p>modulus \(=\sqrt{0^2+2^2}=2&gt;1\) → causal</p>
-<p><b>Invertible:</b> \(\theta(x)=1+2x=0\Rightarrow x=-0.5\), \(|-0.5|=0.5&lt;1\) → not invertible</p>
-<p>No common root, no parameter redundancy: ARMA(2,1).</p>
-<p>Therefore the process is causal but not invertible.</p>
+<p><b>Invertible:</b> \(\theta(x)=1+2x=0\Rightarrow x=-0.5\), \(|-0.5|=0.5&lt;1\) → ไม่ invertible</p>
+<p>ไม่มีรากร่วม ไม่มี parameter redundancy ยังเป็น ARMA(2,1)</p>
+<p>สรุป causal แต่ไม่ invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -276,8 +276,8 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <p>\(b^2-4ac=0.5625-2.25=-1.6875&lt;0\)</p>
 <p>\(x=\dfrac{0.75\pm i\sqrt{1.6875}}{1.125}=\dfrac{0.75\pm1.299i}{1.125}=0.667\pm1.155i\)</p>
 <p>modulus \(=\sqrt{0.667^2+1.155^2}=\sqrt{1.778}=1.333&gt;1\) → causal</p>
-<p><b>Invertible:</b> \(\theta(x)=1+1.25x=0\Rightarrow x=-0.8\), \(|-0.8|=0.8&lt;1\) → not invertible</p>
-<p>Therefore the process is causal but not invertible.</p>
+<p><b>Invertible:</b> \(\theta(x)=1+1.25x=0\Rightarrow x=-0.8\), \(|-0.8|=0.8&lt;1\) → ไม่ invertible</p>
+<p>สรุป causal แต่ไม่ invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -304,12 +304,12 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <p>\((1+1.9B+0.88B^2)X_t=(1+0.2B+0.7B^2)w_t\)</p>
 <p><b>Causal:</b> \(\Phi(x)=0.88x^2+1.9x+1=0\), \(a=0.88,\ b=1.9,\ c=1\)</p>
 <p>\(x=\dfrac{-1.9\pm\sqrt{3.61-3.52}}{1.76}=\dfrac{-1.9\pm0.3}{1.76}\ \Rightarrow\ x=-0.909,\ -1.25\)</p>
-<p>\(|-0.909|=0.909&lt;1\) → not causal</p>
+<p>\(|-0.909|=0.909&lt;1\) → ไม่ causal</p>
 <p><b>Invertible:</b> \(\theta(x)=0.7x^2+0.2x+1=0\), \(a=0.7,\ b=0.2,\ c=1\)</p>
 <p>\(b^2-4ac=0.04-2.8=-2.76&lt;0\)</p>
 <p>\(x=\dfrac{-0.2\pm1.661i}{1.4}=-0.143\pm1.187i\)</p>
 <p>modulus \(=\sqrt{0.143^2+1.187^2}=\sqrt{1.429}=1.195&gt;1\) → invertible</p>
-<p>Therefore the process is invertible but not causal.</p>
+<p>สรุป invertible แต่ไม่ causal</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -335,8 +335,8 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <p>(a) \(\Phi(B)=1+0.81B^2,\quad \theta(B)=1+\tfrac13B\)</p>
 <p>(b) \(\Phi(x)=0\): \(0.81x^2=-1\Rightarrow x^2=-\dfrac{1}{0.81}\Rightarrow x=\pm\dfrac{i}{0.9}=\pm1.111i\)</p>
 <p>\(\theta(x)=0\): \(1+\tfrac13x=0\Rightarrow x=-3\)</p>
-<p>(c) No common root, so no parameter redundancy: \(p=2,\ q=1\), ARMA(2,1)</p>
-<p>(d) \(|\pm1.111i|=1.111&gt;1\) → causal; \(|-3|=3&gt;1\) → invertible</p>
+<p>(c) ไม่มีรากร่วม ไม่มี parameter redundancy ได้ \(p=2,\ q=1\) เป็น ARMA(2,1)</p>
+<p>(d) \(|\pm1.111i|=1.111&gt;1\) → causal · \(|-3|=3&gt;1\) → invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -361,8 +361,8 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 <p>(a) \(\Phi(B)=1-3B,\quad \theta(B)=1+2B-8B^2\)</p>
 <p>(b) \(1-3x=0\Rightarrow x=\tfrac13\)</p>
 <p>\(-8x^2+2x+1=0\), \(a=-8,\ b=2,\ c=1\): \(x=\dfrac{-2\pm\sqrt{4+32}}{-16}=\dfrac{-2\pm6}{-16}\Rightarrow x=-0.25,\ 0.5\)</p>
-<p>(c) \(|\tfrac13|&lt;1\) → not causal; \(|-0.25|&lt;1,\ |0.5|&lt;1\) → not invertible</p>
-<p>Therefore the process is neither causal nor invertible.</p>
+<p>(c) \(|\tfrac13|&lt;1\) → ไม่ causal · \(|-0.25|&lt;1,\ |0.5|&lt;1\) → ไม่ invertible</p>
+<p>สรุป ไม่ causal และไม่ invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -393,8 +393,8 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 <p>\(x=\dfrac{1.6009\pm0.1230i}{1.2890}=1.242\pm0.095i\), modulus \(=\sqrt{1.242^2+0.095^2}=1.246&gt;1\)</p>
 <p>MA: \(b^2-4ac=2.2446-2.0876=0.1570\)</p>
 <p>\(x=\dfrac{1.4982\pm0.3962}{1.0438}\Rightarrow x=1.815,\ 1.056\)</p>
-<p>All roots exceed 1: the fitted model is causal and invertible.</p>
-<p>The AR roots (1.24 ± 0.10i) and the MA roots (1.06 and 1.81) are not equal or very close, so no factor cancels. There is no clear evidence of parameter redundancy.</p>
+<p>รากทุกตัวเกิน 1 โมเดลที่ฟิตได้ causal และ invertible</p>
+<p>ราก AR คือ 1.24 ± 0.10i ราก MA คือ 1.06 กับ 1.81 ไม่เท่ากันและไม่ใกล้กันมาก ไม่มีตัวประกอบที่ตัดกันได้ ไม่มีหลักฐานชัดว่ามี parameter redundancy</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -419,8 +419,8 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 <div class="copy">
 <p>\((1-1.5B+0.5B^2)X_t=(1+0.3B)w_t\)</p>
 <p><b>Causal:</b> \(0.5x^2-1.5x+1=0\), \(x=\dfrac{1.5\pm\sqrt{2.25-2}}{1}=1.5\pm0.5\Rightarrow x=2,\ 1\)</p>
-<p>\(x=1\) does not exceed 1 → not causal (not stationary)</p>
-<p>\(\Phi(B)=(1-B)(1-0.5B)\), so \((1-0.5B)(1-B)X_t=(1+0.3B)w_t\): ARIMA(1,1,1) with \(\phi=0.5,\ \theta=0.3\)</p>
+<p>\(x=1\) ไม่เกิน 1 → ไม่ causal และไม่ stationary</p>
+<p>\(\Phi(B)=(1-B)(1-0.5B)\) เขียนใหม่ได้ \((1-0.5B)(1-B)X_t=(1+0.3B)w_t\) เป็น ARIMA(1,1,1) ที่ \(\phi=0.5,\ \theta=0.3\)</p>
 <p><b>Invertible:</b> \(1+0.3x=0\Rightarrow x=-3.33\), \(|-3.33|&gt;1\) → invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
@@ -443,9 +443,9 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 <div class="copy">
 <p>\((1-B+1.25B^2)X_t=(1-0.5B)w_t\)</p>
 <p><b>Causal:</b> \(1.25x^2-x+1=0\), \(b^2-4ac=1-5=-4&lt;0\)</p>
-<p>\(x=\dfrac{1\pm2i}{2.5}=0.4\pm0.8i\), modulus \(=\sqrt{0.16+0.64}=\sqrt{0.8}=0.894&lt;1\) → not causal</p>
+<p>\(x=\dfrac{1\pm2i}{2.5}=0.4\pm0.8i\), modulus \(=\sqrt{0.16+0.64}=\sqrt{0.8}=0.894&lt;1\) → ไม่ causal</p>
 <p><b>Invertible:</b> \(1-0.5x=0\Rightarrow x=2&gt;1\) → invertible</p>
-<p>Therefore the process is invertible but not causal.</p>
+<p>สรุป invertible แต่ไม่ causal</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -468,8 +468,8 @@ Find the roots of the AR and the MA polynomials for the fitted ARMA(2,2) model. 
 <div class="copy">
 <p>\((1-0.5B)X_t=(1-B)w_t\)</p>
 <p><b>Causal:</b> \(1-0.5x=0\Rightarrow x=2&gt;1\) → causal</p>
-<p><b>Invertible:</b> \(1-x=0\Rightarrow x=1\), which does not exceed 1 → not invertible</p>
-<p>Therefore the process is causal but not invertible.</p>
+<p><b>Invertible:</b> \(1-x=0\Rightarrow x=1\) ไม่เกิน 1 → ไม่ invertible</p>
+<p>สรุป causal แต่ไม่ invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -558,12 +558,12 @@ tsdiag(m1, gof = 12):
   Ljung-Box p-values      lag 1 = 0.008 และใกล้ 0 ทุก lag ตั้งแต่ lag 2</pre>
 <div class="copy">
 <p>\(X_t-40.7630=(1+0.8207B)(1+0.7143B^{12})w_t,\qquad w_t\sim iid\ N(0,\ 88.72)\)</p>
-<p>Invertible: root of \(1+0.8207x\) is \(-1.218\), \(|-1.218|&gt;1\); root of \(1+0.7143x^{12}\) has modulus \(1.4^{1/12}&gt;1\).</p>
-<p>Standardized residuals lie between −1.59 and 2.38, within ±3: no outliers.</p>
-<p>ACF of residuals: lags 1–3 (0.375, 0.596, 0.376) are outside the bounds.</p>
-<p>Ljung-Box p-values are below 0.05 at every lag (0.008 at lag 1, ≈ 0 after) → reject H0, residuals are still correlated.</p>
-<p>Histogram and QQ plot are close to normal; Shapiro-Wilk p-value \(=0.35&gt;0.05\) → residuals are normal.</p>
-<p>The model is not adequate: the residuals are not white noise. The model has no differencing, so it cannot follow the upward trend and the yearly pattern in rain.</p>
+<p>Invertible: รากของ \(1+0.8207x\) คือ \(-1.218\), \(|-1.218|&gt;1\) รากของ \(1+0.7143x^{12}\) มี modulus \(1.4^{1/12}&gt;1\)</p>
+<p>Standardized residuals อยู่ระหว่าง −1.59 ถึง 2.38 ไม่เกิน ±3 ไม่มี outlier</p>
+<p>ACF ของ residuals ที่ lag 1–3 คือ 0.375, 0.596, 0.376 ออกนอกเส้นขอบ</p>
+<p>Ljung-Box p-value ต่ำกว่า 0.05 ทุก lag คือ 0.008 ที่ lag 1 และเกือบ 0 หลังจากนั้น → reject H0 residuals ยังมี correlation</p>
+<p>Histogram กับ QQ plot ใกล้ normal Shapiro-Wilk p-value \(=0.35&gt;0.05\) → residuals เป็น normal</p>
+<p>โมเดลไม่เหมาะสม residuals ไม่เป็น white noise โมเดลไม่มี differencing เลยตาม trend ขาขึ้นและรูปแบบรายปีของ rain ไม่ได้</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -612,10 +612,10 @@ Feb 2026       65.80546 54.01160 77.59932</pre>
 <div class="copy">
 <p>Model: \(ARIMA(0,0,0)\times(0,1,0)_{12}\) with drift</p>
 <p>\((1-B^{12})(X_t-1.0965\,t)=w_t,\qquad w_t\sim iid\ N(0,\ 36.21)\)</p>
-<p>Standardized residuals lie between −2.41 and 1.73, within ±3: no outliers.</p>
-<p>ACF of residuals is within the bounds; Ljung-Box p-values are 0.55–0.90, above 0.05 at every lag → residuals are uncorrelated.</p>
-<p>QQ plot is close to the line; Shapiro-Wilk p-value \(=0.090&gt;0.05\) → residuals are normal.</p>
-<p>The model is adequate. Forecasts: Dec 2025 = 63.61, Jan 2026 = 71.38, Feb 2026 = 65.81 mm.</p>
+<p>Standardized residuals อยู่ระหว่าง −2.41 ถึง 1.73 ไม่เกิน ±3 ไม่มี outlier</p>
+<p>ACF ของ residuals อยู่ในเส้นขอบ Ljung-Box p-value 0.55–0.90 เกิน 0.05 ทุก lag → residuals ไม่มี correlation</p>
+<p>QQ plot ใกล้เส้นตรง Shapiro-Wilk p-value \(=0.090&gt;0.05\) → residuals เป็น normal</p>
+<p>โมเดลเหมาะสม ค่าพยากรณ์ Dec 2025 = 63.61, Jan 2026 = 71.38, Feb 2026 = 65.81 มม.</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / ตัวเลขมาจากไหน</th></tr>
@@ -652,10 +652,10 @@ Dec 2025       75.50196
 Jan 2026       73.53086
 Feb 2026       64.86492</pre>
 <div class="copy">
-<p>ETS(M,A,M): multiplicative error, additive trend, multiplicative seasonality (Holt-Winters multiplicative).</p>
-<p>\(\alpha=0.0103\) (level), \(\beta=0.0099\) (trend), \(\gamma=0.0001\) (seasonal): all close to 0, so level, slope and seasonal pattern change very little over time.</p>
-<p>Initial level 13.18, initial slope 1.228 mm per month.</p>
-<p>Forecasts: Dec 2025 = 75.50, Jan 2026 = 73.53, Feb 2026 = 64.86 mm.</p>
+<p>ETS(M,A,M) คือ error แบบ multiplicative, trend แบบ additive, seasonality แบบ multiplicative เหมือน Holt-Winters แบบ multiplicative</p>
+<p>\(\alpha=0.0103\) ของ level, \(\beta=0.0099\) ของ trend, \(\gamma=0.0001\) ของ seasonal ใกล้ 0 ทั้งหมด level, ความชัน และรูปแบบฤดูกาลแทบไม่เปลี่ยนตามเวลา</p>
+<p>Level เริ่มต้น 13.18 ความชันเริ่มต้น 1.228 มม. ต่อเดือน</p>
+<p>ค่าพยากรณ์ Dec 2025 = 75.50, Jan 2026 = 73.53, Feb 2026 = 64.86 มม.</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>มาจากไหน</th></tr>
@@ -681,9 +681,9 @@ Feb 2026       64.86492</pre>
 &gt; mean(ee^2, na.rm = TRUE)
 [1] 57.09051</pre>
 <div class="copy">
-<p>tsCV with h = 1: MSE of auto.arima = 38.37, MSE of ets = 57.09.</p>
-<p>auto.arima has the smaller MSE, so ARIMA(0,0,0)(0,1,0)[12] with drift is more accurate for one-step forecasts.</p>
-<p>AIC cannot be used here: ETS AIC (344.2) and ARIMA AIC (227.9) are computed on different scales (ARIMA after seasonal differencing), so they are not comparable.</p>
+<p>tsCV ที่ h = 1 ได้ MSE ของ auto.arima = 38.37, MSE ของ ets = 57.09</p>
+<p>auto.arima มี MSE ต่ำกว่า ARIMA(0,0,0)(0,1,0)[12] with drift แม่นกว่าสำหรับการพยากรณ์หนึ่งก้าว</p>
+<p>เทียบด้วย AIC ไม่ได้ AIC ของ ETS = 344.2 กับของ ARIMA = 227.9 คิดบนสเกลต่างกัน ARIMA คิดหลังทำ seasonal difference แล้ว</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>ทำอะไร</th><th>ทำไม</th></tr>
@@ -726,10 +726,10 @@ ETS(M,A,M)   AIC = -208.34
 tsCV MSE: arima 0.001259   ets 0.001712</pre>
 <div class="copy">
 <p>(a) \((1-B)(1-B^{12})\log X_t=(1-0.4018B)(1-0.5569B^{12})w_t,\quad w_t\sim iid\ N(0,\ 0.001371)\)</p>
-<p>Invertible: roots \(1/0.4018=2.49&gt;1\) and \(B^{12}\)-root modulus \((1/0.5569)^{1/12}&gt;1\).</p>
-<p>tsdiag: one standardized residual just below −3 (−3.20), the rest within ±3; ACF of residuals within the bounds; Ljung-Box p-values 0.28–0.95, above 0.05 at every lag. Shapiro-Wilk p-value \(=0.167&gt;0.05\). Residuals are white noise and normal; the model is adequate.</p>
-<p>(b) Forecasts on the log scale 6.110, 6.054, 6.172; back-transform with exp: Jan 1961 ≈ 450, Feb ≈ 426, Mar ≈ 479 passengers (thousands).</p>
-<p>(c) tsCV MSE: ARIMA 0.00126 &lt; ETS(M,A,M) 0.00171, so ARIMA is more accurate.</p>
+<p>Invertible: ราก \(1/0.4018=2.49&gt;1\) และรากของ \(B^{12}\) มี modulus \((1/0.5569)^{1/12}&gt;1\)</p>
+<p>tsdiag: standardized residual ตัวหนึ่งต่ำกว่า −3 เล็กน้อยคือ −3.20 ที่เหลืออยู่ใน ±3 ACF ของ residuals อยู่ในเส้นขอบ Ljung-Box p-value 0.28–0.95 เกิน 0.05 ทุก lag Shapiro-Wilk p-value \(=0.167&gt;0.05\) residuals เป็น white noise และ normal โมเดลเหมาะสม</p>
+<p>(b) ค่าพยากรณ์บนสเกล log คือ 6.110, 6.054, 6.172 แปลงกลับด้วย exp ได้ Jan 1961 ≈ 450, Feb ≈ 426, Mar ≈ 479 พันคน</p>
+<p>(c) tsCV MSE: ARIMA 0.00126 &lt; ETS(M,A,M) 0.00171 ARIMA แม่นกว่า</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -764,10 +764,10 @@ tsCV MSE: ets 0.0863   arima 0.0770</pre>
 <div class="copy">
 <p>(a) Model: ARIMA(1,0,2)(0,1,1)[12]</p>
 <p>\((1+0.7947B)(1-B^{12})X_t=(1+0.7786B+0.2115B^2)(1-0.7618B^{12})w_t,\quad w_t\sim iid\ N(0,\ 0.04883)\)</p>
-<p>tsdiag: standardized residuals between −2.96 and 2.24, within ±3; ACF of residuals within the bounds; Ljung-Box p-values 0.80–1.00, above 0.05 at every lag → residuals are uncorrelated.</p>
-<p>QQ plot close to the line; Shapiro-Wilk p-value = 0.226 > 0.05 → residuals are normal. The model is adequate.</p>
-<p>(b) Forecasts: Nov 2017 = 0.081, Dec 2017 = 0.324, Jan 2018 = −0.621.</p>
-<p>(c) ets gives ETS(A,N,A). tsCV MSE: ARIMA 0.0770 &lt; ETS 0.0863, so ARIMA is more accurate.</p>
+<p>tsdiag: standardized residuals อยู่ระหว่าง −2.96 ถึง 2.24 ไม่เกิน ±3 ACF ของ residuals อยู่ในเส้นขอบ Ljung-Box p-value 0.80–1.00 เกิน 0.05 ทุก lag → residuals ไม่มี correlation</p>
+<p>QQ plot ใกล้เส้นตรง Shapiro-Wilk p-value = 0.226 > 0.05 → residuals เป็น normal โมเดลเหมาะสม</p>
+<p>(b) ค่าพยากรณ์ Nov 2017 = 0.081, Dec 2017 = 0.324, Jan 2018 = −0.621</p>
+<p>(c) ets ได้ ETS(A,N,A) tsCV MSE: ARIMA 0.0770 &lt; ETS 0.0863 ARIMA แม่นกว่า</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -790,9 +790,9 @@ tsCV MSE: ets 0.0863   arima 0.0770</pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Without <code>frequency = 12</code>, R treats the data as non-seasonal, so auto.arima cannot add seasonal terms and fits only ARIMA(0,0,1).</p>
-<p>The seasonal model has a much smaller error variance (0.0488 vs 0.1055), and inflation has a monthly pattern, so ARIMA(1,0,2)(0,1,1)[12] is correct.</p>
-<p>The AIC of the two models should not be compared: one has a seasonal difference and the other does not.</p>
+<p>ถ้าไม่ใส่ <code>frequency = 12</code> R มองว่าข้อมูลไม่มีฤดูกาล auto.arima ใส่ seasonal term ไม่ได้ เลยได้แค่ ARIMA(0,0,1)</p>
+<p>โมเดลที่มีฤดูกาลมี error variance ต่ำกว่ามาก 0.0488 เทียบกับ 0.1055 และเงินเฟ้อมีรูปแบบรายเดือน ARIMA(1,0,2)(0,1,1)[12] ถูกต้อง</p>
+<p>ไม่ควรเทียบ AIC ของสองโมเดลนี้ ตัวหนึ่งทำ seasonal difference อีกตัวไม่ได้ทำ</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -867,9 +867,9 @@ test_set[test_set$storm == 1, c("year", "month")]</code></pre>
 46 2025   Oct
 47 2025   Nov</pre>
 <div class="copy">
-<p>(a) 10 of the 36 training months had a storm.</p>
-<p>(b) In the test set, storms occur in May, Jun, Sep, Oct and Nov 2025.</p>
-<p>(c) A model with storm as a regressor needs these future storm values to forecast, and its forecasts change in exactly those five months.</p>
+<p>(a) training 36 เดือน เกิดพายุ 10 เดือน</p>
+<p>(b) test set เกิดพายุเดือน May, Jun, Sep, Oct และ Nov 2025</p>
+<p>(c) โมเดลที่ใช้ storm เป็น regressor ต้องรู้ค่า storm ในอนาคตเหล่านี้ถึงจะพยากรณ์ได้ และค่าพยากรณ์จะเปลี่ยนตรงห้าเดือนนี้พอดี</p>
 </div>
 <table class="why"><caption>ทำไมต้องดูก่อน</caption>
 <tr><th>ขั้น</th><th>ดูอะไร</th><th>ได้อะไร</th></tr>
@@ -900,8 +900,8 @@ AIC=161.06   AICc=161.63   BIC=163.41
                ME     RMSE      MAE       MPE     MAPE
 Test set 1.070851 4.845553 4.189353 0.5984012 7.180635</pre>
 <div class="copy">
-<p>Model 1: ARIMA(0,0,0)(0,1,0)[12] with drift. Test RMSE = 4.85.</p>
-<p>The model takes a seasonal difference of lag 12 and adds a drift of 1.07 mm per month, so each month is forecast as the same month last year plus the trend.</p>
+<p>ตัวแบบ 1: ARIMA(0,0,0)(0,1,0)[12] with drift · RMSE test = 4.85</p>
+<p>โมเดลทำ seasonal difference ที่ lag 12 แล้วบวก drift เดือนละ 1.07 มม. ค่าพยากรณ์ของแต่ละเดือนคือเดือนเดียวกันของปีก่อนบวก trend</p>
 </div>
 <table class="why"><caption>อ่าน output</caption>
 <tr><th>ขั้น</th><th>ตัวเลข</th><th>อ่านว่า</th></tr>
@@ -934,8 +934,8 @@ AIC=159.38   AICc=160.58   BIC=162.92
                ME     RMSE      MAE      MPE     MAPE
 Test set 1.642794 4.996273 4.345338 1.888537 7.648522</pre>
 <div class="copy">
-<p>Model 2: Regression with ARIMA(0,0,0)(0,1,0)[12] errors, with storm as the regressor. Test RMSE = 5.00.</p>
-<p>The storm coefficient is 4.58 mm: a storm month has 4.58 mm more rain than a month without a storm, all else equal.</p>
+<p>ตัวแบบ 2: Regression with ARIMA(0,0,0)(0,1,0)[12] errors ใช้ storm เป็น regressor · RMSE test = 5.00</p>
+<p>สัมประสิทธิ์ของ storm = 4.58 มม. เดือนที่มีพายุมีฝนมากกว่าเดือนที่ไม่มีพายุ 4.58 มม. เมื่อปัจจัยอื่นเท่ากัน</p>
 </div>
 <table class="why"><caption>อ่าน output</caption>
 <tr><th>ขั้น</th><th>ตัวเลข</th><th>อ่านว่า</th></tr>
@@ -963,8 +963,8 @@ accuracy(f3$mean, te)</code></pre>
 Test set RMSE = 5.59      (seed 1)
 seed 2 → 12.92   seed 3 → 5.24</pre>
 <div class="copy">
-<p>Model 3: NNAR(1,1,2)[12], using set.seed(1). Test RMSE = 5.59.</p>
-<p>The network uses rain one month ago and rain twelve months ago as inputs, with 2 nodes in one hidden layer.</p>
+<p>ตัวแบบ 3: NNAR(1,1,2)[12] ใช้ set.seed(1) · RMSE test = 5.59</p>
+<p>network ใช้ฝนเมื่อหนึ่งเดือนก่อนกับฝนเมื่อสิบสองเดือนก่อนเป็น input มี hidden layer เดียว 2 node</p>
 </div>
 <table class="why"><caption>อ่านชื่อ NNAR(p,P,k)[m]</caption>
 <tr><th>ตำแหน่ง</th><th>ค่า</th><th>อ่านว่า</th></tr>
@@ -996,9 +996,9 @@ accuracy(f4$mean, te)</code></pre>
 Test set RMSE = 64.52     (seed 1)
 seed 2 → 70.84   seed 3 → 58.30</pre>
 <div class="copy">
-<p>Model 4: NNAR(1,1,2)[12] with storm as the regressor, using set.seed(1). Test RMSE = 64.52.</p>
-<p>The forecasts jump from about 46 mm to about 153 mm in June, when a storm occurs, and stay near 150–160 mm even in July and August, which have no storm. Actual rain in the test set is far below this.</p>
-<p>The network learned an extreme response to storm from only 36 months, and because NNAR forecasts recursively, each high forecast is fed back as the lag-1 input for the next month, so the jump carries forward.</p>
+<p>ตัวแบบ 4: NNAR(1,1,2)[12] ใช้ storm เป็น regressor ใช้ set.seed(1) · RMSE test = 64.52</p>
+<p>ค่าพยากรณ์กระโดดจากราว 46 มม. เป็นราว 153 มม. ในเดือน June ที่มีพายุ แล้วค้างอยู่ราว 150–160 มม. แม้ July กับ August จะไม่มีพายุ ฝนจริงใน test set ต่ำกว่านี้มาก</p>
+<p>network เรียนผลของ storm แบบสุดโต่งจากข้อมูลแค่ 36 เดือน และ NNAR พยากรณ์ทีละก้าว ค่าพยากรณ์ที่สูงถูกส่งกลับเป็น input lag 1 ของเดือนถัดไป ค่าที่กระโดดเลยลากต่อไปเรื่อยๆ</p>
 </div>
 <table class="why"><caption>อ่านค่าพยากรณ์</caption>
 <tr><th>ขั้น</th><th>เห็นอะไร</th><th>เพราะ</th></tr>
@@ -1024,10 +1024,10 @@ seed 2 → 70.84   seed 3 → 58.30</pre>
 <tr><td>3</td><td>NNAR(1,1,2)[12]</td><td>5.59 · seed 1</td></tr>
 <tr><td>4</td><td>NNAR(1,1,2)[12] with storm</td><td>64.52 · seed 1</td></tr>
 </table>
-<p>Model 1 is the most accurate. The rain series has a clear yearly pattern and an upward trend, which a seasonal difference with drift captures well, and with only 36 training months a simple model wins.</p>
-<p>Adding storm does not help: its coefficient is 4.58 mm and only borderline significant, so it adds little information, and RMSE rises slightly to 5.00.</p>
-<p>NNAR needs much more data than 36 points, so it is worse than ARIMA and depends on the random seed.</p>
-<p>NNAR with storm fails badly: the network learns an extreme response to storm, and recursive forecasts carry the June jump into the following months.</p>
+<p>ตัวแบบ 1 แม่นที่สุด rain มีรูปแบบรายปีชัดและ trend ขาขึ้น seasonal difference กับ drift จับได้ดี และ training มีแค่ 36 เดือน โมเดลง่ายเลยชนะ</p>
+<p>ใส่ storm แล้วไม่ช่วย สัมประสิทธิ์ 4.58 มม. มีนัยสำคัญแบบก้ำกึ่ง เพิ่มข้อมูลได้น้อย RMSE ขึ้นเล็กน้อยเป็น 5.00</p>
+<p>NNAR ต้องใช้ข้อมูลมากกว่า 36 จุดมาก เลยแย่กว่า ARIMA และผลขึ้นกับ random seed</p>
+<p>NNAR ที่ใส่ storm พังหนัก network เรียนผลของ storm แบบสุดโต่ง และการพยากรณ์ทีละก้าวลากค่าที่กระโดดใน June ไปเดือนถัดๆ ไป</p>
 </div>
 <table class="why"><caption>อภิปรายให้ครบ</caption>
 <tr><th>ขั้น</th><th>เขียนอะไร</th><th>ทำไม</th></tr>
@@ -1048,7 +1048,7 @@ seed 2 → 70.84   seed 3 → 58.30</pre>
 <div class="model-answer">
 <div class="copy">
 <p>(a) \(y_t=1.02\,t+4.58\,\text{storm}_t+\eta_t,\qquad (1-B^{12})\eta_t=w_t,\quad w_t\sim iid\ N(0,\sigma^2)\)</p>
-<p>(b) A storm month adds 4.58 mm to the forecast compared with a month without a storm, all else equal.</p>
+<p>(b) เดือนที่มีพายุ ค่าพยากรณ์สูงกว่าเดือนที่ไม่มีพายุ 4.58 มม. เมื่อปัจจัยอื่นเท่ากัน</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1067,9 +1067,9 @@ seed 2 → 70.84   seed 3 → 58.30</pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a) The value of storm for Dec 2025. ARIMAX needs future values of every regressor.</p>
-<p>(b) Either forecast storm first, use scenarios with storm = 0 and storm = 1, or use a model without the regressor such as Model 1.</p>
-<p>(c) NNAR has no likelihood-based AIC comparable to ARIMA. Test-set RMSE measures every model the same way, on data the models did not see.</p>
+<p>(a) ต้องรู้ค่า storm ของ Dec 2025 ARIMAX ต้องใช้ค่าในอนาคตของ regressor ทุกตัว</p>
+<p>(b) พยากรณ์ storm ก่อน หรือทำ scenario ทั้ง storm = 0 และ storm = 1 หรือใช้โมเดลที่ไม่มี regressor เช่นตัวแบบ 1</p>
+<p>(c) NNAR ไม่มี AIC จาก likelihood ที่เทียบกับ ARIMA ได้ RMSE บน test set วัดทุกโมเดลแบบเดียวกันบนข้อมูลที่โมเดลไม่เคยเห็น</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ข้อ</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1088,9 +1088,9 @@ seed 2 → 70.84   seed 3 → 58.30</pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>ARIMAX with price is the most accurate (RMSE 9.8): price carries real information about sales.</p>
-<p>NNAR fits the training data very closely (σ² = 2.3) but its test RMSE is high, which is overfitting.</p>
-<p>NNAR with price is the worst (31.0): the network learns an unstable response to price and recursive forecasts amplify it.</p>
+<p>ARIMAX ที่ใช้ราคาแม่นที่สุด RMSE 9.8 ราคามีข้อมูลจริงเกี่ยวกับยอดขาย</p>
+<p>NNAR เข้ากับ training ได้ดีมาก σ² = 2.3 แต่ RMSE test สูง คือ overfitting</p>
+<p>NNAR ที่ใช้ราคาแย่ที่สุด 31.0 network เรียนผลของราคาแบบไม่นิ่ง และการพยากรณ์ทีละก้าวขยายความผิดพลาดนั้น</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำไม</th></tr>
@@ -1157,11 +1157,11 @@ coef    -0.0741  0.1376 -0.0815  0.1999  0.6199 -0.4151  0.2811
 s.e.     0.0916  0.0539  0.0285  0.2613  0.5236  0.1780  0.1575
 rstandard −2.74 ถึง 3.64   Shapiro p = 0.177   Ljung-Box p: lag 10 0.864  lag 20 0.069  lag 30 0.030</pre>
 <div class="copy">
-<p>Class model (tempr, part): Regression with ARIMA(3,1,2)(1,0,0)[52] errors, AICc = 2849.06, test RMSE = 7.25.</p>
-<p>Extended model (tempr, part, rh, co, so2, no2, o3): Regression with ARIMA(2,1,1)(1,0,0)[52] errors, AICc = 2839.59, test RMSE = 7.13.</p>
-<p>Both models use d = 1 and the same training data, so their AICc can be compared: the extended model has lower AICc and lower test RMSE, so the extra variables improve the class model.</p>
-<p>Significant regressors (|coef/s.e.| &gt; 2): part (2.55), rh (−2.86) and no2 (−2.33); tempr, co, so2 and o3 are not significant, so a smaller model with part, rh and no2 is a reasonable next step.</p>
-<p>Residuals look normal (Shapiro p = 0.177), but the Ljung-Box p-value falls below 0.05 at lag 30, so some autocorrelation remains.</p>
+<p>โมเดลในคลาส ใช้ tempr, part: Regression with ARIMA(3,1,2)(1,0,0)[52] errors, AICc = 2849.06, RMSE test = 7.25</p>
+<p>โมเดลที่เพิ่มตัวแปร ใช้ tempr, part, rh, co, so2, no2, o3: Regression with ARIMA(2,1,1)(1,0,0)[52] errors, AICc = 2839.59, RMSE test = 7.13</p>
+<p>ทั้งสองโมเดลใช้ d = 1 และ training ชุดเดียวกัน เทียบ AICc ได้ โมเดลที่เพิ่มตัวแปรมีทั้ง AICc และ RMSE test ต่ำกว่า ตัวแปรที่เพิ่มช่วยปรับปรุงโมเดลในคลาสได้</p>
+<p>regressor ที่มีนัยสำคัญ |coef/s.e.| &gt; 2 มี part 2.55, rh −2.86 และ no2 −2.33 ส่วน tempr, co, so2, o3 ไม่มีนัยสำคัญ ขั้นต่อไปที่สมเหตุสมผลคือโมเดลเล็กลงที่ใช้แค่ part, rh, no2</p>
+<p>Residuals ดู normal Shapiro p = 0.177 แต่ Ljung-Box p-value ต่ำกว่า 0.05 ที่ lag 30 ยังเหลือ autocorrelation อยู่บ้าง</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1205,10 +1205,10 @@ ARIMA ไม่มี xreg   ARIMA(2,0,0)(1,1,0)[52] with drift          RMSE te
 ARIMAX tempr+part  Regression with ARIMA(3,1,2)(1,0,0)[52]     RMSE test 7.25
 NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</pre>
 <div class="copy">
-<p>Approach 1, ARIMAX (regression with ARIMA errors): Regression with ARIMA(3,1,2)(1,0,0)[52] errors, test RMSE 7.25.</p>
-<p>Approach 2, NNAR with xreg: NNAR(15,1,10)[52] fits the training data very closely (σ² = 1.44) but its test RMSE is 12.21, so it overfits.</p>
-<p>Neither approach beats the class VAR(2) (test RMSE 6.35), and ARIMAX is even worse than a SARIMA without regressors (6.82): the seasonal difference D = 1 captures the yearly pattern better than tempr does.</p>
-<p>Conclusion: keep VAR(2). Unlike ARIMAX, VAR also forecasts tempr and part itself, so it does not need their future values.</p>
+<p>วิธีที่ 1 ARIMAX หรือ regression with ARIMA errors: Regression with ARIMA(3,1,2)(1,0,0)[52] errors, RMSE test 7.25</p>
+<p>วิธีที่ 2 NNAR ใส่ xreg: NNAR(15,1,10)[52] เข้ากับ training ได้ดีมาก σ² = 1.44 แต่ RMSE test 12.21 คือ overfit</p>
+<p>ไม่มีวิธีไหนชนะ VAR(2) ในคลาสที่ได้ RMSE test 6.35 และ ARIMAX ยังแย่กว่า SARIMA ที่ไม่มี regressor ซึ่งได้ 6.82 seasonal difference D = 1 จับรูปแบบรายปีได้ดีกว่า tempr</p>
+<p>สรุป ใช้ VAR(2) ต่อ VAR พยากรณ์ tempr กับ part เองด้วย ไม่ต้องรู้ค่าในอนาคตเหมือน ARIMAX</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1256,8 +1256,8 @@ Write out the fitted model, carefully stating all the model assumptions.</div>
 <div class="model-answer">
 <div class="copy">
 <p>\((1-1.6009B+0.6445B^2)(X_t-26.4163)=(1-1.4982B+0.5219B^2)w_t\)</p>
-<p>where \(w_t\sim iid\ N(0,\ 791.7)\).</p>
-<p>Assumptions: \(\{w_t\}\) is Gaussian white noise with mean 0 and variance 791.7; \(X_t\) is stationary with mean 26.4163; the model is causal and invertible (all AR and MA roots exceed 1 in modulus: 1.246 and 1.056, 1.815).</p>
+<p>โดย \(w_t\sim iid\ N(0,\ 791.7)\)</p>
+<p>Assumptions: \(\{w_t\}\) เป็น Gaussian white noise mean 0 variance 791.7 · \(X_t\) stationary มี mean 26.4163 · โมเดล causal และ invertible รากของ AR และ MA มี modulus เกิน 1 ทุกตัว คือ 1.246 และ 1.056, 1.815</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1285,9 +1285,9 @@ Write out the fitted model, carefully stating all the model assumptions.</div>
 <div class="model-answer">
 <div class="copy">
 <p>\((1-0.9139B)(1-0.9998B^{12})(X_t+0.0060)=(1+0.0403B)(1-0.9884B^{12})w_t\)</p>
-<p>where \(w_t\sim iid\ N(0,\ 0.006561)\).</p>
-<p>Assumptions: \(\{w_t\}\) Gaussian white noise; the model is causal and invertible; residuals uncorrelated and normal.</p>
-<p>Comments: sar1 = 0.9998 is almost 1, so the seasonal AR root is almost on the unit circle; a seasonal difference \((1-B^{12})\) may be more suitable. sar1 and sma1 almost cancel, which suggests parameter redundancy. ma1 is not significant (0.0403/0.0277 = 1.45 &lt; 2) and neither is the intercept.</p>
+<p>โดย \(w_t\sim iid\ N(0,\ 0.006561)\)</p>
+<p>Assumptions: \(\{w_t\}\) เป็น Gaussian white noise · โมเดล causal และ invertible · residuals ไม่มี correlation และเป็น normal</p>
+<p>ข้อสังเกต: sar1 = 0.9998 เกือบเท่า 1 ราก seasonal AR เกือบอยู่บน unit circle ใช้ seasonal difference \((1-B^{12})\) น่าจะเหมาะกว่า · sar1 กับ sma1 เกือบหักล้างกัน ส่อว่ามี parameter redundancy · ma1 ไม่มีนัยสำคัญ 0.0403/0.0277 = 1.45 &lt; 2 และ intercept ก็ไม่มีนัยสำคัญ</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1316,8 +1316,8 @@ Write out the fitted model for M2, carefully stating all the model assumptions.<
 <div class="model-answer">
 <div class="copy">
 <p>\((1-0.9197B-0.1577B^2+0.1710B^3)(1-B^{12})\log x_t=(1-0.8080B^{12})w_t\)</p>
-<p>where \(w_t\sim iid\ N(0,\ 0.03632)\).</p>
-<p>Assumptions: \(\{w_t\}\) Gaussian white noise; the AR part is causal (roots of \(\Phi(x)\) exceed 1 in modulus); the seasonal MA part is invertible \((|-0.8080|&lt;1)\); no intercept because of the seasonal difference.</p>
+<p>โดย \(w_t\sim iid\ N(0,\ 0.03632)\)</p>
+<p>Assumptions: \(\{w_t\}\) เป็น Gaussian white noise · ส่วน AR causal รากของ \(\Phi(x)\) มี modulus เกิน 1 · ส่วน seasonal MA invertible เพราะ \(|-0.8080|&lt;1\) · ไม่มี intercept เพราะทำ seasonal difference แล้ว</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1344,8 +1344,8 @@ sigma^2 estimated as 19892:  log likelihood = -637.04,  aic = 1282.08</pre>
 <div class="model-answer">
 <div class="copy">
 <p>\((1-0.8611B)(X_t-920.5567)=(1-0.5177B)w_t,\qquad w_t\sim iid\ N(0,\ 19892)\)</p>
-<p>Causal: root of \(1-0.8611x\) is \(1.161&gt;1\). Invertible: root of \(1-0.5177x\) is \(1.932&gt;1\).</p>
-<p>Assumptions: \(w_t\) Gaussian white noise, mean of \(X_t\) is 920.56, residuals uncorrelated and normal.</p>
+<p>Causal: รากของ \(1-0.8611x\) คือ \(1.161&gt;1\) · Invertible: รากของ \(1-0.5177x\) คือ \(1.932&gt;1\)</p>
+<p>Assumptions: \(w_t\) เป็น Gaussian white noise · mean ของ \(X_t\) คือ 920.56 · residuals ไม่มี correlation และเป็น normal</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1370,7 +1370,7 @@ sigma^2 = 20177:  log likelihood = -630.63</pre>
 <div class="model-answer">
 <div class="copy">
 <p>\((1-0.2544B)(1-B)X_t=(1-0.8741B)w_t,\qquad w_t\sim iid\ N(0,\ 20177)\)</p>
-<p>ar1: 0.2544/0.1194 = 2.13 &gt; 2 → significant. ma1: 0.8741/0.0605 = 14.4 → significant.</p>
+<p>ar1: 0.2544/0.1194 = 2.13 &gt; 2 → มีนัยสำคัญ · ma1: 0.8741/0.0605 = 14.4 → มีนัยสำคัญ</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -1483,8 +1483,8 @@ sigma^2 = 0.3543</pre>(ก) เขียนโมเดลพร้อม assump
 <p>(a) \(\text{consumption}_t=0.6168+0.2781\,\text{income}_t+\eta_t\)</p>
 <p>\(\eta_t=0.5819\,\eta_{t-1}+w_t-0.5345\,w_{t-1}+0.1843\,w_{t-2}\)</p>
 <p>\(w_t\sim iid\ N(0,\ 0.3543)\)</p>
-<p>Assumptions: the ARMA(1,2) error is causal and invertible, and the residuals are white noise and normally distributed.</p>
-<p>(b) When income rises by 1 unit, consumption rises by 0.2781 units on average in the same quarter.</p>
+<p>Assumptions: error ที่เป็น ARMA(1,2) causal และ invertible · residuals เป็น white noise และ normal</p>
+<p>(b) income เพิ่ม 1 หน่วย consumption เพิ่มเฉลี่ย 0.2781 หน่วยในไตรมาสเดียวกัน</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -1511,8 +1511,8 @@ sigma^2 = 12.5</pre>(ก) เขียนโมเดล (ข) ทำไมไ�
 <div class="copy">
 <p>(a) \(y_t=1.5\,\text{temp}_t+8.2\,\text{promo}_t+\eta_t\)</p>
 <p>\((1-B)(1-B^{12})\eta_t=(1-0.4B)(1-0.6B^{12})w_t,\qquad w_t\sim iid\ N(0,\ 12.5)\)</p>
-<p>(b) The error is differenced (d = 1, D = 1), so any constant is removed by differencing and R does not estimate an intercept.</p>
-<p>(c) A month with a promotion has sales 8.2 units higher than a month without one, at the same temperature.</p>
+<p>(b) error ถูก difference ทั้ง d = 1 และ D = 1 ค่าคงที่ใดๆ หายไปตอน difference R เลยไม่ประมาณ intercept</p>
+<p>(c) เดือนที่มีโปรโมชั่นมียอดขายสูงกว่าเดือนที่ไม่มี 8.2 หน่วย ที่อุณหภูมิเท่ากัน</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -1538,8 +1538,8 @@ sigma^2 = 4</pre>(ก) เขียนโมเดล (ข) เพื่อน�
 <div class="copy">
 <p>(a) \(y_t=0.5\,t+2.1\,x_t+\eta_t\)</p>
 <p>\((1+0.3B)(1-B)\eta_t=w_t,\qquad w_t\sim iid\ N(0,\ 4)\)</p>
-<p>(b) The AR term belongs to the error \(\eta_t\), not to \(y_t\); the drift multiplies t; and the difference \((1-B)\) is missing.</p>
-<p>(c) \(2.1\times 3=6.3\) units.</p>
+<p>(b) AR term เป็นของ error \(\eta_t\) ไม่ใช่ของ \(y_t\) · drift คูณกับ t · ขาด difference \((1-B)\)</p>
+<p>(c) \(2.1\times 3=6.3\) หน่วย</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -1585,8 +1585,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Supports: the residuals are uncorrelated (white noise). Almost all residual autocorrelations lie within the ±2/√n bounds; one small spike near lag 18 is expected by chance (about 1 in 20 lags).</p>
-<p>Does not support (cannot check): normality of \(w_t\) and constant variance. These need a normal QQ plot / Shapiro-Wilk test and a plot of standardized residuals over time.</p>
+<p>สนับสนุน: residuals ไม่มี correlation หรือเป็น white noise autocorrelation ของ residuals เกือบทุก lag อยู่ในเส้นขอบ ±2/√n มี spike เล็กๆ ใกล้ lag 18 อันเดียว ซึ่งเกิดได้โดยบังเอิญราว 1 ใน 20 lag</p>
+<p>ไม่สนับสนุนหรือตรวจไม่ได้: ความเป็น normal ของ \(w_t\) และ variance คงที่ ต้องใช้ normal QQ plot หรือ Shapiro-Wilk test และกราฟ standardized residuals ตามเวลา</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1606,10 +1606,10 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(A) All residual autocorrelations are inside the bounds → residuals are uncorrelated, consistent with white noise.</p>
-<p>(B) The points lie close to the straight line, with slight deviation in the tails → residuals are approximately normal.</p>
-<p>Conclusion: the model assumptions on \(w_t\) look reasonable.</p>
-<p>Not checked: constant variance over time (and outliers). Check by plotting the standardized residuals against time; values should stay within ±3 with no change in spread. Also check the ACF of squared residuals or ArchTest for volatility clustering, and the Ljung-Box p-values as a joint test.</p>
+<p>(A) autocorrelation ของ residuals อยู่ในเส้นขอบทั้งหมด → residuals ไม่มี correlation สอดคล้องกับ white noise</p>
+<p>(B) จุดอยู่ใกล้เส้นตรง เบี่ยงเล็กน้อยที่ปลาย → residuals ใกล้ normal</p>
+<p>สรุป assumption ของ \(w_t\) ดูสมเหตุสมผล</p>
+<p>ที่ยังไม่ได้ตรวจ: variance คงที่ตามเวลาและ outlier ตรวจโดยพล็อต standardized residuals กับเวลา ค่าควรอยู่ใน ±3 และความกว้างไม่เปลี่ยน ตรวจ ACF ของ squared residuals หรือ ArchTest ดู volatility clustering และดู Ljung-Box p-value เป็นการทดสอบรวม</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1628,8 +1628,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Both residual ACFs are mostly within the bounds, but both have a few small significant spikes, including lags near 1 year (lag ≈ 13) and 2 years.</p>
-<p>So neither M1 nor M2 gives perfectly uncorrelated residuals; some seasonal correlation remains in both. The ACF plots do not clearly favour one model; the log transformation does not change the correlation structure much.</p>
+<p>ACF ของ residuals ทั้งสองโมเดลส่วนใหญ่อยู่ในเส้นขอบ แต่ทั้งคู่มี spike เล็กๆ ที่มีนัยสำคัญอยู่บ้าง รวมถึง lag ใกล้ 1 ปี คือ lag ≈ 13 และ 2 ปี</p>
+<p>ทั้ง M1 และ M2 ยังได้ residuals ที่ไม่ปลอด correlation สมบูรณ์ ยังเหลือ seasonal correlation ทั้งคู่ กราฟ ACF ไม่ได้ชี้ชัดว่าโมเดลไหนดีกว่า การ log ไม่ได้เปลี่ยนโครงสร้าง correlation มากนัก</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1649,9 +1649,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a2) M1 residuals curve away from the line with a long right tail → they are skewed and not normal; the residual spread grows with the level of the series.</p>
-<p>(b2) M2 residuals lie close to the line except a few low points → approximately normal.</p>
-<p>The log transformation stabilizes the variance and makes the residuals closer to normal, so M2 is preferred.</p>
+<p>(a2) residuals ของ M1 โค้งออกจากเส้น มีหางขวายาว → เบ้ ไม่ normal และความกว้างของ residuals โตตามระดับของอนุกรม</p>
+<p>(b2) residuals ของ M2 อยู่ใกล้เส้น ยกเว้นจุดต่ำไม่กี่จุด → ใกล้ normal</p>
+<p>การ log ทำให้ variance นิ่งและ residuals ใกล้ normal ขึ้น เลือก M2</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1671,9 +1671,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Bad fit.</p>
-<p>Standardized residuals are within ±3, so there are no serious outliers.</p>
-<p>However, the Ljung-Box p-values are below 0.05 for every lag from 2 onward, so we reject H0 that the residuals are white noise. The residuals are still correlated (spikes near the bounds at lags 1 and 3), so the model has not captured all the dependence in the data.</p>
+<p>โมเดลไม่เหมาะสม</p>
+<p>Standardized residuals อยู่ใน ±3 ไม่มี outlier รุนแรง</p>
+<p>แต่ Ljung-Box p-value ต่ำกว่า 0.05 ทุก lag ตั้งแต่ lag 2 → reject H0 ที่ว่า residuals เป็น white noise residuals ยังมี correlation มี spike ใกล้เส้นขอบที่ lag 1 และ 3 โมเดลยังจับ dependence ในข้อมูลไม่หมด</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1700,8 +1700,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Model A fails: Ljung-Box p-values are below 0.05 at every lag and residual ACF at lag 2 = 0.596 is large, so residuals are correlated. Normality is fine (p = 0.35) but this does not rescue the model.</p>
-<p>Model B passes: no outliers, ACF within the bounds, Ljung-Box p-values above 0.05 at every lag (uncorrelated), Shapiro-Wilk p-value 0.090 &gt; 0.05 (normal). Model B is adequate.</p>
+<p>Model A ไม่ผ่าน Ljung-Box p-value ต่ำกว่า 0.05 ทุก lag และ ACF ของ residuals ที่ lag 2 = 0.596 สูงมาก residuals มี correlation ความเป็น normal ผ่าน p = 0.35 แต่ช่วยโมเดลไม่ได้</p>
+<p>Model B ผ่าน ไม่มี outlier · ACF อยู่ในเส้นขอบ · Ljung-Box p-value เกิน 0.05 ทุก lag ไม่มี correlation · Shapiro-Wilk p-value 0.090 &gt; 0.05 เป็น normal · Model B เหมาะสม</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -1720,10 +1720,10 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Standardized residuals are within ±3: no outliers.</p>
-<p>ACF of residuals has a large spike at lag 1.0 year (lag 12, about 0.40), above the bounds.</p>
-<p>Ljung-Box p-values drop below 0.05 from lag 12 onward → residuals are correlated.</p>
-<p>The model is not adequate: yearly seasonality is left in the residuals. Add a seasonal term, for example ARIMA(1,0,0)(1,0,0)[12].</p>
+<p>Standardized residuals อยู่ใน ±3 ไม่มี outlier</p>
+<p>ACF ของ residuals มี spike ใหญ่ที่ lag 1.0 ปี คือ lag 12 ราว 0.40 เกินเส้นขอบ</p>
+<p>Ljung-Box p-value ต่ำกว่า 0.05 ตั้งแต่ lag 12 → residuals มี correlation</p>
+<p>โมเดลไม่เหมาะสม ยังเหลือฤดูกาลรายปีใน residuals ให้เพิ่ม seasonal term เช่น ARIMA(1,0,0)(1,0,0)[12]</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -1742,9 +1742,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Residuals are uncorrelated (Ljung-Box p &gt; 0.05), so the dependence is captured.</p>
-<p>But they are not normal: the QQ plot bends away at both ends (heavy tails), Shapiro-Wilk p = 8.7e-11 &lt; 0.05, and three standardized residuals exceed ±3 (outliers).</p>
-<p>Point forecasts are fine, but prediction intervals based on normality are too narrow. Check the outliers or use a transformation.</p>
+<p>Residuals ไม่มี correlation Ljung-Box p &gt; 0.05 จับ dependence ได้แล้ว</p>
+<p>แต่ไม่ normal QQ plot โค้งออกทั้งสองปลาย หางหนา · Shapiro-Wilk p = 8.7e-11 &lt; 0.05 · standardized residuals สามตัวเกิน ±3 เป็น outlier</p>
+<p>ค่าพยากรณ์จุดใช้ได้ แต่ prediction interval ที่อิง normal แคบเกินจริง ให้ตรวจ outlier หรือแปลงข้อมูล</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -1763,8 +1763,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>The residuals are uncorrelated, but the squared residuals are strongly autocorrelated and ArchTest rejects H0 (p = 1.1e-15).</p>
-<p>The variance is not constant: there is volatility clustering. The mean model is fine, but the variance should be modelled with ARCH/GARCH.</p>
+<p>Residuals ไม่มี correlation แต่ squared residuals มี autocorrelation สูง และ ArchTest reject H0 p = 1.1e-15</p>
+<p>Variance ไม่คงที่ มี volatility clustering โมเดลของ mean ใช้ได้ แต่ต้องโมเดล variance ด้วย ARCH/GARCH</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -1801,9 +1801,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>Mean: \(E(X_t)=E(w_tw_{t-1})=E(w_t)E(w_{t-1})=0\cdot0=0\)</p>
 <p>Variance: \(\gamma(0)=E(X_t^2)-0=E(w_t^2w_{t-1}^2)=E(w_t^2)E(w_{t-1}^2)=\sigma^2\cdot\sigma^2=\sigma^4\)</p>
 <p>\(h=1\): \(\gamma(1)=E(X_tX_{t+1})=E(w_tw_{t-1}\,w_{t+1}w_t)=E(w_t^2)E(w_{t-1})E(w_{t+1})=\sigma^2\cdot0\cdot0=0\)</p>
-<p>\(h\ge2\): \(\gamma(h)=E(w_tw_{t-1}\,w_{t+h}w_{t+h-1})=0\) (no common terms, all independent with mean 0)</p>
-<p>Mean 0 and \(\gamma(h)=\sigma^4\) for \(h=0\), \(0\) otherwise; none depend on t.</p>
-<p>Therefore \(X_t\) is stationary (a white noise, but not iid).</p>
+<p>\(h\ge2\): \(\gamma(h)=E(w_tw_{t-1}\,w_{t+h}w_{t+h-1})=0\) ไม่มีพจน์ซ้ำกัน ทุกตัวอิสระกันและมี mean 0</p>
+<p>Mean = 0 และ \(\gamma(h)=\sigma^4\) เมื่อ \(h=0\) เป็น \(0\) เมื่อ h อื่น ไม่ขึ้นกับ t</p>
+<p>สรุป \(X_t\) stationary เป็น white noise แต่ไม่ iid</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1825,11 +1825,11 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Let \(Var(X)=\sigma_X^2\).</p>
+<p>ให้ \(Var(X)=\sigma_X^2\)</p>
 <p>Mean: \(E(Y_t)=(-1)^tE(X)=(-1)^t\cdot0=0\)</p>
 <p>\(\gamma(h)=Cov(Y_t,Y_{t+h})=E[(-1)^tX\cdot(-1)^{t+h}X]=(-1)^{2t+h}E(X^2)=(-1)^h\sigma_X^2\)</p>
-<p>So \(\gamma(0)=\sigma_X^2\), \(\gamma(1)=-\sigma_X^2\), \(\gamma(2)=\sigma_X^2,\dots\) which depends only on h.</p>
-<p>Therefore \(Y_t\) is stationary with mean 0 and \(\gamma(h)=(-1)^h\sigma_X^2\).</p>
+<p>ได้ \(\gamma(0)=\sigma_X^2\), \(\gamma(1)=-\sigma_X^2\), \(\gamma(2)=\sigma_X^2,\dots\) ขึ้นกับ h อย่างเดียว</p>
+<p>สรุป \(Y_t\) stationary มี mean 0 และ \(\gamma(h)=(-1)^h\sigma_X^2\)</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1851,14 +1851,14 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a) \(E(X_t)=-2t+E(w_t)+0.5E(w_{t-1})=-2t\), which depends on t. Therefore \(X_t\) is nonstationary.</p>
+<p>(a) \(E(X_t)=-2t+E(w_t)+0.5E(w_{t-1})=-2t\) ขึ้นกับ t สรุป \(X_t\) nonstationary</p>
 <p>(b) \(\nabla X_t=[-2t+w_t+0.5w_{t-1}]-[-2(t-1)+w_{t-1}+0.5w_{t-2}]\)</p>
 <p>\(=-2+w_t-0.5w_{t-1}-0.5w_{t-2}\)</p>
 <p>\(E(\nabla X_t)=-2\)</p>
 <p>\(\gamma(0)=\sigma^2(1+0.25+0.25)=1.5\sigma^2\)</p>
 <p>\(\gamma(1)=\sigma^2[(1)(-0.5)+(-0.5)(-0.5)]=-0.25\sigma^2\)</p>
-<p>\(\gamma(2)=\sigma^2[(1)(-0.5)]=-0.5\sigma^2\), \(\gamma(h)=0\) for \(h\ge3\)</p>
-<p>Mean and autocovariance do not depend on t. Therefore \(\nabla X_t\) is stationary.</p>
+<p>\(\gamma(2)=\sigma^2[(1)(-0.5)]=-0.5\sigma^2\), \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p>
+<p>Mean และ autocovariance ไม่ขึ้นกับ t สรุป \(\nabla X_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1882,12 +1882,12 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Mean: \(E(X_t)=\int_0^1\sin(2\pi ut)\,du=\left[\dfrac{-\cos(2\pi ut)}{2\pi t}\right]_0^1=\dfrac{1-\cos(2\pi t)}{2\pi t}=0\) since \(\cos(2\pi t)=1\).</p>
-<p>For \(s\ne t\): \(E(X_tX_s)=\int_0^1\sin(2\pi ut)\sin(2\pi us)\,du\)</p>
+<p>Mean: \(E(X_t)=\int_0^1\sin(2\pi ut)\,du=\left[\dfrac{-\cos(2\pi ut)}{2\pi t}\right]_0^1=\dfrac{1-\cos(2\pi t)}{2\pi t}=0\) เพราะ \(\cos(2\pi t)=1\)</p>
+<p>เมื่อ \(s\ne t\): \(E(X_tX_s)=\int_0^1\sin(2\pi ut)\sin(2\pi us)\,du\)</p>
 <p>\(=\tfrac12\int_0^1[\cos(2\pi u(t-s))-\cos(2\pi u(t+s))]\,du=\tfrac12(0-0)=0\)</p>
-<p>For \(s=t\): \(E(X_t^2)=\tfrac12\int_0^1[1-\cos(4\pi ut)]\,du=\tfrac12(1-0)=\tfrac12\)</p>
-<p>So \(E(X_t)=0\), \(\gamma(0)=\tfrac12\), \(\gamma(h)=0\) for \(h\ne0\), none depend on t.</p>
-<p>Therefore \(X_t\) is stationary.</p>
+<p>เมื่อ \(s=t\): \(E(X_t^2)=\tfrac12\int_0^1[1-\cos(4\pi ut)]\,du=\tfrac12(1-0)=\tfrac12\)</p>
+<p>ได้ \(E(X_t)=0\), \(\gamma(0)=\tfrac12\), \(\gamma(h)=0\) เมื่อ \(h\ne0\) ไม่ขึ้นกับ t</p>
+<p>สรุป \(X_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1913,10 +1913,10 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>\(X_t=\tfrac12(w_tw_{t-1}+w_t^2)\)</p>
 <p>Mean: \(E(X_t)=\tfrac12[E(w_t)E(w_{t-1})+E(w_t^2)]=\tfrac12(0+\sigma^2)=\dfrac{\sigma^2}{2}\)</p>
 <p>\(E(X_t^2)=\tfrac14E(w_t^2w_{t-1}^2+2w_t^3w_{t-1}+w_t^4)=\tfrac14(\sigma^4+0+E(w_t^4))\)</p>
-<p>\(\gamma(0)=E(X_t^2)-\left(\dfrac{\sigma^2}{2}\right)^2=\dfrac{E(w_t^4)}{4}\) (\(=\tfrac34\sigma^4\) if \(w_t\) is normal)</p>
+<p>\(\gamma(0)=E(X_t^2)-\left(\dfrac{\sigma^2}{2}\right)^2=\dfrac{E(w_t^4)}{4}\) ถ้า \(w_t\) เป็น normal จะได้ \(\tfrac34\sigma^4\)</p>
 <p>\(E(X_tX_{t+1})=\tfrac14E[(w_tw_{t-1}+w_t^2)(w_{t+1}w_t+w_{t+1}^2)]=\tfrac14E(w_t^2w_{t+1}^2)=\dfrac{\sigma^4}{4}\)</p>
-<p>\(\gamma(1)=\dfrac{\sigma^4}{4}-\dfrac{\sigma^4}{4}=0\); \(\gamma(h)=0\) for \(h\ge2\) (independent).</p>
-<p>Mean \(\sigma^2/2\), \(\gamma(0)=E(w_t^4)/4\), \(\gamma(h)=0\) otherwise: \(X_t\) is stationary.</p>
+<p>\(\gamma(1)=\dfrac{\sigma^4}{4}-\dfrac{\sigma^4}{4}=0\) และ \(\gamma(h)=0\) เมื่อ \(h\ge2\) เพราะอิสระกัน</p>
+<p>Mean \(\sigma^2/2\), \(\gamma(0)=E(w_t^4)/4\), \(\gamma(h)=0\) เมื่อ h อื่น สรุป \(X_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1940,9 +1940,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>\(E(Y_t)=7-3t+E(X_t)=7-3t+3t=7\), free of t.</p>
-<p>\(Cov(Y_t,Y_{t+h})=Cov(7-3t+X_t,\ 7-3(t+h)+X_{t+h})=Cov(X_t,X_{t+h})=\gamma_h\), free of t.</p>
-<p>Therefore \(Y_t\) is stationary.</p>
+<p>\(E(Y_t)=7-3t+E(X_t)=7-3t+3t=7\) ไม่ขึ้นกับ t</p>
+<p>\(Cov(Y_t,Y_{t+h})=Cov(7-3t+X_t,\ 7-3(t+h)+X_{t+h})=Cov(X_t,X_{t+h})=\gamma_h\) ไม่ขึ้นกับ t</p>
+<p>สรุป \(Y_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1963,8 +1963,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="copy">
 <p>\(X_t=w_1+w_2+\dots+w_t\)</p>
 <p>\(E(X_t)=0\)</p>
-<p>\(Var(X_t)=Var(w_1)+\dots+Var(w_t)=t\sigma^2\), which depends on t.</p>
-<p>Therefore \(X_t\) is not stationary.</p>
+<p>\(Var(X_t)=Var(w_1)+\dots+Var(w_t)=t\sigma^2\) ขึ้นกับ t</p>
+<p>สรุป \(X_t\) ไม่ stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -1985,8 +1985,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="copy">
 <p>\(E(X_t)=\cos(ct)E(w_0)=0\)</p>
 <p>\(Cov(X_t,X_{t+h})=\cos(ct)\cos(c(t+h))E(w_0^2)=\sigma^2\cos(ct)\cos(ct+ch)\)</p>
-<p>This depends on t (for example \(Var(X_t)=\sigma^2\cos^2(ct)\) changes with t).</p>
-<p>Therefore \(X_t\) is not stationary.</p>
+<p>ค่านี้ขึ้นกับ t เช่น \(Var(X_t)=\sigma^2\cos^2(ct)\) เปลี่ยนตาม t</p>
+<p>สรุป \(X_t\) ไม่ stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -2007,9 +2007,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="copy">
 <p>\(E(X_t)=E(w_t)E(w_{t-2})=0\)</p>
 <p>\(\gamma(0)=E(w_t^2w_{t-2}^2)=E(w_t^2)E(w_{t-2}^2)=\sigma^4\)</p>
-<p>\(\gamma(1)=E(w_tw_{t-2}\,w_{t+1}w_{t-1})=0\) (four different w, each with mean 0)</p>
+<p>\(\gamma(1)=E(w_tw_{t-2}\,w_{t+1}w_{t-1})=0\) มี w สี่ตัวไม่ซ้ำกัน แต่ละตัว mean 0</p>
 <p>\(\gamma(2)=E(w_tw_{t-2}\,w_{t+2}w_t)=E(w_t^2)E(w_{t-2})E(w_{t+2})=\sigma^2\cdot0\cdot0=0\)</p>
-<p>\(\gamma(h)=0\) for \(h\ge3\). Mean and autocovariance do not depend on t, so \(X_t\) is stationary (white noise).</p>
+<p>\(\gamma(h)=0\) เมื่อ \(h\ge3\) mean และ autocovariance ไม่ขึ้นกับ t สรุป \(X_t\) stationary เป็น white noise</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2031,7 +2031,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>\(E(X_t)=E(w_t)+E(w_{t-1}^2)=0+\sigma^2=\sigma^2\)</p>
 <p>\(\gamma(0)=Var(w_t)+Var(w_{t-1}^2)=\sigma^2+(E(w^4)-[E(w^2)]^2)=\sigma^2+(3\sigma^4-\sigma^4)=\sigma^2+2\sigma^4\)</p>
 <p>\(\gamma(1)=Cov(w_t+w_{t-1}^2,\ w_{t+1}+w_t^2)=Cov(w_t,w_t^2)=E(w_t^3)-E(w_t)E(w_t^2)=0\)</p>
-<p>\(\gamma(h)=0\) for \(h\ge2\). Mean \(\sigma^2\) and \(\gamma(0)=\sigma^2+2\sigma^4\) do not depend on t: stationary.</p>
+<p>\(\gamma(h)=0\) เมื่อ \(h\ge2\) mean \(\sigma^2\) และ \(\gamma(0)=\sigma^2+2\sigma^4\) ไม่ขึ้นกับ t สรุป stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2051,9 +2051,9 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a) \(E(X_t)=5+0.3t\) depends on t → not stationary.</p>
+<p>(a) \(E(X_t)=5+0.3t\) ขึ้นกับ t → ไม่ stationary</p>
 <p>(b) \(\nabla X_t=[5+0.3t+w_t]-[5+0.3(t-1)+w_{t-1}]=0.3+w_t-w_{t-1}\)</p>
-<p>\(E(\nabla X_t)=0.3\); \(\gamma(0)=2\sigma^2\), \(\gamma(1)=-\sigma^2\), \(\gamma(h)=0\) for \(h\ge2\) → stationary.</p>
+<p>\(E(\nabla X_t)=0.3\) · \(\gamma(0)=2\sigma^2\), \(\gamma(1)=-\sigma^2\), \(\gamma(h)=0\) เมื่อ \(h\ge2\) → stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2214,7 +2214,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <tr><td>เทียบกันได้เมื่อไร</td><td>ข้อมูลชุดเดียวกัน สเกลเดียวกัน difference เท่ากัน ตระกูลเดียวกัน · log กับไม่ log, d ต่างกัน, ETS กับ ARIMA <b>เทียบไม่ได้</b></td></tr>
 <tr><td>ตารางผิดปกติ</td><td>เพิ่มพารามิเตอร์ 1 ตัวแล้ว AIC ขึ้นเกิน 2 เป็นไปไม่ได้ทางทฤษฎี เพราะ log L ของโมเดลใหญ่ต้องไม่น้อยกว่าตัวเล็ก ถ้าเจอคือ R หาค่าสูงสุดไม่เจอ</td></tr>
 </table>
-<p>ประโยคปิดที่ใช้ได้ทุกข้อ: AIC is not the only criterion; also check residual diagnostics, parameter significance, causality/invertibility/redundancy, and out-of-sample forecast accuracy.</p>
+<p>ประโยคปิดที่ใช้ได้ทุกข้อ: AIC ไม่ใช่เกณฑ์เดียว ต้องตรวจ residual diagnostics, นัยสำคัญของ parameter, causal/invertible/redundancy และความแม่นของการพยากรณ์นอกตัวอย่างด้วย</p>
 </div>
 
 <!-- A1 -->
@@ -2231,8 +2231,8 @@ What ARMA model does this suggest, and why?</div>
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>The lowest AIC is 3959.7 for ARMA(2,2), so AIC suggests ARMA(2,2).</p>
-<p>However, ARMA(2,1) (3960.5), AR(1) (3961.0) and MA(1) (3961.5) are within 2 of the minimum, so the evidence for ARMA(2,2) is weak. By parsimony a small model such as AR(1) or MA(1) is reasonable, which agrees with the ACF/PACF in part (a).</p>
+<p>AIC ต่ำสุดคือ 3959.7 ของ ARMA(2,2) AIC เลือก ARMA(2,2)</p>
+<p>แต่ ARMA(2,1) ได้ 3960.5, AR(1) ได้ 3961.0 และ MA(1) ได้ 3961.5 ห่างจากค่าต่ำสุดไม่ถึง 2 หลักฐานที่สนับสนุน ARMA(2,2) อ่อน ตามหลัก parsimony เลือกโมเดลเล็กอย่าง AR(1) หรือ MA(1) ได้ ตรงกับ ACF/PACF ในข้อ a</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>มาจากไหน</th></tr>
@@ -2252,10 +2252,10 @@ What ARMA model does this suggest, and why?</div>
 <div class="model-answer">
 <div class="copy">
 <p>\(AIC=-2\log L+2k\)</p>
-<p>ARMA(2,1) with intercept: \(k=2+1+1+1=5\) (\(\phi_1,\phi_2,\theta_1,\mu,\sigma^2\))</p>
+<p>ARMA(2,1) มี intercept: \(k=2+1+1+1=5\) คือ \(\phi_1,\phi_2,\theta_1,\mu,\sigma^2\)</p>
 <p>\(3960.5=-2\log L+10\)</p>
 <p>\(\log L=\dfrac{10-3960.5}{2}=-1975.25\)</p>
-<p>Check with the ARMA(2,2) printout: \(-2(-1973.88)+2(6)=3959.76\), which matches the reported aic, so k includes \(\sigma^2\).</p>
+<p>ตรวจกับ output ของ ARMA(2,2): \(-2(-1973.88)+2(6)=3959.76\) ตรงกับ aic ที่ R พิมพ์ k นับ \(\sigma^2\) ด้วย</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -2283,10 +2283,10 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Models without an AR term (row 0) have much higher AIC, so an AR component is essential.</p>
-<p>The minimum is ARMA(4,4) with −239.73, but it lies on the edge of the table, so a larger order might be even lower; the search range may be too small. ARMA(1,1) has −237.98, only 1.75 higher with 6 fewer parameters, so by parsimony ARMA(1,1)×(1,0,1)₁₂ is preferred. BIC can also be used to support the choice.</p>
-<p>Some entries are inconsistent: ARMA(3,1) (−211.95) is 13 higher than ARMA(3,0) (−224.96), but adding one parameter can increase AIC by at most 2. This shows numerical problems in the likelihood maximization, so the table should not be trusted blindly.</p>
-<p>Other analyses: residual diagnostics (ACF, Ljung-Box, QQ plot), significance of coefficients, roots for causality, invertibility and redundancy, and out-of-sample forecast accuracy.</p>
+<p>โมเดลที่ไม่มี AR term คือแถว 0 มี AIC สูงกว่ามาก ต้องมีส่วน AR</p>
+<p>ต่ำสุดคือ ARMA(4,4) ได้ −239.73 แต่อยู่ขอบตาราง order ที่ใหญ่กว่าอาจต่ำกว่านี้อีก ช่วงที่ค้นอาจแคบเกิน ARMA(1,1) ได้ −237.98 สูงกว่าแค่ 1.75 แต่ใช้ parameter น้อยกว่า 6 ตัว ตามหลัก parsimony เลือก ARMA(1,1)×(1,0,1)₁₂ ใช้ BIC ช่วยยืนยันได้</p>
+<p>บางค่าในตารางขัดกัน ARMA(3,1) ได้ −211.95 สูงกว่า ARMA(3,0) ที่ได้ −224.96 อยู่ 13 แต่เพิ่ม parameter หนึ่งตัวทำให้ AIC เพิ่มได้ไม่เกิน 2 แสดงว่าการหาค่า likelihood สูงสุดมีปัญหาเชิงตัวเลข อย่าเชื่อตารางแบบไม่ตรวจ</p>
+<p>การวิเคราะห์อื่นที่ควรทำ: residual diagnostics คือ ACF, Ljung-Box, QQ plot · นัยสำคัญของสัมประสิทธิ์ · รากเพื่อตรวจ causal, invertible และ redundancy · ความแม่นของการพยากรณ์นอกตัวอย่าง</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>มาจากไหน</th></tr>
@@ -2307,8 +2307,8 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>No. The two AIC values are computed from likelihoods of different data, x and log(x), so they are on different scales and cannot be compared directly. The much lower AIC of M2 comes from the smaller numbers of log(x), not from a better model.</p>
-<p>To decide on the log transformation, compare residual diagnostics: whether the residual variance is constant and whether the QQ plot is closer to normal (parts d and e).</p>
+<p>ไม่ได้ AIC สองค่านี้คิดจาก likelihood ของข้อมูลต่างกัน คือ x กับ log(x) อยู่คนละสเกล เทียบตรงๆ ไม่ได้ AIC ของ M2 ที่ต่ำกว่ามากมาจากตัวเลขของ log(x) ที่เล็กกว่า ไม่ใช่เพราะโมเดลดีกว่า</p>
+<p>จะตัดสินว่าควร log ไหม ให้เทียบ residual diagnostics ว่า variance ของ residuals คงที่ไหม และ QQ plot ใกล้ normal กว่าไหม ตามข้อ d และ e</p>
 </div>
 <p class="trap">⚠ อาจารย์บอกใน Class 13 ว่า "ข้อนี้ผมจะเน้น" โมเดลตระกูลเดียวกันแต่ข้อมูลแปลงต่างกัน log likelihood คิดบนข้อมูลคนละชุด AIC จึงเทียบไม่ได้ แบบเดียวกับ ETS กับ ARIMA</p>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
@@ -2327,9 +2327,9 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>We cannot conclude from AIC. ETS and ARIMA compute the likelihood differently (ETS includes the initial state and is not based on the same transformed data), so their AIC values are not comparable, even on the same series.</p>
-<p>Compare them by forecast accuracy instead, for example time series cross-validation (tsCV) or RMSE on a test set.</p>
-<p>Note: ETS(A,N,N) is simple exponential smoothing, equivalent to ARIMA(0,1,1) with \(\theta=\alpha-1=-0.7545\).</p>
+<p>สรุปจาก AIC ไม่ได้ ETS กับ ARIMA คิด likelihood ต่างกัน ETS รวม initial state และไม่ได้คิดบนข้อมูลที่แปลงแบบเดียวกัน AIC เทียบกันไม่ได้แม้ใช้อนุกรมเดียวกัน</p>
+<p>ให้เทียบด้วยความแม่นของการพยากรณ์แทน เช่น time series cross-validation หรือ tsCV หรือ RMSE บน test set</p>
+<p>หมายเหตุ ETS(A,N,N) คือ simple exponential smoothing เทียบเท่า ARIMA(0,1,1) ที่ \(\theta=\alpha-1=-0.7545\)</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -2347,9 +2347,9 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Not necessarily. auto.arima first chooses d with a unit-root test, then minimizes AICc among models with that d using a stepwise search. "Best" only means lowest AICc within that search.</p>
-<p>Its AIC 1267.25 cannot be compared with ARIMA(1,0,1) (1282.08) because d is different.</p>
-<p>We still need residual diagnostics (Ljung-Box, QQ plot), significance checks (ar1: 0.2544/0.1194 = 2.13, borderline) and out-of-sample accuracy before calling it the best model.</p>
+<p>ไม่จำเป็น auto.arima เลือก d ก่อนด้วย unit-root test แล้วหา AICc ต่ำสุดในโมเดลที่มี d นั้นด้วย stepwise search คำว่า "Best" หมายถึงแค่ AICc ต่ำสุดในการค้นครั้งนั้น</p>
+<p>AIC 1267.25 ของมันเทียบกับ ARIMA(1,0,1) ที่ได้ 1282.08 ไม่ได้ เพราะ d ต่างกัน</p>
+<p>ก่อนเรียกว่าโมเดลดีที่สุด ยังต้องทำ residual diagnostics คือ Ljung-Box, QQ plot · ตรวจนัยสำคัญ ar1: 0.2544/0.1194 = 2.13 ก้ำกึ่ง · และดูความแม่นนอกตัวอย่าง</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -2367,11 +2367,11 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>\(k=3\) (\(\phi,\theta,\sigma^2\)), \(n=99\) after differencing</p>
+<p>\(k=3\) คือ \(\phi,\theta,\sigma^2\) และ \(n=99\) หลัง difference</p>
 <p>\(AIC=-2(-630.63)+2(3)=1261.26+6=1267.26\)</p>
 <p>\(AICc=AIC+\dfrac{2k(k+1)}{n-k-1}=1267.26+\dfrac{24}{95}=1267.51\)</p>
 <p>\(BIC=1261.26+3\ln(99)=1261.26+13.79=1275.05\)</p>
-<p>All match the R output up to rounding.</p>
+<p>ตรงกับ output ของ R ทุกค่า ต่างแค่การปัดเศษ</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -2395,8 +2395,8 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <div class="copy">
 <p>AR(1): \(AIC=420.8+6=426.8\), \(BIC=420.8+3\ln100=420.8+13.8=434.6\)</p>
 <p>ARMA(2,1): \(AIC=413.8+10=423.8\), \(BIC=413.8+5\ln100=413.8+23.0=436.8\)</p>
-<p>AIC prefers ARMA(2,1) (423.8 &lt; 426.8); BIC prefers AR(1) (434.6 &lt; 436.8) because BIC penalizes extra parameters more.</p>
-<p>The AIC difference is 3, so both are reasonable; check residual diagnostics and choose the simpler model if both pass.</p>
+<p>AIC เลือก ARMA(2,1) เพราะ 423.8 &lt; 426.8 · BIC เลือก AR(1) เพราะ 434.6 &lt; 436.8 BIC ลงโทษ parameter ที่เพิ่มหนักกว่า</p>
+<p>AIC ต่างกัน 3 ใช้ได้ทั้งคู่ ให้ตรวจ residual diagnostics ถ้าผ่านทั้งคู่ เลือกโมเดลที่ง่ายกว่า</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2415,11 +2415,11 @@ Discuss briefly what you learn from the AIC table. Explain why AIC may not be th
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a) Yes: same data, same d.</p>
-<p>(b) No: likelihoods are on different scales (x vs log x).</p>
-<p>(c) No: ETS and ARIMA compute the likelihood differently.</p>
-<p>(d) No: different d, so the likelihoods use different data (x vs ∇x).</p>
-<p>(e) Yes: same response y and same d; the regression term is just extra parameters.</p>
+<p>(a) ได้ ข้อมูลเดียวกัน d เท่ากัน</p>
+<p>(b) ไม่ได้ likelihood อยู่คนละสเกล x กับ log x</p>
+<p>(c) ไม่ได้ ETS กับ ARIMA คิด likelihood ต่างกัน</p>
+<p>(d) ไม่ได้ d ต่างกัน likelihood คิดจากข้อมูลต่างกัน x กับ ∇x</p>
+<p>(e) ได้ ตัวแปรตาม y เดียวกัน d เท่ากัน regression term เป็นแค่ parameter ที่เพิ่มมา</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2468,12 +2468,12 @@ c(1,2)        a1 p=0.055, a2 p=0.40, b1 p=1.00       0.0006    0.620
 ugarchfit sGARCH(1,1): mu 0.0318 (p 0.46)  omega 0.1182 (p 0.011)
                        alpha1 0.4722 (p 0.000)  beta1 0.4529 (p 0.000)</pre>
 <div class="copy">
-<p>Model: GARCH(1,1).</p>
-<p>Reason: x is a daily stock return; ADF p = 0.01 → stationary. The time plot shows volatility clustering and ArchTest p = 0.0006 → ARCH effect, so the variance must be modelled.</p>
-<p>Steps: compare ARCH(1), GARCH(1,1), GARCH(2,1). GARCH(1,1) has all parameters significant, Ljung-Box of squared residuals p = 0.89 and Jarque-Bera p = 0.55, the best of the three.</p>
+<p>โมเดล: GARCH(1,1)</p>
+<p>เหตุผล: x คือผลตอบแทนรายวันของหุ้น ADF p = 0.01 → stationary กราฟตามเวลามี volatility clustering และ ArchTest p = 0.0006 → มี ARCH effect ต้องโมเดล variance</p>
+<p>ขั้นตอน: เทียบ ARCH(1), GARCH(1,1), GARCH(2,1) GARCH(1,1) มี parameter มีนัยสำคัญทุกตัว Ljung-Box ของ squared residuals p = 0.89 และ Jarque-Bera p = 0.55 ดีที่สุดในสามตัว</p>
 <p>\(x_t=0.0318+u_t,\quad u_t=\sigma_t\varepsilon_t,\quad \varepsilon_t\sim iid\ N(0,1)\)</p>
 <p>\(\sigma_t^2=0.1182+0.4722\,u_{t-1}^2+0.4529\,\sigma_{t-1}^2\)</p>
-<p>mu is not significant (p = 0.46), so the mean return can be taken as 0.</p>
+<p>mu ไม่มีนัยสำคัญ p = 0.46 ถือว่าผลตอบแทนเฉลี่ยเป็น 0 ได้</p>
 </div>
 <table class="why"><caption>อ่าน output ทีละตัว</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>มาจากไหน</th></tr>
@@ -2526,11 +2526,11 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>ArchTest p &lt; 2.2e-16 → strong ARCH effect.</p>
-<p>ARCH(1) and GARCH(1,1) fail the Ljung-Box test on squared residuals (p = 0.033 and 0.016). GARCH with two ARCH terms and one GARCH term (tseries order c(1,2)) passes: all parameters significant, LB p = 0.934, JB p = 0.986.</p>
+<p>ArchTest p &lt; 2.2e-16 → มี ARCH effect ชัด</p>
+<p>ARCH(1) กับ GARCH(1,1) ไม่ผ่าน Ljung-Box ของ squared residuals p = 0.033 และ 0.016 GARCH ที่มี ARCH term สองตัวและ GARCH term หนึ่งตัว คือ order c(1,2) ของ tseries ผ่าน parameter มีนัยสำคัญทุกตัว LB p = 0.934, JB p = 0.986</p>
 <p>\(x_t=0.0683+u_t,\quad u_t=\sigma_t\varepsilon_t\)</p>
 <p>\(\sigma_t^2=0.1379+0.1279\,u_{t-1}^2+0.3186\,u_{t-2}^2+0.2583\,\sigma_{t-1}^2\)</p>
-<p>mu is significant here, so keep it in the mean equation.</p>
+<p>ข้อนี้ mu มีนัยสำคัญ ให้คงไว้ในสมการ mean</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -2552,7 +2552,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <p>\(u_T=-0.3286-0.0683=-0.3969,\quad u_{T-1}=0.5795-0.0683=0.5112\)</p>
 <p>\(\sigma_{T+1}^2=0.1379+0.1279(0.3969)^2+0.3186(0.5112)^2+0.2583(0.5511)^2\)</p>
 <p>\(=0.1379+0.0201+0.0833+0.0784=0.3198\)</p>
-<p>\(\sigma_{T+1}=\sqrt{0.3198}=0.5655\), which matches R (0.5654).</p>
+<p>\(\sigma_{T+1}=\sqrt{0.3198}=0.5655\) ตรงกับ R ที่ได้ 0.5654</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -2649,7 +2649,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <div class="copy">
 <p>\(\hat\rho_1=\dfrac{\theta}{1+\theta^2}\Rightarrow0.4(1+\theta^2)=\theta\Rightarrow0.4\theta^2-\theta+0.4=0\)</p>
 <p>\(\theta=\dfrac{1\pm\sqrt{1-4(0.4)(0.4)}}{2(0.4)}=\dfrac{1\pm\sqrt{0.36}}{0.8}=\dfrac{1\pm0.6}{0.8}\Rightarrow\theta=2,\ 0.5\)</p>
-<p>Choose the invertible root: \(\hat\theta=0.5\)</p>
+<p>เลือกรากที่ invertible: \(\hat\theta=0.5\)</p>
 <p>\(\gamma_0=\sigma^2(1+\theta^2)\Rightarrow\hat\sigma^2=\dfrac{2.5}{1+0.25}=2\)</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
@@ -2673,7 +2673,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <div class="model-answer">
 <div class="copy">
 <p>\(0.6\theta^2-\theta+0.6=0\), \(b^2-4ac=1-4(0.6)(0.6)=1-1.44=-0.44&lt;0\)</p>
-<p>There is no real solution for θ. Since \(|\rho_1|\le\tfrac12\) for every MA(1), \(\hat\rho_1=0.6\) means MA(1) is not a suitable model.</p>
+<p>ไม่มีคำตอบจริงของ θ ทุก MA(1) มี \(|\rho_1|\le\tfrac12\) ได้ \(\hat\rho_1=0.6\) เลยบอกว่า MA(1) ไม่เหมาะกับข้อมูลนี้</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -2692,7 +2692,7 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <div class="model-answer">
 <div class="copy">
 <p>\(0.5=\phi_1+0.5\phi_2,\qquad 0.1=0.5\phi_1+\phi_2\)</p>
-<p>From the first: \(\phi_1=0.5-0.5\phi_2\)</p>
+<p>จากสมการแรก \(\phi_1=0.5-0.5\phi_2\)</p>
 <p>\(0.1=0.5(0.5-0.5\phi_2)+\phi_2=0.25+0.75\phi_2\Rightarrow\phi_2=\dfrac{-0.15}{0.75}=-0.2\)</p>
 <p>\(\phi_1=0.5-0.5(-0.2)=0.6\)</p>
 <p>\(\hat\sigma^2=4(1-0.6\times0.5-(-0.2)\times0.1)=4(1-0.3+0.02)=2.88\)</p>
@@ -2741,9 +2741,9 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <tr><td>5</td><td>14</td><td>24.23</td><td>0.5778</td><td>11</td><td>40</td><td>29.51</td><td>1.3555</td></tr>
 <tr><td>6</td><td>27</td><td>25.11</td><td>1.0753</td><td>12</td><td>27</td><td>30.39</td><td>0.8885</td></tr>
 </table>
-<p>Average ratio: Q1 0.6543, Q2 1.1053, Q3 1.3221, Q4 0.9241; mean = 1.0015</p>
+<p>อัตราส่วนเฉลี่ย Q1 0.6543, Q2 1.1053, Q3 1.3221, Q4 0.9241 ค่าเฉลี่ยรวม = 1.0015</p>
 <p>Seasonal index: Q1 0.6534, Q2 1.1037, Q3 1.3202, Q4 0.9227</p>
-<p>2018: \(t=13: (19.83+0.88\times13)(0.6534)=31.27\times0.6534=20.43\)</p>
+<p>ปี 2018: \(t=13: (19.83+0.88\times13)(0.6534)=31.27\times0.6534=20.43\)</p>
 <p>\(t=14: 32.15\times1.1037=35.48\qquad t=15: 33.03\times1.3202=43.61\qquad t=16: 33.91\times0.9227=31.29\)</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
@@ -2772,11 +2772,11 @@ si &lt;- tapply(ratio, rep(1:12, length.out = 47), mean)
 si &lt;- si / mean(si)
 (coef(fit)[1] + coef(fit)[2] * c(48, 49, 50)) * si[c(12, 1, 2)]</code></pre>
 <div class="copy">
-<p>Trend: \(T_t=12.4589+1.1741t\) (t = 1 is Jan 2022)</p>
+<p>Trend: \(T_t=12.4589+1.1741t\) โดย t = 1 คือ Jan 2022</p>
 <p>Seasonal index: Jan 1.124, Feb 0.974, Mar 0.774, Apr 0.678, May 0.811, Jun 0.878, Jul 0.962, Aug 1.059, Sep 1.139, Oct 1.186, Nov 1.273, Dec 1.143</p>
-<p>Dec 2025 (t = 48): \(68.815\times1.1428=78.64\)</p>
-<p>Jan 2026 (t = 49): \(69.989\times1.1240=78.67\)</p>
-<p>Feb 2026 (t = 50): \(71.163\times0.9736=69.29\)</p>
+<p>Dec 2025 ที่ t = 48: \(68.815\times1.1428=78.64\)</p>
+<p>Jan 2026 ที่ t = 49: \(69.989\times1.1240=78.67\)</p>
+<p>Feb 2026 ที่ t = 50: \(71.163\times0.9736=69.29\)</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -2797,10 +2797,10 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Detrend by subtraction \(Y_t-T_t\); average by quarter and adjust to mean 0:</p>
+<p>ถอด trend ด้วยการลบ \(Y_t-T_t\) เฉลี่ยแยกไตรมาส แล้วปรับให้เฉลี่ยรวมเป็น 0</p>
 <p>\(S_1=-8.60,\ S_2=2.52,\ S_3=8.31,\ S_4=-2.24\)</p>
-<p>2018: \(31.27-8.60=22.67,\ 32.15+2.52=34.67,\ 33.03+8.31=41.34,\ 33.91-2.24=31.67\)</p>
-<p>Additive seasonality is a fixed amount in $ millions; multiplicative is a fixed percentage, so it grows with the trend.</p>
+<p>ปี 2018: \(31.27-8.60=22.67,\ 32.15+2.52=34.67,\ 33.03+8.31=41.34,\ 33.91-2.24=31.67\)</p>
+<p>ฤดูกาลแบบ additive เป็นจำนวนคงที่ หน่วยล้านดอลลาร์ ส่วนแบบ multiplicative เป็นเปอร์เซ็นต์คงที่ ขนาดโตตาม trend</p>
 </div>
 <table class="why"><caption>ต่างจากแบบคูณตรงไหน</caption>
 <tr><th>ขั้น</th><th>แบบบวก</th><th>แบบคูณ</th></tr>
@@ -2837,10 +2837,10 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>First ask whether the regressor affects Y only (one-way) or whether Y and X affect each other (feedback), and whether the goal is explanation or forecasting.</p>
-<p><b>GLS</b>: linear regression of Y on X where the errors are autocorrelated. It corrects the standard errors, so use it when the goal is to estimate and test the effect of X.</p>
-<p><b>ARIMAX</b>: regression with ARIMA errors. Use it when X affects Y one-way and future values of X are known or controlled (for example advertising budget), and the goal is to forecast Y.</p>
-<p><b>VAR</b>: every variable is explained by lags of all variables. Use it when the variables influence each other and all of them must be forecast together; Granger causality shows the direction of influence.</p>
+<p>ถามก่อนว่า regressor ส่งผลต่อ Y ทางเดียว หรือ Y กับ X ส่งผลถึงกันเป็น feedback และเป้าหมายคืออธิบายหรือพยากรณ์</p>
+<p><b>GLS</b>: linear regression ของ Y บน X ที่ error มี autocorrelation แก้ standard error ให้ถูก ใช้เมื่อต้องการประมาณและทดสอบผลของ X</p>
+<p><b>ARIMAX</b>: regression with ARIMA errors ใช้เมื่อ X ส่งผลต่อ Y ทางเดียว และรู้หรือกำหนดค่าในอนาคตของ X ได้ เช่นงบโฆษณา และเป้าหมายคือพยากรณ์ Y</p>
+<p><b>VAR</b>: ทุกตัวแปรถูกอธิบายด้วย lag ของทุกตัวแปร ใช้เมื่อตัวแปรส่งผลถึงกันและต้องพยากรณ์ทุกตัวพร้อมกัน Granger causality บอกทิศทางของผล</p>
 </div>
 <table class="why"><caption>จำง่าย ๆ</caption>
 <tr><th>โมเดล</th><th>X ในอนาคต</th><th>ทิศของผล</th></tr>
@@ -2859,12 +2859,12 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(1) FB Prophet: daily data, weekly seasonality and holiday effects.</p>
-<p>(2) GARCH: volatility clustering; squared returns are autocorrelated.</p>
-<p>(3) ARIMAX: Ads is a known regressor that drives sales one-way.</p>
-<p>(4) SARIMA: one monthly series with yearly seasonality and a trend.</p>
-<p>(5) VAR: the two GDP series affect each other.</p>
-<p>(6) SARIMA: one series with stable monthly seasonality and no extra information.</p>
+<p>(1) FB Prophet: ข้อมูลรายวัน มีฤดูกาลรายสัปดาห์และผลของวันหยุด</p>
+<p>(2) GARCH: มี volatility clustering squared returns มี autocorrelation</p>
+<p>(3) ARIMAX: Ads เป็น regressor ที่รู้ค่าและส่งผลต่อยอดขายทางเดียว</p>
+<p>(4) SARIMA: อนุกรมรายเดือนตัวเดียว มีฤดูกาลรายปีและ trend</p>
+<p>(5) VAR: GDP สองประเทศส่งผลถึงกัน</p>
+<p>(6) SARIMA: อนุกรมตัวเดียว ฤดูกาลรายเดือนนิ่ง ไม่มีข้อมูลอื่นเพิ่ม</p>
 </div>
 <p class="trap">⚠ อาจารย์เฉลยครบทั้ง 6 ชุดใน Class 13 ชุด (4) อาจารย์ตอบ SARIMA เพราะ "อนุกรมเวลามีแค่อันเดียว ... เป็น seasonal" ไม่ได้ให้น้ำหนักกับช่วงโควิด หลักคือดูว่าโจทย์ให้ข้อมูลอะไร "เพิ่ม" จากอนุกรมเดียวที่มีฤดูกาล</p>
 </div>
@@ -2879,10 +2879,10 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>In R, <code>ccf(sales, coupon)</code> at lag k measures the correlation between sales at week t + k and coupon spending at week t.</p>
-<p>Coupon: a strong positive correlation (about 0.85) at lag +3, and nothing at lag 0. Spending on receipt coupons is followed by higher sales about 3 weeks later, which fits how coupons work: customers redeem them on a later visit.</p>
-<p>BOGO: no significant correlation at any lag, so BOGO spending shows no measurable link with sales of this SKU.</p>
-<p>Insight: keep the coupon programme and plan stock and staff about 3 weeks after each coupon campaign; review or cut the BOGO budget for this SKU. Correlation does not prove causation, so test with a controlled campaign.</p>
+<p>ใน R <code>ccf(sales, coupon)</code> ที่ lag k วัด correlation ระหว่าง sales ในสัปดาห์ t + k กับค่าใช้จ่าย coupon ในสัปดาห์ t</p>
+<p>Coupon: correlation บวกสูงราว 0.85 ที่ lag +3 และไม่มีอะไรที่ lag 0 ใช้เงินกับคูปองท้ายใบเสร็จแล้ว ยอดขายขึ้นในอีกราว 3 สัปดาห์ ตรงกับธรรมชาติของคูปอง ลูกค้าเอามาใช้ตอนกลับมาซื้อครั้งถัดไป</p>
+<p>BOGO: ไม่มี correlation ที่มีนัยสำคัญเลยทุก lag ค่าใช้จ่าย BOGO ไม่มีความสัมพันธ์ที่วัดได้กับยอดขาย SKU นี้</p>
+<p>Insight: ทำโปรคูปองต่อ และเตรียมสต็อกกับพนักงานไว้ราว 3 สัปดาห์หลังแต่ละแคมเปญคูปอง ทบทวนหรือตัดงบ BOGO ของ SKU นี้ correlation ไม่ได้พิสูจน์ causation ควรทดสอบด้วยแคมเปญที่ควบคุมได้</p>
 </div>
 <table class="why"><caption>อ่านกราฟอย่างไร</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>เหตุผล</th></tr>
@@ -2903,9 +2903,9 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p><code>ccf(sales, ads)</code> at lag k is the correlation between sales at week t + k and ads at week t.</p>
-<p>The peak 0.76 at lag +2 is far above the bounds (±0.18): ad spending is followed by higher sales about two weeks later.</p>
-<p>Insight: plan ad campaigns two weeks before the sales period you want to boost; ads could also be used as a lagged regressor (ARIMAX).</p>
+<p><code>ccf(sales, ads)</code> ที่ lag k คือ correlation ระหว่าง sales ในสัปดาห์ t + k กับ ads ในสัปดาห์ t</p>
+<p>ยอดสูงสุด 0.76 ที่ lag +2 เกินเส้นขอบ ±0.18 ไปมาก ใช้เงินโฆษณาแล้ว ยอดขายขึ้นในอีกราวสองสัปดาห์</p>
+<p>Insight: วางแคมเปญโฆษณาก่อนช่วงที่อยากดันยอดขายสองสัปดาห์ และใช้ ads เป็น lagged regressor ใน ARIMAX ได้</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2923,12 +2923,12 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(1) GARCH: volatility clustering.</p>
-<p>(2) ARIMAX: temperature forecast is a known regressor driving demand one way.</p>
-<p>(3) VAR: the three variables affect each other.</p>
-<p>(4) FB Prophet: daily data, weekly pattern and holidays.</p>
-<p>(5) SARIMA: one series with stable yearly seasonality.</p>
-<p>(6) ARIMAX: price is set by the company and known in advance.</p>
+<p>(1) GARCH: มี volatility clustering</p>
+<p>(2) ARIMAX: พยากรณ์อุณหภูมิเป็น regressor ที่รู้ค่าและส่งผลต่อ demand ทางเดียว</p>
+<p>(3) VAR: สามตัวแปรส่งผลถึงกัน</p>
+<p>(4) FB Prophet: ข้อมูลรายวัน มีรูปแบบรายสัปดาห์และวันหยุด</p>
+<p>(5) SARIMA: อนุกรมตัวเดียว ฤดูกาลรายปีนิ่ง</p>
+<p>(6) ARIMAX: บริษัทตั้งราคาเองและรู้ล่วงหน้า</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -2963,10 +2963,10 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a) \(AR(2)_3\): \(X_t=\Phi_1X_{t-3}+\Phi_2X_{t-6}+w_t\). ACF tails off at lags 3, 6, 9, … and is zero at all other lags. PACF is nonzero at lags 3 and 6 and cuts off after lag 6.</p>
-<p>(b) \(MA(2)_4\): \(X_t=w_t+\Theta_1w_{t-4}+\Theta_2w_{t-8}\). ACF is nonzero only at lags 4 and 8 and cuts off after lag 8. PACF tails off at lags 4, 8, 12, ….</p>
-<p>(c) ARIMA(2,1,0): the ACF of \(X_t\) decays very slowly because of the unit root. After one difference, \(\nabla X_t\) is AR(2): ACF tails off, PACF cuts off after lag 2.</p>
-<p>(d) \(MA(4)_2\): nonzero ACF only at lags 2, 4, 6, 8, cut off after lag 8; PACF tails off at lags 2, 4, 6, ….</p>
+<p>(a) \(AR(2)_3\): \(X_t=\Phi_1X_{t-3}+\Phi_2X_{t-6}+w_t\) ACF ค่อยๆ ลดที่ lag 3, 6, 9, … และเป็นศูนย์ที่ lag อื่นทั้งหมด PACF ไม่เป็นศูนย์ที่ lag 3 กับ 6 แล้ว cut off หลัง lag 6</p>
+<p>(b) \(MA(2)_4\): \(X_t=w_t+\Theta_1w_{t-4}+\Theta_2w_{t-8}\) ACF ไม่เป็นศูนย์แค่ที่ lag 4 กับ 8 แล้ว cut off หลัง lag 8 PACF ค่อยๆ ลดที่ lag 4, 8, 12, …</p>
+<p>(c) ARIMA(2,1,0): ACF ของ \(X_t\) ลดช้ามากเพราะมี unit root difference หนึ่งครั้งแล้ว \(\nabla X_t\) เป็น AR(2) ACF ค่อยๆ ลด PACF cut off หลัง lag 2</p>
+<p>(d) \(MA(4)_2\): ACF ไม่เป็นศูนย์แค่ที่ lag 2, 4, 6, 8 แล้ว cut off หลัง lag 8 PACF ค่อยๆ ลดที่ lag 2, 4, 6, …</p>
 </div>
 <table class="why"><caption>อ่านตัวห้อย</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>เหตุผล</th></tr>
@@ -2986,8 +2986,8 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Both the ACF and the PACF have only one significant spike, at lag 1, and are within the bounds afterwards.</p>
-<p>ACF cutting off after lag 1 suggests MA(1); PACF cutting off after lag 1 suggests AR(1). With such a small lag-1 correlation (≈ 0.12) the two models are almost the same, so either AR(1) or MA(1) is reasonable. The dependence is weak; the data are close to white noise.</p>
+<p>ทั้ง ACF และ PACF มี spike ที่มีนัยสำคัญแค่อันเดียวที่ lag 1 หลังจากนั้นอยู่ในเส้นขอบ</p>
+<p>ACF cut off หลัง lag 1 ชี้ MA(1) PACF cut off หลัง lag 1 ชี้ AR(1) correlation ที่ lag 1 เล็กมากราว 0.12 สองโมเดลนี้แทบเหมือนกัน เลือก AR(1) หรือ MA(1) ก็ได้ dependence อ่อน ข้อมูลใกล้ white noise</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>อ่านว่า</th><th>มาจากไหน</th></tr>
@@ -3006,8 +3006,8 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>\(q=2\).</p>
-<p>Lag 1 shows a clear negative relationship (\(\rho_1&lt;0\)), lag 2 a weak positive relationship (\(\rho_2&gt;0\)), and lags 3 and 4 show no relationship (\(\rho_3\approx\rho_4\approx0\)). An MA(q) has ACF zero after lag q, so q = 2.</p>
+<p>\(q=2\)</p>
+<p>lag 1 มีความสัมพันธ์เชิงลบชัด \(\rho_1&lt;0\) · lag 2 มีความสัมพันธ์เชิงบวกอ่อนๆ \(\rho_2&gt;0\) · lag 3 กับ 4 ไม่มีความสัมพันธ์ \(\rho_3\approx\rho_4\approx0\) MA(q) มี ACF เป็นศูนย์หลัง lag q ได้ q = 2</p>
 </div>
 <table class="why"><caption>อ่านภาพอย่างไร</caption>
 <tr><th>ขั้น</th><th>ภาพ</th><th>ความหมาย</th></tr>
@@ -3025,9 +3025,9 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>MA(1) \(X_t=w_t+\theta w_{t-1}\): ACF \(\rho_1=\theta/(1+\theta^2)\), \(|\rho_1|\le\tfrac12\), and \(\rho_h=0\) for \(h\ge2\) (cuts off). PACF tails off, alternating in sign if θ &gt; 0.</p>
-<p>AR(1) \(X_t=\phi X_{t-1}+w_t\), \(|\phi|&lt;1\): ACF \(\rho_h=\phi^h\), tails off exponentially (alternating if φ &lt; 0). PACF \(\phi_{11}=\phi\), zero for \(h\ge2\) (cuts off).</p>
-<p>ARMA(2,2): both ACF and PACF tail off; neither cuts off. The ACF decays after lag 2 as a mixture of exponential decay and damped sine waves, depending on the AR roots.</p>
+<p>MA(1) \(X_t=w_t+\theta w_{t-1}\): ACF \(\rho_1=\theta/(1+\theta^2)\), \(|\rho_1|\le\tfrac12\) และ \(\rho_h=0\) เมื่อ \(h\ge2\) คือ cut off PACF ค่อยๆ ลด สลับเครื่องหมายถ้า θ &gt; 0</p>
+<p>AR(1) \(X_t=\phi X_{t-1}+w_t\), \(|\phi|&lt;1\): ACF \(\rho_h=\phi^h\) ลดแบบ exponential สลับเครื่องหมายถ้า φ &lt; 0 PACF \(\phi_{11}=\phi\) เป็นศูนย์เมื่อ \(h\ge2\) คือ cut off</p>
+<p>ARMA(2,2): ทั้ง ACF และ PACF ค่อยๆ ลด ไม่มีตัวไหน cut off ACF หลัง lag 2 ลดแบบผสมระหว่าง exponential decay กับ damped sine wave ขึ้นกับราก AR</p>
 </div>
 <p class="trap">⚠ อาจารย์บอกใน Class 13 ว่าแนวบรรยาย ACF/PACF แบบนี้ "open book ผมคงไม่ออกหรอก" เพราะเปิดตารางสรุปได้</p>
 </div>
@@ -3044,9 +3044,9 @@ si &lt;- si / mean(si)
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Series 1: ACF tails off slowly; PACF has spikes at lags 1–2 then cuts off → AR(2).</p>
-<p>Series 2: ACF has spikes at lags 1–2 then cuts off; PACF tails off with alternating signs → MA(2).</p>
-<p>Series 3: both ACF and PACF tail off with no clear cut-off → ARMA(1,1).</p>
+<p>อนุกรม 1: ACF ค่อยๆ ลด PACF มี spike ที่ lag 1–2 แล้ว cut off → AR(2)</p>
+<p>อนุกรม 2: ACF มี spike ที่ lag 1–2 แล้ว cut off PACF ค่อยๆ ลดแบบสลับเครื่องหมาย → MA(2)</p>
+<p>อนุกรม 3: ทั้ง ACF และ PACF ค่อยๆ ลด ไม่มีจุด cut off ชัด → ARMA(1,1)</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -3075,10 +3075,10 @@ si &lt;- si / mean(si)
 <p>\(\gamma(1)=Cov(w_t+\theta w_{t-1},\ w_{t+1}+\theta w_t)=\theta\sigma^2\)</p>
 <p>\(\rho(1)=\dfrac{\theta}{1+\theta^2}\)</p>
 <p>\(\dfrac{d\rho(1)}{d\theta}=\dfrac{(1+\theta^2)(1)-\theta(2\theta)}{(1+\theta^2)^2}=\dfrac{1-\theta^2}{(1+\theta^2)^2}\)</p>
-<p>Set \(\dfrac{d\rho(1)}{d\theta}=0\Rightarrow1-\theta^2=0\Rightarrow\theta=\pm1\)</p>
-<p>\(|\theta|&lt;1\): derivative \(&gt;0\); \(|\theta|&gt;1\): derivative \(&lt;0\); and \(\rho(1)\to0\) as \(\theta\to\pm\infty\)</p>
-<p>Maximum at \(\theta=1\): \(\rho(1)=\dfrac{1}{1+1}=\dfrac12\); minimum at \(\theta=-1\): \(\rho(1)=-\dfrac12\)</p>
-<p>Therefore \(-\tfrac12\le\rho(1)\le\tfrac12\), i.e. \(|\rho(1)|\le\tfrac12\) for all θ.</p>
+<p>ให้ \(\dfrac{d\rho(1)}{d\theta}=0\Rightarrow1-\theta^2=0\Rightarrow\theta=\pm1\)</p>
+<p>\(|\theta|&lt;1\): อนุพันธ์ \(&gt;0\) · \(|\theta|&gt;1\): อนุพันธ์ \(&lt;0\) · และ \(\rho(1)\to0\) เมื่อ \(\theta\to\pm\infty\)</p>
+<p>ค่าสูงสุดที่ \(\theta=1\): \(\rho(1)=\dfrac{1}{1+1}=\dfrac12\) ค่าต่ำสุดที่ \(\theta=-1\): \(\rho(1)=-\dfrac12\)</p>
+<p>สรุป \(-\tfrac12\le\rho(1)\le\tfrac12\) หรือ \(|\rho(1)|\le\tfrac12\) ทุกค่า θ</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -3105,7 +3105,7 @@ si &lt;- si / mean(si)
 <div class="copy">
 <p>(a) \(\rho(0)=1,\quad \rho(1)=\dfrac{0.8}{1+0.64}=\dfrac{0.8}{1.64}=0.488,\quad \rho(h)=0\ \text{for}\ h\ge2\)</p>
 <p>(b) \(\rho(1)\big|_{1/\theta}=\dfrac{1/\theta}{1+1/\theta^2}=\dfrac{1/\theta}{1+1/\theta^2}\cdot\dfrac{\theta^2}{\theta^2}=\dfrac{\theta}{\theta^2+1}=\rho(1)\big|_{\theta}\)</p>
-<p>\(\rho(h)=0\) for \(h\ge2\) in both cases, so the whole ACF is unchanged.</p>
+<p>\(\rho(h)=0\) เมื่อ \(h\ge2\) ทั้งสองกรณี ACF ทั้งชุดไม่เปลี่ยน</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
@@ -3125,7 +3125,7 @@ si &lt;- si / mean(si)
 <div class="model-answer">
 <div class="copy">
 <p>\(\rho_1=\dfrac{-0.5}{1+0.25}=-0.4,\qquad \rho_1=\dfrac{-2}{1+4}=-0.4\)</p>
-<p>Both give the same ACF, so the data cannot tell them apart. Choose θ = −0.5 because \(|\theta|&lt;1\) (invertible).</p>
+<p>ได้ ACF เท่ากัน ข้อมูลแยกสองตัวนี้ไม่ออก เลือก θ = −0.5 เพราะ \(|\theta|&lt;1\) คือ invertible</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -3154,9 +3154,9 @@ s &lt;- spectrum(rain$rain, log = "no")
 s$freq[which.max(s$spec)]        # 0.0833
 1 / s$freq[which.max(s$spec)]    # 12</code></pre>
 <div class="copy">
-<p>The periodogram has its highest peak at frequency f = 0.0833 cycles per month.</p>
-<p>Period \(T=1/f=1/0.0833=12\) months: a yearly rainy-season cycle.</p>
-<p>So the series should be set as <code>ts(rain$rain, start = c(2022, 1), frequency = 12)</code> for the following parts.</p>
+<p>Periodogram มียอดสูงสุดที่ความถี่ f = 0.0833 รอบต่อเดือน</p>
+<p>คาบ \(T=1/f=1/0.0833=12\) เดือน คือรอบฤดูฝนรายปี</p>
+<p>ข้อต่อไปให้ตั้งอนุกรมเป็น <code>ts(rain$rain, start = c(2022, 1), frequency = 12)</code></p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -3175,8 +3175,8 @@ s$freq[which.max(s$spec)]        # 0.0833
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>(a) \(T=1/0.25=4\) quarters, a yearly cycle.</p>
-<p>(b) With a ts of frequency 12, the axis is in cycles per year. f = 1 means one cycle per year, T = 1 year = 12 months.</p>
+<p>(a) \(T=1/0.25=4\) ไตรมาส คือรอบรายปี</p>
+<p>(b) ts ที่ frequency 12 แกนเป็นรอบต่อปี f = 1 คือหนึ่งรอบต่อปี T = 1 ปี = 12 เดือน</p>
 </div>
 <p class="trap">⚠ ข้อ ข คือกับดักที่เจอบ่อย: ตัวเลขแกนเปลี่ยนตามว่าส่ง ts หรือตัวเลขธรรมดา ให้ดูว่าส่งอะไรเข้าไปก่อนแปลค่า</p>
 </div>
@@ -3191,8 +3191,8 @@ s$freq[which.max(s$spec)]        # 0.0833
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Peak at f = 0.25 cycles per quarter → period \(T=1/0.25=4\) quarters = one year.</p>
-<p>Set <code>ts(q, frequency = 4)</code> before fitting a seasonal model.</p>
+<p>ยอดอยู่ที่ f = 0.25 รอบต่อไตรมาส → คาบ \(T=1/0.25=4\) ไตรมาส = หนึ่งปี</p>
+<p>ตั้ง <code>ts(q, frequency = 4)</code> ก่อนฟิตโมเดลที่มีฤดูกาล</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -3220,12 +3220,12 @@ s$freq[which.max(s$spec)]        # 0.0833
 <div class="model-answer">
 <div class="copy">
 <p>\(\bar x=\dfrac{1154.62}{6}=192.437\)</p>
-<p>Deviations \(x_t-\bar x\): 3.593, 6.203, −0.857, −4.457, −5.037, 0.553</p>
+<p>ส่วนเบี่ยงเบน \(x_t-\bar x\): 3.593, 6.203, −0.857, −4.457, −5.037, 0.553</p>
 <p>\(\sum(x_t-\bar x)^2=97.663\)</p>
-<p>Lag 1 products: 22.291, −5.314, 3.818, 22.447, −2.787; sum = 40.454</p>
-<p>Lag 2 products: −3.078, −27.646, 4.315, −2.466; sum = −28.876</p>
+<p>ผลคูณ lag 1: 22.291, −5.314, 3.818, 22.447, −2.787 ผลรวม = 40.454</p>
+<p>ผลคูณ lag 2: −3.078, −27.646, 4.315, −2.466 ผลรวม = −28.876</p>
 <p>\(\hat\rho(1)=40.454/97.663=0.414,\qquad \hat\rho(2)=-28.876/97.663=-0.296\)</p>
-<p>Correlogram: bars at lag 0 (1), lag 1 (0.414), lag 2 (−0.296), bounds \(\pm2/\sqrt6=\pm0.816\); neither lag is significant.</p>
+<p>Correlogram: แท่งที่ lag 0 สูง 1, lag 1 สูง 0.414, lag 2 สูง −0.296 เส้นขอบ \(\pm2/\sqrt6=\pm0.816\) ไม่มี lag ไหนมีนัยสำคัญ</p>
 <p>(b) \(\nabla x_t\): —, 2.61, −7.06, −3.60, −0.58, 5.59</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
@@ -3249,8 +3249,8 @@ s$freq[which.max(s$spec)]        # 0.0833
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>The dashed lines are approximate 95% bounds for \(\hat\rho(h)\) when the series is white noise. A bar outside the lines is significantly different from 0.</p>
-<p>They are computed as \(\pm1.96/\sqrt n\approx\pm2/\sqrt n\). For Nile, n = 100, so the bounds are about ±0.2.</p>
+<p>เส้นประคือขอบเขต 95% โดยประมาณของ \(\hat\rho(h)\) เมื่ออนุกรมเป็น white noise แท่งที่ออกนอกเส้นต่างจาก 0 อย่างมีนัยสำคัญ</p>
+<p>คำนวณจาก \(\pm1.96/\sqrt n\approx\pm2/\sqrt n\) ข้อมูล Nile มี n = 100 เส้นขอบอยู่ราว ±0.2</p>
 </div>
 <table class="why"><caption>มาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -3268,10 +3268,10 @@ s$freq[which.max(s$spec)]        # 0.0833
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>\(\bar x=35/5=7\); deviations: −3, −1, −2, 2, 4; \(\sum(x_t-\bar x)^2=9+1+4+4+16=34\)</p>
+<p>\(\bar x=35/5=7\) ส่วนเบี่ยงเบน −3, −1, −2, 2, 4 · \(\sum(x_t-\bar x)^2=9+1+4+4+16=34\)</p>
 <p>Lag 1: \((-3)(-1)+(-1)(-2)+(-2)(2)+(2)(4)=3+2-4+8=9\Rightarrow\hat\rho(1)=9/34=0.265\)</p>
 <p>Lag 2: \((-3)(-2)+(-1)(2)+(-2)(4)=6-2-8=-4\Rightarrow\hat\rho(2)=-4/34=-0.118\)</p>
-<p>\(\nabla x_t\): —, 2, −1, 4, 2. Bounds \(\pm2/\sqrt5=\pm0.894\): no lag is significant.</p>
+<p>\(\nabla x_t\): —, 2, −1, 4, 2 เส้นขอบ \(\pm2/\sqrt5=\pm0.894\) ไม่มี lag ไหนมีนัยสำคัญ</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
@@ -3295,9 +3295,9 @@ s$freq[which.max(s$spec)]        # 0.0833
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>The fitted line \(\hat T_t=6129.46-2.7143t\) is a linear trend: the flow falls by about 2.71 per year, and the slope is significant (p = 1.07e-06).</p>
-<p>Use: detrending. Subtract the trend, \(x_t-\hat T_t\), to get a detrended series, or use it as the trend line in a regression (classical) decomposition, \(F_t=(b_0+b_1t)SI_t\).</p>
-<p>Related models: detrending / decomposition with a linear trend.</p>
+<p>เส้นที่ฟิตได้ \(\hat T_t=6129.46-2.7143t\) เป็น linear trend ปริมาณน้ำลดลงราว 2.71 ต่อปี ความชันมีนัยสำคัญ p = 1.07e-06</p>
+<p>ใช้ทำ detrending ลบ trend ออก \(x_t-\hat T_t\) ได้อนุกรมที่ถอด trend แล้ว หรือใช้เป็นเส้น trend ใน classical decomposition แบบ regression \(F_t=(b_0+b_1t)SI_t\)</p>
+<p>โมเดลที่เกี่ยวข้อง: detrending หรือ decomposition ที่ใช้ linear trend</p>
 </div>
 <table class="why"><caption>ทำไมตอบแบบนี้</caption>
 <tr><th>ขั้น</th><th>คิดอย่างไร</th><th>เหตุผล</th></tr>
@@ -3323,11 +3323,11 @@ s$freq[which.max(s$spec)]        # 0.0833
 <button class="reveal-btn">เฉลย</button>
 <div class="model-answer">
 <div class="copy">
-<p>Yes. ETS(A,N,N) is equivalent to ARIMA(0,1,1) \(\nabla X_t=w_t+\theta w_{t-1}\) with \(\theta=\alpha-1\).</p>
+<p>ได้ ETS(A,N,N) เทียบเท่า ARIMA(0,1,1) \(\nabla X_t=w_t+\theta w_{t-1}\) ที่ \(\theta=\alpha-1\)</p>
 <p>\(\hat\theta=0.2455-1=-0.7545\)</p>
 <p>\(\hat\sigma^2\approx144.2318^2=20802.8\)</p>
 <p>Model: \((1-B)X_t=(1-0.7545B)w_t,\quad w_t\sim N(0,\ 20803)\)</p>
-<p>Check: fitting ARIMA(0,1,1) directly in R gives ma1 = −0.7329 and σ² = 20810, close to these values.</p>
+<p>ตรวจ: ฟิต ARIMA(0,1,1) ตรงๆ ใน R ได้ ma1 = −0.7329 และ σ² = 20810 ใกล้กับค่าข้างบน</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -3347,7 +3347,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <div class="model-answer">
 <div class="copy">
 <p>\(\alpha=1+\theta=1+(-0.6)=0.4\)</p>
-<p>\(\hat X_{t+1}=0.4X_t+0.6\hat X_t\): the newest observation gets weight 0.4.</p>
+<p>\(\hat X_{t+1}=0.4X_t+0.6\hat X_t\) ค่าสังเกตล่าสุดได้น้ำหนัก 0.4</p>
 </div>
 <p class="trap">⚠ ถ้าโจทย์เขียน MA แบบเครื่องหมายลบ \(w_t-\theta w_{t-1}\) สูตรกลายเป็น \(\alpha=1-\theta\) ดูเครื่องหมายในโจทย์ก่อนเสมอ</p>
 </div>
