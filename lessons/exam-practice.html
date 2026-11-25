@@ -1004,6 +1004,7 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.68  RMSE test 10.44</pre>
 <li>ส่วนฤดูกาลใช้ \(B^{s}\) เช่น \(B^{12}\) แล้วคูณเป็นวงเล็บแยก</li>
 <li>ถ้ามี d หรือ D ใส่ \((1-B)\) หรือ \((1-B^{12})\) หน้า X · ถ้ามี intercept ให้เขียน \(X_t-\mu\) แทน \(X_t\)</li>
 <li>ปิดท้ายด้วย \(w_t\sim iid\ N(0,\sigma^2)\) แล้วเขียน assumption: causal, invertible, residual เป็น white noise และ normal</li>
+<li>ถ้าชื่อขึ้นต้นด้วย <code>Regression with ARIMA(...) errors</code> ให้แยกสองบรรทัด: บรรทัด 1 คือ \(y_t=\)intercept หรือ drift·t + slope·x + \(\eta_t\) บรรทัด 2 คือ ARIMA ของ \(\eta_t\) ตามขั้น 2–5 ดูข้อ 4.9–4.12</li>
 </ol>
 </div>
 
@@ -1231,6 +1232,89 @@ sigma^2 = 4.1</pre>เขียนโมเดล</div>
 <tr><td>2</td><td>−2.3</td><td>ราคาขึ้น 1 หน่วย ยอดขายลด 2.3 หน่วย</td></tr>
 </table>
 <p class="trap">⚠ อย่าใส่ \((1-0.6B)\) คูณ \(y_t\) ตรง ๆ ตัว AR อยู่ที่ error ไม่ได้อยู่ที่ y</p>
+</div>
+</div>
+
+<!-- W10 -->
+<div class="quiz free" id="w10">
+<div class="qhead"><span>ข้อ 4.10 · จากสไลด์อาจารย์ Class 9</span><span>ARIMAX ที่ error เป็น ARMA(1,2)</span></div>
+<div class="qtext"><code>auto.arima(con_training, xreg = inc_training)</code> ได้<pre class="out">Regression with ARIMA(1,0,2) errors
+         ar1      ma1     ma2  intercept    xreg
+      0.5819  -0.5345  0.1843     0.6168  0.2781
+sigma^2 = 0.3543</pre>(ก) เขียนโมเดลพร้อม assumption (ข) แปลความหมายค่า 0.2781</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) \(\text{consumption}_t=0.6168+0.2781\,\text{income}_t+\eta_t\)</p>
+<p>\(\eta_t=0.5819\,\eta_{t-1}+w_t-0.5345\,w_{t-1}+0.1843\,w_{t-2}\)</p>
+<p>\(w_t\sim iid\ N(0,\ 0.3543)\)</p>
+<p>Assumptions: the ARMA(1,2) error is causal and invertible, and the residuals are white noise and normally distributed.</p>
+<p>(b) When income rises by 1 unit, consumption rises by 0.2781 units on average in the same quarter.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>บรรทัด 1 มี 0.6168 กับ 0.2781</td><td>intercept กับ xreg เป็นของ regression คอลัมน์ xreg คือ slope หน้า income</td></tr>
+<tr><td>2</td><td>ต่อท้ายด้วย \(\eta_t\)</td><td>\(\eta\) คือส่วนที่ income อธิบายไม่ได้ ARIMA(1,0,2) ในชื่อโมเดลเป็นของ \(\eta\)</td></tr>
+<tr><td>3</td><td>\(+0.5819\,\eta_{t-1}\)</td><td>เขียนแบบไม่มี B ar ใช้เครื่องหมายตาม R ถ้าเขียนรูป B ได้ \((1-0.5819B)\eta_t\)</td></tr>
+<tr><td>4</td><td>\(-0.5345\,w_{t-1}+0.1843\,w_{t-2}\)</td><td>ma ใช้เครื่องหมายตาม R ทุกแบบ</td></tr>
+<tr><td>5</td><td>\(N(0,\ 0.3543)\)</td><td>ลอก sigma^2 ตรง ๆ ไม่ต้องถอดราก</td></tr>
+</table>
+<p class="trap">⚠ intercept ของ ARIMAX ไม่ใช่ค่าเฉลี่ยของ consumption แต่คือค่าของ consumption ตอน income = 0</p>
+</div>
+</div>
+
+<!-- W11 -->
+<div class="quiz free" id="w11">
+<div class="qhead"><span>ข้อ 4.11 · ดัดแปลง</span><span>SARIMAX สองตัวแปร มี d และ D</span></div>
+<div class="qtext">ยอดขายรายเดือน ฟิตด้วย <code>auto.arima(y, xreg = cbind(temp, promo))</code> โดย promo เป็น 1 เมื่อเดือนนั้นจัดโปรโมชัน ได้<pre class="out">Regression with ARIMA(0,1,1)(0,1,1)[12] errors
+          ma1     sma1    temp   promo
+      -0.4000  -0.6000  1.5000  8.2000
+sigma^2 = 12.5</pre>(ก) เขียนโมเดล (ข) ทำไมไม่มี intercept (ค) แปลความหมายค่า 8.2</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) \(y_t=1.5\,\text{temp}_t+8.2\,\text{promo}_t+\eta_t\)</p>
+<p>\((1-B)(1-B^{12})\eta_t=(1-0.4B)(1-0.6B^{12})w_t,\qquad w_t\sim iid\ N(0,\ 12.5)\)</p>
+<p>(b) The error is differenced (d = 1, D = 1), so any constant is removed by differencing and R does not estimate an intercept.</p>
+<p>(c) A month with a promotion has sales 8.2 units higher than a month without one, at the same temperature.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>สองตัวแปรในบรรทัด 1</td><td>xreg มีสองคอลัมน์ R ตั้งชื่อตามคอลัมน์ temp กับ promo แต่ละตัวมี slope ของตัวเอง</td></tr>
+<tr><td>2</td><td>\((1-B)(1-B^{12})\)</td><td>d = 1 ได้ \((1-B)\) · D = 1 ที่ s = 12 ได้ \((1-B^{12})\) ทั้งสองวงเล็บคูณหน้า \(\eta\) ไม่ได้คูณหน้า y</td></tr>
+<tr><td>3</td><td>\((1-0.4B)(1-0.6B^{12})\)</td><td>ma1 = −0.4 กับ sma1 = −0.6 ใช้เครื่องหมายตาม R ส่วนฤดูกาลใช้ \(B^{12}\)</td></tr>
+<tr><td>4</td><td>8.2 คือผลต่าง</td><td>promo มีแค่ 0 หรือ 1 เปลี่ยนจาก 0 เป็น 1 ยอดขายเพิ่ม 8.2 พอดี</td></tr>
+</table>
+<p class="trap">⚠ จะพยากรณ์ต้องรู้ทั้ง temp และ promo ของเดือนที่จะพยากรณ์ ส่งให้ R ด้วย <code>forecast(fit, xreg = cbind(temp_new, promo_new))</code> โดยเรียงคอลัมน์ให้เหมือนตอนฟิต</p>
+</div>
+</div>
+
+<!-- W12 -->
+<div class="quiz free" id="w12">
+<div class="qhead"><span>ข้อ 4.12 · ดัดแปลง</span><span>ARIMAX มี drift และจับผิดสมการ</span></div>
+<div class="qtext"><pre class="out">Regression with ARIMA(1,1,0) errors
+          ar1   drift     x
+      -0.3000  0.5000  2.1000
+sigma^2 = 4</pre>(ก) เขียนโมเดล (ข) เพื่อนเขียนว่า \(y_t=-0.3\,y_{t-1}+0.5+2.1\,x_t+w_t\) ผิดตรงไหน (ค) ถ้า x ของเดือนหน้ามากกว่าเดือนนี้ 3 หน่วย ส่วน regression ของค่าพยากรณ์จะเพิ่มขึ้นจากผลของ x เท่าไร</div>
+<textarea placeholder="เขียนคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>(a) \(y_t=0.5\,t+2.1\,x_t+\eta_t\)</p>
+<p>\((1+0.3B)(1-B)\eta_t=w_t,\qquad w_t\sim iid\ N(0,\ 4)\)</p>
+<p>(b) The AR term belongs to the error \(\eta_t\), not to \(y_t\); the drift multiplies t; and the difference \((1-B)\) is missing.</p>
+<p>(c) \(2.1\times 3=6.3\) units.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ / มาจากไหน</th></tr>
+<tr><td>1</td><td>\(0.5\,t\)</td><td>drift คือความชันต่อเวลา ต้องคูณกับ t อยู่บรรทัด 1 เหมือนข้อ 4.8</td></tr>
+<tr><td>2</td><td>\(1+0.3B\)</td><td>รูป B กลับเครื่องหมาย ar: \(1-(-0.3)B=1+0.3B\)</td></tr>
+<tr><td>3</td><td>\((1-B)\) อยู่กับ \(\eta\)</td><td>d = 1 ในวงเล็บ ARIMA เป็นของ error</td></tr>
+<tr><td>4</td><td>6.3</td><td>slope 2.1 คูณจำนวนหน่วยที่ x เปลี่ยน 3 หน่วย</td></tr>
+</table>
+<p class="trap">⚠ สมการของเพื่อนคือโมเดลอีกแบบที่เอา x ใส่ใน ARIMA ตรง ๆ ไม่ใช่ regression with ARIMA errors ที่ <code>auto.arima(xreg = )</code> ฟิต</p>
 </div>
 </div>
 </section>
