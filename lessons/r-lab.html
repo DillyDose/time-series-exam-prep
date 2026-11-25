@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ฝึกคำสั่ง R ของอาจารย์</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<style>
+section.unit { border-top: 3px solid #e2ddd3; margin-top: 2.2em; padding-top: 0.4em; }
+.unit-meta { font-size: 0.85rem; color: #6b655b; margin: -0.4em 0 0.8em; }
+.unit-meta b { color: #3b372f; }
+.method { background: #faf7f0; border: 1px solid #e2ddd3; border-radius: 8px; padding: 0.6em 1em; margin: 0.8em 0 1.2em; }
+.method ol, .method ul { margin: 0.3em 0 0.2em 1.2em; padding: 0; }
+table.why, table.map { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.8em 0; }
+table.why caption, table.map caption { text-align: left; font-weight: 700; padding-bottom: 0.3em; }
+table.why th, table.why td, table.map th, table.map td { border: 1px solid #e2ddd3; padding: 0.4em 0.5em; vertical-align: top; text-align: left; }
+table.why th, table.map th { background: #f6f2ea; }
+table.why td:first-child code { white-space: nowrap; }
+table.why td, table.map td { overflow-wrap: anywhere; }
+p.trap { background: #fff6ec; border-left: 4px solid #c25e00; padding: 0.4em 0.8em; }
+p.lead { font-weight: 600; }
+.src { font-size: 0.8rem; color: #6b655b; }
+pre { font-size: 0.82rem; }
+@media (max-width: 600px) { table.why, table.map { display: block; overflow-x: auto; max-width: 100%; } }
+</style>
+</head>
+<body class="reader">
+
+<nav class="lesson-nav">
+  <span><a href="../index.html">หน้าแรก</a> · <a href="exam-practice.html">ฝึกตามข้อสอบเก่า</a> · ฝึกคำสั่ง R</span>
+  <span><a href="#map">สารบัญ</a></span>
+</nav>
+
+<h1>ฝึกคำสั่ง R ของอาจารย์</h1>
+
+<p>หน้านี้รวมคำสั่ง R ที่อาจารย์ใช้ในไฟล์ <code>R_codes</code> ของ Class 2–12 จัดเรียงตามงานที่ต้องทำ ใช้คู่กับ<a href="exam-practice.html">หน้าฝึกตามข้อสอบเก่า</a> หน้านั้นฝึกเฉพาะคำสั่งที่ข้อสอบเก่าเคยใช้ หน้านี้เพิ่มคำสั่งที่อาจารย์สอนในห้องแต่ข้อสอบเก่ายังไม่เคยถาม เผื่อปีนี้อาจารย์เปลี่ยนโมเดลหรือเปลี่ยนชุดข้อมูล</p>
+
+<p>แต่ละหัวข้อมี 4 ส่วน:</p>
+<ol>
+<li>โค้ดของอาจารย์ คัดมาจากไฟล์ตรงตัว</li>
+<li>ตารางอธิบายว่าแต่ละคำสั่งทำอะไร</li>
+<li>ผลที่รันได้จริง</li>
+<li>โจทย์ให้ลองแก้โค้ดเอง</li>
+</ol>
+
+<p>ทุกตัวเลขรันด้วย R 4.5 กับข้อมูลในโฟลเดอร์ของแต่ละ Class บน myCourseVille ก่อนรันให้ตั้ง working directory ไปที่โฟลเดอร์ที่มีไฟล์ข้อมูล</p>
+
+<div class="method" id="setup">
+<b>เตรียม R ก่อนเข้าห้องสอบ</b> ติดตั้งทุก package ล่วงหน้า เพราะในห้องสอบอาจไม่มีอินเทอร์เน็ต
+<pre><code>install.packages(c("forecast", "TSA", "tseries", "zoo", "lubridate", "car", "nlme",
+                   "lmtest", "vars", "tswge", "rugarch", "FinTS", "fpp2"))</code></pre>
+<p>ข้อมูล uschange ของ Class 10 ไม่มีไฟล์ในโฟลเดอร์ ให้ใช้ชุดเดียวกันจาก package fpp2 ตรวจแล้วได้ค่าตรงกับสไลด์อาจารย์ทุกตัว</p>
+<pre><code>library(fpp2)
+data <- as.data.frame(uschange); names(data) <- tolower(names(data))</code></pre>
+</div>
+
+<h2 id="map">สารบัญ</h2>
+<table class="map">
+<tr><th>หัวข้อ</th><th>Class</th><th>คำสั่งหลัก</th><th>ข้อสอบเก่าเคยใช้</th></tr>
+<tr><td><a href="#r-read">1 อ่านข้อมูล ตั้ง ts แบ่ง train/test</a></td><td>2, 4, 5</td><td><code>read.table</code> <code>ts</code> <code>window</code> <code>as.Date</code></td><td>ใช้ทุกปี</td></tr>
+<tr><td><a href="#r-acf">2 กราฟ ACF PACF EACF และ diff</a></td><td>3, 6, 7, 8</td><td><code>plot</code> <code>acf</code> <code>pacf</code> <code>eacf</code> <code>diff</code></td><td>ให้รูปมา ไม่เคยให้รันเอง</td></tr>
+<tr><td><a href="#r-detrend">3 detrend ด้วย regression</a></td><td>3</td><td><code>lm</code> <code>time</code> <code>resid</code> <code>abline</code></td><td>2024 ข้อ 3ก ให้ output มา</td></tr>
+<tr><td><a href="#r-smooth">4 SMA, EMA, Holt</a></td><td>4</td><td><code>rollmean</code> <code>ets</code> <code>holt</code> <code>accuracy</code></td><td>ยังไม่เคย</td></tr>
+<tr><td><a href="#r-decomp">5 decomposition</a></td><td>4, 5</td><td><code>decompose</code> <code>lm</code> <code>cycle</code> <code>tapply</code> <code>predict</code></td><td>2025 ข้อ 5f</td></tr>
+<tr><td><a href="#r-ident">6 ตาราง AIC/BIC และ Yule-Walker</a></td><td>7</td><td><code>arima</code> <code>AIC</code> <code>ar.yw</code></td><td>ให้ตารางมา ไม่เคยให้สร้าง</td></tr>
+<tr><td><a href="#r-diag">7 ตรวจ residual</a></td><td>7–10</td><td><code>rstandard</code> <code>shapiro.test</code> <code>tsdiag</code> <code>checkresiduals</code></td><td>ใช้ทุกปี</td></tr>
+<tr><td><a href="#r-predict">8 พยากรณ์จาก arima และช่วงพยากรณ์</a></td><td>8, 9</td><td><code>predict</code> <code>qnorm</code> <code>exp</code> <code>diffinv</code></td><td>ยังไม่เคย</td></tr>
+<tr><td><a href="#r-sarima">9 SARIMA ด้วย arima</a></td><td>8</td><td><code>diff(x, lag = 12)</code> <code>arima(..., seasonal = )</code></td><td>2025 ข้อ 5b</td></tr>
+<tr><td><a href="#r-auto">10 auto.arima, ets, tsCV</a></td><td>9, 12</td><td><code>auto.arima</code> <code>forecast</code> <code>tsCV</code></td><td>2025 ข้อ 5c–e</td></tr>
+<tr><td><a href="#r-gls">11 GLS</a></td><td>10</td><td><code>durbinWatsonTest</code> <code>gls</code> <code>corAR1</code></td><td>2022 ข้อ 3 ถามทฤษฎี</td></tr>
+<tr><td><a href="#r-arimax">12 ARIMAX</a></td><td>10</td><td><code>adf.test</code> <code>grangertest</code> <code>auto.arima(xreg = )</code></td><td>2025 ข้อ 5g</td></tr>
+<tr><td><a href="#r-var">13 CCF และ VAR</a></td><td>10</td><td><code>ccf</code> <code>VARselect</code> <code>VAR</code> <code>causality</code></td><td>2025 ข้อ 4 อ่าน CCF</td></tr>
+<tr><td><a href="#r-nnar">14 NNAR</a></td><td>10, 11</td><td><code>nnetar</code> <code>forecast(..., PI = F)</code></td><td>2025 ข้อ 5g</td></tr>
+<tr><td><a href="#r-garch">15 ARCH/GARCH</a></td><td>10, 11</td><td><code>ArchTest</code> <code>garch</code> <code>ugarchfit</code></td><td>2024 ข้อ 4</td></tr>
+<tr><td><a href="#r-spec">16 periodogram</a></td><td>12</td><td><code>spectrum</code> <code>which.max</code></td><td>2025 ข้อ 5a</td></tr>
+<tr><td><a href="#r-sim">17 ACF ทฤษฎีและจำลองข้อมูล</a></td><td>5–8</td><td><code>ARMAacf</code> <code>arima.sim</code></td><td>ใช้ตรวจคำตอบข้อคำนวณ</td></tr>
+<tr><td><a href="#r-prophet">18 Prophet</a></td><td>12</td><td><code>prophet</code> <code>make_future_dataframe</code></td><td>2025 ข้อ 3 ให้เลือกโมเดล</td></tr>
+</table>
+
+<p class="trap">⚠ กับดักที่เจอบ่อยตลอดหน้า: เมื่อโหลด <code>library(TSA)</code> คำสั่ง <code>acf</code> จะเปลี่ยนเป็นของ TSA ซึ่ง<b>ไม่มี lag 0</b> และ <code>arima</code> จะพิมพ์ <code>aic</code> ต่ำกว่า <code>AIC()</code> อยู่ 2 ถ้าจะเทียบ AIC ให้ใช้วิธีเดียวกันทุกโมเดล</p>
+
+<!-- ===================== 1 ===================== -->
+<section class="unit" id="r-read">
+<h2>1 อ่านข้อมูล ตั้ง ts แบ่ง train/test</h2>
+<p class="unit-meta"><b>Class:</b> 2, 4, 5 · <b>ข้อมูล:</b> temp.txt, CPALL.txt, XBOX.txt</p>
+
+<pre><code># Class 2: temp.txt ไม่มีหัวคอลัมน์ ปีละ 1 ค่า เริ่ม 1856
+temperature <- read.table("temp.txt")
+new_temperature <- ts(temperature, start = 1856)
+nValid <- 36
+nTrain <- length(new_temperature) - nValid
+train.ts <- window(new_temperature, start = 1856, end = 1856+nTrain-1)
+test.ts  <- window(new_temperature, start = 1856+nTrain, end = 1856+nTrain+nValid-1)
+
+# Class 4: ข้อมูลที่ไม่มีวันที่ ใช้ลำดับที่ 1, 2, 3, ...
+data <- read.table("CPALL.txt", h = T)
+data <- ts(data)
+train.ts <- window(data, start = 1, end = nTrain)
+test.ts  <- window(data, start = nTrain+1, end = nTrain+nValid)
+
+# Class 5: ข้อมูลที่มีคอลัมน์วันที่
+library(lubridate)
+data <- read.table("xbox.txt", h = T)
+data$date <- as.Date(data$date, format = "%m/%d/%Y")
+sales_ts <- ts(data$sales, start = c(year(min(data$date)), month(min(data$date))), frequency = 12)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th><th>ต้องเปลี่ยนเมื่อไร</th></tr>
+<tr><td><code>h = T</code></td><td>ย่อมาจาก header = TRUE บรรทัดแรกของไฟล์เป็นชื่อคอลัมน์</td><td>เปิดไฟล์ดูก่อน ถ้าบรรทัดแรกเป็นตัวเลข ใช้ <code>h = F</code> หรือไม่ต้องใส่</td></tr>
+<tr><td><code>start = 1856</code></td><td>ข้อมูลรายปี ใส่ปีแรกตัวเดียวพอ</td><td>รายเดือนใส่ <code>c(ปี, เดือน)</code> รายไตรมาสใส่ <code>c(ปี, ไตรมาส)</code></td></tr>
+<tr><td><code>frequency = 12</code></td><td>บอกว่ามีกี่จุดต่อหนึ่งรอบ</td><td>รายไตรมาส 4 · รายสัปดาห์ 52 · รายวันที่ดูรอบสัปดาห์ 7</td></tr>
+<tr><td><code>nValid</code></td><td>จำนวนจุดที่กันไว้เป็น test</td><td>เปลี่ยนตามโจทย์</td></tr>
+<tr><td><code>window(x, start, end)</code></td><td>ตัดช่วงเวลา ใช้หน่วยเวลาเดียวกับที่ตั้งไว้ใน <code>ts</code></td><td>ถ้าตั้ง <code>start = 1856</code> ต้องใส่เป็นปี ถ้าไม่ได้ตั้ง ใส่ลำดับที่</td></tr>
+<tr><td><code>as.Date(..., format = "%m/%d/%Y")</code></td><td>แปลงข้อความ 11/01/2005 เป็นวันที่ %m คือเดือน %d คือวัน %Y คือปี 4 หลัก</td><td>ถ้าไฟล์เขียน 2005-11-01 ใช้ <code>"%Y-%m-%d"</code></td></tr>
+<tr><td><code>year(min(...)), month(min(...))</code></td><td>ดึงปีกับเดือนของวันแรก มาใส่เป็น start อัตโนมัติ</td><td>ใช้ได้กับทุกไฟล์ที่มีคอลัมน์วันที่</td></tr>
+</table>
+
+<pre class="out">temp.txt: 142 ค่า → nTrain = 106
+train.ts 1856–1961   test.ts 1962–1997
+XBOX: start = Nov 2005, end = Dec 2014, 110 เดือน</pre>
+
+<p class="trap">⚠ ไฟล์ในโฟลเดอร์ชื่อ <code>XBOX.txt</code> ตัวใหญ่ แต่โค้ดอาจารย์เขียน <code>xbox.txt</code> บน Mac กับ Windows เปิดได้ทั้งคู่ บน Linux จะหาไฟล์ไม่เจอ</p>
+
+<div class="quiz free" id="q1-1">
+<div class="qhead"><span>ข้อ 1.1</span><span>แบ่ง train/test ตามโจทย์</span></div>
+<div class="qtext">ใช้ temp.txt ตั้งเป็นรายปีเริ่ม 1856 ให้เก็บ 20 ปีสุดท้ายเป็น test set เขียนโค้ดและบอกว่า train กับ test อยู่ช่วงปีไหน</div>
+<textarea placeholder="เขียนโค้ด"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>temperature <- read.table("temp.txt")
+new_temperature <- ts(temperature, start = 1856)
+nValid <- 20
+nTrain <- length(new_temperature) - nValid          # 142 - 20 = 122
+train.ts <- window(new_temperature, start = 1856, end = 1856+nTrain-1)
+test.ts  <- window(new_temperature, start = 1856+nTrain, end = 1856+nTrain+nValid-1)
+c(start(train.ts), end(train.ts)); c(start(test.ts), end(test.ts))</code></pre>
+<pre class="out">train 1856–1977 (122 ปี)   test 1978–1997 (20 ปี)</pre>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td>เปลี่ยนแค่ <code>nValid</code></td><td>บรรทัดอื่นคำนวณจาก nValid ให้เอง</td></tr>
+<tr><td>2</td><td>ปีสุดท้ายของ train = 1856 + 122 − 1 = 1977</td><td>ลบ 1 เพราะปี 1856 นับเป็นปีที่ 1</td></tr>
+</table>
+</div>
+</div>
+
+<div class="quiz free" id="q1-2">
+<div class="qhead"><span>ข้อ 1.2</span><span>ข้อมูลรายไตรมาส</span></div>
+<div class="qtext">beer.txt ใน Class 4 เป็นยอดผลิตเบียร์รายไตรมาส 72 ค่า ไม่มีหัวคอลัมน์ สมมติว่าเริ่มไตรมาส 1 ปี 1956 ให้ตั้ง ts แล้วเก็บ 8 ไตรมาสสุดท้ายเป็น test ใช้ <code>window</code> แบบใส่ปีกับไตรมาส</div>
+<textarea placeholder="เขียนโค้ด"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>beer <- ts(read.table("beer.txt", h = F), start = c(1956, 1), frequency = 4)
+end(beer)                                   # 1973 4
+train.ts <- window(beer, end = c(1971, 4))
+test.ts  <- window(beer, start = c(1972, 1))
+length(train.ts); length(test.ts)          # 64 8</code></pre>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>h = F</code></td><td>บรรทัดแรกของ beer.txt เป็นตัวเลข 284.4 ไม่ใช่ชื่อคอลัมน์</td></tr>
+<tr><td>2</td><td>72 ไตรมาส = 18 ปี</td><td>1956–1973 ปีสุดท้ายคือ 1973 Q4</td></tr>
+<tr><td>3</td><td>test 8 ไตรมาส = 2 ปีสุดท้าย</td><td>เริ่ม 1972 Q1 ส่วน train จบ 1971 Q4</td></tr>
+<tr><td>4</td><td>เช็ก <code>length</code></td><td>64 + 8 = 72 ครบทุกค่า ไม่ซ้อนกัน</td></tr>
+</table>
+</div>
+</div>
+
+<div class="quiz free" id="q1-3">
+<div class="qhead"><span>ข้อ 1.3</span><span>คอลัมน์วันที่รูปแบบอื่น</span></div>
+<div class="qtext">ไฟล์ shop.txt มีคอลัมน์ <code>date</code> เขียนเป็น 2021-03-01, 2021-04-01, ... และคอลัมน์ <code>y</code> เป็นยอดขายรายเดือน เขียนโค้ดตั้ง ts โดยไม่ต้องพิมพ์ปีกับเดือนแรกเอง</div>
+<textarea placeholder="เขียนโค้ด"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>library(lubridate)
+data <- read.table("shop.txt", h = T)
+data$date <- as.Date(data$date, format = "%Y-%m-%d")
+y <- ts(data$y, start = c(year(min(data$date)), month(min(data$date))), frequency = 12)
+start(y)                                   # 2021 3</code></pre>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>"%Y-%m-%d"</code></td><td>เรียงตามที่เห็นในไฟล์ ปี-เดือน-วัน คั่นด้วยขีด</td></tr>
+<tr><td>2</td><td>บรรทัด ts เหมือนอาจารย์ทุกตัว</td><td>เปลี่ยนแค่ชื่อคอลัมน์จาก sales เป็น y</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section class="unit" id="r-acf">
+<h2>2 กราฟ ACF PACF EACF และ diff</h2>
+<p class="unit-meta"><b>Class:</b> 3, 6, 7, 8 · <b>ข้อมูล:</b> temp.txt, times.txt, aero.txt · <b>บทที่สอน:</b> <a href="0006-ar2-pacf-and-arima.html">L6</a>, <a href="0007-arima-identification-and-estimation.html">L7</a></p>
+
+<pre><code># Class 7: ขั้นระบุโมเดล
+data <- read.table("times.txt")
+data <- ts(data)
+par(mfrow = c(2,1))
+acf(data)
+pacf(data)
+
+library(TSA)
+eacf(data)
+
+# Class 7: ข้อมูลไม่นิ่ง ให้ diff ก่อนแล้วดูใหม่
+data <- ts(read.table("aero.txt"))
+acf(diff(data), main = "Autocorrelation plot of the differenced data")
+pacf(diff(data), main = "Partial autocorrelation plot of the differenced data")
+eacf(diff(data))
+
+# Class 8: ข้อมูลฤดูกาล ดูถึง lag 48
+milk.diff <- diff(diff(milk, lag = 12))
+acf(as.vector(milk.diff), main = "Sample ACF", lag.max = 48)
+pacf(as.vector(milk.diff), main = "Sample PACF", lag.max = 48)
+
+# Class 7: แปลงข้อมูลก่อน
+BoxCox.ar(electricity)
+acf(diff(log(electricity)), lag.max = 36)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th><th>หมายเหตุ</th></tr>
+<tr><td><code>par(mfrow = c(2,1))</code></td><td>แบ่งหน้ากราฟเป็น 2 แถว 1 คอลัมน์ วาด ACF กับ PACF ไว้ในหน้าเดียวกัน</td><td><code>c(2,2)</code> ได้ 4 รูป ตั้งกลับเป็นปกติด้วย <code>par(mfrow = c(1,1))</code></td></tr>
+<tr><td><code>acf(x)</code></td><td>วาด sample ACF เส้นประคือ \(\pm 2/\sqrt{n}\)</td><td><code>acf(x, plot = F)</code> พิมพ์ค่าเป็นตัวเลข</td></tr>
+<tr><td><code>pacf(x)</code></td><td>วาด sample PACF เริ่มที่ lag 1</td><td>ใช้หา p ของ AR</td></tr>
+<tr><td><code>eacf(x)</code></td><td>ตาราง x กับ o หาสามเหลี่ยมของ o มุมบนซ้ายของสามเหลี่ยมคือ AR p กับ MA q</td><td>ต้องโหลด TSA</td></tr>
+<tr><td><code>diff(x)</code></td><td>\(x_t-x_{t-1}\) ข้อมูลหายไป 1 ค่า</td><td><code>diff(x, lag = 12)</code> คือ \(x_t-x_{t-12}\) · <code>diff(x, differences = 2)</code> คือ diff สองครั้ง</td></tr>
+<tr><td><code>as.vector(x)</code></td><td>ตัดข้อมูลเวลาของ ts ทิ้ง แกน lag จะเป็น 1, 2, 3 แทน 0.083, 0.167</td><td>ใช้กับข้อมูลรายเดือน จะได้อ่าน lag 12, 24 ได้ตรง ๆ</td></tr>
+<tr><td><code>lag.max = 48</code></td><td>ดู ACF ถึง lag 48 ครอบคลุม 4 รอบฤดูกาล</td><td>ค่าเริ่มต้นสั้นเกินไปสำหรับฤดูกาล</td></tr>
+<tr><td><code>BoxCox.ar(x)</code></td><td>หาค่า λ ที่ทำให้ variance คงที่ ถ้าช่วงความเชื่อมั่นคลุม 0 ให้ใช้ log</td><td>ข้อมูลต้องเป็นบวกทั้งหมด</td></tr>
+</table>
+
+<pre class="out">times.txt n = 150  เส้นประ ±0.163
+ACF  lag 1–4:  -0.771   0.382  -0.090  -0.077
+PACF lag 1–4:  -0.771  -0.524  -0.153  -0.135</pre>
+
+<p>ACF เกินเส้นที่ lag 1 กับ 2 แล้วหยุด PACF ค่อย ๆ ลดลง ดูจาก ACF อย่างเดียวจะได้ MA(2) แต่ PACF ลดลงไม่ใช่ตัดทันที แบบนี้ให้ทำตาราง AIC ใน<a href="#r-ident">หัวข้อ 6</a> อาจารย์เลือก ARMA(1,1)</p>
+
+<p class="trap">⚠ ถ้าโหลด TSA แล้ว <code>acf</code> จะเริ่มที่ lag 1 ไม่มีแท่ง lag 0 ที่สูง 1 อ่านแท่งแรกเป็น lag 1 ได้เลย ถ้าดึงค่าด้วย <code>acf(x)$acf[2]</code> จะได้ lag 2 แทน lag 1 ให้ใช้ <code>stats::acf</code> ถ้าต้องการรูปแบบเดิม</p>
+
+<div class="quiz free" id="q2-1">
+<div class="qhead"><span>ข้อ 2.1 · ข้อมูลที่อาจารย์ให้แต่ไม่ได้ใช้</span><span>earthquake.txt</span></div>
+<div class="qtext">earthquake.txt ใน Class 3 คือจำนวนแผ่นดินไหวรายปี 99 ค่า ไม่มีหัวคอลัมน์ เขียนโค้ดดู ACF, PACF, EACF แล้วเสนอโมเดล</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>library(TSA)
+eq <- ts(read.table("earthquake.txt"))
+plot(eq, type = "o")
+par(mfrow = c(2,1)); acf(eq); pacf(eq)
+eacf(eq)</code></pre>
+<pre class="out">เส้นประ ±0.201
+ACF  lag 1–4:  0.542  0.419  0.398  0.324   ลดลงช้า ๆ
+PACF lag 1–3:  0.542  0.178  0.168          เกินเส้นแค่ lag 1
+EACF  แถว AR 1:  x o o o o ...   มุมสามเหลี่ยมที่ (1,1)</pre>
+<div class="copy">
+<p>The sample ACF decays slowly while the sample PACF cuts off after lag 1, which suggests AR(1).</p>
+<p>The EACF has its vertex at AR = 1, MA = 1, so ARMA(1,1) is also a candidate.</p>
+<p>Fit both models and choose by AIC, then check the residuals.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>อ่านอะไร</th><th>สรุป</th></tr>
+<tr><td>1</td><td>เส้นประ \(2/\sqrt{99}=0.201\)</td><td>ใช้ตัดสินว่าค่าไหนเกินเส้น</td></tr>
+<tr><td>2</td><td>PACF lag 2 = 0.178 ไม่เกิน 0.201</td><td>PACF ตัดหลัง lag 1 ได้ AR(1)</td></tr>
+<tr><td>3</td><td>EACF แถวที่ 1 เป็น o ตั้งแต่คอลัมน์ 1</td><td>มุมบนซ้ายของ o อยู่ที่ p = 1, q = 1</td></tr>
+<tr><td>4</td><td>สองวิธีให้คำตอบไม่ตรงกัน</td><td>เสนอทั้งสองแล้วตัดสินด้วย AIC แบบที่อาจารย์ทำใน Class 7</td></tr>
+</table>
+</div>
+</div>
+
+<div class="quiz free" id="q2-2">
+<div class="qhead"><span>ข้อ 2.2</span><span>ข้อมูลรายเดือนที่มีฤดูกาล</span></div>
+<div class="qtext">ใช้ <code>data(milk)</code> จาก TSA ทำ diff ปกติหนึ่งครั้งกับ diff ฤดูกาลหนึ่งครั้ง แล้วอ่าน ACF กับ PACF ที่ lag 12, 24, 36 เสนอส่วนฤดูกาลของโมเดล</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>library(TSA); data(milk)
+milk.diff <- diff(diff(milk, lag = 12))
+par(mfrow = c(1,2))
+acf(as.vector(milk.diff), lag.max = 48)
+pacf(as.vector(milk.diff), lag.max = 48)</code></pre>
+<pre class="out">เส้นประ ±0.175
+ACF   lag 12, 24, 36:  -0.448  -0.087  -0.109   ตัดหลัง lag 12
+PACF  lag 12, 24, 36:  -0.387  -0.346  -0.354   ยังเกินเส้นทุกรอบ</pre>
+<div class="copy">
+<p>At the seasonal lags the ACF cuts off after lag 12 while the PACF stays large at lags 12, 24, 36, which suggests a seasonal MA(1): ARIMA(0,1,0)(0,1,1)[12].</p>
+<p>The lecturer fitted ARIMA(0,1,0)(3,1,0)[12]; compare both by AIC on the same data.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>อ่านอะไร</th><th>สรุป</th></tr>
+<tr><td>1</td><td>ดูแค่ lag 12, 24, 36</td><td>เป็นตำแหน่งของส่วนฤดูกาล</td></tr>
+<tr><td>2</td><td>ACF ตัด PACF ไม่ตัด</td><td>เป็นรูปของ MA ส่วนฤดูกาล Q = 1</td></tr>
+<tr><td>3</td><td>d = 1, D = 1 มาจากการ diff ที่ทำ</td><td>diff ปกติให้ d diff lag 12 ให้ D</td></tr>
+</table>
+<p class="trap">⚠ เทียบ AIC ในหัวข้อ 9 แล้ว แบบของอาจารย์ AIC ต่ำกว่า กราฟชี้ทางได้ แต่ต้องตัดสินด้วย AIC และ residual</p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section class="unit" id="r-detrend">
+<h2>3 detrend ด้วย regression</h2>
+<p class="unit-meta"><b>Class:</b> 3 · <b>ข้อมูล:</b> temp.txt · <b>บทที่สอน:</b> <a href="0003-estimation-correlogram-and-detrending.html">L3</a></p>
+
+<pre><code>temp <- read.table("temp.txt")
+newtemp <- ts(temp, start = 1856)
+temp.1900 <- window(newtemp, start = 1900)
+
+fit <- lm(temp.1900 ~ time(temp.1900))
+summary(fit)
+plot(temp.1900, type = "o"); abline(fit)
+plot(resid(fit), type = "o")
+
+par(mfrow = c(2,1))
+acf(temp.1900)
+acf(resid(fit))
+
+diff1 <- diff(temp.1900)
+acf(diff1)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>time(x)</code></td><td>ดึงแกนเวลา 1900, 1901, ... มาเป็นตัวแปร t</td></tr>
+<tr><td><code>lm(x ~ time(x))</code></td><td>ฟิตเส้นตรง \(x_t=\beta_0+\beta_1t+\varepsilon_t\)</td></tr>
+<tr><td><code>abline(fit)</code></td><td>วาดเส้นตรงที่ฟิตทับบนกราฟ</td></tr>
+<tr><td><code>resid(fit)</code></td><td>ข้อมูลหลังตัด trend ออก \(x_t-\hat\beta_0-\hat\beta_1t\)</td></tr>
+</table>
+
+<pre class="out">              Estimate   Std. Error  t value   Pr(>|t|)
+(Intercept)  -12.1864     0.9032     -13.49    6.8e-24
+time          0.006209    0.000463    13.40    1.1e-23
+
+ACF lag 1–3   ข้อมูลเดิม   0.819  0.720  0.657
+              หลัง detrend 0.530  0.273  0.184
+              หลัง diff   -0.196 -0.191 -0.195</pre>
+
+<p>อุณหภูมิเพิ่มปีละ 0.0062 องศา ACF ของข้อมูลเดิมลดช้ามาก หลัง detrend ลดเร็วขึ้นแต่ lag 1 ยังสูง หลัง diff ACF ทุก lag ใกล้เส้นประ ±0.202</p>
+
+<div class="quiz free" id="q3-1">
+<div class="qhead"><span>ข้อ 3.1</span><span>เปลี่ยนช่วงข้อมูลและชุดข้อมูล</span></div>
+<div class="qtext">ใช้ earthquake.txt ตั้งเป็น ts ธรรมดา ฟิต trend เส้นตรงด้วยคำสั่งของอาจารย์ แล้วตอบว่า trend มีนัยสำคัญที่ 5% ไหม และ detrend จำเป็นไหม</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>eq <- ts(read.table("earthquake.txt"))
+fit <- lm(eq ~ time(eq))
+summary(fit)</code></pre>
+<pre class="out">            Estimate  Std. Error  t value  Pr(>|t|)
+(Intercept) 22.5805    1.4480     15.594   3.5e-28
+time(eq)    -0.0512    0.0251     -2.037   0.0444</pre>
+<div class="copy">
+<p>The slope is −0.0512 per year with p-value 0.044 &lt; 0.05, so the downward trend is statistically significant but very small.</p>
+<p>Over 99 years it lowers the level by about 5 earthquakes, so detrending is optional; the slowly decaying ACF can also be handled by an AR term.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>อ่านอะไร</th><th>สรุป</th></tr>
+<tr><td>1</td><td>แถว <code>time(eq)</code> คอลัมน์ Pr</td><td>0.0444 น้อยกว่า 0.05</td></tr>
+<tr><td>2</td><td>−0.0512 × 99 ≈ −5</td><td>เทียบกับระดับเฉลี่ยประมาณ 20 ถือว่าน้อย</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section class="unit" id="r-smooth">
+<h2>4 SMA, EMA, Holt</h2>
+<p class="unit-meta"><b>Class:</b> 4 · <b>ข้อมูล:</b> CPALL.txt, sales.txt, singapore.txt · <b>บทที่สอน:</b> <a href="0004-smoothing-methods.html">L4</a></p>
+
+<pre><code>## CPALL: SMA และ EMA
+data <- ts(read.table("CPALL.txt", h = T))
+nValid <- 15; nTrain <- length(data) - nValid
+train.ts <- window(data, start = 1, end = nTrain)
+test.ts  <- window(data, start = nTrain+1, end = nTrain+nValid)
+
+library(zoo)
+k <- 3
+ma.trailing <- rollmean(train.ts, k, align = "right")
+library(forecast)
+accuracy(ma.trailing, train.ts)                       # self-validation
+forecast <- rep(ma.trailing[nTrain-k+1,], 15)
+accuracy(forecast, test.ts)                           # cross-validation
+
+ema <- ets(train.ts, model = "ANN", alpha = 0.2)
+forecast(ema, h = 15, level = 0)
+accuracy(forecast(ema)$fitted, train.ts)
+accuracy(forecast(ema, h = 15)$mean, test.ts)
+
+## sales: Holt
+holt.additive <- ets(data, model = "AAN")
+forecast(holt.additive, h = 5, level = 0)
+holt.additive <- ets(data, model = "AAN", alpha = 0.5, beta = 0.5)
+
+## singapore: holt() กับ damped
+holttrend1 <- holt(singapur, h = 15)
+holttrend2 <- holt(singapur, h = 15, damped = TRUE)
+bestmodel <- ets(singapur, model = "ZZZ")</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th><th>เปลี่ยนเป็นแบบอื่น</th></tr>
+<tr><td><code>rollmean(x, k, align = "right")</code></td><td>ค่าเฉลี่ยของ k ค่าล่าสุด ค่าแรกออกที่ตำแหน่ง k</td><td>เปลี่ยน k</td></tr>
+<tr><td><code>ma.trailing[nTrain-k+1,]</code></td><td>ค่า SMA ตัวสุดท้าย ใช้เป็นค่าพยากรณ์ทุกจุดในอนาคต เพราะ SMA พยากรณ์เป็นเส้นแบน</td><td>ใช้ <code>tail(ma.trailing, 1)</code> ก็ได้</td></tr>
+<tr><td><code>rep(..., 15)</code></td><td>ทำซ้ำ 15 ครั้งเท่าจำนวน test</td><td>เปลี่ยนตาม nValid</td></tr>
+<tr><td><code>model = "ANN"</code></td><td>3 ตัวอักษรคือ Error, Trend, Season · A additive · N none · M multiplicative · Ad damped</td><td>"AAN" = Holt · "AAA" = Holt-Winters additive · "MAM" · "ZZZ" ให้ R เลือก</td></tr>
+<tr><td><code>alpha = 0.2</code></td><td>บังคับค่า α ถ้าไม่ใส่ R หาค่าที่ดีที่สุดให้</td><td><code>beta</code> สำหรับ trend · <code>gamma</code> สำหรับฤดูกาล</td></tr>
+<tr><td><code>level = 0</code></td><td>ไม่แสดงช่วงพยากรณ์ ให้แต่ค่าพยากรณ์</td><td>ไม่ใส่จะได้ช่วง 80% กับ 95%</td></tr>
+<tr><td><code>$fitted</code> / <code>$mean</code></td><td>ค่าที่ฟิตในช่วง train / ค่าพยากรณ์ในอนาคต</td><td></td></tr>
+<tr><td><code>accuracy(f, x)</code></td><td>ME, RMSE, MAE, MPE, MAPE เทียบค่าพยากรณ์ f กับค่าจริง x</td><td>ลำดับ f ก่อน x ตามโค้ดอาจารย์</td></tr>
+<tr><td><code>holt(x, damped = TRUE)</code></td><td>Holt ที่ trend ค่อย ๆ แบนลงด้วย φ</td><td>เท่ากับ <code>ets(x, model = "AAN", damped = TRUE)</code></td></tr>
+</table>
+
+<pre class="out">CPALL  nTrain = 65, test 15 ค่า
+SMA k = 3   ค่าสุดท้าย 1.553   RMSE train 1.221   RMSE test 1.663
+EMA α = 0.2 ระดับสุดท้าย 0.510  RMSE train 1.634   RMSE test 0.738
+
+sales  ETS(A,A,N)  α = 0.7851  β = 0.0001
+       พยากรณ์ 17–19:  298,119  319,178  340,236
+
+singapore  holt:        α 0.638  β 0.121             พยากรณ์ 2008: 83.90
+           holt damped: α 0.515  β 0.0001  φ 0.967   พยากรณ์ 2008: 83.73
+           ets ZZZ เลือก ETS(M,Ad,N)</pre>
+
+<p class="trap">⚠ RMSE ใน train ของ SMA ต่ำกว่า EMA แต่ RMSE ใน test สูงกว่า ให้เลือกโมเดลจาก RMSE ใน test เสมอ</p>
+
+<div class="quiz free" id="q4-1">
+<div class="qhead"><span>ข้อ 4.1</span><span>เปลี่ยน k และ α</span></div>
+<div class="qtext">ทำ CPALL ซ้ำด้วย SMA k = 5 และ EMA α = 0.5 แล้วให้ R เลือก α เอง เทียบ RMSE บน test ทั้ง 5 แบบรวมกับของอาจารย์ แบบไหนดีที่สุด</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>k <- 5
+ma.trailing <- rollmean(train.ts, k, align = "right")
+forecast <- rep(ma.trailing[nTrain-k+1,], 15)
+accuracy(forecast, test.ts)
+
+ema <- ets(train.ts, model = "ANN", alpha = 0.5)
+accuracy(forecast(ema, h = 15)$mean, test.ts)
+
+ema0 <- ets(train.ts, model = "ANN")       # ไม่ใส่ alpha
+ema0$par
+accuracy(forecast(ema0, h = 15)$mean, test.ts)</code></pre>
+<table class="why"><caption>RMSE บน test</caption>
+<tr><th>โมเดล</th><th>ค่าพยากรณ์</th><th>RMSE test</th></tr>
+<tr><td>SMA k = 3</td><td>1.553</td><td>1.663</td></tr>
+<tr><td>SMA k = 5</td><td>0.728</td><td>0.910</td></tr>
+<tr><td>EMA α = 0.2</td><td>0.510</td><td>0.738</td></tr>
+<tr><td>EMA α = 0.5</td><td>1.293</td><td>1.417</td></tr>
+<tr><td>EMA ให้ R เลือก α = 0.0001</td><td>0.131</td><td><b>0.526</b></td></tr>
+</table>
+<div class="copy">
+<p>The best model on the test set is simple exponential smoothing with α estimated by R (α ≈ 0.0001, RMSE = 0.526).</p>
+<p>An α near 0 means the forecast is almost the overall mean: CPALL returns behave like noise around a constant, so averaging more history works better than following recent values.</p>
+</div>
+</div>
+</div>
+
+<div class="quiz free" id="q4-2">
+<div class="qhead"><span>ข้อ 4.2</span><span>บังคับ α, β ของ Holt</span></div>
+<div class="qtext">sales.txt ฟิต Holt ด้วย α = 0.5, β = 0.5 ตามบรรทัดสุดท้ายของอาจารย์ แล้วพยากรณ์ 3 ช่วงข้างหน้า เทียบกับกรณีที่ R เลือก α, β เอง</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>data <- ts(read.table("sales.txt", h = T))
+holt.additive <- ets(data, model = "AAN", alpha = 0.5, beta = 0.5)
+forecast(holt.additive, h = 3, level = 0)</code></pre>
+<pre class="out">          α = 0.5, β = 0.5     R เลือก α 0.785, β 0.0001
+17        286,675              298,119
+18        298,410              319,178
+19        310,146              340,236</pre>
+<p>ค่าพยากรณ์ของ Holt เพิ่มขึ้นทีละเท่า ๆ กัน เท่ากับความชัน b ตัวสุดท้าย แบบ α = β = 0.5 เพิ่มครั้งละ 11,736 แบบที่ R เลือกเพิ่มครั้งละ 21,058</p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section class="unit" id="r-decomp">
+<h2>5 decomposition</h2>
+<p class="unit-meta"><b>Class:</b> 4, 5 · <b>ข้อมูล:</b> beer.txt, german.txt, XBOX.txt · <b>บทที่สอน:</b> <a href="0004-smoothing-methods.html">L4</a>, <a href="0005-ma-and-ar-models.html">L5</a> · <b>ข้อสอบ:</b> 2025 ข้อ 5f ใช้ Excel หรือ R ก็ได้</p>
+
+<p>อาจารย์สอน 3 วิธี เลือกตามที่โจทย์บอก</p>
+<table class="why">
+<tr><th>วิธี</th><th>trend มาจาก</th><th>ใช้เมื่อโจทย์บอกว่า</th></tr>
+<tr><td>ก <code>decompose()</code></td><td>moving average แบบ centered</td><td>"seasonal decomposition" เฉย ๆ</td></tr>
+<tr><td>ข <code>lm</code> + <code>tapply</code></td><td>เส้นตรง \(b_0+b_1t\)</td><td>\(F_t=(b_0+b_1t)\times SI_t\) แบบ 2025 ข้อ 5f</td></tr>
+<tr><td>ค <code>decompose</code> + <code>auto.arima</code></td><td>ARIMA บนข้อมูลที่ถอดฤดูกาลแล้ว</td><td>พยากรณ์ด้วย decomposition แต่ไม่บังคับเส้นตรง</td></tr>
+</table>
+
+<pre><code>## ก: decompose()   Class 4
+beerprod <- ts(read.table("beer.txt", h = F), freq = 4)
+decompbeer <- decompose(beerprod, type = "additive")
+decompbeermult <- decompose(beerprod, type = "multiplicative")
+plot(decompbeermult); decompbeermult
+trendpattern <- filter(beerprod, filter = c(1/8, 1/4, 1/4, 1/4, 1/8), sides = 2)
+
+## ข: trend เส้นตรง × seasonal index   Class 5
+y <- sales_ts
+t <- 1:length(y)
+trend_fit <- lm(y ~ t)
+trend_hat <- fitted(trend_fit)
+detrended <- y / trend_hat
+month_index <- cycle(y)
+seasonal <- tapply(detrended, month_index, mean, na.rm = TRUE)
+seasonal <- seasonal / mean(seasonal)
+
+h <- 3
+freq <- frequency(y)
+last_m <- as.integer(cycle(y)[length(y)])
+future_months <- ((last_m + seq_len(h) - 1) %% freq) + 1
+seasonal_future <- seasonal[future_months]
+t_future <- (length(y) + 1):(length(y) + h)
+trend_future <- predict(trend_fit, newdata = data.frame(t = t_future))
+forecast <- trend_future * seasonal_future
+
+## ค: decompose + auto.arima   Class 5
+dcmp <- decompose(y, type = "multiplicative")
+y_sa <- y / dcmp$seasonal
+season_by_month <- tapply(dcmp$seasonal, cycle(y), mean, na.rm = TRUE)
+fit <- auto.arima(y_sa)
+fc_sa <- forecast(fit, h = h)
+forecast <- fc_sa$mean * season_by_month[future_m]</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>type = "multiplicative"</code></td><td>\(x=T\times S\times I\) ใช้เมื่อความกว้างของฤดูกาลโตตาม trend · additive คือ \(x=T+S+I\)</td></tr>
+<tr><td><code>$figure</code></td><td>seasonal index ของแต่ละเดือนหรือไตรมาส ตัวละค่า</td></tr>
+<tr><td><code>filter(..., c(1/8, 1/4, 1/4, 1/4, 1/8), sides = 2)</code></td><td>centered MA สำหรับข้อมูลรายไตรมาส ได้ค่าเท่ากับ <code>$trend</code> ของ decompose ตรวจแล้ว</td></tr>
+<tr><td><code>cycle(y)</code></td><td>บอกว่าแต่ละจุดเป็นเดือนที่เท่าไร 1–12 หรือไตรมาสที่ 1–4</td></tr>
+<tr><td><code>tapply(detrended, month_index, mean)</code></td><td>แยกค่า detrended ตามเดือน แล้วหาค่าเฉลี่ยของแต่ละเดือน</td></tr>
+<tr><td><code>seasonal / mean(seasonal)</code></td><td>ปรับให้ index เฉลี่ยเท่ากับ 1 พอดี</td></tr>
+<tr><td><code>last_m</code> และ <code>%% freq</code></td><td>หาว่าเดือนถัดไปคือเดือนอะไร ถ้าจบที่ธันวาคม เดือนถัดไปคือ 1, 2, 3</td></tr>
+<tr><td><code>predict(trend_fit, newdata = data.frame(t = t_future))</code></td><td>แทน t ในอนาคตลงในสมการเส้นตรง ชื่อคอลัมน์ต้องเป็น t ตรงกับตอนฟิต</td></tr>
+</table>
+
+<pre class="out">beer  multiplicative index  Q1 1.0238  Q2 0.8754  Q3 0.9233  Q4 1.1775
+      additive index        Q1 7.90    Q2 -40.68  Q3 -24.65  Q4 57.43
+
+XBOX วิธี ข  trend = 388,917.9 + 249.72 t     จบที่ Dec 2014 → future_months = 1 2 3
+      index  Jan 0.8220  Feb 0.7618  Mar 0.6660  ...  Nov 2.3067  Dec 3.1270
+      trend t = 111–113: 416,637  416,887  417,136
+      พยากรณ์ Jan–Mar 2015: 342,461  317,605  277,801
+XBOX วิธี ค  auto.arima บน y_sa ได้ ARIMA(0,1,2)(0,0,1)[12]
+      พยากรณ์ Jan–Mar 2015: 64,964  70,639  64,994</pre>
+
+<p class="trap">⚠ วิธี ข กับ ค ให้ค่าพยากรณ์ต่างกันมาก เพราะเส้นตรงของวิธี ข ยังสูงอยู่ ส่วน ARIMA ในวิธี ค ตามยอดขายช่วงท้ายที่ลดลง ต้องใช้วิธีที่โจทย์สั่งเท่านั้น</p>
+<p class="trap">⚠ ในโค้ดวิธี ค อาจารย์เขียน <code>future_m</code> ซึ่งได้ค่าจากบรรทัด <code>future_m &lt;- ((last_m + seq_len(h) - 1) %% freq) + 1</code> ถ้ารันแค่ช่วงนี้ต้องมีบรรทัดนั้นด้วย</p>
+
+<div class="quiz free" id="q5-1">
+<div class="qhead"><span>ข้อ 5.1 · แบบ 2025 ข้อ 5f</span><span>เส้นตรง × seasonal index กับข้อมูลรายไตรมาส</span></div>
+<div class="qtext">ใช้ beer.txt ตั้ง <code>frequency = 4</code> สร้าง \(F_t=(b_0+b_1t)\times SI_t\) ด้วยวิธี ข แล้วพยากรณ์ 4 ไตรมาสข้างหน้า ต้องแก้โค้ดตรงไหนจากของ XBOX</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>y <- ts(read.table("beer.txt", h = F), frequency = 4)
+t <- 1:length(y)
+trend_fit <- lm(y ~ t)
+detrended <- y / fitted(trend_fit)
+seasonal <- tapply(detrended, cycle(y), mean, na.rm = TRUE)
+seasonal <- seasonal / mean(seasonal)
+
+h <- 4
+freq <- frequency(y)
+last_m <- as.integer(cycle(y)[length(y)])
+future_months <- ((last_m + seq_len(h) - 1) %% freq) + 1
+t_future <- (length(y) + 1):(length(y) + h)
+trend_future <- predict(trend_fit, newdata = data.frame(t = t_future))
+trend_future * seasonal[future_months]</code></pre>
+<pre class="out">trend = 223.521 + 2.914 t
+SI  Q1 1.0303  Q2 0.8729  Q3 0.9234  Q4 1.1734
+last_m = 4 → future_months = 1 2 3 4
+พยากรณ์ t = 73–76:  449.47  383.32  408.23  522.13</pre>
+<div class="copy">
+<p>Trend line: \(\hat T_t=223.521+2.914\,t\)</p>
+<p>Seasonal indices: Q1 = 1.0303, Q2 = 0.8729, Q3 = 0.9234, Q4 = 1.1734</p>
+<p>\(F_{73}=(223.521+2.914\times73)\times1.0303=449.47\)</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>แก้อะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>frequency = 4</code></td><td>cycle จะได้ 1–4 แทน 1–12 ส่วนที่เหลือของโค้ดไม่ต้องแก้</td></tr>
+<tr><td>2</td><td><code>h = 4</code></td><td>โจทย์ให้พยากรณ์ 4 ไตรมาส</td></tr>
+<tr><td>3</td><td>72 ค่าจบที่ Q4</td><td>ไตรมาสถัดไปวนกลับเป็น Q1 ด้วย <code>%%</code></td></tr>
+</table>
+<p class="trap">⚠ index ที่ได้ต่างจาก <code>decompose</code> เล็กน้อย เช่น Q4 1.1734 กับ 1.1775 เพราะ trend มาจากเส้นตรงไม่ใช่ moving average ถ้าโจทย์เขียน \(b_0+b_1t\) ต้องใช้แบบเส้นตรง</p>
+</div>
+</div>
+
+<div class="quiz free" id="q5-2">
+<div class="qhead"><span>ข้อ 5.2</span><span>ปรับค่าให้ไม่มีผลฤดูกาล</span></div>
+<div class="qtext">จากผล multiplicative decompose ของ beer ถ้ายอดผลิตไตรมาส 4 ในอนาคตเท่ากับ 535 ค่าที่ปรับฤดูกาลแล้วคือเท่าไร และถ้าใช้ additive ได้เท่าไร</div>
+<textarea placeholder="คำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>Multiplicative: 535 / 1.1775 = 454.35</p>
+<p>Additive: 535 − 57.43 = 477.57</p>
+</div>
+<p>ตัวอย่างนี้อยู่ในคอมเมนต์ท้ายโค้ด Class 4 multiplicative ให้หาร additive ให้ลบ</p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section class="unit" id="r-ident">
+<h2>6 ตาราง AIC/BIC และ Yule-Walker</h2>
+<p class="unit-meta"><b>Class:</b> 7 · <b>ข้อมูล:</b> times.txt, aero.txt, temp.txt · <b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html">L7</a></p>
+
+<pre><code>data <- ts(read.table("times.txt"))
+
+table1 <- array(0, c(4,4))
+for (i in 1:4) {
+  for (j in 1:4) {
+    aic <- AIC(arima(data, order = c(i-1,0,j-1), method = "ML"))
+    table1[i,j] <- aic
+  }
+}
+
+table2 <- array(0, c(4,4))
+for (i in 1:4) {
+  for (j in 1:4) {
+    bic <- AIC(arima(data, order = c(i-1,0,j-1), method = "ML"), k = log(length(data)))
+    table2[i,j] <- bic
+  }
+}
+
+nat.yw <- ar.yw(data, order = 1)
+nat.yw$mean; nat.yw$ar; nat.yw$var.pred
+ar(data, order.max = 1, AIC = F, method = 'yw')
+
+nat <- arima(data, order = c(1,0,1), method = 'ML')</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>array(0, c(4,4))</code></td><td>สร้างตาราง 4×4 ใส่ 0 ไว้ก่อน</td></tr>
+<tr><td><code>for (i in 1:4)</code></td><td>แถว i คือ AR p = i − 1 ได้ p = 0–3 · คอลัมน์ j คือ MA q = j − 1</td></tr>
+<tr><td><code>AIC(..., k = log(n))</code></td><td>เปลี่ยนค่าปรับจาก 2 เป็น log n ได้ BIC</td></tr>
+<tr><td><code>method = "ML"</code></td><td>ใช้ maximum likelihood เต็มรูป เทียบ AIC กันได้</td></tr>
+<tr><td><code>ar.yw(data, order = 1)</code></td><td>ประมาณ AR(1) ด้วย Yule-Walker คือใช้ \(\hat\phi=\hat\rho_1\)</td></tr>
+</table>
+
+<pre class="out">AIC table   แถว p = 0–3, คอลัมน์ q = 0–3
+       q=0     q=1     q=2     q=3
+p=0  699.68  558.81  518.30  503.93
+p=1  563.29  503.31  502.27  503.76
+p=2  513.28  501.28  502.35  504.33
+p=3  508.84  502.68  504.34  506.34
+
+BIC table
+p=0  705.70  567.84  530.35  518.98
+p=1  572.32  515.36  517.33  521.82
+p=2  525.32  516.33  520.41  525.41
+p=3  523.89  520.75  525.41  530.43
+
+ar.yw: mean 0.0198   phi −0.7710   σ² 2.4866
+arima(1,0,1): ar1 −0.6169  ma1 −0.7233  intercept 0.0235  σ² 1.57  aic 501.31</pre>
+
+<p>AIC ต่ำสุดคือ ARMA(2,1) 501.28 แต่ห่างจาก ARMA(1,1) 503.31 แค่ 2 BIC ต่ำสุดคือ ARMA(1,1) 515.36 อาจารย์เลือก ARMA(1,1) เพราะพารามิเตอร์น้อยกว่าและ BIC เลือก</p>
+
+<p class="trap">⚠ ARMA(1,1) ในตาราง AIC เท่ากับ 503.31 แต่ตอนพิมพ์โมเดลได้ <code>aic = 501.31</code> ต่างกัน 2 เพราะ arima ของ TSA ไม่นับ σ² ในจำนวนพารามิเตอร์ ถ้าเทียบหลายโมเดล ให้เอาค่าจากวิธีเดียวกันทุกตัว</p>
+<p class="trap">⚠ ถ้าตาราง AIC มาจาก <code>diff(data)</code> อย่าเอาไปเทียบกับโมเดลที่ฟิตบน data เดิม เพราะ d ไม่เท่ากัน</p>
+
+<div class="quiz free" id="q6-1">
+<div class="qhead"><span>ข้อ 6.1</span><span>ตาราง AIC บนข้อมูลที่ diff</span></div>
+<div class="qtext">ใช้ aero.txt ซึ่งไม่นิ่ง สร้างตาราง AIC 4×4 บน <code>diff(data)</code> แบบอาจารย์ แล้วเทียบ ARIMA(2,1,0) กับ ARIMA(0,1,1) ที่อาจารย์ฟิต</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>data <- ts(read.table("aero.txt"))
+table1 <- array(0, c(4,4))
+for (i in 1:4) for (j in 1:4)
+  table1[i,j] <- AIC(arima(diff(data), order = c(i-1,0,j-1), method = "ML"))
+round(table1, 2)
+
+fit1 <- arima(data, order = c(2,1,0), method = "ML")
+fit2 <- arima(data, order = c(0,1,1), method = "ML")
+AIC(fit1); AIC(fit2)</code></pre>
+<pre class="out">ARIMA(2,1,0): ar1 −0.4062  ar2 −0.1647   AIC() 679.27
+ARIMA(0,1,1): ma1 −0.3917               AIC() 680.19</pre>
+<div class="copy">
+<p>ARIMA(2,1,0) has the lower AIC (679.27 vs 680.19), but the difference is less than 2, so both models fit about equally well.</p>
+<p>ARIMA(0,1,1) has one parameter fewer, so it is a reasonable simpler choice.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td>ใส่ <code>diff(data)</code> ในลูป</td><td>ตาราง ARMA บนผลต่างคือการเลือก ARIMA(p,1,q)</td></tr>
+<tr><td>2</td><td>ฟิตด้วย <code>order = c(2,1,0)</code> บน data เดิม</td><td>ได้ค่าสัมประสิทธิ์เกือบเท่ากับฟิต (2,0,0) บน diff และพยากรณ์ได้ในสเกลเดิมทันที</td></tr>
+</table>
+</div>
+</div>
+
+<div class="quiz free" id="q6-2">
+<div class="qhead"><span>ข้อ 6.2</span><span>ขยายตารางและเปลี่ยนเป็น BIC</span></div>
+<div class="qtext">ถ้าโจทย์ให้ทำตาราง BIC ขนาด 6×6 คือ p, q = 0–5 ต้องแก้โค้ดตรงไหน</div>
+<textarea placeholder="เขียนโค้ด"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>table2 <- array(0, c(6,6))
+for (i in 1:6) {
+  for (j in 1:6) {
+    table2[i,j] <- AIC(arima(data, order = c(i-1,0,j-1), method = "ML"), k = log(length(data)))
+  }
+}
+dimnames(table2) <- list(paste0("p=", 0:5), paste0("q=", 0:5))
+which(table2 == min(table2), arr.ind = TRUE)</code></pre>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>แก้อะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>c(6,6)</code> และ <code>1:6</code> ทั้งสองลูป</td><td>p, q = 0–5 มีอย่างละ 6 ค่า</td></tr>
+<tr><td>2</td><td><code>dimnames</code> กับ <code>which</code></td><td>ไม่ใช่โค้ดอาจารย์ ใส่ไว้ช่วยหาช่องที่ต่ำสุด ตอบเป็น p = แถว − 1, q = คอลัมน์ − 1</td></tr>
+</table>
+<p class="trap">⚠ ถ้าบางโมเดลฟิตไม่ผ่าน R จะหยุดทั้งลูป ให้ครอบด้วย <code>tryCatch(..., error = function(e) NA)</code></p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section class="unit" id="r-diag">
+<h2>7 ตรวจ residual</h2>
+<p class="unit-meta"><b>Class:</b> 7–10 · <b>บทที่สอน:</b> <a href="0008-diagnostic-and-forecasting.html#s1-idea">L8</a> · <b>ฝึกเต็มใน:</b> <a href="exam-practice.html#u-diag">ทักษะ 5</a></p>
+
+<pre><code>library(TSA)
+par(mfrow = c(1,2))
+hist(rstandard(nat), xlab = "Standardised residuals")
+qqnorm(rstandard(nat))
+qqline(rstandard(nat))
+shapiro.test(rstandard(nat))
+tsdiag(nat, gof.lag = 20)                       # Class 7
+tsdiag(fit, gof = 30, omit.initial = T)          # Class 8–10 ใช้กับโมเดลที่มี diff
+
+checkresiduals(germaninflarima)                  # Class 9 ทางเลือก</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ตรวจอะไร</th><th>ผ่านเมื่อ</th></tr>
+<tr><td><code>hist</code>, <code>qqnorm</code>, <code>qqline</code></td><td>residual เป็น normal ไหม</td><td>histogram เป็นระฆัง จุดเกาะเส้น</td></tr>
+<tr><td><code>shapiro.test</code></td><td>H0: residual เป็น normal</td><td>p &gt; 0.05</td></tr>
+<tr><td><code>tsdiag</code></td><td>3 รูป: standardized residual, ACF ของ residual, Ljung-Box p-value ทุก lag</td><td>residual อยู่ใน ±3 ACF อยู่ในเส้นประ p-value อยู่เหนือเส้น 0.05 ทุกจุด</td></tr>
+<tr><td><code>gof = 30</code></td><td>Ljung-Box ถึง lag 30</td><td></td></tr>
+<tr><td><code>omit.initial = T</code></td><td>ตัด residual ช่วงแรกที่หายไปตอน diff</td><td>ใช้เมื่อโมเดลมี d หรือ D</td></tr>
+<tr><td><code>checkresiduals</code></td><td>วาด residual, ACF, histogram และพิมพ์ Ljung-Box ตัวเดียว</td><td>p &gt; 0.05</td></tr>
+</table>
+
+<pre class="out">times.txt ARMA(1,1): Shapiro p = 0.307  rstandard −2.24 ถึง 3.20  Ljung-Box p ทุก lag เกิน 0.05
+
+singapore auto.arima ARIMA(1,1,0) with drift:
+checkresiduals →  Ljung-Box  Q* = 3.1026, df = 5, p-value = 0.6842   Total lags used: 6</pre>
+
+<p class="trap">⚠ <code>checkresiduals</code> ให้ Ljung-Box ที่ lag เดียว ส่วน <code>tsdiag</code> ให้ทุก lag ข้อสอบที่ถามว่า "ตรวจ assumption ให้ครบ" ใช้ชุดของอาจารย์ที่มี tsdiag ดีกว่า</p>
+</section>
+
+<!-- ===================== 8 ===================== -->
+<section class="unit" id="r-predict">
+<h2>8 พยากรณ์จาก arima และช่วงพยากรณ์</h2>
+<p class="unit-meta"><b>Class:</b> 8, 9 · <b>ข้อมูล:</b> times.txt, aero.txt, singapore.txt · <b>บทที่สอน:</b> <a href="0008-diagnostic-and-forecasting.html#s4-idea">L8 ตอน 4</a></p>
+
+<p class="lead">โมเดลที่ฟิตด้วย <code>arima()</code> ตัวเล็ก อาจารย์พยากรณ์ด้วย <code>predict()</code> ส่วนโมเดลจาก <code>auto.arima</code> หรือ <code>ets</code> ใช้ <code>forecast()</code></p>
+
+<pre><code>nat <- arima(data, order = c(1,0,1), method = 'ML')
+nat.predict <- predict(nat, n.ahead = 20)
+round(nat.predict$pred, 3)
+round(nat.predict$se, 3)
+lower.pi <- nat.predict$pred - qnorm(0.975, 0, 1) * nat.predict$se
+upper.pi <- nat.predict$pred + qnorm(0.975, 0, 1) * nat.predict$se
+
+## ข้อมูลที่ log ก่อนฟิต
+## nat.fit = arima(log(data), order = c(0,1,1), method = 'ML')
+## nat.predict <- predict(nat.fit, n.ahead = 12)
+## round(exp(nat.predict$pred), 3)
+
+## Class 9: diff ในโมเดล กับ diff ก่อนฟิต
+mod1 <- arima(singapur, order = c(1,1,0), method = 'ML')
+forecast1 <- predict(mod1, n.ahead = 12)$pred
+mod2 <- arima(diff(singapur), order = c(1,0,0), method = 'ML')
+forecast2 <- diffinv(predict(mod2, n.ahead = 12)$pred, xi = singapur[28])</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>n.ahead = 20</code></td><td>พยากรณ์ 20 ช่วงข้างหน้า เทียบได้กับ h ของ forecast</td></tr>
+<tr><td><code>$pred</code>, <code>$se</code></td><td>ค่าพยากรณ์ และ standard error ของแต่ละช่วง</td></tr>
+<tr><td><code>qnorm(0.975, 0, 1)</code></td><td>1.96 ใช้ทำช่วง 95% ถ้าโจทย์ถาม 90% ใช้ <code>qnorm(0.95)</code> = 1.645</td></tr>
+<tr><td><code>exp(...)</code></td><td>แปลงค่าพยากรณ์จาก log กลับเป็นสเกลเดิม</td></tr>
+<tr><td><code>diffinv(..., xi = ค่าสุดท้าย)</code></td><td>บวกสะสมผลต่างที่พยากรณ์ กลับเป็นระดับเดิม เริ่มจากค่าจริงตัวสุดท้าย</td></tr>
+</table>
+
+<pre class="out">times ARMA(1,1)  n.ahead = 3
+pred    3.248  −1.966   1.251
+se      1.253   2.095   2.337
+95% PI  [0.792, 5.704]  [−6.072, 2.141]  [−3.331, 5.832]
+
+singapore  mod1 ARIMA(1,1,0):           83.567  83.582  83.585
+           mod2 AR(1) บน diff → diffinv:   83.500  84.061  84.525  85.025   ← ตัวแรกคือ xi = 83.5</pre>
+
+<p class="trap">⚠ <code>diffinv</code> คืนค่ามา h + 1 ตัว ตัวแรกคือค่าเริ่มต้น xi ค่าพยากรณ์จริงคือตัวที่ 2 เป็นต้นไป</p>
+<p class="trap">⚠ mod1 กับ mod2 ให้ค่าไม่เท่ากัน เพราะ mod2 มี intercept 0.49 ซึ่งกลายเป็น drift ส่วน mod1 ที่มี d = 1 ใน arima ไม่มีค่าคงที่ ในไฟล์อาจารย์ใช้ประโยค "Since they are not the same, we need to do undifferencing"</p>
+
+<div class="quiz free" id="q8-1">
+<div class="qhead"><span>ข้อ 8.1</span><span>เปลี่ยนโมเดลและระดับความเชื่อมั่น</span></div>
+<div class="qtext">aero.txt ฟิต ARIMA(0,1,1) ด้วย <code>arima</code> พยากรณ์ 3 ช่วง พร้อมช่วงพยากรณ์ 90%</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>data <- ts(read.table("aero.txt"))
+nat <- arima(data, order = c(0,1,1), method = 'ML')
+nat.predict <- predict(nat, n.ahead = 3)
+round(nat.predict$pred, 3); round(nat.predict$se, 3)
+lower.pi <- nat.predict$pred - qnorm(0.95, 0, 1) * nat.predict$se
+upper.pi <- nat.predict$pred + qnorm(0.95, 0, 1) * nat.predict$se</code></pre>
+<pre class="out">pred  112.323  112.323  112.323
+se      0.443    0.519    0.585
+90% PI  [111.593, 113.052]  [111.469, 113.176]  [111.360, 113.285]</pre>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>qnorm(0.95)</code> = 1.645</td><td>ช่วง 90% เหลือหางข้างละ 5%</td></tr>
+<tr><td>2</td><td>112.323 − 1.645 × 0.443 = 111.593</td><td>คำนวณขอบล่างช่วงแรก</td></tr>
+<tr><td>3</td><td>ค่าพยากรณ์แบนทุกช่วง</td><td>ARIMA(0,1,1) ไม่มี drift พยากรณ์ทุกช่วงเท่ากับระดับล่าสุด แต่ se โตขึ้นเรื่อย ๆ</td></tr>
+</table>
+</div>
+</div>
+
+<div class="quiz free" id="q8-2">
+<div class="qhead"><span>ข้อ 8.2</span><span>log แล้วแปลงกลับ</span></div>
+<div class="qtext">ใช้บรรทัดที่อาจารย์ใส่คอมเมนต์ไว้ ฟิต ARIMA(0,1,1) บน log(aero) แล้วพยากรณ์ 3 ช่วงในสเกลเดิม</div>
+<textarea placeholder="เขียนโค้ด"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>nat.fit <- arima(log(data), order = c(0,1,1), method = 'ML')
+nat.predict <- predict(nat.fit, n.ahead = 3)
+round(exp(nat.predict$pred), 3)</code></pre>
+<pre class="out">112.323  112.323  112.323</pre>
+<p class="trap">⚠ คอมเมนต์ในไฟล์อาจารย์เขียน <code>round(exp(nat.predict$pred ,3)</code> วงเล็บผิดตำแหน่งและปิดไม่ครบ ที่ถูกคือ <code>round(exp(nat.predict$pred), 3)</code> ส่วนช่วงพยากรณ์ให้ exp ขอบล่างกับขอบบนแยกกัน</p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 9 ===================== -->
+<section class="unit" id="r-sarima">
+<h2>9 SARIMA ด้วย arima</h2>
+<p class="unit-meta"><b>Class:</b> 8 · <b>ข้อมูล:</b> milk, boardings จาก TSA · <b>บทที่สอน:</b> <a href="0009-sarima.html">L9</a> · <b>ข้อสอบ:</b> 2025 ข้อ 5b</p>
+
+<pre><code>library(TSA)
+data(milk)
+plot(diff(milk), type = "o")
+plot(diff(milk, lag = 12), type = "o")
+plot(diff(diff(milk), lag = 12), type = "o")
+
+milk.arima010.arima310 <- arima(milk, order = c(0,1,0), method = 'ML',
+                                seasonal = list(order = c(3,1,0), period = 12))
+tsdiag(milk.arima010.arima310, gof = 30, omit.initial = T)
+
+data(boardings)
+boardings <- boardings[,1]
+boardings.arma03.arma10 <- arima(boardings, order = c(0,0,3), method = 'ML',
+                                 seasonal = list(order = c(1,0,0), period = 12))</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>ส่วน</th><th>ความหมาย</th></tr>
+<tr><td><code>order = c(p,d,q)</code></td><td>ส่วนปกติ</td></tr>
+<tr><td><code>seasonal = list(order = c(P,D,Q), period = 12)</code></td><td>ส่วนฤดูกาล period คือ s</td></tr>
+<tr><td><code>boardings[,1]</code></td><td>ข้อมูลมีหลายคอลัมน์ เลือกคอลัมน์แรก</td></tr>
+</table>
+
+<pre class="out">milk ARIMA(0,1,0)(3,1,0)[12]: sar1 −0.9133  sar2 −0.8146  sar3 −0.6002  σ² 121.4  aic 1030.05
+     พยากรณ์ Jan–Mar 2006: 1702.4  1584.3  1760.4
+boardings ARIMA(0,0,3)(1,0,0)[12]: ma1 0.7288  ma2 0.6115  ma3 0.2951  sar1 0.8777  intercept 12.5455</pre>
+
+<div class="quiz free" id="q9-1">
+<div class="qhead"><span>ข้อ 9.1</span><span>เปลี่ยนส่วนฤดูกาลแล้วเทียบ</span></div>
+<div class="qtext">จากข้อ 2.2 กราฟเสนอ ARIMA(0,1,1)(0,1,1)[12] ฟิตโมเดลนี้กับ milk แล้วเทียบ AIC กับโมเดลของอาจารย์ และดูว่ามีอะไรผิดปกติในค่าสัมประสิทธิ์ไหม</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>m2 <- arima(milk, order = c(0,1,1), method = 'ML',
+            seasonal = list(order = c(0,1,1), period = 12))
+m2
+AIC(milk.arima010.arima310); AIC(m2)</code></pre>
+<pre class="out">ma1 −0.1705  sma1 −0.9999
+AIC()  (0,1,0)(3,1,0) = 1032.05    (0,1,1)(0,1,1) = 1056.18</pre>
+<div class="copy">
+<p>The lecturer's ARIMA(0,1,0)(3,1,0)[12] has the lower AIC (1032.05 vs 1056.18).</p>
+<p>In ARIMA(0,1,1)(0,1,1)[12] the estimate sma1 = −0.9999 lies on the invertibility boundary, which means the seasonal difference over-differences the data.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>อ่านอะไร</th><th>สรุป</th></tr>
+<tr><td>1</td><td>d และ D เท่ากันทั้งคู่</td><td>เทียบ AIC ได้</td></tr>
+<tr><td>2</td><td>sma1 ≈ −1</td><td>ราก \(1-0.9999B^{12}=0\) อยู่บนวงกลมหนึ่งหน่วย ไม่ invertible</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===================== 10 ===================== -->
+<section class="unit" id="r-auto">
+<h2>10 auto.arima, ets, tsCV</h2>
+<p class="unit-meta"><b>Class:</b> 9, 12 · <b>บทที่สอน:</b> <a href="0010-auto-arima-ets-tscv.html">L10</a> · <b>ฝึกเต็มใน:</b> <a href="exam-practice.html#u-rpipe">ทักษะ 2</a></p>
+
+<pre><code>library(forecast)
+germaninflarima <- auto.arima(germaninfl, stepwise = T, approximation = F, trace = T)
+forec <- forecast(germaninflarima); plot(forec)
+germaninflets <- ets(germaninfl)
+plot(forecast(germaninflets, h = 60))
+
+forecastets <- function(x, h) { forecast(ets(x), h = h) }
+forecastarima <- function(x, h) { forecast(auto.arima(x, stepwise = T, approximation = F), h = h) }
+etserror <- tsCV(germaninfl, forecastets, h = 1)
+arimaerror <- tsCV(germaninfl, forecastarima, h = 1)
+mean(etserror^2, na.rm = TRUE); mean(arimaerror^2, na.rm = TRUE)
+
+## Class 12: บังคับให้หาส่วนฤดูกาล
+fit <- auto.arima(data, seasonal = TRUE, stepwise = TRUE, approximation = FALSE)</code></pre>
+
+<table class="why"><caption>ตัวเลือกที่ยังไม่ได้ใช้ในหน้าฝึก</caption>
+<tr><th>ตัวเลือก</th><th>ทำอะไร</th></tr>
+<tr><td><code>trace = T</code></td><td>พิมพ์ทุกโมเดลที่ลองพร้อม AIC ใช้ตอบได้ว่า R ลองอะไรไปบ้าง</td></tr>
+<tr><td><code>seasonal = TRUE</code></td><td>ค่าเริ่มต้นเป็น TRUE อยู่แล้ว ใส่ FALSE ถ้าโจทย์ให้ห้ามมีส่วนฤดูกาล</td></tr>
+<tr><td><code>summary(fit)</code></td><td>พิมพ์โมเดลพร้อม training error: ME RMSE MAE MAPE</td></tr>
+</table>
+
+<p class="trap">⚠ ในไฟล์อาจารย์ <code>stepwise</code> กับ <code>approximation</code> อยู่ใน <code>forecast()</code> ซึ่ง R ไม่สนใจ ในหน้านี้ย้ายไปไว้ใน <code>auto.arima()</code> แล้ว ผลอาจต่างจากของอาจารย์เล็กน้อย</p>
+</section>
+
+<!-- ===================== 11 ===================== -->
+<section class="unit" id="r-gls">
+<h2>11 GLS</h2>
+<p class="unit-meta"><b>Class:</b> 10 · <b>ข้อมูล:</b> revenue.txt · <b>บทที่สอน:</b> <a href="0011-multivariate-arimax-var.html">L11</a></p>
+
+<p class="lead">regression ธรรมดาที่ error ของแต่ละช่วงเวลาสัมพันธ์กัน ทำให้ standard error ผิด GLS ใส่โครงสร้าง AR(1) ให้ error แล้วประมาณใหม่</p>
+
+<pre><code>data <- read.table("revenue.txt", h = T)
+model <- lm(revenue ~ growth, data = data)
+summary(model)
+
+library(car)
+durbinWatsonTest(model)
+
+library(nlme)
+glsmod <- gls(revenue ~ growth, correlation = corAR1(form = ~time), data = data)
+summary(glsmod)
+intervals(glsmod)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>durbinWatsonTest</code></td><td>H0: residual ของ regression ไม่มี autocorrelation lag 1 · D-W ใกล้ 2 คือไม่มี ใกล้ 0 คือบวกแรง</td></tr>
+<tr><td><code>corAR1(form = ~time)</code></td><td>บอก gls ว่า error เป็น AR(1) เรียงตามคอลัมน์ time</td></tr>
+<tr><td><code>intervals(glsmod)</code></td><td>ช่วงความเชื่อมั่นของสัมประสิทธิ์และของ Phi</td></tr>
+</table>
+
+<pre class="out">lm:   growth 1.6099  SE 0.2023
+D-W:  autocorrelation 0.636  D-W statistic 0.695  p-value 0
+gls:  growth 1.6522  SE 0.1168
+      Phi 0.669   95% CI [0.447, 0.812]</pre>
+
+<div class="quiz free" id="q11-1">
+<div class="qhead"><span>ข้อ 11.1</span><span>อ่านผลและสรุป</span></div>
+<div class="qtext">จากผลข้างบน ทำไมต้องใช้ GLS แทน lm และค่า Phi บอกอะไร</div>
+<textarea placeholder="คำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<div class="copy">
+<p>The Durbin-Watson test rejects H0 (D-W = 0.695, p ≈ 0): the OLS residuals are positively autocorrelated, so OLS standard errors are not valid.</p>
+<p>GLS with AR(1) errors estimates Phi = 0.669, 95% CI [0.447, 0.812], which excludes 0, confirming the AR(1) error structure.</p>
+<p>Under GLS, growth is still significant: revenue rises by 1.65 per unit of growth.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===================== 12 ===================== -->
+<section class="unit" id="r-arimax">
+<h2>12 ARIMAX</h2>
+<p class="unit-meta"><b>Class:</b> 10 · <b>ข้อมูล:</b> uschange จาก fpp2 · <b>บทที่สอน:</b> <a href="0011-multivariate-arimax-var.html#s2-arimax">L11</a> · <b>ฝึกเต็มใน:</b> <a href="exam-practice.html#u-rxreg">ทักษะ 3</a></p>
+
+<pre><code>consumption <- ts(data$consumption)
+income <- ts(data$income)
+
+library(tseries)
+adf.test(consumption)
+
+library(lmtest)
+grangertest(consumption ~ income, data = data)
+grangertest(income ~ consumption, data = data)
+
+con_training <- window(consumption, end = length(consumption)-41)
+con_test     <- window(consumption, start = length(consumption)-40)
+inc_training <- window(income, end = length(income)-41)
+inc_test     <- window(income, start = length(income)-40)
+
+arimax <- auto.arima(con_training, stepwise = T, approximation = F, trace = T, xreg = inc_training)
+forec_train <- fitted(arimax)
+forec_test  <- forecast(arimax, xreg = inc_test)
+accuracy(con_training, forec_train)
+accuracy(con_test, forec_test$mean)
+
+# ตัวแปรภายนอกมากกว่า 1 ตัว
+# model <- auto.arima(data[, "consumption"], xreg = data[, 2:3])</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>adf.test</code></td><td>H0: ไม่นิ่ง p &lt; 0.05 คือนิ่ง</td></tr>
+<tr><td><code>grangertest(y ~ x)</code></td><td>H0: x ไม่ช่วยพยากรณ์ y ค่าเริ่มต้นใช้ 1 lag เปลี่ยนด้วย <code>order = </code></td></tr>
+<tr><td><code>window(x, end = length(x)-41)</code></td><td>train จบก่อน 41 ค่าสุดท้าย · <code>start = length(x)-40</code> คือ 41 ค่าสุดท้าย</td></tr>
+<tr><td><code>fitted(arimax)</code></td><td>ค่าที่ฟิตในช่วง train ใช้หา RMSE ของ train</td></tr>
+<tr><td><code>xreg = data[, 2:3]</code></td><td>ใส่ตัวแปรภายนอกหลายคอลัมน์ ต้องเป็น matrix และตอนพยากรณ์ต้องส่งคอลัมน์ชุดเดียวกัน</td></tr>
+</table>
+
+<pre class="out">adf.test(consumption): p = 0.01 → นิ่ง
+grangertest consumption ~ income: p = 0.075   income ~ consumption: p = 3.3e-06
+train 146 ค่า  test 41 ค่า
+ARIMA ไม่มี xreg:          ARIMA(3,0,0) with non-zero mean           RMSE test 0.632
+ARIMAX income:             Regression with ARIMA(1,0,2) errors       RMSE test 0.596
+                           ar1 0.5819  ma1 −0.5345  ma2 0.1843  intercept 0.6168  xreg 0.2781</pre>
+
+<p class="trap">⚠ อาจารย์เขียน <code>accuracy(con_test, forec_test$mean)</code> ใส่ค่าจริงก่อน ส่วน Class 4 ใส่ค่าพยากรณ์ก่อน RMSE กับ MAE ได้เท่ากันทั้งสองแบบ แต่ ME กับ MAPE จะกลับเครื่องหมายหรือเปลี่ยนค่า</p>
+
+<div class="quiz free" id="q12-1">
+<div class="qhead"><span>ข้อ 12.1</span><span>เพิ่มตัวแปรภายนอกเป็นสองตัว</span></div>
+<div class="qtext">ทำ ARIMAX ของ consumption โดยใช้ทั้ง income และ savings เป็น xreg แบ่ง train/test เหมือนอาจารย์ เขียนชื่อโมเดล RMSE บน test และเทียบกับแบบ income ตัวเดียว</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>X <- as.matrix(data[, c("income", "savings")])
+n <- nrow(X)
+X_training <- X[1:(n-41), ]
+X_test     <- X[(n-40):n, ]
+arimax2 <- auto.arima(con_training, stepwise = T, approximation = F, xreg = X_training)
+arimax2
+accuracy(con_test, forecast(arimax2, xreg = X_test)$mean)</code></pre>
+<pre class="out">Regression with ARIMA(2,0,2) errors
+ar1 −0.5089  ar2 −0.6376  ma1 0.5343  ma2 0.9367  intercept 0.2680  income 0.7857  savings −0.0515
+RMSE test 0.269</pre>
+<div class="copy">
+<p>Adding savings reduces the test RMSE from 0.596 to 0.269, so savings carries real information about consumption.</p>
+<p>Holding savings fixed, a 1-unit rise in income raises consumption by 0.786; holding income fixed, a 1-unit rise in savings lowers consumption by 0.052.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>as.matrix</code></td><td>xreg หลายตัวต้องเป็น matrix</td></tr>
+<tr><td>2</td><td>ตัดแถว <code>1:(n-41)</code> กับ <code>(n-40):n</code></td><td>ให้ตรงกับช่วงของ con_training และ con_test</td></tr>
+<tr><td>3</td><td>ไม่ต้องใส่ h ใน forecast</td><td>R นับจากจำนวนแถวของ X_test คือ 41</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===================== 13 ===================== -->
+<section class="unit" id="r-var">
+<h2>13 CCF และ VAR</h2>
+<p class="unit-meta"><b>Class:</b> 10 · <b>ข้อมูล:</b> Bsales.txt, var1.txt, EuStockMarkets, var.txt ของ Class 11 · <b>บทที่สอน:</b> <a href="0011-multivariate-arimax-var.html">L11</a></p>
+
+<pre><code>## CCF
+data <- read.table("Bsales.txt", h = T)
+par(mfrow = c(3,1))
+ccf(data$ad_tv, data$sales)
+ccf(data$ad_online, data$sales)
+ccf(data$discount, data$sales)
+
+## VAR บนข้อมูลที่ไม่นิ่ง
+library(vars); library(tseries)
+apply(EuStockMarkets, 2, adf.test)
+stnry <- diff(EuStockMarkets)
+apply(stnry, 2, adf.test)
+VARselect(stnry, type = "none", lag.max = 10)
+var.a <- vars::VAR(stnry, lag.max = 10, ic = "AIC", type = "none")
+summary(var.a)
+serial.test(var.a)
+causality(var.a, cause = c("DAX"))
+fcast <- predict(var.a, n.ahead = 25); plot(fcast)
+
+## VAR แบ่ง train/test
+CMortVAR2 <- VAR(cardiacTrain, type = "both", season = 52, p = 2)
+preds2 <- predict(CMortVAR2, n.ahead = 52)
+RMSE2 <- sqrt(mean((cardiacTest[,"cmort"] - preds2$fcst$cmort[,1])^2))</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>ccf(x, y)</code></td><td>สหสัมพันธ์ระหว่าง \(x_{t+h}\) กับ \(y_t\) แท่งที่ lag ติดลบสูงคือ x นำ y</td></tr>
+<tr><td><code>apply(X, 2, adf.test)</code></td><td>ทำ adf.test ทีละคอลัมน์ เลข 2 คือคอลัมน์</td></tr>
+<tr><td><code>VARselect(X, lag.max, type)</code></td><td>หา p ที่ดีที่สุดตาม AIC HQ SC FPE · SC คือ BIC</td></tr>
+<tr><td><code>type = "const"</code> / <code>"none"</code> / <code>"both"</code></td><td>มีค่าคงที่ / ไม่มี / มีทั้งค่าคงที่และ trend</td></tr>
+<tr><td><code>season = 52</code></td><td>ใส่ dummy ฤดูกาล 52 สัปดาห์</td></tr>
+<tr><td><code>serial.test</code></td><td>Portmanteau ของ residual ทุกสมการ H0: ไม่มี autocorrelation</td></tr>
+<tr><td><code>causality(var, cause = "DAX")</code></td><td>Granger test ว่า DAX ช่วยพยากรณ์ตัวอื่นไหม ดูผลที่ <code>$Granger</code></td></tr>
+<tr><td><code>preds$fcst$cmort[,1]</code></td><td>ค่าพยากรณ์ของ cmort คอลัมน์ 1 คือค่าพยากรณ์ คอลัมน์อื่นเป็นขอบช่วง</td></tr>
+</table>
+
+<pre class="out">Bsales  เส้นประ ±0.20
+ad_tv     lag −1: 0.85   lag 0: 0.69   → โฆษณาทีวีเดือนนี้สัมพันธ์กับยอดขายเดือนหน้ามากที่สุด
+ad_online lag −1: 0.79   lag 0: 0.59
+discount  ทุก lag −0.2 ถึง −0.33 ไม่มียอดชัด
+EuStockMarkets ที่ diff แล้ว: VARselect AIC เลือก 9  SC เลือก 1</pre>
+
+<div class="quiz free" id="q13-1">
+<div class="qhead"><span>ข้อ 13.1 · ข้อมูลที่อาจารย์ให้แต่ไม่ได้ใช้</span><span>VAR สามตัวแปร</span></div>
+<div class="qtext">var.txt ใน Class 11 มีสามคอลัมน์ x1 x2 x3 อย่างละ 180 ค่า ทำตามขั้นของอาจารย์: ตรวจความนิ่ง diff ถ้าจำเป็น เลือก p ด้วย VARselect lag.max = 8 type = "const" ฟิต VAR ตรวจ residual และทดสอบ Granger ทีละตัว</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>library(vars); library(tseries)
+v <- read.table("var.txt", h = T)
+apply(v, 2, adf.test)
+dv <- diff(as.matrix(v))
+apply(dv, 2, adf.test)
+VARselect(dv, lag.max = 8, type = "const")
+fit <- VAR(dv, p = 4, type = "const")
+serial.test(fit)
+causality(fit, cause = "x1"); causality(fit, cause = "x2"); causality(fit, cause = "x3")</code></pre>
+<pre class="out">adf.test ข้อมูลเดิม p: x1 0.390  x2 0.167  x3 0.531   ไม่นิ่ง
+adf.test หลัง diff p: 0.01 ทุกตัว                       นิ่ง
+VARselect: AIC 4  HQ 2  SC 2  FPE 4
+serial.test VAR(4): p = 0.112
+causality p: x1 0.091  x2 0.062  x3 0.472</pre>
+<div class="copy">
+<p>All three series are non-stationary (ADF p &gt; 0.05) and become stationary after first differencing.</p>
+<p>AIC selects p = 4 (SC selects 2); VAR(4) on the differenced data passes the serial correlation test (p = 0.112).</p>
+<p>None of the Granger causality tests is significant at 5%, so no series clearly helps forecast the others; x2 (p = 0.062) is the closest.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>diff(as.matrix(v))</code></td><td>diff ทุกคอลัมน์พร้อมกัน แบบ <code>diff(EuStockMarkets)</code></td></tr>
+<tr><td>2</td><td>เลือก p = 4 ตาม AIC</td><td>อาจารย์ใช้ <code>ic = "AIC"</code> ในตัวอย่าง EuStockMarkets ถ้าโจทย์ให้ BIC ให้ใช้ SC = 2</td></tr>
+<tr><td>3</td><td>serial.test p &gt; 0.05</td><td>residual ไม่มี autocorrelation โมเดลใช้ได้</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===================== 14 ===================== -->
+<section class="unit" id="r-nnar">
+<h2>14 NNAR</h2>
+<p class="unit-meta"><b>Class:</b> 10, 11 · <b>ข้อมูล:</b> electric.txt, uschange · <b>บทที่สอน:</b> <a href="0012-arch-garch-nnar.html">L12</a></p>
+
+<pre><code>data <- read.table("electric.txt", h = T)
+watt <- ts(data$watt, frequency = 288)
+set.seed(11)
+fit <- nnetar(watt)
+nnetforecast <- forecast(fit, h = 400, PI = F)
+
+fit2 <- nnetar(watt, xreg = data$appliances)
+y <- rep(2, times = 120)
+nnetforecast <- forecast(fit2, xreg = y, PI = F)
+
+## uschange: หลาย xreg พร้อม train/test
+train_y   <- ts(training_set$unemployment, start = 1970, frequency = 4)
+train_reg <- as.matrix(training_set[,1:4])
+set.seed(11)
+model <- nnetar(y = train_y, xreg = train_reg)
+forecast <- forecast(model, xreg = test_reg)
+accuracy(forecast$mean, test_y)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>set.seed(11)</code></td><td>ล็อกค่าสุ่มเริ่มต้นของ network ให้รันซ้ำได้ผลเดิม ต้องรันก่อน nnetar ทุกครั้ง</td></tr>
+<tr><td><code>NNAR(p,P,k)[m]</code></td><td>ใช้ p lag ปกติ P lag ฤดูกาล k node ใน hidden layer</td></tr>
+<tr><td><code>PI = F</code></td><td>ไม่คำนวณช่วงพยากรณ์ ถ้าเปิดจะช้ามาก</td></tr>
+<tr><td><code>xreg = rep(2, times = 120)</code></td><td>สมมติว่าอนาคต 120 จุด appliances = 2 ทุกจุด ความยาว xreg คือจำนวนจุดที่พยากรณ์</td></tr>
+</table>
+
+<pre class="out">electric 1041 จุด  ไม่มี xreg: NNAR(16,1,9)[288]  σ² 50.98
+                   มี xreg:   NNAR(16,1,10)[288] σ² 47.33
+uschange unemployment  test 7 ไตรมาส
+  NNAR ไม่มี xreg:  NNAR(20,1,10)[4]  RMSE test 0.351
+  NNAR + 4 xreg:   NNAR(20,1,12)[4]  RMSE test 0.290</pre>
+
+<p class="trap">⚠ เลขที่ได้ขึ้นกับ seed และเวอร์ชัน forecast ถ้าใส่ <code>set.seed(11)</code> ก่อน nnetar ทุกครั้งแล้วยังได้ต่างจากนี้ไม่ใช่ความผิด ให้ลอกชื่อโมเดลตามที่ R ของตัวเองพิมพ์</p>
+<p class="trap">⚠ σ² ของ uschange ใน train เล็กมาก 9e-08 แต่ RMSE บน test 0.29 แบบนี้คือ overfit เหมือนข้อ 3.2 ของหน้าฝึก</p>
+</section>
+
+<!-- ===================== 15 ===================== -->
+<section class="unit" id="r-garch">
+<h2>15 ARCH/GARCH</h2>
+<p class="unit-meta"><b>Class:</b> 10, 11 · <b>ข้อมูล:</b> <code>data(rate)</code> จาก tswge · <b>บทที่สอน:</b> <a href="0012-arch-garch-nnar.html">L12</a> · <b>ฝึกเต็มใน:</b> <a href="exam-practice.html#u-garch">ทักษะ 9</a></p>
+
+<pre><code>library(tswge)
+data(rate)
+rate.2000 <- rate[7200:8199]
+
+library(tseries); library(rugarch); library(FinTS)
+adf.test(rate.2000)                       # Step 1
+plot.ts(rate.2000)                        # Step 2
+ArchTest(rate.2000)                       # Step 3  H0: no ARCH effect
+rate_garch <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(2,1)),
+                         mean.model = list(armaOrder = c(0,0)))
+rate_fit <- ugarchfit(data = rate.2000, spec = rate_garch)     # Step 4
+rate2000_forecast <- ugarchforecast(rate_fit, n.head = 10)     # Step 5
+
+model <- garch(rate.2000, order = c(1,2))   # tseries: order = c(q,p)
+summary(model)</code></pre>
+
+<pre class="out">adf p = 0.01   ArchTest: Chi-squared = 110.38, df = 12, p &lt; 2.2e-16
+rugarch garchOrder c(2,1): mu 0.0028  omega 0.0866  alpha1 0.0157  alpha2 0.0942  beta1 0.8453  AIC 3.349
+tseries order c(1,2):      a0 0.0849  a1 0.0156  a2 0.0937  b1 0.8467
+σ พยากรณ์ 3 วันแรก: 1.154  1.117  1.134</pre>
+
+<table class="why"><caption>ตัวเลข order ของสอง package สลับกัน</caption>
+<tr><th>package</th><th>เขียน</th><th>ตัวแรก</th><th>ตัวหลัง</th></tr>
+<tr><td>rugarch</td><td><code>garchOrder = c(2,1)</code></td><td>α 2 ตัว ARCH</td><td>β 1 ตัว GARCH</td></tr>
+<tr><td>tseries</td><td><code>order = c(1,2)</code></td><td>b 1 ตัว GARCH</td><td>a 2 ตัว ARCH</td></tr>
+</table>
+
+<p class="trap">⚠ โค้ดอาจารย์เขียน <code>n.head = 10</code> ซึ่งพิมพ์ผิด R ไม่ฟ้องแต่ใช้ค่าเริ่มต้น n.ahead = 10 แทน ถ้าเปลี่ยนเป็น <code>n.head = 5</code> จะยังได้ 10 วัน ให้เขียน <code>n.ahead</code></p>
+
+<div class="quiz free" id="q15-1">
+<div class="qhead"><span>ข้อ 15.1</span><span>เปลี่ยนเป็น GARCH(1,1)</span></div>
+<div class="qtext">ฟิต rate.2000 ด้วย GARCH(1,1) ทั้งด้วย rugarch และ tseries เทียบ AIC กับ GARCH(2,1) ของอาจารย์ แล้วพยากรณ์ σ 5 วัน</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>sp11 <- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+                   mean.model = list(armaOrder = c(0,0)))
+fit11 <- ugarchfit(data = rate.2000, spec = sp11)
+fit11
+infocriteria(fit11)[1]
+ugarchforecast(fit11, n.ahead = 5)
+
+m11 <- garch(rate.2000, order = c(1,1))
+summary(m11)</code></pre>
+<pre class="out">rugarch (1,1): omega 0.0689  alpha1 0.0928  beta1 0.8718   AIC 3.3525
+tseries (1,1): a0 0.0682  a1 0.0922  b1 0.8728
+GARCH(2,1) AIC 3.3487</pre>
+<div class="copy">
+<p>GARCH(2,1) has a slightly lower AIC (3.3487 vs 3.3525), but in GARCH(2,1) alpha1 = 0.016 is very small, so GARCH(1,1) is a simpler model with almost the same fit.</p>
+<p>α + β = 0.0928 + 0.8718 = 0.965 &lt; 1, so the variance is stationary but volatility shocks are very persistent.</p>
+</div>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td><code>infocriteria(fit)[1]</code></td><td>แถวแรกคือ Akaike ใน rugarch เป็น AIC หารด้วยจำนวนข้อมูล ยิ่งต่ำยิ่งดี</td></tr>
+<tr><td>2</td><td>GARCH(1,1) ทั้งสอง package เขียนเลขเหมือนกัน</td><td>c(1,1) สลับแล้วก็ได้ค่าเดิม</td></tr>
+</table>
+</div>
+</div>
+
+<div class="quiz free" id="q15-2">
+<div class="qhead"><span>ข้อ 15.2</span><span>ข้อมูลที่ไม่มี ARCH effect</span></div>
+<div class="qtext">ใช้ CPALL.txt ของ Class 4 เป็นผลตอบแทนรายวัน ทำ Step 1 และ Step 3 ของอาจารย์ ควรทำ GARCH ต่อไหม</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>cp <- read.table("CPALL.txt", h = T)$cpall
+adf.test(cp)
+ArchTest(cp)</code></pre>
+<pre class="out">adf p = 0.01   ArchTest p = 0.557</pre>
+<div class="copy">
+<p>The series is stationary (ADF p = 0.01), but the ARCH LM test does not reject H0 (p = 0.557): there is no ARCH effect, so a GARCH model is not needed.</p>
+</div>
+<p class="trap">⚠ ArchTest ไม่ผ่านต้องหยุดที่ Step 3 และตอบว่าไม่ต้องใช้ GARCH ฟิตต่อไปจะเสียคะแนน</p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 16 ===================== -->
+<section class="unit" id="r-spec">
+<h2>16 periodogram</h2>
+<p class="unit-meta"><b>Class:</b> 12 · <b>ข้อมูล:</b> traffic.txt, sales.txt · <b>บทที่สอน:</b> <a href="0013-frequency-domain-prophet.html">L13</a> · <b>ฝึกเต็มใน:</b> <a href="exam-practice.html#u-period">ทักษะ 15</a></p>
+
+<pre><code>data <- ts(read.table("traffic.txt", h = T))
+data <- diff(data)
+spectrum(data, log = "no", main = "Frequency Domain: Periodogram")
+spec <- spectrum(data, log = "no", plot = FALSE)
+dominant_freq <- spec$freq[which.max(spec$spec)]
+dominant_period <- 1 / dominant_freq</code></pre>
+
+<pre class="out">traffic หลัง diff:  freq 0.144  period 6.94 ≈ 7 วัน
+sales:             freq 0.0833 period 12 เดือน → ts(data, frequency = 12) แล้ว auto.arima
+                   ได้ ARIMA(0,0,0)(0,1,2)[12] with drift</pre>
+
+<div class="quiz free" id="q16-1">
+<div class="qhead"><span>ข้อ 16.1</span><span>กับดัก frequency</span></div>
+<div class="qtext">beer.txt รายไตรมาส ถ้ารัน spectrum กับ <code>ts(beer)</code> ได้ period เท่าไร ถ้ารันกับ <code>ts(beer, frequency = 4)</code> ได้เท่าไร อธิบายว่าทำไมไม่เท่ากัน</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>beer <- ts(read.table("beer.txt", h = F))
+spec <- spectrum(beer, log = "no", plot = FALSE)
+1 / spec$freq[which.max(spec$spec)]          # 4
+
+beer4 <- ts(read.table("beer.txt", h = F), frequency = 4)
+spec4 <- spectrum(beer4, log = "no", plot = FALSE)
+1 / spec4$freq[which.max(spec4$spec)]        # 1</code></pre>
+<div class="copy">
+<p>Without a frequency the unit of time is one observation, so the peak at f = 0.25 gives a period of 4 quarters.</p>
+<p>With frequency = 4 the unit of time is one year, so the same peak is reported at f = 1 cycle per year, a period of 1 year.</p>
+</div>
+<p class="trap">⚠ ทำ periodogram กับ ts ที่ไม่ได้ใส่ frequency แบบอาจารย์ จะได้คาบเป็นจำนวนจุดข้อมูลตรง ๆ</p>
+</div>
+</div>
+</section>
+
+<!-- ===================== 17 ===================== -->
+<section class="unit" id="r-sim">
+<h2>17 ACF ทฤษฎีและจำลองข้อมูล</h2>
+<p class="unit-meta"><b>Class:</b> 5, 6, 7, 8 · <b>บทที่สอน:</b> <a href="0005-ma-and-ar-models.html">L5</a>, <a href="0006-ar2-pacf-and-arima.html">L6</a></p>
+
+<p class="lead">อาจารย์ใช้คำสั่งกลุ่มนี้วาดรูปให้ดูในห้อง แต่ในห้องสอบใช้ตรวจคำตอบข้อคำนวณ ACF ที่ทำด้วยมือได้ เพราะเปิด R ได้</p>
+
+<pre><code>y <- ARMAacf(ar = c(0.9), lag.max = 20)
+plot(y, x = 0:20, type = "h", ylim = c(-1,1), xlab = "h", ylab = "Autocorrelation")
+abline(h = 0)
+ARMAacf(ar = c(0.9), lag.max = 20, pacf = TRUE)
+ARMAacf(ma = c(rep(0,11), 0.9), lag.max = 50)                 # MA(1) ที่ s = 12
+ARMAacf(ma = c(-0.5, rep(0,10), -0.9, 0.45), lag.max = 50)    # MA(1) × MA(1)12
+
+ma.sim <- arima.sim(list(order = c(0,0,1), ma = 0.9), n = 100)
+acf(ma.sim)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td><code>ARMAacf(ar, ma, lag.max)</code></td><td>ACF ทฤษฎี ρ(0), ρ(1), ... ใส่ ar และ ma ตามเครื่องหมายแบบ R: \(X_t=\phi X_{t-1}+w_t+\theta w_{t-1}\)</td></tr>
+<tr><td><code>pacf = TRUE</code></td><td>PACF ทฤษฎี เริ่มที่ lag 1</td></tr>
+<tr><td><code>c(rep(0,11), 0.9)</code></td><td>ใส่ 0 สิบเอ็ดตัวแล้ว 0.9 ที่ตำแหน่ง 12 คือ \(\Theta w_{t-12}\)</td></tr>
+<tr><td><code>c(-0.5, rep(0,10), -0.9, 0.45)</code></td><td>คูณกระจาย \((1-0.5B)(1-0.9B^{12})\) ได้สัมประสิทธิ์ lag 1, 12, 13 = −0.5, −0.9, 0.45</td></tr>
+<tr><td><code>arima.sim(list(order, ar, ma), n)</code></td><td>สุ่มข้อมูลจากโมเดลที่กำหนด ผลเปลี่ยนทุกครั้ง ถ้าต้องการผลเดิมใส่ set.seed ก่อน</td></tr>
+</table>
+
+<div class="quiz free" id="q17-1">
+<div class="qhead"><span>ข้อ 17.1 · ตรวจข้อสอบ 2022 ข้อ 4</span><span>ACF ของ ARMA(1,1)</span></div>
+<div class="qtext">\(X_t-0.5X_{t-1}=w_t+0.4w_{t-1}\) ใช้ R หา ρ(1), ρ(2), ρ(3) เพื่อตรวจคำตอบที่ทำด้วยมือ</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>ARMAacf(ar = 0.5, ma = 0.4, lag.max = 3)</code></pre>
+<pre class="out">     0      1      2      3
+1.0000 0.6923 0.3462 0.1731</pre>
+<table class="why"><caption>อธิบายทีละขั้น</caption>
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เพราะอะไร</th></tr>
+<tr><td>1</td><td>ย้าย \(-0.5X_{t-1}\) ไปขวา ได้ \(X_t=0.5X_{t-1}+w_t+0.4w_{t-1}\)</td><td>R ใช้รูปนี้ ar = +0.5 ma = +0.4</td></tr>
+<tr><td>2</td><td>ρ(2) = 0.5 × ρ(1)</td><td>หลัง lag 1 ACF ของ ARMA(1,1) ลดลงด้วยตัวคูณ φ ทุก lag: 0.6923 × 0.5 = 0.3462</td></tr>
+</table>
+<p class="trap">⚠ ถ้าโจทย์เขียน \(w_t-0.4w_{t-1}\) ต้องใส่ <code>ma = -0.4</code> ถ้าใส่เครื่องหมายผิด ρ(1) จะผิดทั้งข้อ</p>
+</div>
+</div>
+
+<div class="quiz free" id="q17-2">
+<div class="qhead"><span>ข้อ 17.2</span><span>ACF และ PACF ของ AR(2)</span></div>
+<div class="qtext">\(X_t=0.5X_{t-1}+0.3X_{t-2}+w_t\) หา ρ(1), ρ(2) และ PACF φ11, φ22, φ33 ด้วย R</div>
+<textarea placeholder="เขียนโค้ดและคำตอบ"></textarea>
+<button class="reveal-btn">เฉลย</button>
+<div class="model-answer">
+<pre><code>ARMAacf(ar = c(0.5, 0.3), lag.max = 3)
+ARMAacf(ar = c(0.5, 0.3), lag.max = 3, pacf = TRUE)</code></pre>
+<pre class="out">ACF   0: 1.0000  1: 0.7143  2: 0.6571  3: 0.5429
+PACF  1: 0.7143  2: 0.3000  3: 0.0000</pre>
+<table class="why"><caption>ตรวจกับสูตรมือ</caption>
+<tr><th>ค่า</th><th>สูตร</th><th>แทนค่า</th></tr>
+<tr><td>ρ(1)</td><td>\(\phi_1/(1-\phi_2)\)</td><td>0.5 / 0.7 = 0.7143</td></tr>
+<tr><td>ρ(2)</td><td>\(\phi_1\rho(1)+\phi_2\)</td><td>0.5 × 0.7143 + 0.3 = 0.6571</td></tr>
+<tr><td>φ22</td><td>เท่ากับ \(\phi_2\) ของ AR(2)</td><td>0.3</td></tr>
+<tr><td>φ33</td><td>AR(2) PACF ตัดหลัง lag 2</td><td>0</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===================== 18 ===================== -->
+<section class="unit" id="r-prophet">
+<h2>18 Prophet</h2>
+<p class="unit-meta"><b>Class:</b> 12 · <b>ข้อมูล:</b> data1.csv, DHS.csv · <b>บทที่สอน:</b> <a href="0013-frequency-domain-prophet.html">L13</a></p>
+
+<p>ข้อสอบเก่าถามแค่ว่าข้อมูลแบบไหนควรใช้ Prophet ไม่เคยให้รัน package prophet ติดตั้งยากและช้า ถ้าเครื่องติดตั้งไม่ได้ ให้รู้ขั้นตอนไว้อ่านโค้ดออก</p>
+
+<pre><code>library(prophet)
+data <- read.csv("data1.csv")                         # ต้องมีคอลัมน์ ds กับ y
+data$ds <- as.Date(strptime(data$ds, format = "%m/%d/%Y"))
+m <- prophet(data)
+future <- make_future_dataframe(m, periods = 100)
+forecast <- predict(m, future)
+plot(m, forecast)
+prophet_plot_components(m, forecast)
+
+## มีวันหยุดและตัวแปรภายนอก
+m <- prophet(holidays = holidays, yearly.seasonality = TRUE, weekly.seasonality = TRUE,
+             daily.seasonality = FALSE, seasonality.mode = 'multiplicative')
+m <- add_regressor(m, 'Christmas')
+m <- add_regressor(m, 'Temperature')
+m <- fit.prophet(m, training)
+future <- make_future_dataframe(m, periods = nrow(test))
+future[,2:3] <- data %>% select(Christmas, Temperature)
+forecast <- predict(m, future)
+accuracy(tail(forecast$yhat, nrow(test)), test$y)</code></pre>
+
+<table class="why"><caption>แต่ละคำสั่งทำอะไร</caption>
+<tr><th>คำสั่ง</th><th>ทำอะไร</th></tr>
+<tr><td>ชื่อคอลัมน์ <code>ds</code>, <code>y</code></td><td>prophet บังคับชื่อนี้ ds คือวันที่ y คือค่า</td></tr>
+<tr><td><code>make_future_dataframe(m, periods = 100)</code></td><td>สร้างตารางวันที่ อดีตทั้งหมดต่อด้วยอนาคต 100 วัน</td></tr>
+<tr><td><code>holidays</code></td><td>ตารางวันหยุด มี lower_window และ upper_window บอกว่าผลกระทบเริ่มก่อนและจบหลังวันหยุดกี่วัน</td></tr>
+<tr><td><code>add_regressor</code></td><td>เพิ่มตัวแปรภายนอก ต้องใส่ค่าในอนาคตลงใน future ด้วย</td></tr>
+<tr><td><code>tail(forecast$yhat, nrow(test))</code></td><td>forecast มีทั้งอดีตและอนาคต เอาเฉพาะแถวท้ายที่เป็นช่วง test</td></tr>
+</table>
+</section>
+
+<p style="margin-top:2.5em"><a href="exam-practice.html">← กลับไปหน้าฝึกตามข้อสอบเก่า</a></p>
+
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
