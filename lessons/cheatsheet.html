@@ -61,6 +61,9 @@ p.trap::before { content: "กับดัก "; font-weight: 700; color: #b03a2
 mark.hit { background: #ffe27a; }
 main details[id] { scroll-margin-top: 4.5em; }
 ol.toc { margin: 0.3em 0 0.6em 1.4em; padding: 0; font-size: 0.92rem; } ol.toc li { margin: 0.15em 0; }
+.fcard { border-color: #b9cde6; background: #f7fbff; }
+.fcard .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; }
+.fcard code { font-size: 0.85em; }
 pre.r { background: #f3f7fc; border: 1px solid #d5e2f2; border-radius: 6px; padding: 0.5em 0.7em; font-size: 0.8rem; overflow-x: auto; }
 </style>
 </head>
@@ -69,7 +72,7 @@ pre.r { background: #f3f7fc; border: 1px solid #d5e2f2; border-radius: 6px; padd
 <p><a href="../index.html">หน้าแรก</a> · <a href="exam-practice.html">checklist ทักษะ</a></p>
 <h1>Cheat sheet ตามทักษะที่ออกสอบ</h1>
 
-<p>ทักษะละ 1 กล่อง ข้างในแยก แนวคิด ขั้นตอน สมบัติ ตัวอย่าง เกร็ดตอบ กดกางเฉพาะที่ต้องใช้ หรือพิมพ์คำในช่องค้น ท้ายหน้ามีคลังเกร็ดแบบ "ได้ถ้า / ไม่ได้ถ้า"</p>
+<p>ทักษะละ 1 กล่อง ข้างในแยก แนวคิด ขั้นตอน สมบัติ ตัวอย่าง เกร็ดตอบ กดกางเฉพาะที่ต้องใช้ หรือพิมพ์คำในช่องค้น ท้ายหน้ามีคลังเกร็ดแบบ "ได้ถ้า / ไม่ได้ถ้า" และสูตรคำนวณมือสำหรับ test และการแปลงค่า</p>
 
 <div class="tools">
 <input id="q" type="search" placeholder="ค้น เช่น log likelihood, BIC, lag 0, E(w^4)">
@@ -80,7 +83,7 @@ pre.r { background: #f3f7fc; border: 1px solid #d5e2f2; border-radius: 6px; padd
 <div class="legend">
 <span class="chip c-idea">แนวคิด</span><span class="chip c-step">ขั้นตอน</span><span class="chip c-prop">สมบัติที่ต้องรู้</span><span class="chip c-ex">ตัวอย่างโจทย์</span><span class="chip c-tip">เกร็ดตอบ</span>
 </div>
-<details class="blk" id="toc" open><summary>สารบัญ เรียงตามความสำคัญ</summary><ol class="toc"><li><a href="#cs-roots">ทักษะ 1 · ราก ARMA: causal, invertible, redundancy</a></li><li><a href="#cs-rpipe">ทักษะ 2 · R: SARIMA, auto.arima, ets, พยากรณ์, tsCV</a></li><li><a href="#cs-rxreg">ทักษะ 3 · R: ARIMAX, NNAR, RMSE บน test set</a></li><li><a href="#cs-stat">ทักษะ 6 · พิสูจน์ว่า stationary ด้วย mean กับ autocovariance</a></li><li><a href="#cs-write">ทักษะ 4 · เขียนโมเดลจาก output ของ R พร้อม assumption</a></li><li><a href="#cs-diag">ทักษะ 5 · ตรวจ residual: ACF, QQ, Ljung-Box</a></li><li><a href="#cs-garch">ทักษะ 9 · R: GARCH ครบขั้น</a></li><li><a href="#cs-choose">ทักษะ 12 · เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF</a></li><li><a href="#cs-decomp">ทักษะ 11 · Multiplicative decomposition และ seasonal index</a></li><li><a href="#cs-aic">ทักษะ 8 · เลือกโมเดลด้วย AIC, BIC และ log-likelihood</a></li><li><a href="#cs-period">ทักษะ 15 · R: periodogram หาความถี่และคาบ</a></li><li><a href="#cs-sacf">ทักษะ 16 · sample ACF ด้วยมือ, correlogram, \(\nabla x_t\)</a></li><li><a href="#cs-etsarima">ทักษะ 18 · ETS(A,N,N) กับ ARIMA(0,1,1)</a></li><li><a href="#cs-detrend">ทักษะ 17 · Detrending และ OLS trend ที่ error สัมพันธ์กัน</a></li><li><a href="#cs-ma1">ทักษะ 14 · MA(1): \(\rho_1\), \(|\rho_1|\le\tfrac12\), θ กับ 1/θ</a></li><li><a href="#cs-yw">ทักษะ 10 · Yule-Walker: ประมาณ φ และ σ² จาก \(\hat\gamma(h)\)</a></li><li><a href="#cs-psi">ทักษะ 7 · ψ weights และ π weights</a></li><li><a href="#cs-acfpacf">ทักษะ 13 · บรรยาย ACF/PACF และทายโมเดลจากกราฟ</a></li><li><a href="#tips">คลังเกร็ดไว้อ้างตอนตอบ 17 ข้อ</a></li></ol></details>
+<details class="blk" id="toc" open><summary>สารบัญ เรียงตามความสำคัญ</summary><ol class="toc"><li><a href="#cs-roots">ทักษะ 1 · ราก ARMA: causal, invertible, redundancy</a></li><li><a href="#cs-rpipe">ทักษะ 2 · R: SARIMA, auto.arima, ets, พยากรณ์, tsCV</a></li><li><a href="#cs-rxreg">ทักษะ 3 · R: ARIMAX, NNAR, RMSE บน test set</a></li><li><a href="#cs-stat">ทักษะ 6 · พิสูจน์ว่า stationary ด้วย mean กับ autocovariance</a></li><li><a href="#cs-write">ทักษะ 4 · เขียนโมเดลจาก output ของ R พร้อม assumption</a></li><li><a href="#cs-diag">ทักษะ 5 · ตรวจ residual: ACF, QQ, Ljung-Box</a></li><li><a href="#cs-garch">ทักษะ 9 · R: GARCH ครบขั้น</a></li><li><a href="#cs-choose">ทักษะ 12 · เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF</a></li><li><a href="#cs-decomp">ทักษะ 11 · Multiplicative decomposition และ seasonal index</a></li><li><a href="#cs-aic">ทักษะ 8 · เลือกโมเดลด้วย AIC, BIC และ log-likelihood</a></li><li><a href="#cs-period">ทักษะ 15 · R: periodogram หาความถี่และคาบ</a></li><li><a href="#cs-sacf">ทักษะ 16 · sample ACF ด้วยมือ, correlogram, \(\nabla x_t\)</a></li><li><a href="#cs-etsarima">ทักษะ 18 · ETS(A,N,N) กับ ARIMA(0,1,1)</a></li><li><a href="#cs-detrend">ทักษะ 17 · Detrending และ OLS trend ที่ error สัมพันธ์กัน</a></li><li><a href="#cs-ma1">ทักษะ 14 · MA(1): \(\rho_1\), \(|\rho_1|\le\tfrac12\), θ กับ 1/θ</a></li><li><a href="#cs-yw">ทักษะ 10 · Yule-Walker: ประมาณ φ และ σ² จาก \(\hat\gamma(h)\)</a></li><li><a href="#cs-psi">ทักษะ 7 · ψ weights และ π weights</a></li><li><a href="#cs-acfpacf">ทักษะ 13 · บรรยาย ACF/PACF และทายโมเดลจากกราฟ</a></li><li><a href="#tips">คลังเกร็ดไว้อ้างตอนตอบ 17 ข้อ</a></li><li><a href="#calc">สูตรคำนวณมือ 20 การ์ด: ทดสอบ เลือกโมเดล พยากรณ์ แปลงค่า</a></li></ol></details>
 
 
 <h2 id="skills">ส่วน ก · ทักษะ</h2>
@@ -229,6 +232,7 @@ mean(tsCV(x, farima, h = 1)^2, na.rm = TRUE)</pre>
 <tr><td>α ใกล้ 1</td><td>ค่าพยากรณ์ตามค่าล่าสุดเกือบทั้งหมด</td></tr>
 <tr><td>tsCV h = 1</td><td>leave-one-out ทีละก้าว ได้ error ทุกจุด เอามายกกำลังสองเฉลี่ย</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-acc">RMSE MAE MAPE</a> · <a href="#f-sigma">sigma กับ sigma²</a> · <a href="#f-boxcox">Box-Cox</a> · <a href="#f-adf">ADF τ</a> · <a href="#f-ar1fc">พยากรณ์ AR(1) และ PI</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบจากปี 2025</summary>
@@ -309,6 +313,7 @@ set.seed(1); f4 &lt;- nnetar(tr, xreg = s1); accuracy(forecast(f4, xreg = s2), t
 <tr><td>NNAR(1,1,2)[12]</td><td>ใช้ค่าเดือนก่อนกับ 12 เดือนก่อน hidden 2 node</td></tr>
 <tr><td>\(\text{RMSE}=\sqrt{\frac1n\sum(y-\hat y)^2}\)</td><td>ยิ่งต่ำยิ่งแม่น หน่วยเดียวกับข้อมูล</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-acc">RMSE MAE MAPE</a> · <a href="#f-granger">Granger F</a> · <a href="#f-adf">ADF τ</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
@@ -397,6 +402,7 @@ set.seed(1); f4 &lt;- nnetar(tr, xreg = s1); accuracy(forecast(f4, xreg = s2), t
 <tr><td>moment ของ normal</td><td>\(E(w)=0,\ E(w^2)=\sigma^2,\ E(w^3)=0,\ E(w^4)=3\sigma^4\)</td><td>\(\operatorname{Var}(w^2)=3\sigma^4-\sigma^4=2\sigma^4\)</td></tr>
 <tr><td>ย้ายสูตร Var</td><td>\(E(X^2)=\operatorname{Var}(X)+[E(X)]^2\)</td><td>\(E(w_t^2)=\sigma^2+0=\sigma^2\)</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-const">intercept กับ c</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบที่เจอบ่อย</summary>
@@ -500,6 +506,7 @@ set.seed(1); f4 &lt;- nnetar(tr, xreg = s1); accuracy(forecast(f4, xreg = s2), t
 <tr><td>พารามิเตอร์มีนัยสำคัญ</td><td>\(|\text{coef}/\text{s.e.}|\)</td><td>เกิน 2</td></tr>
 </table>
 <div class="say">Assumptions: \(w_t\) เป็น Gaussian white noise คือ mean 0, variance คงที่ \(\sigma^2\), ไม่ correlate กัน และเป็น normal · โมเดล causal และ invertible คือรากของ AR และ MA มี modulus เกิน 1</div>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-const">intercept กับ c</a> · <a href="#f-backshift">ขยาย backshift</a> · <a href="#f-sigma">sigma กับ sigma²</a> · <a href="#f-t">t-test</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 4 แบบ</summary>
@@ -591,6 +598,7 @@ tsdiag(fit, gof = 30, omit.initial = T)</pre>
 <tr><td>ADF</td><td>ไม่ stationary</td><td>ยังไม่นิ่ง ตรงข้ามกับสามตัวบน</td></tr>
 </table>
 <p>เส้นประ ACF = \(\pm2/\sqrt n\) · 20 lag หลุด 1 แท่งเกิดได้โดยบังเอิญที่ระดับ 5%</p>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-lb">Ljung-Box มือ</a> · <a href="#f-jb">Jarque-Bera มือ</a> · <a href="#f-t">t-test</a> · <a href="#f-std">standardized residual</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 4 แบบ</summary>
@@ -675,6 +683,7 @@ ugarchforecast(f, n.ahead = 3)       # 5 พยากรณ์ sigma</pre>
 <tr><td>นิ่งเมื่อ</td><td>\(\alpha_1+\beta_1<1\)</td><td>\(0.472+0.453=0.925\)</td></tr>
 <tr><td>ลำดับตัวเลขกลับด้าน</td><td>garch(order = c(β, α)) · garchOrder = c(α, β)</td><td>tseries กับ rugarch สลับกัน</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-arch">ArchTest มือ</a> · <a href="#f-jb">Jarque-Bera มือ</a> · <a href="#f-std">standardized residual</a> · <a href="#f-ret">return</a> · <a href="#f-sigma">sigma กับ sigma²</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
@@ -753,6 +762,7 @@ ugarchforecast(f, n.ahead = 3)       # 5 พยากรณ์ sigma</pre>
 <tr><td>เส้นประ</td><td>\(\pm2/\sqrt n\) แท่งในเส้นถือว่าไม่สัมพันธ์</td></tr>
 </table>
 <p class="trap">ทิศ lag ขึ้นกับลำดับตัวแปรใน ccf() เขียนนิยามก่อนตอบทุกครั้ง</p>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-granger">Granger F</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
@@ -897,6 +907,7 @@ ugarchforecast(f, n.ahead = 3)       # 5 พยากรณ์ sigma</pre>
 <tr><td>BIC หนักกว่าเมื่อไร</td><td>\(\ln n>2\) เมื่อ \(n\ge8\)</td><td>ข้อมูลจริงแทบทุกชุด BIC เลือกโมเดลเล็กกว่า</td></tr>
 </table>
 <p class="src"><b>อาจารย์:</b> Class 7-1 0:34:16 intercept กับ \(\sigma^2\) นับเป็นพารามิเตอร์ ตรงกับ R แม้สไลด์หน้า 18 เขียนว่าไม่นับ \(\sigma^2\)</p>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-aic">AIC BIC AICc</a> · <a href="#f-acc">RMSE MAE MAPE</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
@@ -1016,6 +1027,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><td>เส้นประ</td><td>\(\pm1.96/\sqrt n\approx\pm2/\sqrt n\)</td><td>ขอบ 95% ถ้าเป็น white noise</td></tr>
 <tr><td>difference</td><td>\(\nabla x_t=x_t-x_{t-1}\)</td><td>ตัวแรกไม่มีค่า</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-acfband">เส้น ACF</a> · <a href="#f-backshift">ขยาย backshift</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
@@ -1065,6 +1077,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><td>ETS(A,A,N) หรือ Holt</td><td>ARIMA(0,2,2)</td><td></td></tr>
 <tr><td>sigma ของ ETS</td><td>σ² ของ ARIMA</td><td>ยกกำลังสอง</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-etsarima">ETS เป็น ARIMA</a> · <a href="#f-psi">MSPE จาก ψ</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 ทาง</summary>
@@ -1108,6 +1121,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><td>ข้อเสีย</td><td>ใช้ไม่ได้ถ้า trend เป็น stochastic</td><td>ใส่ MA เพิ่มให้ noise</td></tr>
 </table>
 <p>OLS ที่ error มี autocorrelation: ค่าสัมประสิทธิ์ยังใช้ได้ แต่ s.e. และ p-value ผิด ใช้ GLS แก้</p>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-t">t-test</a> · <a href="#f-adf">ADF τ</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 1 แบบ</summary>
@@ -1199,6 +1213,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><td>MA(1)</td><td>\(\hat\rho_1\theta^2-\theta+\hat\rho_1=0\) เลือก \(|\theta|<1\)</td><td>\(\hat\gamma_0/(1+\hat\theta^2)\)</td></tr>
 </table>
 <p>สมการ AR(2) มาจาก \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\) แทน h = 1, 2 ใช้ \(\rho_0=1\), \(\rho_{-1}=\rho_1\)</p>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-const">intercept กับ c</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
@@ -1249,6 +1264,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><td>เทียบสัมประสิทธิ์</td><td>\(\Phi(z)\psi(z)=\theta(z)\) เทียบเลขหน้า \(z^0, z^1, \dots\)</td><td>ทุกกรณี รวม AR(2)</td></tr>
 <tr><td>π</td><td>\(\pi(z)=\Phi(z)/\theta(z)\)</td><td>สลับบทบาท</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-psi">MSPE จาก ψ</a> · <a href="#f-ar1fc">พยากรณ์ AR(1) และ PI</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
@@ -1298,6 +1314,7 @@ s$freq[which.max(s$spec)]        # 0.0833
 <tr><td>AR(1)</td><td>\(\rho_h=\phi^h\) สลับเครื่องหมายถ้า φ &lt; 0</td><td>\(\phi_{11}=\phi\)</td></tr>
 <tr><td>MA(1)</td><td>\(\rho_1=\theta/(1+\theta^2)\), \(|\rho_1|\le\tfrac12\)</td><td>ค่อยๆ ลด</td></tr>
 </table>
+<p class="src"><b>สูตรมือ:</b> <a href="#f-acfband">เส้น ACF</a></p>
 </details>
 
 <details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
@@ -1457,6 +1474,302 @@ s$freq[which.max(s$spec)]        # 0.0833
 <details class="tipcard" id="tip-intercept"><summary>17 · intercept ใน arima คือ mean ไม่ใช่ค่าคงที่</summary><div class="in">
 <div class="yes"><b>เขียน</b><span>\(\Phi(B)(X_t-\mu)=\theta(B)w_t\)</span></div>
 <div class="no"><b>ไม่ใช่</b><span>\(X_t=c+\phi X_{t-1}+\dots\) ที่ c = intercept · ค่าคงที่จริงคือ \(c=\mu(1-\phi_1-\dots-\phi_p)\)</span></div>
+</div></details>
+
+<h2 id="calc">ส่วน ค · สูตรคำนวณมือ</h2>
+<p>ใช้ตอนโจทย์ให้ตัวเลขมาแล้วถามว่าทดสอบผ่านไหม หรือให้แปลงค่า x เป็นอีกค่า ทุกการ์ดเรียงแบบเดียวกัน สูตร → ใช้เมื่อ → อ่านผล → ตัวอย่างตัวเลข → ตรวจกับ R ตัวเลขตัวอย่างตรวจด้วย Python และ R แล้ว ป้าย <b>หลักทั่วไป</b> คือสูตรที่ไม่อยู่ในสไลด์ของอาจารย์</p>
+
+<h3>ทดสอบด้วยมือ</h3>
+
+<details class="tipcard fcard" id="f-crit"><summary>ค1 · ค่าวิกฤตที่ต้องพกไว้ ระดับ 5%</summary><div class="in">
+<table class="why">
+<tr><th>การแจกแจง</th><th>ค่าวิกฤต</th><th>ใช้กับ</th></tr>
+<tr><td>\(N(0,1)\) สองหาง</td><td>1.96 ปัดเป็น 2 ได้</td><td>t-test ของสัมประสิทธิ์ · เส้น ACF</td></tr>
+<tr><td>\(\chi^2_1\)</td><td>3.84</td><td rowspan="6">Ljung-Box · Jarque-Bera ใช้ df 2 · ArchTest ใช้ df 12</td></tr>
+<tr><td>\(\chi^2_2\)</td><td>5.99</td></tr>
+<tr><td>\(\chi^2_3\)</td><td>7.81</td></tr>
+<tr><td>\(\chi^2_5\)</td><td>11.07</td></tr>
+<tr><td>\(\chi^2_{10}\)</td><td>18.31</td></tr>
+<tr><td>\(\chi^2_{12}\)</td><td>21.03</td></tr>
+<tr><td>\(F_{2,95}\)</td><td>3.09</td><td>Granger lag 2</td></tr>
+<tr><td>ADF ของ adf.test</td><td>−3.45 ที่ n = 100 · −3.41 เมื่อ n ใหญ่</td><td>tseries ใส่ค่าคงที่และ trend เสมอ</td></tr>
+</table>
+<div class="yes"><b>reject</b><span>ค่าสถิติเกินค่าวิกฤต ส่วน ADF ต้องติดลบมากกว่าค่าวิกฤต</span></div>
+<p class="src"><b>ตรวจกับ R:</b> <code>qchisq(0.95, df)</code> · <code>qf(0.95, 2, 95)</code> · <code>qnorm(0.975)</code></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-t"><summary>ค2 · t-test และช่วงเชื่อมั่นของสัมประสิทธิ์</summary><div class="in">
+<p>\[t=\frac{\text{coef}}{\text{s.e.}}\qquad \text{CI}_{95\%}=\text{coef}\pm1.96\,\text{s.e.}\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>output ของ arima ให้ coef กับ s.e. มาแต่ไม่ให้ p-value แล้วถามว่าพารามิเตอร์ไหนควรตัด</span></div>
+<div class="yes"><b>อ่านผล</b><span>\(|t|>1.96\) หรือช่วงไม่ครอบ 0 แปลว่ามีนัยสำคัญ เก็บไว้</span></div>
+<div class="copy">
+<p>ar1 = 0.35, s.e. = 0.12</p>
+<p>\(t=0.35/0.12=2.92>1.96\) ar1 มีนัยสำคัญ p ≈ 0.0035</p>
+<p>\(\text{CI}=0.35\pm1.96(0.12)=0.35\pm0.235=(0.115,\ 0.585)\) ไม่ครอบ 0</p>
+</div>
+<p class="trap">s.e. ของ OLS trend ที่ residual ยัง correlate กันใช้ไม่ได้ ตามทักษะ 17</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>coeftest(fit)</code> ใน lmtest · <b>ที่มา:</b> Slide 3 บอกว่า s.e. และ t-test ใช้ได้เมื่อ error เป็น white noise</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-acfband"><summary>ค3 · เส้นประของ ACF ±1.96/√n</summary><div class="in">
+<p>\[\hat\rho(h)\approx N\!\left(0,\ \tfrac1n\right)\ \text{ถ้าเป็น white noise}\qquad\text{ขอบ}=\pm\frac{1.96}{\sqrt n}\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>คำนวณ ACF มือแล้วถามว่า lag ไหนต่างจาก 0 หรือถามว่าเส้นประมาจากไหน</span></div>
+<div class="copy">
+<p>n = 100: ขอบ \(=\pm1.96/10=\pm0.196\)</p>
+<p>\(\hat\rho(1)=0.25\) ออกนอกเส้น มีนัยสำคัญ · \(\hat\rho(2)=0.15\) อยู่ในเส้น</p>
+</div>
+<p class="src"><b>ที่มา:</b> Slide 3 หน้า 9 · ตัวอย่างข้อสอบอยู่ใน <a href="#cs-sacf">ทักษะ 16</a></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-lb"><summary>ค4 · Ljung-Box และ Box-Pierce คิดมือ</summary><div class="in">
+<p>\[Q_{LB}=n(n+2)\sum_{k=1}^{H}\frac{\hat\rho_k^2}{n-k}\qquad Q_{BP}=n\sum_{k=1}^{H}\hat\rho_k^2\qquad Q\sim\chi^2_{H-p-q}\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>โจทย์ให้ ACF ของ residual หลาย lag แล้วถามว่าโมเดลเหมาะสมไหม</span></div>
+<div class="yes"><b>อ่านผล</b><span>\(H_0\): residual เป็น white noise · Q เกินค่าวิกฤตคือ reject โมเดลไม่ผ่าน</span></div>
+<div class="copy">
+<p>n = 100, \(\hat\rho_1=0.2\), \(\hat\rho_2=0.1\), H = 2</p>
+<p>\(Q=100(102)\left(\dfrac{0.04}{99}+\dfrac{0.01}{98}\right)=10200(0.000506)=5.16\)</p>
+<p>อนุกรมดิบ df = 2 ค่าวิกฤต 5.99 · 5.16 &lt; 5.99 ไม่ reject เป็น white noise</p>
+<p>residual ของ MA(1) df = 2 − 1 = 1 ค่าวิกฤต 3.84 · 5.16 &gt; 3.84 reject โมเดลไม่ผ่าน</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>0.04/99</td><td>\(\hat\rho_1^2=0.2^2\) หารด้วย n − 1</td></tr>
+<tr><td>0.01/98</td><td>\(\hat\rho_2^2=0.1^2\) หารด้วย n − 2</td></tr>
+<tr><td>Box-Pierce</td><td>\(100(0.04+0.01)=5.0\) ใกล้กันเมื่อ n ใหญ่</td></tr></table>
+<p class="trap">ลืมหัก p + q ออกจาก df ทำให้สรุปกลับด้าน · ถ้าทดสอบ residual² ของ GARCH ไม่ต้องหัก</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>Box.test(res, lag = 2, type = "Ljung", fitdf = 1)</code> ตรวจแล้วตรงกับสูตร · <b>หลักทั่วไป:</b> สไลด์ให้แค่ \(H_0\) ไม่ได้ให้สูตร</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-jb"><summary>ค5 · Jarque-Bera คิดมือ</summary><div class="in">
+<p>\[JB=\frac n6\left(S^2+\frac{(K-3)^2}{4}\right)\sim\chi^2_2\qquad S=\frac{\tfrac1n\sum(x-\bar x)^3}{s^3}\quad K=\frac{\tfrac1n\sum(x-\bar x)^4}{s^4}\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>โจทย์ให้ skewness กับ kurtosis ของ residual มา แล้วถามว่า normal ไหม</span></div>
+<div class="yes"><b>อ่านผล</b><span>\(H_0\): normal · normal มี S = 0 และ K = 3 ยิ่งเบ้หรือหางหนา JB ยิ่งโต</span></div>
+<div class="copy">
+<p>n = 200, S = −0.5, K = 4.2</p>
+<p>\(JB=\dfrac{200}{6}\left(0.25+\dfrac{1.44}{4}\right)=33.33(0.61)=20.33\)</p>
+<p>20.33 &gt; 5.99 reject ไม่ normal หางหนากว่า normal</p>
+</div>
+<p class="trap">s ในสูตรหารด้วย n ไม่ใช่ n − 1 · K − 3 คือ excess kurtosis ถ้าโจทย์ให้ excess มาแล้วห้ามลบ 3 ซ้ำ</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>jarque.bera.test(res)</code> ตรวจแล้วตรงกับสูตร · <b>ที่มา:</b> Slide 11 ให้ \(H_0\) และบอกว่าดู skewness กับ kurtosis · สูตรเป็นหลักทั่วไป</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-arch"><summary>ค6 · ArchTest คิดมือ</summary><div class="in">
+<p>\[u_t^2=a_0+a_1u_{t-1}^2+\dots+a_mu_{t-m}^2+e_t\qquad LM=T\cdot R^2\sim\chi^2_m\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>โจทย์ให้ \(R^2\) ของ regression \(u^2\) บน lag ของตัวเอง</span></div>
+<div class="yes"><b>อ่านผล</b><span>\(H_0\): ไม่มี ARCH effect · reject แปลว่าต้องใช้ GARCH</span></div>
+<div class="copy">
+<p>CPALL 278 วัน ArchTest ใช้ m = 12 ได้ T = 278 − 12 = 266</p>
+<p>ถ้า \(R^2=0.05\): \(LM=266(0.05)=13.3&lt;21.03\) ไม่ reject</p>
+<p>ข้อสอบจริงได้ 34.333 &gt; 21.03 reject มี ARCH effect</p>
+</div>
+<p class="trap">T คือจำนวนแถวที่เหลือหลังตัด lag ไม่ใช่ n</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>ArchTest(x)</code> ของ FinTS ค่า default lags = 12 ในโค้ดคำนวณ <code>r.squared * length(resid)</code> ตรงกับสูตร · <b>หลักทั่วไป</b></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-adf"><summary>ค7 · ADF: ค่าสถิติ τ</summary><div class="in">
+<p>\[\nabla x_t=\alpha+\beta t+\gamma x_{t-1}+\sum_{j=1}^{k}\delta_j\nabla x_{t-j}+e_t\qquad \tau=\frac{\hat\gamma}{\text{s.e.}(\hat\gamma)}\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>โจทย์ให้ \(\hat\gamma\) กับ s.e. หรือให้ค่า Dickey-Fuller มาแต่ไม่ให้ p</span></div>
+<div class="yes"><b>อ่านผล</b><span>\(H_0\): \(\gamma=0\) มี unit root ไม่ stationary · τ ติดลบมากกว่า −3.45 คือ reject ได้ stationary</span></div>
+<div class="copy">
+<p>\(\hat\gamma=-0.15\), s.e. = 0.06: \(\tau=-0.15/0.06=-2.5\)</p>
+<p>−2.5 ไม่ต่ำกว่า −3.45 ไม่ reject ยังไม่ stationary ต้อง difference</p>
+</div>
+<p class="trap">ห้ามเทียบกับ −1.96 · τ ไม่ได้แจกแจงแบบ t · adf.test ตัด p ไว้ที่ 0.01 และ 0.99 ถ้าเห็น p = 0.01 แปลว่าน้อยกว่าหรือเท่ากับ 0.01</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>adf.test(x)</code> ในโค้ดใส่ทั้งค่าคงที่และ trend <code>tt</code> · ตัวอย่าง Slide 3: Dickey-Fuller = −2.2512, p = 0.4726 ไม่ stationary · <b>สูตรเป็นหลักทั่วไป</b></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-granger"><summary>ค8 · Granger causality: F-test</summary><div class="in">
+<p>\[F=\frac{(RSS_r-RSS_u)/q}{RSS_u/(n-k)}\sim F_{q,\ n-k}\]</p>
+<table class="why">
+<tr><th>สัญลักษณ์</th><th>คือ</th></tr>
+<tr><td>\(RSS_r\)</td><td>โมเดลที่มีแค่ lag ของ Y</td></tr>
+<tr><td>\(RSS_u\)</td><td>โมเดลที่เพิ่ม lag ของ X เข้าไป</td></tr>
+<tr><td>q</td><td>จำนวน lag ของ X ที่เพิ่ม</td></tr>
+<tr><td>k</td><td>จำนวนพารามิเตอร์ของโมเดลใหญ่ รวมค่าคงที่</td></tr>
+</table>
+<div class="yes"><b>อ่านผล</b><span>\(H_0\): X ไม่ Granger-cause Y · reject แปลว่า lag ของ X ช่วยพยากรณ์ Y ใส่เป็น xreg ได้</span></div>
+<div class="copy">
+<p>lag 2, n = 100, \(RSS_r=120\), \(RSS_u=110\), k = 1 + 2 + 2 = 5</p>
+<p>\(F=\dfrac{(120-110)/2}{110/95}=\dfrac{5}{1.158}=4.32\)</p>
+<p>4.32 &gt; 3.09 reject X ช่วยพยากรณ์ Y · p ≈ 0.016</p>
+</div>
+<p class="src"><b>ตรวจกับ R:</b> <code>grangertest(Y ~ X, order = 2)</code> · <b>ที่มา:</b> Slide 9 ให้ \(H_0\) และขั้นตอน · สูตร F เป็นหลักทั่วไป</p>
+</div></details>
+
+<h3>เลือกโมเดลและวัดความแม่น</h3>
+
+<details class="tipcard fcard" id="f-aic"><summary>ค9 · AIC, BIC, AICc และแปลงกลับเป็น log L</summary><div class="in">
+<p>\[AIC=-2\ln L+2k\qquad BIC=-2\ln L+k\ln n\qquad AICc=AIC+\frac{2k(k+1)}{n-k-1}\]</p>
+<p>\[\ln L=-\frac{AIC-2k}{2}\]</p>
+<table class="why">
+<tr><th>นับ k อย่างไร</th><th>ARMA(1,1) มี intercept</th></tr>
+<tr><td>สไลด์: ไม่นับ \(\sigma^2\)</td><td>k = 3</td></tr>
+<tr><td>R ใน arima: นับ \(\sigma^2\) ด้วย</td><td>k = 4</td></tr>
+</table>
+<div class="copy">
+<p>\(\ln L=-250\), k = 3, n = 100</p>
+<p>\(AIC=500+6=506\) · \(BIC=500+3\ln100=500+13.82=513.82\)</p>
+<p>\(AICc=506+\dfrac{2(3)(4)}{96}=506.25\)</p>
+<p>R ฟิต ARMA(1,1) มี intercept ได้ log L −250 จะพิมพ์ aic = 500 + 2(4) = 508</p>
+</div>
+<p class="trap">ถ้าคิด AIC มือไม่ตรงกับ R ให้ลองนับ \(\sigma^2\) เป็นพารามิเตอร์ด้วย</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>fit$aic</code> เทียบ <code>-2*fit$loglik + 2*(length(coef(fit)) + 1)</code> ตรวจแล้วตรง · <b>ที่มา:</b> Slide 7 หน้า 18–19 · AICc อยู่ใน Slide 9 ไม่มีสูตร สูตรเป็นหลักทั่วไป · ดู <a href="#cs-aic">ทักษะ 8</a></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-acc"><summary>ค10 · RMSE, MAE, MAPE, MPE, MASE</summary><div class="in">
+<table class="why">
+<tr><th>ค่า</th><th>สูตร \(e_t=Y_t-F_t\)</th><th>อ่าน</th></tr>
+<tr><td>RMSE</td><td>\(\sqrt{\tfrac1n\sum e_t^2}\)</td><td>ลงโทษ error ใหญ่หนัก</td></tr>
+<tr><td>MAE</td><td>\(\tfrac1n\sum|e_t|\)</td><td>error เฉลี่ยในหน่วยเดิม</td></tr>
+<tr><td>MAPE</td><td>\(\tfrac{100}n\sum|e_t/Y_t|\)</td><td>เป็น % ใช้ไม่ได้ถ้า Y มีค่า 0</td></tr>
+<tr><td>MPE</td><td>\(\tfrac{100}n\sum e_t/Y_t\)</td><td>บอก bias บวกคือพยากรณ์ต่ำไป</td></tr>
+<tr><td>MASE</td><td>MAE ÷ MAE ของ naive บน train</td><td>น้อยกว่า 1 คือชนะ naive</td></tr>
+</table>
+<div class="copy">
+<p>Y = 10, 12, 15, 13 · F = 11, 11, 14, 15 · e = −1, 1, 1, −2</p>
+<p>\(RMSE=\sqrt{(1+1+1+4)/4}=\sqrt{1.75}=1.323\) · \(MAE=5/4=1.25\)</p>
+<p>\(MAPE=\tfrac{100}{4}\left(\tfrac1{10}+\tfrac1{12}+\tfrac1{15}+\tfrac2{13}\right)=10.10\%\)</p>
+<p>\(MPE=\tfrac{100}{4}\left(-\tfrac1{10}+\tfrac1{12}+\tfrac1{15}-\tfrac2{13}\right)=-2.60\%\) พยากรณ์สูงไปเล็กน้อย</p>
+<p>train 8, 10, 9, 12: naive MAE \(=(2+1+3)/3=2\) · \(MASE=1.25/2=0.625\)</p>
+</div>
+<p class="trap">เครื่องหมาย e คือ Y − F ตามสไลด์ · RMSE ≥ MAE เสมอ</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>accuracy(fc, test)</code> · <b>ที่มา:</b> Slide 2 หน้า 13–14 · MASE เป็นหลักทั่วไป</p>
+</div></details>
+
+<h3>พยากรณ์</h3>
+
+<details class="tipcard fcard" id="f-ar1fc"><summary>ค11 · AR(1): ค่าพยากรณ์ h ก้าว และ prediction interval</summary><div class="in">
+<p>\[\hat x_{n+h}=\mu+\phi^h(x_n-\mu)\qquad \operatorname{Var}(e_{n+h})=\sigma^2\frac{1-\phi^{2h}}{1-\phi^2}\qquad \text{PI}=\hat x_{n+h}\pm1.96\sqrt{\operatorname{Var}}\]</p>
+<div class="copy">
+<p>\(\mu=10,\ \phi=0.6,\ x_n=14,\ \sigma^2=4\)</p>
+<p>h = 1: \(\hat x=10+0.6(4)=12.4\) · Var = 4 · PI = (8.48, 16.32)</p>
+<p>h = 2: \(\hat x=10+0.36(4)=11.44\) · \(\operatorname{Var}=4(1+0.36)=5.44\) · PI = \(11.44\pm1.96(2.332)=(6.87,\ 16.01)\)</p>
+<p>h → ∞: \(\hat x\to\mu=10\) · \(\operatorname{Var}\to\sigma^2/(1-\phi^2)=6.25\)</p>
+</div>
+<p class="trap">ถ้า R ให้ intercept 10 นั่นคือ μ ใช้แทนได้เลย ไม่ใช่ค่าคงที่ c</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>predict(fit, n.ahead = 2)</code> ได้ pred กับ se · <b>ที่มา:</b> Slide 8 หน้า 12–13 MSPE โตขึ้นเมื่อ h มากขึ้น</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-psi"><summary>ค12 · MSPE ทั่วไปจาก ψ weights</summary><div class="in">
+<p>\[\operatorname{Var}(e_{n+h})=\sigma^2\sum_{j=0}^{h-1}\psi_j^2\qquad \psi_0=1\]</p>
+<div class="yes"><b>ใช้เมื่อ</b><span>ARMA หรือ ARIMA ใดๆ หา ψ ก่อนตาม <a href="#cs-psi">ทักษะ 7</a> แล้วรวมกำลังสอง h ตัวแรก</span></div>
+<table class="why">
+<tr><th>โมเดล</th><th>\(\psi_j\) เมื่อ j ≥ 1</th><th>Var h ก้าว</th></tr>
+<tr><td>random walk</td><td>1</td><td>\(h\sigma^2\)</td></tr>
+<tr><td>SES หรือ ARIMA(0,1,1)</td><td>\(\alpha\)</td><td>\(\sigma^2[1+(h-1)\alpha^2]\)</td></tr>
+<tr><td>ARMA(1,1)</td><td>\(\psi_1=\phi+\theta\)</td><td>h = 2: \(\sigma^2[1+(\phi+\theta)^2]\)</td></tr>
+</table>
+<div class="copy">
+<p>\(X_t-0.5X_{t-1}=w_t+0.4w_{t-1}\): \(\psi_1=0.9\) · h = 2: \(\sigma^2(1+0.81)=1.81\sigma^2\)</p>
+<p>SES α = 0.4, h = 3: \(\sigma^2(1+2(0.16))=1.32\sigma^2\)</p>
+</div>
+<p class="src"><b>ที่มา:</b> Slide 8 หน้า 12 ให้ \(\sigma^2[1+(\theta_1+\phi_1)^2]\) สำหรับ 2 ก้าว · ค่าพยากรณ์ σ² ของ GARCH ดู <a href="#cs-garch">ทักษะ 9</a></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-rw"><summary>ค13 · ค่าพยากรณ์ของ random walk, drift, SES</summary><div class="in">
+<table class="why">
+<tr><th>โมเดล</th><th>\(\hat x_{n+h}\)</th></tr>
+<tr><td>random walk</td><td>\(x_n\) ทุก h</td></tr>
+<tr><td>random walk with drift</td><td>\(x_n+h\delta\)</td></tr>
+<tr><td>SES</td><td>\(\ell_n=\alpha x_n+(1-\alpha)\ell_{n-1}\) คงที่ทุก h</td></tr>
+<tr><td>ARIMA(1,1,0)</td><td>ขยายเป็น \(x_t=(1+\phi)x_{t-1}-\phi x_{t-2}+w_t\) แล้วแทนทีละก้าว</td></tr>
+</table>
+<div class="copy">
+<p>drift δ = 0.5, \(x_n=20\): \(\hat x_{n+3}=20+1.5=21.5\)</p>
+<p>ARIMA(1,1,0) φ = 0.3, \(x_n=10,\ x_{n-1}=8\): \(\hat x_{n+1}=1.3(10)-0.3(8)=10.6\)</p>
+</div>
+</div></details>
+
+<h3>แปลงค่า x เป็น y</h3>
+
+<details class="tipcard fcard" id="f-ret"><summary>ค14 · ราคาเป็น return และกลับ</summary><div class="in">
+<table class="why">
+<tr><th>แบบ</th><th>สูตร</th><th>แปลงกลับ</th></tr>
+<tr><td>simple return</td><td>\(R_t=100\,\dfrac{P_t-P_{t-1}}{P_{t-1}}\)</td><td>\(P_t=P_{t-1}(1+R_t/100)\)</td></tr>
+<tr><td>log return</td><td>\(r_t=100\ln\dfrac{P_t}{P_{t-1}}=100\,\nabla\ln P_t\)</td><td>\(P_t=P_{t-1}e^{r_t/100}\)</td></tr>
+</table>
+<div class="copy">
+<p>P จาก 100 เป็น 105: simple 5% · log \(100\ln1.05=4.879\%\)</p>
+</div>
+<p class="src">log return คือ difference ของ log ราคา ราคาไม่ stationary แต่ return มักนิ่ง เลยเอา return เข้า GARCH · <b>ที่มา:</b> Slide 4 และ 11 ใช้ rate of return ของ CPALL</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-boxcox"><summary>ค15 · Box-Cox และแปลงกลับ</summary><div class="in">
+<p>\[y=\begin{cases}\dfrac{x^\lambda-1}{\lambda}&\lambda\ne0\\ \ln x&\lambda=0\end{cases}\qquad x=\begin{cases}(\lambda y+1)^{1/\lambda}&\lambda\ne0\\ e^y&\lambda=0\end{cases}\]</p>
+<table class="why">
+<tr><th>λ</th><th>เท่ากับ</th></tr>
+<tr><td>1</td><td>ไม่แปลง แค่เลื่อนลง 1</td></tr>
+<tr><td>0.5</td><td>รากที่สอง</td></tr>
+<tr><td>0</td><td>log</td></tr>
+<tr><td>−1</td><td>ส่วนกลับ</td></tr>
+</table>
+<div class="copy">
+<p>λ = 0.5, x = 16: \(y=(4-1)/0.5=6\) · กลับ: \((0.5(6)+1)^2=16\)</p>
+<p>พยากรณ์ log ได้ 4.6: \(\hat x=e^{4.6}=99.5\)</p>
+</div>
+<p class="trap">ต้องแปลงค่าพยากรณ์และขอบ PI กลับทุกตัว · x ต้องเป็นบวก</p>
+<p class="src"><b>ตรวจกับ R:</b> <code>BoxCox(x, lambda)</code> · <code>InvBoxCox(y, lambda)</code> · <b>ที่มา:</b> Slide 7 หน้า 7–8</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-backshift"><summary>ค16 · ขยาย backshift และ difference</summary><div class="in">
+<table class="why">
+<tr><th>เขียน</th><th>ขยายได้</th></tr>
+<tr><td>\(\nabla x_t=(1-B)x_t\)</td><td>\(x_t-x_{t-1}\)</td></tr>
+<tr><td>\(\nabla^2x_t=(1-B)^2x_t\)</td><td>\(x_t-2x_{t-1}+x_{t-2}\)</td></tr>
+<tr><td>\(\nabla_{12}x_t=(1-B^{12})x_t\)</td><td>\(x_t-x_{t-12}\)</td></tr>
+<tr><td>\((1-B)(1-B^{12})x_t\)</td><td>\(x_t-x_{t-1}-x_{t-12}+x_{t-13}\)</td></tr>
+<tr><td>\((1-\phi B)(1-B)x_t=w_t\)</td><td>\(x_t=(1+\phi)x_{t-1}-\phi x_{t-2}+w_t\)</td></tr>
+<tr><td>\((1-\Phi B^{12})x_t=(1+\theta B)w_t\)</td><td>\(x_t=\Phi x_{t-12}+w_t+\theta w_{t-1}\)</td></tr>
+</table>
+<p class="trap">\(\nabla^2\) คือ difference สองครั้ง ไม่ใช่ \(x_t-x_{t-2}\)</p>
+<p class="src">ใช้เขียนโมเดลจาก output ตาม <a href="#cs-write">ทักษะ 4</a> และพยากรณ์มือ</p>
+</div></details>
+
+<details class="tipcard fcard" id="f-const"><summary>ค17 · intercept, ค่าคงที่ c, mean และ variance ของ AR</summary><div class="in">
+<p>\[c=\mu(1-\phi_1-\dots-\phi_p)\qquad \mu=\frac{c}{1-\sum\phi_i}\qquad \gamma_0^{AR(1)}=\frac{\sigma^2}{1-\phi^2}\]</p>
+<div class="copy">
+<p>R ให้ ar1 = 0.6, intercept = 10, sigma^2 = 4</p>
+<p>\(\mu=10\) · \(c=10(1-0.6)=4\)</p>
+<p>เขียน \(x_t=4+0.6x_{t-1}+w_t\) หรือ \((x_t-10)=0.6(x_{t-1}-10)+w_t\)</p>
+<p>\(\operatorname{Var}(x_t)=4/(1-0.36)=6.25\)</p>
+</div>
+<p class="src">ดู <a href="#tip-intercept">เกร็ด 17</a></p>
+</div></details>
+
+<details class="tipcard fcard" id="f-std"><summary>ค18 · shock, standardized residual, outlier</summary><div class="in">
+<table class="why">
+<tr><th>ค่า</th><th>สูตร</th><th>ใช้ตอน</th></tr>
+<tr><td>shock ของ GARCH</td><td>\(u_t=x_t-\mu\)</td><td>ก่อนแทนในสมการ \(\sigma_t^2\)</td></tr>
+<tr><td>standardized residual</td><td>\(\hat\varepsilon_t=u_t/\sigma_t\)</td><td>ตรวจ JB และ LB ของ GARCH</td></tr>
+<tr><td>ARIMA</td><td>\(e_t/\hat\sigma\) โดย \(\hat\sigma=\sqrt{\text{sigma}^2}\)</td><td>เกิน ±3 คือ outlier</td></tr>
+</table>
+<div class="copy">
+<p>\(x_t=1.2,\ \mu=0.2,\ \sigma_t=0.8\): \(u_t=1.0\) · \(\hat\varepsilon_t=1.25\)</p>
+<p>residual 7.5, sigma^2 = 4: \(7.5/2=3.75>3\) เป็น outlier</p>
+</div>
+</div></details>
+
+<details class="tipcard fcard" id="f-sigma"><summary>ค19 · sigma กับ sigma² ใน output แต่ละคำสั่ง</summary><div class="in">
+<table class="why">
+<tr><th>คำสั่ง</th><th>พิมพ์</th><th>ได้ \(\sigma^2\)</th></tr>
+<tr><td>arima, Arima, auto.arima</td><td>sigma^2</td><td>ใช้ได้เลย</td></tr>
+<tr><td>ets</td><td>sigma</td><td>ยกกำลังสอง เช่น \(144.23^2=20803\)</td></tr>
+<tr><td>ugarchforecast</td><td>sigma ที่ t + h</td><td>ยกกำลังสอง</td></tr>
+<tr><td>สมการ GARCH</td><td>\(\sigma_t^2\)</td><td>ถอดรูทถ้าถาม volatility</td></tr>
+</table>
+</div></details>
+
+<details class="tipcard fcard" id="f-etsarima"><summary>ค20 · ETS เป็น ARIMA</summary><div class="in">
+<table class="why">
+<tr><th>ETS</th><th>ARIMA</th><th>แปลง</th></tr>
+<tr><td>A,N,N หรือ SES</td><td>(0,1,1)</td><td>\(\theta=\alpha-1\)</td></tr>
+<tr><td>A,A,N หรือ Holt</td><td>(0,2,2)</td><td>\(\theta_1=\alpha+\beta-2\) · \(\theta_2=1-\alpha\)</td></tr>
+</table>
+<div class="copy">
+<p>SES α = 0.2455: \(\theta=-0.7545\)</p>
+<p>Holt α = 0.8, β = 0.1: \(\theta_1=-1.1,\ \theta_2=0.2\) · \((1-B)^2x_t=(1-1.1B+0.2B^2)w_t\)</p>
+<p>รากของ MA คือ 4.35 กับ 1.15 เกิน 1 ทั้งคู่ โมเดลนี้ invertible</p>
+</div>
+<p class="src">β ที่ R พิมพ์ใช้ได้ตรงๆ เพราะ R บังคับ \(0&lt;\beta&lt;\alpha\) · <b>ที่มา:</b> Class 9-2 อาจารย์บอกว่า SES เท่ากับ ARIMA(0,1,1) และ Holt เท่ากับ ARIMA(0,2,2) · สูตรแปลง θ ของ Holt มาจากตำรา Hyndman · ดู <a href="#cs-etsarima">ทักษะ 18</a></p>
 </div></details>
 
 </main>
