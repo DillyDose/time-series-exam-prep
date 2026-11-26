@@ -1958,13 +1958,26 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
-<tr><td>1</td><td>คูณ \(w_t\) เข้าวงเล็บ</td><td>แยกเป็นสองพจน์ก่อน จะคูณกระจาย cov ได้</td></tr>
-<tr><td>2</td><td>lag 0 มี 4 คู่</td><td>2 พจน์ × 2 พจน์ คู่ไขว้สองคู่เท่ากัน เขียนรวมเป็น \(2\cdot\tfrac14\)</td></tr>
-<tr><td>3</td><td>cov ของผลคูณ</td><td>ใช้ ก13 \(E(XY)-E(X)E(Y)\) แล้วดูว่า w ชนครบทุกตัวไหม</td></tr>
-<tr><td>4</td><td>\(cov(w_tw_{t-1},w_t^2)=0\)</td><td>\(w_t\) ชนเป็น \(w_t^3\) แต่ \(w_{t-1}\) อยู่ตัวเดียว E = 0</td></tr>
-<tr><td>5</td><td>\(3\sigma^4\)</td><td>moment ที่ 4 ของ normal \(E(w^4)=3\sigma^4\)</td></tr>
-<tr><td>6</td><td>lag 1 สามคู่แรกเป็น 0</td><td>แต่ละคู่มี w ที่อยู่ตัวเดียว คือ \(w_t\) หรือ \(w_{t-2}\)</td></tr>
-<tr><td>7</td><td>คู่สุดท้ายลบ mean ด้วย</td><td>\(w_t^2\) กับ \(w_{t-1}^2\) มี mean = σ² ไม่ใช่ 0 ต้องลบ \(\sigma^2\cdot\sigma^2\) ตาม ก13 ได้ 0</td></tr>
+<tr><td>1</td><td>\(X_t=\tfrac12w_tw_{t-1}+\tfrac12w_t^2\)</td><td>คูณ \(w_t\) เข้าวงเล็บ \(w_t\cdot w_{t-1}+w_t\cdot w_t\) แล้วหาร 2 ทั้งคู่ ได้สองพจน์ จะคูณกระจาย cov ได้</td></tr>
+<tr><td>2</td><td>ตั้งชื่อ \(A=\tfrac12w_tw_{t-1}\), \(B=\tfrac12w_t^2\)</td><td>จะได้เห็นว่า \(X_t=A+B\) และ lag 0 คือ \(cov(A+B,\ A+B)\)</td></tr>
+<tr><td>3</td><td>คูณกระจายได้ 4 คู่</td><td>\(cov(A,A)+cov(A,B)+cov(B,A)+cov(B,B)\) · cov สลับซ้ายขวาได้ \(cov(A,B)=cov(B,A)\) เลยรวมเป็น \(2\,cov(A,B)\) เหลือ 3 แบบ</td></tr>
+<tr><td>4</td><td>ดึง \(\tfrac12\) ออก</td><td>ทั้งสองฝั่งมี \(\tfrac12\) ดึงออกมาคูณกัน \(\tfrac12\cdot\tfrac12=\tfrac14\) เหมือนดึง 2 ออกจาก \(cov(2w_t,2w_t)\) ได้ 4</td></tr>
+<tr><td>5</td><td>แยกคิดทีละคู่ บรรทัด 5–7</td><td>แต่ละคู่เป็นผลคูณของ w ต้องใช้ ก13 \(cov(X,Y)=E(XY)-E(X)E(Y)\) ทีละคู่ เขียนรวมบรรทัดเดียวยาวเกิน</td></tr>
+<tr><td>6</td><td>\(cov(w_tw_{t-1},w_tw_{t-1})=\sigma^4\)</td><td>\(E(w_t^2w_{t-1}^2)=E(w_t^2)E(w_{t-1}^2)=\sigma^2\cdot\sigma^2\) ลบ \(E(w_tw_{t-1})^2=0\)</td></tr>
+<tr><td>7</td><td>\(cov(w_tw_{t-1},w_t^2)=0\)</td><td>\(w_t\cdot w_t^2=w_t^3\) แต่ \(w_{t-1}\) อยู่ตัวเดียว \(E(w_{t-1})=0\) ทั้งพจน์เป็น 0</td></tr>
+<tr><td>8</td><td>\(cov(w_t^2,w_t^2)=2\sigma^4\)</td><td>ดูตารางถัดไป</td></tr>
+<tr><td>9</td><td>แทนกลับ</td><td>\(\tfrac14\sigma^4+2\cdot\tfrac14\cdot0+\tfrac14\cdot2\sigma^4=\tfrac14\sigma^4+\tfrac24\sigma^4=\tfrac34\sigma^4\)</td></tr>
+<tr><td>10</td><td>lag 1 สามคู่แรกเป็น 0</td><td>แต่ละคู่มี w ที่อยู่ตัวเดียว คือ \(w_t\) หรือ \(w_{t-2}\)</td></tr>
+<tr><td>11</td><td>คู่สุดท้ายลบ mean ด้วย</td><td>\(w_t^2\) กับ \(w_{t-1}^2\) มี mean = σ² ไม่ใช่ 0 ต้องลบ \(\sigma^2\cdot\sigma^2\) ตาม ก13 ได้ 0</td></tr>
+</table>
+<table class="why"><caption>บรรทัด \(cov(w_t^2,w_t^2)\) ทีละขั้น · ให้ \(Y=w_t^2\)</caption>
+<tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
+<tr><td>1</td><td>\(cov(Y,Y)=E(Y\cdot Y)-E(Y)E(Y)\)</td><td>สูตร ก13 ให้ทั้งสองตัวเป็น Y · cov ของตัวเองกับตัวเองคือ \(Var(Y)\)</td></tr>
+<tr><td>2</td><td>\(E(Y\cdot Y)=E(w_t^4)\)</td><td>กฎเลขยกกำลัง \(w^2\cdot w^2=w^{2+2}=w^4\)</td></tr>
+<tr><td>3</td><td>\(E(Y)E(Y)=[E(w_t^2)]^2\)</td><td>ตัวเดียวกันคูณกันเอง เขียนเป็นยกกำลังสอง</td></tr>
+<tr><td>4</td><td>\(E(w_t^4)=3\sigma^4\)</td><td>moment ที่ 4 ของ normal จากตาราง "หา E ของ w ยกกำลัง"</td></tr>
+<tr><td>5</td><td>\([E(w_t^2)]^2=\sigma^4\)</td><td>\(E(w^2)=\sigma^2\) แล้วยกกำลังสอง \((\sigma^2)^2=\sigma^4\)</td></tr>
+<tr><td>6</td><td>\(3\sigma^4-\sigma^4=2\sigma^4\)</td><td>ลบกัน</td></tr>
 </table>
 <p class="trap">⚠ อาจารย์เฉลยใน Class 13 ด้วยสมบัติของ normal \(E(w^3)=0\) และ \(E(w^4)=3\sigma^4\) ได้ γ(0) = 3σ⁴/4 · อาจารย์บอกว่าข้อนี้ "ยากสุดแล้วถ้าจะออก" และ "ถ้าทำข้อนี้ได้ ข้อแรกของข้อสอบปีที่แล้วคุณก็ทำได้"</p>
 </div>
