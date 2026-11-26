@@ -1229,7 +1229,7 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</
 <h2>ทักษะ 4: เขียนโมเดลจาก output ของ R</h2>
 <p class="unit-meta"><b>บทที่สอน:</b> <a href="0007-arima-identification-and-estimation.html#s5-out">L7 ตอน 5.6</a>, <a href="0008-diagnostic-and-forecasting.html#s2-write">L8 ตอน 2.2</a> · <b>เคยออก:</b> FINAL 2022 ข้อ 6d, 7b · 2023 ข้อ 4a · 2024 ข้อ 3ค · 2025 ข้อ 5b</p>
 
-<p>โจทย์มักสั่งให้เขียนโมเดลที่ฟิตได้พร้อมระบุ assumption ให้ครบ คะแนนแบ่งเป็นสองส่วน คือสมการที่ถูกเครื่องหมาย กับรายการ assumption</p>
+<p>โจทย์ทุกปีสั่งให้เขียนโมเดลที่ฟิตได้พร้อม assumption คะแนนแบ่งเป็นสองส่วน คือสมการที่ถูกเครื่องหมาย กับ assumption อาจารย์บอกใน Class 8 ว่าส่วนสมการ "ข้อสอบถ้าให้เขียนก็เป็นจบแค่เนี่ย ผมให้คุณเต็ม" คือเขียนบรรทัดเดียวพอ</p>
 
 <div class="method">
 <b>แปลง output เป็นสมการ 6 ขั้น</b>
@@ -1239,9 +1239,38 @@ NNAR tempr+part    NNAR(15,1,10)[52]  sigma^2 1.44             RMSE test 12.21</
 <li>ฝั่ง MA: \(1+\theta_1B+\theta_2B^2\) <b>ใส่เครื่องหมายตาม R</b> ไม่ต้องกลับ</li>
 <li>ส่วนฤดูกาลใช้ \(B^{s}\) เช่น \(B^{12}\) แล้วคูณเป็นวงเล็บแยก</li>
 <li>ถ้ามี d หรือ D ใส่ \((1-B)\) หรือ \((1-B^{12})\) หน้า X · ถ้ามี intercept ให้เขียน \(X_t-\mu\) แทน \(X_t\)</li>
-<li>ปิดท้ายด้วย \(w_t\sim iid\ N(0,\sigma^2)\) แล้วเขียน assumption: causal, invertible, residual เป็น white noise และ normal</li>
+<li>ปิดท้ายด้วย \(w_t\sim iid\ N(0,\sigma^2)\) แล้วเขียน assumption ตามกล่องถัดไป</li>
 <li>ถ้าชื่อขึ้นต้นด้วย <code>Regression with ARIMA(...) errors</code> ให้แยกสองบรรทัด: บรรทัด 1 คือ \(y_t=\)intercept หรือ drift·t + slope·x + \(\eta_t\) บรรทัด 2 คือ ARIMA ของ \(\eta_t\) ตามขั้น 2–5 ดูข้อ 4.9–4.12</li>
 </ol>
+</div>
+
+<div class="method">
+<b>assumption: ดูคำสั่งก่อนว่า "ระบุ" หรือ "ตรวจ"</b>
+<table class="why">
+<tr><th>ปี</th><th>คำสั่ง</th><th>ต้องทำ</th></tr>
+<tr><td>2022 ข้อ 6d, 7b · 2023 ข้อ 4a</td><td>stating all the model assumptions</td><td><b>ระบุ</b> เขียนรายการ</td></tr>
+<tr><td>2024 ข้อ 3ค</td><td>ระบุเงื่อนไขของตัวแบบให้ครบถ้วน</td><td><b>ระบุ</b> เขียนรายการ</td></tr>
+<tr><td>2025 ข้อ 5b, 5c</td><td>ตรวจสอบ assumptions ต่างๆ ให้ครบถ้วน และตัวแบบเหมาะสมหรือไม่</td><td><b>ตรวจ</b> ใช้ output ของ R ทีละข้อ แล้วสรุป</td></tr>
+</table>
+<p>assumption มี 2 กลุ่ม กลุ่มแรกคือ causal กับ invertible กลุ่มที่สองคือ \(w_t\) เป็น white noise ซึ่งอาจารย์แตกเป็น 4 ข้อใน Class 8: residual ควร "normal, mean 0, variance คงที่, ไม่ correlate กัน"</p>
+<table class="why"><caption>assumption แต่ละข้อ ตรวจด้วยอะไร</caption>
+<tr><th>assumption</th><th>ตรวจด้วย</th><th>ผ่านเมื่อ</th></tr>
+<tr><td>causal</td><td>รากของ \(\Phi(x)\)</td><td>modulus เกิน 1 ทุกตัว</td></tr>
+<tr><td>invertible</td><td>รากของ \(\theta(x)\)</td><td>modulus เกิน 1 ทุกตัว</td></tr>
+<tr><td>ไม่มี outlier และ variance คงที่</td><td>standardized residual ใน <code>tsdiag(m)</code></td><td>อยู่ใน \(\pm3\) ความกว้างไม่เปลี่ยนตามเวลา</td></tr>
+<tr><td>residual ไม่ correlate กัน</td><td>ACF ของ residual ใน <code>tsdiag(m)</code></td><td>แท่งอยู่ในเส้นประ</td></tr>
+<tr><td>โมเดลเหมาะสม</td><td>Ljung-Box ใน <code>tsdiag(m)</code> · \(H_0\) โมเดลเหมาะสม</td><td>p-value เกิน 0.05 ทุก lag</td></tr>
+<tr><td>residual เป็น normal</td><td>QQ plot และ <code>shapiro.test(rstandard(m))</code> · \(H_0\) normal</td><td>จุดเกาะเส้น และ p-value เกิน 0.05</td></tr>
+</table>
+<p><b>แบบระบุ</b> เขียนต่อจากสมการได้เลย</p>
+<div class="copy">
+<p>Assumptions: \(w_t\) เป็น Gaussian white noise คือ mean 0, variance คงที่ \(\sigma^2\), ไม่ correlate กัน และเป็น normal · โมเดล causal และ invertible คือรากของ AR และ MA มี modulus เกิน 1 · ถ้ามี intercept ให้เพิ่ม \(X_t\) stationary มี mean = intercept</p>
+</div>
+<p><b>แบบตรวจ</b> เอาตัวเลขจาก output มาเขียนทีละข้อตามตาราง แล้วปิดด้วยประโยคสรุป</p>
+<div class="copy">
+<p>invertible รากเกิน 1 ผ่าน · standardized residual อยู่ใน ±3 ไม่มี outlier · ACF ของ residual อยู่ในเส้นประ · Ljung-Box p-value เกิน 0.05 ทุก lag · Shapiro-Wilk p = 0.090 เกิน 0.05 เป็น normal · สรุป ผ่านทุกข้อ โมเดลเหมาะสม</p>
+</div>
+<p class="trap">⚠ แบบตรวจต้องดูให้ครบทุกข้อ ตกข้อเดียวก็สรุปว่าไม่เหมาะสม เช่น 2025 ข้อ 5b ในข้อ 2.1 invertible ผ่าน normal ผ่าน แต่ Ljung-Box ต่ำกว่า 0.05 ทุก lag ต้องสรุปว่าโมเดลไม่เหมาะสม · คำสั่ง R ของแต่ละตัวดูใน<a href="#u-diag">ทักษะ 5</a></p>
 </div>
 
 <!-- W1 -->
