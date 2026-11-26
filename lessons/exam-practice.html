@@ -725,7 +725,8 @@ log forecasts: 6.110  6.054  6.172     exp: 450.4  425.7  479.0
 ETS(M,A,M)   AIC = -208.34
 tsCV MSE: arima 0.001259   ets 0.001712</pre>
 <div class="copy">
-<p>(a) \((1-B)(1-B^{12})\log X_t=(1-0.4018B)(1-0.5569B^{12})w_t,\quad w_t\sim iid\ N(0,\ 0.001371)\)</p>
+<p>(a) \((1-B)(1-B^{12})\log X_t=(1-0.4018B)(1-0.5569B^{12})w_t\)</p>
+<p>\(w_t\sim iid\ N(0,\ 0.001371)\)</p>
 <p>Invertible: ราก \(1/0.4018=2.49&gt;1\) และรากของ \(B^{12}\) มี modulus \((1/0.5569)^{1/12}&gt;1\)</p>
 <p>tsdiag: standardized residual ตัวหนึ่งต่ำกว่า −3 เล็กน้อยคือ −3.20 ที่เหลืออยู่ใน ±3 ACF ของ residuals อยู่ในเส้นขอบ Ljung-Box p-value 0.28–0.95 เกิน 0.05 ทุก lag Shapiro-Wilk p-value \(=0.167&gt;0.05\) residuals เป็น white noise และ normal โมเดลเหมาะสม</p>
 <p>(b) ค่าพยากรณ์บนสเกล log คือ 6.110, 6.054, 6.172 แปลงกลับด้วย exp ได้ Jan 1961 ≈ 450, Feb ≈ 426, Mar ≈ 479 พันคน</p>
@@ -763,7 +764,8 @@ ETS(A,N,A)   forecast: 0.015  0.376  -0.528
 tsCV MSE: ets 0.0863   arima 0.0770</pre>
 <div class="copy">
 <p>(a) Model: ARIMA(1,0,2)(0,1,1)[12]</p>
-<p>\((1+0.7947B)(1-B^{12})X_t=(1+0.7786B+0.2115B^2)(1-0.7618B^{12})w_t,\quad w_t\sim iid\ N(0,\ 0.04883)\)</p>
+<p>\((1+0.7947B)(1-B^{12})X_t=(1+0.7786B+0.2115B^2)(1-0.7618B^{12})w_t\)</p>
+<p>\(w_t\sim iid\ N(0,\ 0.04883)\)</p>
 <p>tsdiag: standardized residuals อยู่ระหว่าง −2.96 ถึง 2.24 ไม่เกิน ±3 ACF ของ residuals อยู่ในเส้นขอบ Ljung-Box p-value 0.80–1.00 เกิน 0.05 ทุก lag → residuals ไม่มี correlation</p>
 <p>QQ plot ใกล้เส้นตรง Shapiro-Wilk p-value = 0.226 > 0.05 → residuals เป็น normal โมเดลเหมาะสม</p>
 <p>(b) ค่าพยากรณ์ Nov 2017 = 0.081, Dec 2017 = 0.324, Jan 2018 = −0.621</p>
@@ -1813,7 +1815,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>Mean: \(E(X_t)=E(w_tw_{t-1})=E(w_t)E(w_{t-1})=0\cdot0=0\)</p>
 <p>เพราะ mean = 0 ได้ \(\gamma(h)=cov(X_t,X_{t+h})=E(X_tX_{t+h})-0\)</p>
 <p><b>lag 0</b>: \(\gamma(0)=cov(w_tw_{t-1},\ w_tw_{t-1})=E(w_tw_{t-1}\cdot w_tw_{t-1})=E(w_t^2)E(w_{t-1}^2)=\sigma^2\cdot\sigma^2=\sigma^4\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(w_tw_{t-1},\ w_{t+1}w_t)=E(w_tw_{t-1}\cdot w_{t+1}w_t)=E(w_t^2)E(w_{t-1})E(w_{t+1})=\sigma^2\cdot0\cdot0=0\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(w_tw_{t-1},\ w_{t+1}w_t)=E(w_tw_{t-1}\cdot w_{t+1}w_t)\)</p>
+<p>\(=E(w_t^2)E(w_{t-1})E(w_{t+1})=\sigma^2\cdot0\cdot0=0\)</p>
 <p><b>lag 2</b>: \(\gamma(2)=cov(w_tw_{t-1},\ w_{t+2}w_{t+1})=E(w_t)E(w_{t-1})E(w_{t+1})E(w_{t+2})=0\)</p>
 <p>lag ≥ 2 ไม่มี w ชนกันเลย \(\gamma(h)=0\)</p>
 <p>\(E(X_t)=0\) · \(\gamma(0)=\sigma^4\) · \(\gamma(h)=0\) เมื่อ \(h\ge1\) ไม่ขึ้นกับ t สรุป \(X_t\) stationary</p>
@@ -1862,13 +1865,18 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="model-answer">
 <div class="copy">
 <p>(a) \(E(X_t)=-2t+E(w_t)+0.5E(w_{t-1})=-2t\) ขึ้นกับ t สรุป \(X_t\) nonstationary</p>
-<p>(b) \(\nabla X_t=[-2t+w_t+0.5w_{t-1}]-[-2(t-1)+w_{t-1}+0.5w_{t-2}]=-2+w_t-0.5w_{t-1}-0.5w_{t-2}\)</p>
+<p>(b) \(\nabla X_t=[-2t+w_t+0.5w_{t-1}]-[-2(t-1)+w_{t-1}+0.5w_{t-2}]\)</p>
+<p>\(=-2+w_t-0.5w_{t-1}-0.5w_{t-2}\)</p>
 <p>Mean: \(E(\nabla X_t)=-2\)</p>
 <p><b>lag 0</b>: \(\gamma(0)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_t-0.5w_{t-1}-0.5w_{t-2})\)</p>
-<p>\(=cov(w_t,w_t)+(-0.5)(-0.5)cov(w_{t-1},w_{t-1})+(-0.5)(-0.5)cov(w_{t-2},w_{t-2})=\sigma^2+0.25\sigma^2+0.25\sigma^2=1.5\sigma^2\)</p>
+<p>คูณกระจายได้ 9 คู่ คู่ที่ชนมี 3 คู่ คือ \(w_t\) กับ \(w_t\), \(w_{t-1}\) กับ \(w_{t-1}\), \(w_{t-2}\) กับ \(w_{t-2}\) อีก 6 คู่คนละเวลาเป็น 0</p>
+<p>\(=cov(w_t,w_t)+(-0.5)(-0.5)cov(w_{t-1},w_{t-1})+(-0.5)(-0.5)cov(w_{t-2},w_{t-2})\)</p>
+<p>\(=\sigma^2+0.25\sigma^2+0.25\sigma^2=1.5\sigma^2\)</p>
 <p><b>lag 1</b>: \(\gamma(1)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+1}-0.5w_t-0.5w_{t-1})\)</p>
-<p>\(=(1)(-0.5)cov(w_t,w_t)+(-0.5)(-0.5)cov(w_{t-1},w_{t-1})=-0.5\sigma^2+0.25\sigma^2=-0.25\sigma^2\)</p>
-<p><b>lag 2</b>: \(\gamma(2)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+2}-0.5w_{t+1}-0.5w_t)=(1)(-0.5)cov(w_t,w_t)=-0.5\sigma^2\)</p>
+<p>\(=(1)(-0.5)cov(w_t,w_t)+(-0.5)(-0.5)cov(w_{t-1},w_{t-1})\)</p>
+<p>\(=-0.5\sigma^2+0.25\sigma^2=-0.25\sigma^2\)</p>
+<p><b>lag 2</b>: \(\gamma(2)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+2}-0.5w_{t+1}-0.5w_t)\)</p>
+<p>\(=(1)(-0.5)cov(w_t,w_t)=-0.5\sigma^2\)</p>
 <p><b>lag 3</b>: \(\gamma(3)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+3}-0.5w_{t+2}-0.5w_{t+1})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p>
 <p>Mean และ autocovariance ไม่ขึ้นกับ t สรุป \(\nabla X_t\) stationary</p>
 </div>
@@ -2127,7 +2135,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>\(\psi_0=1,\ \psi_1=0.9,\ \psi_2=0.45,\ \psi_3=0.225,\ \psi_4=0.1125\)</p>
 <p>(b) \(1+0.4x=0\Rightarrow x=-2.5,\ |-2.5|&gt;1\) → invertible</p>
 <p>\(\pi(z)=\dfrac{1-0.5z}{1+0.4z}=(1-0.5z)(1-0.4z+0.16z^2-0.064z^3+0.0256z^4-\dots)\)</p>
-<p>\(=1+(-0.4-0.5)z+(0.16+0.2)z^2+(-0.064-0.08)z^3+(0.0256+0.032)z^4+\dots\)</p>
+<p>\(=1+(-0.4-0.5)z+(0.16+0.2)z^2\)</p>
+<p>\(\quad+(-0.064-0.08)z^3+(0.0256+0.032)z^4+\dots\)</p>
 <p>\(=1-0.9z+0.36z^2-0.144z^3+0.0576z^4-\dots\)</p>
 <p>\(\pi_0=1,\ \pi_1=-0.9,\ \pi_2=0.36,\ \pi_3=-0.144,\ \pi_4=0.0576\)</p>
 </div>
@@ -2774,7 +2783,9 @@ ugarchfit garchOrder = c(2,1): mu 0.0683  omega 0.1379  alpha1 0.1279
 <p>อัตราส่วนเฉลี่ย Q1 0.6543, Q2 1.1053, Q3 1.3221, Q4 0.9241 ค่าเฉลี่ยรวม = 1.0015</p>
 <p>Seasonal index: Q1 0.6534, Q2 1.1037, Q3 1.3202, Q4 0.9227</p>
 <p>ปี 2018: \(t=13: (19.83+0.88\times13)(0.6534)=31.27\times0.6534=20.43\)</p>
-<p>\(t=14: 32.15\times1.1037=35.48\qquad t=15: 33.03\times1.3202=43.61\qquad t=16: 33.91\times0.9227=31.29\)</p>
+<p>\(t=14: 32.15\times1.1037=35.48\)</p>
+<p>\(t=15: 33.03\times1.3202=43.61\)</p>
+<p>\(t=16: 33.91\times0.9227=31.29\)</p>
 </div>
 <table class="why"><caption>ตัวเลขมาจากไหน</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>มาจากไหน</th></tr>
@@ -2829,7 +2840,8 @@ si &lt;- si / mean(si)
 <div class="copy">
 <p>ถอด trend ด้วยการลบ \(Y_t-T_t\) เฉลี่ยแยกไตรมาส แล้วปรับให้เฉลี่ยรวมเป็น 0</p>
 <p>\(S_1=-8.60,\ S_2=2.52,\ S_3=8.31,\ S_4=-2.24\)</p>
-<p>ปี 2018: \(31.27-8.60=22.67,\ 32.15+2.52=34.67,\ 33.03+8.31=41.34,\ 33.91-2.24=31.67\)</p>
+<p>ปี 2018: \(31.27-8.60=22.67,\ 32.15+2.52=34.67\)</p>
+<p>\(33.03+8.31=41.34,\ 33.91-2.24=31.67\)</p>
 <p>ฤดูกาลแบบ additive เป็นจำนวนคงที่ หน่วยล้านดอลลาร์ ส่วนแบบ multiplicative เป็นเปอร์เซ็นต์คงที่ ขนาดโตตาม trend</p>
 </div>
 <table class="why"><caption>ต่างจากแบบคูณตรงไหน</caption>
@@ -3299,7 +3311,8 @@ s$freq[which.max(s$spec)]        # 0.0833
 <div class="model-answer">
 <div class="copy">
 <p>\(\bar x=35/5=7\) ส่วนเบี่ยงเบน −3, −1, −2, 2, 4 · \(\sum(x_t-\bar x)^2=9+1+4+4+16=34\)</p>
-<p>Lag 1: \((-3)(-1)+(-1)(-2)+(-2)(2)+(2)(4)=3+2-4+8=9\Rightarrow\hat\rho(1)=9/34=0.265\)</p>
+<p>Lag 1: \((-3)(-1)+(-1)(-2)+(-2)(2)+(2)(4)=3+2-4+8=9\)</p>
+<p>\(\hat\rho(1)=9/34=0.265\)</p>
 <p>Lag 2: \((-3)(-2)+(-1)(2)+(-2)(4)=6-2-8=-4\Rightarrow\hat\rho(2)=-4/34=-0.118\)</p>
 <p>\(\nabla x_t\): —, 2, −1, 4, 2 เส้นขอบ \(\pm2/\sqrt5=\pm0.894\) ไม่มี lag ไหนมีนัยสำคัญ</p>
 </div>
