@@ -158,7 +158,7 @@ table.why td, table.check td { overflow-wrap: anywhere; }
 
 <div class="rule" id="r12"><span class="rid">ก12 white noise</span> \(E(w_t)=0\) · \(E(w_t^2)=\sigma^2\) · ถ้าเวลาต่างกัน w เป็นอิสระต่อกัน คูณกันแล้วแยก E ได้ \(E(w_tw_s)=E(w_t)E(w_s)=0\) · ถ้าเป็น normal เพิ่มอีกสองข้อ \(E(w_t^3)=0\) และ \(E(w_t^4)=3\sigma^4\)</div>
 
-<div class="rule" id="r13"><span class="rid">ก13 Var และ Cov จาก E</span> \(Var(X)=E(X^2)-[E(X)]^2\) · \(Cov(X,Y)=E(XY)-E(X)E(Y)\) ถ้า mean เป็น 0 ทั้งคู่ เหลือแค่ \(E(XY)\)</div>
+<div class="rule" id="r13"><span class="rid">ก13 Var และ Cov จาก E</span> \(Var(X)=E(X^2)-[E(X)]^2\) · \(Cov(X,Y)=E(XY)-E(X)E(Y)\) ถ้า mean เป็น 0 ทั้งคู่ เหลือแค่ \(E(XY)\) · ย้ายข้างสูตร Var ได้ \(E(X^2)=Var(X)+[E(X)]^2\) เช่น \(E(w^2)=\sigma^2+0=\sigma^2\)</div>
 
 <div class="rule" id="r14"><span class="rid">ก14 Cov ของผลบวก w</span> Cov กระจายเหมือนการคูณวงเล็บ \(Cov(aX+bY,\ Z)=a\,Cov(X,Z)+b\,Cov(Y,Z)\) ค่าคงที่บวกเข้าไปไม่เปลี่ยน Cov · \(Cov(w_t,w_s)=\sigma^2\) เมื่อ t = s และเท่ากับ 0 เมื่อ t ≠ s · ทางลัด: ถ้า \(X_t=a_0w_t+a_1w_{t-1}+a_2w_{t-2}\) ให้วางสัมประสิทธิ์สองแถวเลื่อนกัน h ช่อง แล้วคูณคู่ที่ตรงกัน \(\gamma(h)=\sigma^2\sum_j a_ja_{j+h}\) · ในข้อสอบให้เขียนคูณกระจายเป็นคู่แบบอาจารย์ ใช้ทางลัดไว้ตรวจคำตอบ</div>
 
@@ -1794,7 +1794,17 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <li>สรุป mean กับ \(\gamma(h)\) ไม่มี t → stationary</li>
 </ol>
 <p><b>ทุกข้อในทักษะนี้ใช้ \(\gamma(h)=cov(x_t,x_{t-h})\)</b> คือจับคู่ \(x_t\) กับจุดที่ถอยหลังไป h ช่อง ใช้ \(x_{t+h}\) ก็ได้ผลเท่ากัน อาจารย์บอกใน Class 2 ว่า \"จะได้อันเดียวกันเลย\" แต่ให้เลือกแบบเดียวแล้วใช้ทั้งข้อ</p>
-<p>ถ้ามี w คูณกันหรือยกกำลัง ใช้ \(cov(X,Y)=E(XY)-E(X)E(Y)\) ตาม ก13 แล้วหาคู่ที่ชนใน E แทน w ที่อยู่ตัวเดียวทำให้ E เป็น 0 ใช้ moment ของ normal: \(E(w)=0\), \(E(w^2)=\sigma^2\), \(E(w^3)=0\), \(E(w^4)=3\sigma^4\)</p>
+<p>ถ้ามี w คูณกันหรือยกกำลัง ใช้ \(cov(X,Y)=E(XY)-E(X)E(Y)\) ตาม ก13 แล้วหาคู่ที่ชนใน E แทน w ที่อยู่ตัวเดียวทำให้ E เป็น 0</p>
+<table class="why"><caption>หา E ของ w ยกกำลัง · \(w\sim N(0,\sigma^2)\)</caption>
+<tr><th>ต้องการ</th><th>ค่า</th><th>มาจากไหน</th></tr>
+<tr><td>\(E(w)\)</td><td>\(0\)</td><td>white noise มี mean 0</td></tr>
+<tr><td>\(E(w^2)\)</td><td>\(\sigma^2\)</td><td>สูตร \(Var(w)=E(w^2)-[E(w)]^2\) ย้ายข้างได้ \(E(w^2)=Var(w)+[E(w)]^2=\sigma^2+0^2=\sigma^2\)</td></tr>
+<tr><td>\(E(w^3)\)</td><td>\(0\)</td><td>moment ของ normal ต้องจำ อาจารย์ให้ไว้ใน Class 2</td></tr>
+<tr><td>\(E(w^4)\)</td><td>\(3\sigma^4\)</td><td>moment ของ normal ต้องจำ</td></tr>
+<tr><td>\(Var(w^2)\)</td><td>\(2\sigma^4\)</td><td>\(E(w^4)-[E(w^2)]^2=3\sigma^4-\sigma^4\)</td></tr>
+<tr><td>\(E(w_tw_s)\), \(t\ne s\)</td><td>\(0\)</td><td>คนละเวลาอิสระกัน แยกได้ \(E(w_t)E(w_s)=0\cdot0\)</td></tr>
+<tr><td>\(E(w_t^2w_s^2)\), \(t\ne s\)</td><td>\(\sigma^4\)</td><td>แยกได้ \(E(w_t^2)E(w_s^2)=\sigma^2\cdot\sigma^2\)</td></tr>
+</table>
 <table class="why"><caption>ตัวอย่างที่อาจารย์ทำในห้อง: \(x_t=w_{t-1}+2w_t+w_{t+1}\)</caption>
 <tr><th>lag</th><th>เขียน</th><th>คู่ที่ชน</th><th>\(\gamma(h)\)</th></tr>
 <tr><td>0</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t-1}+2w_t+w_{t+1})\)</td><td>\(w_{t-1}\)·\(w_{t-1}\), \(2w_t\)·\(2w_t\), \(w_{t+1}\)·\(w_{t+1}\)</td><td>\(\sigma^2+4\sigma^2+\sigma^2=6\sigma^2\)</td></tr>

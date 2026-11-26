@@ -408,6 +408,7 @@ table.fix td:first-child { width: 34%; }
 
 /* Keep math case intact inside uppercase table headers (w_t must not become W_T) */
 th .katex { text-transform: none; letter-spacing: 0; }
+.quiz .qhead .katex { text-transform: none; letter-spacing: 0; }
 
 /* footnotes: clip citations collected at the end of a lesson */
 sup.fn { font-size: 0.7em; line-height: 0; margin-left: 1px; }
