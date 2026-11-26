@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheat sheet ตามทักษะที่ออกสอบ</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/katex/katex.min.css">
+<script defer src="../assets/katex/katex.min.js"></script>
+<script defer src="../assets/katex/auto-render.min.js"></script>
+<script defer src="../assets/math.js"></script>
+<style>
+.tools { position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid #e2ddd3; padding: 0.6em 0; display: flex; gap: 0.5em; flex-wrap: wrap; align-items: center; }
+.tools input { flex: 1 1 14em; font: inherit; font-size: 0.95rem; padding: 0.4em 0.7em; border: 1px solid #b9b2a5; border-radius: 6px; }
+.tools button { font: inherit; font-size: 0.85rem; padding: 0.35em 0.8em; border: 1px solid #b9b2a5; border-radius: 999px; background: #fff; cursor: pointer; }
+.tools .hits { font-size: 0.8rem; color: #6b655b; }
+.legend { display: flex; flex-wrap: wrap; gap: 0.4em; font-size: 0.8rem; margin: 0.6em 0 1em; }
+.chip { display: inline-block; padding: 0.1em 0.6em; border-radius: 4px; font-weight: 600; white-space: nowrap; }
+.c-idea { background: #e6f1e3; } .c-step { background: #dde9f7; } .c-prop { background: #fde8d6; }
+.c-ex { background: #efe6f7; } .c-tip { background: #fff3c4; }
+
+details.skill { border: 1px solid #d8d1c4; border-radius: 10px; margin: 0.9em 0; background: #fff; }
+details.skill > summary { cursor: pointer; padding: 0.7em 1em; font-weight: 700; font-size: 1.02rem; list-style-position: inside; }
+details.skill > summary .meta { display: block; font-weight: 400; font-size: 0.8rem; color: #6b655b; margin-top: 0.15em; }
+details.skill[open] > summary { border-bottom: 1px solid #e2ddd3; background: #faf7f0; border-radius: 10px 10px 0 0; }
+details.skill > .body { padding: 0.4em 1em 0.8em; }
+details.skill.todo > summary { color: #9a9384; font-weight: 500; }
+
+details.blk { border-left: 4px solid #ccc; margin: 0.6em 0; padding: 0 0.8em; }
+details.blk > summary { cursor: pointer; padding: 0.4em 0; font-weight: 600; font-size: 0.95rem; }
+details.blk.idea { border-color: #8fbf84; } details.blk.step { border-color: #7fa6d6; }
+details.blk.prop { border-color: #e0a06a; } details.blk.ex { border-color: #ad8bcf; } details.blk.tip { border-color: #e2c24a; }
+
+details.ex1 { border: 1px dashed #cdbfe0; border-radius: 6px; margin: 0.5em 0; padding: 0 0.8em; }
+details.ex1 > summary { cursor: pointer; padding: 0.4em 0; font-size: 0.92rem; }
+details.ex1 .q { background: #faf7f0; border-radius: 6px; padding: 0.4em 0.7em; margin: 0.3em 0 0.6em; }
+.lbl { display: block; font: 700 0.75rem -apple-system, "Helvetica Neue", Arial, sans-serif; color: #6b655b; margin: 0.7em 0 0.2em; }
+
+table.why { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.5em 0; }
+table.why th, table.why td { border: 1px solid #e2ddd3; padding: 0.35em 0.5em; vertical-align: top; text-align: left; }
+table.why th { background: #f6f2ea; }
+table.why td .katex { font-size: 0.95em; }
+
+.copy { counter-reset: ln; background: #fbfaf6; border: 1px solid #e2ddd3; border-radius: 6px; padding: 0.3em 0.6em; font-size: 0.9rem; }
+.copy p { counter-increment: ln; position: relative; margin: 0; padding: 0.3em 0.3em 0.3em 2em; border-bottom: 1px dashed #dcd6ca; overflow-x: auto; line-height: 1.6; }
+.copy p:last-child { border-bottom: 0; }
+.copy p::before { content: counter(ln); position: absolute; left: 0; top: 0.4em; width: 1.5em; text-align: right; font: 600 0.7rem -apple-system, sans-serif; color: #9a9384; }
+
+.tipcard { border: 1px solid #eadb9a; background: #fffdf3; border-radius: 8px; margin: 0.6em 0; }
+.tipcard > summary { cursor: pointer; padding: 0.5em 0.8em; font-weight: 600; }
+.tipcard > .in { padding: 0 0.8em 0.6em; }
+.yes, .no { display: grid; grid-template-columns: 5.5em 1fr; gap: 0.4em; padding: 0.3em 0; font-size: 0.9rem; }
+.yes b { color: #2f7a3b; } .no b { color: #b03a2e; }
+.say { background: #fff; border: 1px solid #e2ddd3; border-left: 4px solid #8a4b2a; padding: 0.35em 0.7em; font-size: 0.9rem; margin: 0.4em 0; }
+.say::before { content: "ประโยคลอกตอบ"; display: block; font: 700 0.7rem -apple-system, sans-serif; color: #8a4b2a; }
+.src { font-size: 0.78rem; color: #6b655b; }
+.src b { color: #8a4b2a; font-weight: 600; }
+p.trap { background: #fff1ef; border-left: 4px solid #b03a2e; padding: 0.35em 0.7em; font-size: 0.9rem; }
+p.trap::before { content: "กับดัก "; font-weight: 700; color: #b03a2e; }
+.draft { background: #fff6ec; border: 1px dashed #c25e00; border-radius: 8px; padding: 0.5em 1em; font-size: 0.9rem; }
+mark.hit { background: #ffe27a; }
+main details[id] { scroll-margin-top: 4.5em; }
+ol.toc { margin: 0.3em 0 0.6em 1.4em; padding: 0; font-size: 0.92rem; } ol.toc li { margin: 0.15em 0; }
+pre.r { background: #f3f7fc; border: 1px solid #d5e2f2; border-radius: 6px; padding: 0.5em 0.7em; font-size: 0.8rem; overflow-x: auto; }
+</style>
+</head>
+<body class="reader">
+<main>
+<p><a href="../index.html">หน้าแรก</a> · <a href="exam-practice.html">checklist ทักษะ</a></p>
+<h1>Cheat sheet ตามทักษะที่ออกสอบ</h1>
+
+<p>ทักษะละ 1 กล่อง ข้างในแยก แนวคิด ขั้นตอน สมบัติ ตัวอย่าง เกร็ดตอบ กดกางเฉพาะที่ต้องใช้ หรือพิมพ์คำในช่องค้น ท้ายหน้ามีคลังเกร็ดแบบ "ได้ถ้า / ไม่ได้ถ้า"</p>
+
+<div class="tools">
+<input id="q" type="search" placeholder="ค้น เช่น log likelihood, BIC, lag 0, E(w^4)">
+<button id="openall">กางหมด</button><button id="closeall">พับหมด</button>
+<span class="hits" id="hits"></span>
+</div>
+
+<div class="legend">
+<span class="chip c-idea">แนวคิด</span><span class="chip c-step">ขั้นตอน</span><span class="chip c-prop">สมบัติที่ต้องรู้</span><span class="chip c-ex">ตัวอย่างโจทย์</span><span class="chip c-tip">เกร็ดตอบ</span>
+</div>
+<details class="blk" id="toc" open><summary>สารบัญ เรียงตามความสำคัญ</summary><ol class="toc"><li><a href="#cs-roots">ทักษะ 1 · ราก ARMA: causal, invertible, redundancy</a></li><li><a href="#cs-rpipe">ทักษะ 2 · R: SARIMA, auto.arima, ets, พยากรณ์, tsCV</a></li><li><a href="#cs-rxreg">ทักษะ 3 · R: ARIMAX, NNAR, RMSE บน test set</a></li><li><a href="#cs-stat">ทักษะ 6 · พิสูจน์ว่า stationary ด้วย mean กับ autocovariance</a></li><li><a href="#cs-write">ทักษะ 4 · เขียนโมเดลจาก output ของ R พร้อม assumption</a></li><li><a href="#cs-diag">ทักษะ 5 · ตรวจ residual: ACF, QQ, Ljung-Box</a></li><li><a href="#cs-garch">ทักษะ 9 · R: GARCH ครบขั้น</a></li><li><a href="#cs-choose">ทักษะ 12 · เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF</a></li><li><a href="#cs-decomp">ทักษะ 11 · Multiplicative decomposition และ seasonal index</a></li><li><a href="#cs-aic">ทักษะ 8 · เลือกโมเดลด้วย AIC, BIC และ log-likelihood</a></li><li><a href="#cs-period">ทักษะ 15 · R: periodogram หาความถี่และคาบ</a></li><li><a href="#cs-sacf">ทักษะ 16 · sample ACF ด้วยมือ, correlogram, \(\nabla x_t\)</a></li><li><a href="#cs-etsarima">ทักษะ 18 · ETS(A,N,N) กับ ARIMA(0,1,1)</a></li><li><a href="#cs-detrend">ทักษะ 17 · Detrending และ OLS trend ที่ error สัมพันธ์กัน</a></li><li><a href="#cs-ma1">ทักษะ 14 · MA(1): \(\rho_1\), \(|\rho_1|\le\tfrac12\), θ กับ 1/θ</a></li><li><a href="#cs-yw">ทักษะ 10 · Yule-Walker: ประมาณ φ และ σ² จาก \(\hat\gamma(h)\)</a></li><li><a href="#cs-psi">ทักษะ 7 · ψ weights และ π weights</a></li><li><a href="#cs-acfpacf">ทักษะ 13 · บรรยาย ACF/PACF และทายโมเดลจากกราฟ</a></li><li><a href="#tips">คลังเกร็ดไว้อ้างตอนตอบ 17 ข้อ</a></li></ol></details>
+
+
+<h2 id="skills">ส่วน ก · ทักษะ</h2>
+
+<details class="skill" id="cs-roots">
+<summary>ทักษะ 1 · ราก ARMA: causal, invertible, redundancy
+<span class="meta">คำนวณ · ออกทุกปี 5–10 คะแนน · 2022 ข้อ 1, 2023 ข้อ 1, 2024 ข้อ 1, 2025 ข้อ 2 · <a href="exam-practice.html#u-roots">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ฝั่ง X ตัดสิน causal ฝั่ง w ตัดสิน invertible</summary>
+<p>เขียนโมเดลเป็น \(\Phi(B)X_t=\theta(B)w_t\) แล้วหารากของพหุนามแต่ละฝั่ง รากทุกตัวต้องมีขนาดเกิน 1</p>
+<p>causal คือเขียน X เป็นผลรวมของ shock ในอดีตได้ ตรงกับ stationary ของ AR · invertible คือเขียน w ย้อนกลับจาก X ในอดีตได้ ทำให้ θ ไม่ซ้ำกับ 1/θ</p>
+<p class="src"><b>อาจารย์:</b> Class 13 ภาค concept ออกตรวจราก causal/invertible แทบทุกปี</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 6 ขั้น ใช้ได้ทุกข้อ</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เขียนว่า</th></tr>
+<tr><td>1</td><td>ย้าย X ทุกตัวไปซ้าย w ไว้ขวา ย้ายข้างแล้วเปลี่ยนเครื่องหมาย</td><td>\(X_t-0.6X_{t-1}+\dots=w_t+\dots\)</td></tr>
+<tr><td>2</td><td>เขียนด้วย B</td><td>\((1-0.6B+0.08B^2)X_t=(1+0.4B-0.32B^2)w_t\)</td></tr>
+<tr><td>3</td><td>causal: เปลี่ยน B เป็น x ตั้ง \(\Phi(x)=0\) หาราก</td><td>อ่าน a, b, c แล้วใช้สูตรกำลังสอง</td></tr>
+<tr><td>4</td><td>invertible: ตั้ง \(\theta(x)=0\) หาราก</td><td>เหมือนขั้น 3</td></tr>
+<tr><td>5</td><td>รากซ้ำสองฝั่ง ตัดตัวประกอบร่วม</td><td>parameter redundancy</td></tr>
+<tr><td>6</td><td>ทุกรากต้อง \(|x|>1\) แล้วเขียนสรุปบรรทัดเดียว</td><td>"causal และ invertible"</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> พีชคณิตที่ใช้หาราก</summary>
+<table class="why">
+<tr><th>สมบัติ</th><th>สูตร</th><th>แทนเลขให้ดู</th></tr>
+<tr><td>B คือถอยหลัง 1 ก้าว</td><td>\(BX_t=X_{t-1},\ B^2X_t=X_{t-2}\)</td><td>\(X_t-0.6X_{t-1}=(1-0.6B)X_t\)</td></tr>
+<tr><td>อ่าน a b c พร้อมเครื่องหมาย</td><td>\(ax^2+bx+c\)</td><td>\(1-0.6x+0.08x^2\): a = 0.08, b = −0.6, c = 1</td></tr>
+<tr><td>สูตรกำลังสอง</td><td>\(x=\dfrac{-b\pm\sqrt{b^2-4ac}}{2a}\)</td><td>\(\dfrac{0.6\pm\sqrt{0.36-0.32}}{0.16}=5,\ 2.5\)</td></tr>
+<tr><td>ราก AR(1)/MA(1)</td><td>\(1-\phi x=0\Rightarrow x=1/\phi\)</td><td>\(1-0.5x=0\Rightarrow x=2\)</td></tr>
+<tr><td>D ติดลบ ได้รากเชิงซ้อน</td><td>\(u\pm vi,\ u=\frac{-b}{2a},\ v=\frac{\sqrt{|D|}}{2a}\)</td><td>\(0.25x^2+1=0\Rightarrow x=\pm2i\)</td></tr>
+<tr><td>modulus</td><td>\(|u+vi|=\sqrt{u^2+v^2}\) และ modulus² = c/a</td><td>\(\sqrt{0^2+2^2}=2\), เช็ก \(1/0.25=4\)</td></tr>
+<tr><td>รากกับวงเล็บ</td><td>ราก r คือวงเล็บ \((1-\tfrac{x}{r})\)</td><td>ราก 2.5 คือ \((1-0.4x)\)</td></tr>
+<tr><td>ตัดสินด้วยขนาด</td><td>\(|x|>1\) ทุกตัว ราก = 1 พอดีไม่ผ่าน</td><td>\(|-1.25|=1.25\) ผ่าน · \(|-0.8|=0.8\) ตก</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 4 แบบ: รากจริง, เชิงซ้อน, รากร่วม, ราก = 1</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> รากเชิงซ้อนล้วน · 2024 ข้อ 1 · \(X_t=-0.25X_{t-2}+w_t+2w_{t-1}\)</summary>
+<div class="copy">
+<p>\((1+0.25B^2)X_t=(1+2B)w_t\)</p>
+<p>Causal: \(0.25x^2+1=0\Rightarrow x^2=-4\Rightarrow x=\pm2i\), modulus \(=2>1\) → causal</p>
+<p>Invertible: \(1+2x=0\Rightarrow x=-0.5\), \(|-0.5|<1\) → ไม่ invertible</p>
+<p>สรุป causal แต่ไม่ invertible</p>
+</div>
+<p class="trap">b = 0 เพราะไม่มีพจน์ x ตัวเดียว ไม่ได้แปลว่าโจทย์ผิด</p>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> เชิงซ้อนมีส่วนจริง · 2023 ข้อ 1 · \(X_t=0.75X_{t-1}-0.5625X_{t-2}+w_t+1.25w_{t-1}\)</summary>
+<div class="copy">
+<p>\((1-0.75B+0.5625B^2)X_t=(1+1.25B)w_t\)</p>
+<p>\(b^2-4ac=0.5625-2.25=-1.6875<0\)</p>
+<p>\(x=\dfrac{0.75\pm1.299i}{1.125}=0.667\pm1.155i\), modulus \(=\sqrt{1.778}=1.333>1\) → causal</p>
+<p>\(1+1.25x=0\Rightarrow x=-0.8\), \(|-0.8|<1\) → ไม่ invertible</p>
+</div>
+<p class="trap">อย่าตัดสินจากส่วนจริง 0.667 ใช้ modulus ทั้งก้อน</p>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> รากร่วม ตัด redundancy · 2025 ข้อ 2</summary>
+<div class="q">\(X_t=0.6X_{t-1}-0.08X_{t-2}+w_t+0.4w_{t-1}-0.32w_{t-2}\)</div>
+<div class="copy">
+<p>\((1-0.6B+0.08B^2)X_t=(1+0.4B-0.32B^2)w_t\)</p>
+<p>Causal: \(x=\dfrac{0.6\pm0.2}{0.16}=5,\ 2.5\)</p>
+<p>Invertible: \(x=\dfrac{-0.4\pm1.2}{-0.64}=-1.25,\ 2.5\)</p>
+<p>รากร่วม 2.5 ได้ \((1-0.4B)(1-0.2B)X_t=(1-0.4B)(1+0.8B)w_t\)</p>
+<p>ตัดออกเหลือ \((1-0.2B)X_t=(1+0.8B)w_t\) เป็น ARMA(1,1) ที่ causal และ invertible</p>
+</div>
+<table class="why">
+<tr><th>บรรทัด</th><th>ตัวเลขมาจากไหน</th></tr>
+<tr><td>3</td><td>\(b^2=0.16\), \(4ac=4(-0.32)(1)=-1.28\), \(0.16-(-1.28)=1.44\), \(\sqrt{1.44}=1.2\), \(2a=-0.64\)</td></tr>
+<tr><td>4</td><td>ราก 2.5 คือ \((1-0.4x)\) · ราก 5 คือ \((1-0.2x)\) · ราก −1.25 คือ \((1+0.8x)\) คูณกลับเช็กได้</td></tr>
+</table>
+</details>
+
+<details class="ex1"><summary><b>แบบ D</b> ราก = 1 พอดี ซ่อน unit root · \(X_t=1.5X_{t-1}-0.5X_{t-2}+w_t+0.3w_{t-1}\)</summary>
+<div class="copy">
+<p>\(0.5x^2-1.5x+1=0\Rightarrow x=1.5\pm0.5=2,\ 1\)</p>
+<p>\(x=1\) ไม่เกิน 1 → ไม่ causal ไม่ stationary</p>
+<p>\((1-0.5B)(1-B)X_t=(1+0.3B)w_t\) เป็น ARIMA(1,1,1)</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 3 ข้อ</summary>
+<details class="tipcard"><summary>MA ล้วน ต้องเช็ค causal ไหม</summary><div class="in">
+<div class="yes"><b>ไม่ต้องคำนวณ</b><span>\(\Phi(x)=1\) ไม่มีราก MA จำกัดอันดับ causal และ stationary เสมอ เขียนประโยคนี้ได้เลย</span></div>
+<div class="no"><b>แต่</b><span>AR ล้วน invertible เสมอ ด้วยเหตุผลเดียวกัน</span></div>
+</div></details>
+<details class="tipcard"><summary>ไม่เห็นรากร่วม ตอบ causal/invertible ถูกไหม</summary><div class="in">
+<div class="yes"><b>ถูกครึ่งเดียว</b><span>คำตอบยังถูก แต่เสียคะแนนส่วนที่ต้องบอกว่าจริงๆ เป็นโมเดลเล็กกว่า โจทย์ตั้งชื่อ ARMA(2,2) ไว้หลอกให้ไม่ตรวจ</span></div>
+</div></details>
+<details class="tipcard"><summary>ราก MA = 1 พอดีบอกอะไร</summary><div class="in">
+<div class="yes"><b>แปลว่า</b><span>difference เกิน เช่น \(X_t=0.5X_{t-1}+w_t-w_{t-1}\) ไม่ invertible ให้ลด d ลง 1</span></div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-rpipe">
+<summary>ทักษะ 2 · R: SARIMA, auto.arima, ets, พยากรณ์, tsCV
+<span class="meta">R · 2025 ข้อ 5b–5e รวม 8 คะแนน · <a href="exam-practice.html#u-rpipe">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ฟิต → ตรวจ → พยากรณ์ → เทียบด้วย tsCV</summary>
+<p>ปี 2025 ส่ง pdf ข้อละไม่เกิน 1 หน้า แปะ output ที่จำเป็น แล้วเขียนอธิบายสั้นใต้ output</p>
+<p>auto.arima ช่วยแค่เลือก d, p, q · transform และตรวจ residual ต้องทำเอง</p>
+<p class="src"><b>อาจารย์:</b> Class 9-2 0:36:49 "ช่วย 3 4 5 ผมย้ำตรงนี้เลยนะครับ" · 0:36:27 "auto.arima ไม่ transform ให้นะครับ"</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> โค้ดชุดเดียวใช้ทั้งข้อ</summary>
+<pre class="r">library(TSA); library(forecast)
+rain &lt;- read.table("rain.txt", header = TRUE)
+x &lt;- ts(rain$rain, start = c(2022, 1), frequency = 12)
+m1 &lt;- arima(x, order = c(0,0,1), seasonal = list(order = c(0,0,1), period = 12))
+qqnorm(rstandard(m1)); qqline(rstandard(m1)); shapiro.test(rstandard(m1))
+tsdiag(m1, gof = 12, omit.initial = T)
+m2 &lt;- auto.arima(x, stepwise = T, approximation = F); forecast(m2, h = 3)
+m3 &lt;- ets(x); forecast(m3, h = 3)
+fets   &lt;- function(x, h) forecast(ets(x), h = h)
+farima &lt;- function(x, h) forecast(auto.arima(x, stepwise = T, approximation = F), h = h)
+mean(tsCV(x, fets, h = 1)^2, na.rm = TRUE)
+mean(tsCV(x, farima, h = 1)^2, na.rm = TRUE)</pre>
+<table class="why">
+<tr><th>ข้อย่อย</th><th>เขียนใต้ output</th></tr>
+<tr><td>ฟิตโมเดลที่กำหนด</td><td>สมการ backshift + ตรวจ assumption ทีละข้อ + เหมาะสมไหม</td></tr>
+<tr><td>auto.arima</td><td>ชื่อโมเดล + สมการ + ตรวจ + ค่าพยากรณ์</td></tr>
+<tr><td>ets</td><td>แปลชื่อ ETS(E,T,S) + α β γ + ค่าพยากรณ์</td></tr>
+<tr><td>tsCV</td><td>MSE สองตัว ตัวต่ำกว่าแม่นกว่า</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> อ่านชื่อโมเดลและพารามิเตอร์</summary>
+<table class="why">
+<tr><th>เห็นใน output</th><th>แปลว่า</th></tr>
+<tr><td>ARIMA(p,d,q)(P,D,Q)[12]</td><td>วงเล็บแรก non-seasonal วงเล็บหลัง seasonal คาบ 12</td></tr>
+<tr><td>with drift</td><td>มี d = 1 หรือ D = 1 แล้วยังมี trend เส้นตรง เขียน \(X_t-\delta t\)</td></tr>
+<tr><td>ETS(M,A,M)</td><td>error คูณ, trend บวก, seasonal คูณ</td></tr>
+<tr><td>ETS(A,Ad,N)</td><td>trend แบบ damped มี φ</td></tr>
+<tr><td>α, β, γ ใกล้ 0</td><td>level, slope, ฤดูกาลแทบไม่เปลี่ยนตามเวลา</td></tr>
+<tr><td>α ใกล้ 1</td><td>ค่าพยากรณ์ตามค่าล่าสุดเกือบทั้งหมด</td></tr>
+<tr><td>tsCV h = 1</td><td>leave-one-out ทีละก้าว ได้ error ทุกจุด เอามายกกำลังสองเฉลี่ย</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบจากปี 2025</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> โมเดลที่กำหนดแล้วตก · 2025 ข้อ 5b</summary>
+<div class="copy">
+<p>\(X_t-40.7630=(1+0.8207B)(1+0.7143B^{12})w_t,\quad w_t\sim iid\ N(0,\ 88.72)\)</p>
+<p>Invertible ผ่าน · std. residual อยู่ใน ±3</p>
+<p>ACF lag 1–3 = 0.375, 0.596, 0.376 หลุดเส้น · Ljung-Box p &lt; 0.05 ทุก lag</p>
+<p>Shapiro p = 0.35 เป็น normal</p>
+<p>โมเดลไม่เหมาะสม residual ไม่เป็น white noise ไม่มี differencing เลยตาม trend และฤดูกาลไม่ได้</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> ets แปลองค์ประกอบ · 2025 ข้อ 5d</summary>
+<div class="copy">
+<p>ETS(M,A,M) คือ error multiplicative, trend additive, seasonal multiplicative เหมือน Holt-Winters แบบคูณ</p>
+<p>α = 0.0103, β = 0.0099, γ = 0.0001 ใกล้ 0 ทั้งหมด level, slope และฤดูกาลแทบไม่เปลี่ยน</p>
+<p>พยากรณ์ Dec 2025 = 75.50, Jan 2026 = 73.53, Feb 2026 = 64.86 มม.</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> tsCV เทียบ MSE · 2025 ข้อ 5e</summary>
+<div class="copy">
+<p>tsCV h = 1: MSE auto.arima = 38.37, MSE ets = 57.09</p>
+<p>auto.arima แม่นกว่าสำหรับพยากรณ์หนึ่งก้าว</p>
+<p>เทียบ AIC ไม่ได้ ETS กับ ARIMA คิด likelihood คนละแบบ และ ARIMA คิดหลัง seasonal difference</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 3 ข้อ</summary>
+<details class="tipcard"><summary>ลืม frequency = 12 เกิดอะไร</summary><div class="in">
+<div class="no"><b>พัง</b><span>R ไม่รู้ว่ามีฤดูกาล auto.arima กับ ets ใส่ seasonal ไม่ได้ ได้โมเดลอย่าง ARIMA(0,0,1) ที่ σ² สูงกว่ามาก</span></div>
+</div></details>
+<details class="tipcard"><summary>rstandard() error</summary><div class="in">
+<div class="yes"><b>แก้</b><span>โหลด library(TSA) ก่อน</span></div>
+</div></details>
+<details class="tipcard"><summary>log ข้อมูลแล้วพยากรณ์ ต้องทำอะไรต่อ</summary><div class="in">
+<div class="yes"><b>ต้อง</b><span>แปลงกลับด้วย exp เช่น 6.110 ได้ราว 450</span></div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-rxreg">
+<summary>ทักษะ 3 · R: ARIMAX, NNAR, RMSE บน test set
+<span class="meta">R · 2025 ข้อ 5g 9 คะแนน · 2023 ข้อ 5 · <a href="exam-practice.html#u-rxreg">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> เทียบทุกโมเดลบน test set ชุดเดียวกัน</summary>
+<p>แบ่ง train/test ฟิต 4 ตัวแบบ ได้แก่ auto.arima มีและไม่มี xreg, nnetar มีและไม่มี xreg แล้วเทียบ RMSE บน test</p>
+<p>ใช้ RMSE เพราะ NNAR ไม่มี likelihood ที่เทียบกับ ARIMA ได้</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> setup + 4 ตัวแบบ</summary>
+<pre class="r">library(forecast)
+rain &lt;- read.table("rain.txt", header = TRUE)
+training_set &lt;- rain[1:36, ]; test_set &lt;- rain[37:47, ]
+tr &lt;- ts(training_set$rain, start = c(2022, 1), frequency = 12)
+te &lt;- test_set$rain; s1 &lt;- training_set$storm; s2 &lt;- test_set$storm
+f1 &lt;- auto.arima(tr, stepwise = T, approximation = F)
+accuracy(forecast(f1, h = 11), te)
+f2 &lt;- auto.arima(tr, xreg = s1, stepwise = T, approximation = F)
+accuracy(forecast(f2, xreg = s2), te)
+set.seed(1); f3 &lt;- nnetar(tr); accuracy(forecast(f3, h = 11), te)
+set.seed(1); f4 &lt;- nnetar(tr, xreg = s1); accuracy(forecast(f4, xreg = s2), te)</pre>
+<p>อ่าน RMSE แถว Test set</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> ชื่อโมเดลและสัมประสิทธิ์</summary>
+<table class="why">
+<tr><th>เห็น</th><th>แปลว่า</th></tr>
+<tr><td>Regression with ARIMA(…) errors</td><td>ARIMAX เขียนสองบรรทัด \(y_t=\beta x_t+\eta_t\) และ ARIMA ของ \(\eta_t\)</td></tr>
+<tr><td>xreg = 4.58</td><td>x เพิ่ม 1 หน่วย y เพิ่มเฉลี่ย 4.58 เมื่อปัจจัยอื่นเท่ากัน</td></tr>
+<tr><td>NNAR(p,P,k)[m]</td><td>input คือ lag 1..p และ lag m..Pm · hidden layer เดียว k node</td></tr>
+<tr><td>NNAR(1,1,2)[12]</td><td>ใช้ค่าเดือนก่อนกับ 12 เดือนก่อน hidden 2 node</td></tr>
+<tr><td>\(\text{RMSE}=\sqrt{\frac1n\sum(y-\hat y)^2}\)</td><td>ยิ่งต่ำยิ่งแม่น หน่วยเดียวกับข้อมูล</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> เติมตาราง 4 ตัวแบบ · 2025 ข้อ 5g</summary>
+<table class="why">
+<tr><th>ตัวแบบ</th><th>ใน training</th><th>RMSE test</th></tr>
+<tr><td>1</td><td>ARIMA(0,0,0)(0,1,0)[12] with drift</td><td>4.85</td></tr>
+<tr><td>2</td><td>Regression with ARIMA(0,0,0)(0,1,0)[12] errors</td><td>5.00</td></tr>
+<tr><td>3</td><td>NNAR(1,1,2)[12] seed 1</td><td>5.59</td></tr>
+<tr><td>4</td><td>NNAR(1,1,2)[12] with storm seed 1</td><td>64.52</td></tr>
+</table>
+<div class="copy">
+<p>ตัวแบบ 1 ดีสุด ฤดูกาลชัด มี trend ข้อมูลแค่ 36 เดือน โมเดลง่ายชนะ</p>
+<p>ใส่ storm ไม่ช่วย สัมประสิทธิ์ก้ำกึ่ง RMSE ขึ้นเล็กน้อย</p>
+<p>NNAR ต้องใช้ข้อมูลมากกว่านี้ และผลขึ้นกับ seed</p>
+<p>NNAR + storm พัง พยากรณ์ทีละก้าว ค่าที่กระโดดเดือนมีพายุถูกส่งเป็น input ต่อ</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> เขียนสมการ ARIMAX แล้วแปลค่า</summary>
+<div class="q">drift = 1.02, xreg = 4.58, error เป็น \((0,1,0)[12]\)</div>
+<div class="copy">
+<p>\(y_t=1.02\,t+4.58\,\text{storm}_t+\eta_t\)</p>
+<p>\((1-B^{12})\eta_t=w_t,\quad w_t\sim iid\ N(0,\sigma^2)\)</p>
+<p>เดือนมีพายุ ค่าพยากรณ์สูงกว่าเดือนไม่มีพายุ 4.58 มม.</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> คำถามความเข้าใจต่อจาก 5g</summary>
+<div class="copy">
+<p>พยากรณ์ Dec 2025 ด้วยตัวแบบ 2 ต้องรู้ storm ของ Dec 2025 ด้วย</p>
+<p>ไม่รู้ storm: พยากรณ์ storm ก่อน หรือทำ scenario 0 กับ 1 หรือใช้ตัวแบบไม่มี xreg</p>
+<p>σ² ใน train ต่ำแต่ RMSE test สูง คือ overfitting</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 3 ข้อ</summary>
+<details class="tipcard"><summary>ชื่อคอลัมน์ตัวใหญ่ตามโจทย์ได้ NULL</summary><div class="in">
+<div class="yes"><b>แก้</b><span>ไฟล์จริงเป็นตัวเล็ก ใช้ rain$rain กับ rain$storm</span></div>
+</div></details>
+<details class="tipcard"><summary>NNAR ผลไม่ตรงเพื่อน</summary><div class="in">
+<div class="yes"><b>ปกติ</b><span>network เริ่มสุ่ม บอก seed ที่ใช้ เช่น set.seed(1) ผลต่าง seed ต่างกันได้มาก</span></div>
+</div></details>
+<details class="tipcard"><summary>ARIMAX กับ VAR ต่างกันตรงไหนตอนพยากรณ์</summary><div class="in">
+<div class="yes"><b>ARIMAX</b><span>ต้องรู้ X ในอนาคต ส่ง xreg ช่วง test เข้า forecast</span></div>
+<div class="yes"><b>VAR</b><span>พยากรณ์ทุกตัวแปรเองพร้อมกัน ไม่ต้องรู้ X ล่วงหน้า</span></div>
+<p class="src"><b>อาจารย์:</b> Class 10 0:44:12 ต้องส่ง X ช่วง test ตอน forecast · ถ้า Y difference แล้ว X ต้อง difference ด้วย</p>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<!-- ========== ทักษะ 6 ========== -->
+<details class="skill" id="cs-stat">
+<summary>ทักษะ 6 · พิสูจน์ว่า stationary ด้วย mean กับ autocovariance
+<span class="meta">คำนวณ · 2023 ข้อ 3, 2025 ข้อ 1, PRACTICE 1 ข้อ 1 3 5 6 · <a href="exam-practice.html#u-stat">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ถามแค่ว่าค่าวิ่งตาม t ไหม</summary>
+<p>stationary แบบ weak มีสองเงื่อนไข mean คงที่ และ \(\gamma(h)\) ขึ้นกับ h อย่างเดียว ไม่มี t โผล่</p>
+<p>\(\gamma(h)\) ไม่ต้องลงถึง 0 ก็ stationary ได้ ขอแค่ไม่มี t</p>
+<p class="src"><b>อาจารย์:</b> Class 2 ทำ lag 0 ก่อนด้วย cov แล้วหาคู่ที่ "ชน" กัน</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 4 ขั้นแบบอาจารย์</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>เขียนว่า</th></tr>
+<tr><td>1</td><td>หา mean ใส่ E ทีละตัว</td><td>\(E(x_t)=\dots\)</td></tr>
+<tr><td>2</td><td>lag 0 กางทุกคู่ เก็บคู่ที่เวลาเดียวกัน</td><td>\(\gamma(0)=\operatorname{cov}(x_t,x_t)\)</td></tr>
+<tr><td>3</td><td>lag 1, 2, … ทำซ้ำจนไม่มีคู่ชน</td><td>\(\gamma(h)=\operatorname{cov}(x_t,x_{t-h})\)</td></tr>
+<tr><td>4</td><td>สรุป mean และ γ มี t ไหม</td><td>"ไม่ขึ้นกับ t จึง stationary"</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> 7 ข้อ พร้อมแทนเลข</summary>
+<table class="why">
+<tr><th>สมบัติ</th><th>สูตร</th><th>แทนเลขให้ดู</th></tr>
+<tr><td>E กระจายได้</td><td>\(E(aX+bY+c)=aE(X)+bE(Y)+c\)</td><td>\(E(3+2w_t)=3+2\cdot0=3\)</td></tr>
+<tr><td>white noise ชนเวลาเดียวกันเท่านั้น</td><td>\(\operatorname{cov}(w_s,w_t)=\sigma^2\) ถ้า s=t, ไม่งั้น 0</td><td>\(\operatorname{cov}(w_{t-1},w_{t-1})=\sigma^2\), \(\operatorname{cov}(w_t,w_{t-1})=0\)</td></tr>
+<tr><td>ดึงสัมประสิทธิ์ออกมาคูณ</td><td>\(\operatorname{cov}(aX,bY)=ab\operatorname{cov}(X,Y)\)</td><td>\(\operatorname{cov}(0.5w_{t-1},2w_{t-1})=1\cdot\sigma^2\)</td></tr>
+<tr><td>ค่าคงที่ไม่มี cov</td><td>\(\operatorname{cov}(c,X)=0\)</td><td>\(\operatorname{cov}(3,w_t)=0\)</td></tr>
+<tr><td>cov ของผลคูณ</td><td>\(\operatorname{cov}(X,Y)=E(XY)-E(X)E(Y)\)</td><td>ใช้กับ \(w_tw_{t-1}\), \(w_t^2\)</td></tr>
+<tr><td>moment ของ normal</td><td>\(E(w)=0,\ E(w^2)=\sigma^2,\ E(w^3)=0,\ E(w^4)=3\sigma^4\)</td><td>\(\operatorname{Var}(w^2)=3\sigma^4-\sigma^4=2\sigma^4\)</td></tr>
+<tr><td>ย้ายสูตร Var</td><td>\(E(X^2)=\operatorname{Var}(X)+[E(X)]^2\)</td><td>\(E(w_t^2)=\sigma^2+0=\sigma^2\)</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบที่เจอบ่อย</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> ผลบวกของ w · \(x_t=w_t+0.5w_{t-1}\)</summary>
+<div class="q">แสดงว่า \(x_t\) stationary</div>
+<div class="copy">
+<p>\(E(x_t)=E(w_t)+0.5E(w_{t-1})=0\)</p>
+<p>\(\gamma(0)=\operatorname{cov}(w_t+0.5w_{t-1},\,w_t+0.5w_{t-1})=\sigma^2+0.25\sigma^2=1.25\sigma^2\)</p>
+<p>\(\gamma(1)=\operatorname{cov}(w_t+0.5w_{t-1},\,w_{t-1}+0.5w_{t-2})=0.5\sigma^2\)</p>
+<p>\(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
+<p>mean และ γ ไม่ขึ้นกับ t จึง stationary</p>
+</div>
+<span class="lbl">ตัวเลขมาจากไหน</span>
+<table class="why">
+<tr><th>บรรทัด</th><th>คู่ที่ชน</th><th>ได้</th></tr>
+<tr><td>2</td><td>\(w_t\) กับ \(w_t\) และ \(0.5w_{t-1}\) กับ \(0.5w_{t-1}\)</td><td>\(1\cdot1\sigma^2+0.5\cdot0.5\sigma^2\)</td></tr>
+<tr><td>3</td><td>\(0.5w_{t-1}\) ตัวหน้า กับ \(w_{t-1}\) ตัวหลัง คู่เดียว</td><td>\(0.5\cdot1\sigma^2\)</td></tr>
+<tr><td>4</td><td>ตัวหลังเลื่อนไปถึง \(w_{t-2}\) ลงไป ไม่มีเวลาซ้ำกับ \(w_t, w_{t-1}\)</td><td>0</td></tr>
+</table>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> มี t ใน mean · \(x_t=3+2t+w_t\)</summary>
+<div class="q">\(x_t\) stationary ไหม</div>
+<div class="copy">
+<p>\(E(x_t)=3+2t\)</p>
+<p>mean ขึ้นกับ t จึงไม่ stationary</p>
+</div>
+<p class="trap">ไม่ต้องหา γ ต่อ mean ตกข้อเดียวก็จบ γ ของข้อนี้เท่ากับ \(\sigma^2\) ที่ lag 0 ก็ไม่ช่วย</p>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> ผลคูณของ w · \(x_t=w_tw_{t-1}\)</summary>
+<div class="q">แสดงว่า \(x_t\) stationary</div>
+<div class="copy">
+<p>\(E(x_t)=E(w_t)E(w_{t-1})=0\)</p>
+<p>\(\gamma(0)=E(w_t^2w_{t-1}^2)-0=E(w_t^2)E(w_{t-1}^2)=\sigma^4\)</p>
+<p>\(\gamma(1)=E(w_tw_{t-1}\cdot w_{t-1}w_{t-2})-0=E(w_t)E(w_{t-1}^2)E(w_{t-2})=0\)</p>
+<p>\(\gamma(h)=0\) เมื่อ \(h\ge1\)</p>
+<p>mean และ γ ไม่ขึ้นกับ t จึง stationary</p>
+</div>
+<span class="lbl">ตัวเลขมาจากไหน</span>
+<table class="why">
+<tr><th>บรรทัด</th><th>ใช้สมบัติ</th><th>ทำแบบนี้เพราะ</th></tr>
+<tr><td>1</td><td>w ต่างเวลาอิสระกัน แยก E ได้</td><td>\(E(w_t)=0\) คูณอะไรก็ 0</td></tr>
+<tr><td>2</td><td>cov = E(XY) − E(X)E(Y)</td><td>\(E(X)=0\) เหลือ \(E(X^2)\) แยกเป็น \(\sigma^2\cdot\sigma^2\)</td></tr>
+<tr><td>3</td><td>รวมตัวเวลาเดียวกันก่อน</td><td>\(w_{t-1}\) ซ้ำสองตัวรวมเป็น \(w_{t-1}^2\) แต่ยังมี \(E(w_t)=0\) คูณอยู่</td></tr>
+</table>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 3 คำถามที่ชอบหลอก</summary>
+<details class="tipcard"><summary>γ ไม่ลงถึง 0 ยัง stationary ได้ไหม</summary><div class="in">
+<div class="yes"><b>ได้ ถ้า</b><span>γ(h) ไม่มี t เช่น \(\gamma(h)=\sigma^2(-1)^h\) หรือ AR(1) ที่ \(\gamma(h)=\phi^h\gamma(0)\)</span></div>
+<div class="no"><b>ไม่ได้ ถ้า</b><span>มี t อยู่ เช่น random walk \(\gamma(0)=t\sigma^2\)</span></div>
+</div></details>
+<details class="tipcard"><summary>Var คงที่พอไหม</summary><div class="in">
+<div class="no"><b>ไม่พอ</b><span>ต้องตรวจทุก lag Var คือ γ(0) ตัวเดียว ถ้า γ(1) มี t ก็ตก</span></div>
+</div></details>
+<details class="tipcard"><summary>\((-1)^{2t-h}\) มี t แล้วตกไหม</summary><div class="in">
+<div class="yes"><b>ไม่ตก</b><span>\((-1)^{2t}=1\) ทุก t เหลือ \((-1)^{-h}=(-1)^h\)</span></div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+
+<details class="skill" id="cs-write">
+<summary>ทักษะ 4 · เขียนโมเดลจาก output ของ R พร้อม assumption
+<span class="meta">อ่าน output · 2022 ข้อ 6d 7b, 2023 ข้อ 4a, 2024 ข้อ 3ค, 2025 ข้อ 5b · <a href="exam-practice.html#u-write">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> AR กลับเครื่องหมาย MA ไม่กลับ</summary>
+<p>R พิมพ์ AR ในรูป \(X_t=\phi X_{t-1}+\dots\) พอย้ายไปซ้ายเลยกลับเครื่องหมาย ส่วน MA พิมพ์ตามรูป \(w_t+\theta w_{t-1}\) ใส่ตามนั้น</p>
+<p>คะแนนแบ่งสองส่วน สมการถูกเครื่องหมาย กับ assumption</p>
+<p class="src"><b>อาจารย์:</b> Class 8 ส่วนสมการเขียนบรรทัดเดียวก็ได้เต็ม · Class 9-2 0:11:08 "นิสิตควรจะต้องเขียนโมเดลข้างล่างเป็น"</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 6 ขั้นแปลง output</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>ตัวอย่าง</th></tr>
+<tr><td>1</td><td>จับคู่ชื่อ ar=φ, ma=θ, sar=Φ, sma=Θ, intercept=μ</td><td>ar1 0.8611 · ma1 −0.5177</td></tr>
+<tr><td>2</td><td>AR: \(1-\phi_1B-\phi_2B^2\) กลับเครื่องหมาย</td><td>\((1-0.8611B)\)</td></tr>
+<tr><td>3</td><td>MA: \(1+\theta_1B\) ใส่ตาม R</td><td>\((1-0.5177B)\)</td></tr>
+<tr><td>4</td><td>ฤดูกาลใช้ \(B^{12}\) วงเล็บแยก</td><td>\((1-0.9998B^{12})\)</td></tr>
+<tr><td>5</td><td>d, D ใส่ \((1-B)\), \((1-B^{12})\) · intercept เขียน \(X_t-\mu\)</td><td>\((X_t-920.5567)\)</td></tr>
+<tr><td>6</td><td>ปิดด้วย \(w_t\sim iid\ N(0,\sigma^2)\) แล้วเขียน assumption</td><td>\(N(0,\ 19892)\)</td></tr>
+</table>
+<p>ดูคำสั่งก่อน "ระบุ" ให้เขียนรายการ · "ตรวจ" ให้ใช้ตัวเลขจาก output ทีละข้อ แล้วสรุป ปี 2022–2024 สั่งระบุ ปี 2025 สั่งตรวจ</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> assumption และตัวตรวจ</summary>
+<table class="why">
+<tr><th>assumption</th><th>ตรวจด้วย</th><th>ผ่านเมื่อ</th></tr>
+<tr><td>causal</td><td>ราก \(\Phi(x)\)</td><td>modulus เกิน 1</td></tr>
+<tr><td>invertible</td><td>ราก \(\theta(x)\)</td><td>modulus เกิน 1</td></tr>
+<tr><td>ไม่มี outlier, variance คงที่</td><td>std. residual ใน tsdiag</td><td>อยู่ใน ±3</td></tr>
+<tr><td>ไม่ correlate</td><td>ACF residual ใน tsdiag</td><td>แท่งอยู่ในเส้นประ</td></tr>
+<tr><td>โมเดลเหมาะสม</td><td>Ljung-Box · \(H_0\) เหมาะสม</td><td>p เกิน 0.05 ทุก lag</td></tr>
+<tr><td>normal</td><td>QQ plot, shapiro.test · \(H_0\) normal</td><td>p เกิน 0.05</td></tr>
+<tr><td>พารามิเตอร์มีนัยสำคัญ</td><td>\(|\text{coef}/\text{s.e.}|\)</td><td>เกิน 2</td></tr>
+</table>
+<div class="say">Assumptions: \(w_t\) เป็น Gaussian white noise คือ mean 0, variance คงที่ \(\sigma^2\), ไม่ correlate กัน และเป็น normal · โมเดล causal และ invertible คือรากของ AR และ MA มี modulus เกิน 1</div>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 4 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> ARMA มี intercept · 2024 ข้อ 3ค Nile</summary>
+<div class="q">ar1 0.8611 · ma1 −0.5177 · intercept 920.5567 · sigma^2 19892</div>
+<div class="copy">
+<p>\((1-0.8611B)(X_t-920.5567)=(1-0.5177B)w_t,\quad w_t\sim iid\ N(0,\ 19892)\)</p>
+<p>Causal: ราก \(1/0.8611=1.161>1\) · Invertible: ราก \(1/0.5177=1.932>1\)</p>
+<p>\(w_t\) เป็น Gaussian white noise · mean ของ \(X_t\) คือ 920.56</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> SARIMA intercept ติดลบ · 2022 ข้อ 7b</summary>
+<div class="q">ar1 0.9139 · ma1 0.0403 · sar1 0.9998 · sma1 −0.9884 · intercept −0.0060</div>
+<div class="copy">
+<p>\((1-0.9139B)(1-0.9998B^{12})(X_t+0.0060)=(1+0.0403B)(1-0.9884B^{12})w_t\)</p>
+<p>sar1 ≈ 1 ใช้ \((1-B^{12})\) น่าจะเหมาะกว่า · sar1 กับ sma1 เกือบหักล้างกัน ส่อ redundancy</p>
+</div>
+<p class="trap">intercept ลบ: \(X_t-(-0.006)=X_t+0.006\)</p>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> with drift · 2025 ข้อ 5c</summary>
+<div class="copy">
+<p>\((1-B^{12})(X_t-1.0965\,t)=w_t,\quad w_t\sim iid\ N(0,\ 36.21)\)</p>
+<p>เขียนแบบไม่มี t: \(X_t-X_{t-12}=13.158+w_t\)</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>13.158</td><td>\(1.0965t-1.0965(t-12)=1.0965\times12\)</td></tr></table>
+</details>
+
+<details class="ex1"><summary><b>แบบ D</b> ARIMAX มี d และ D</summary>
+<div class="q">Regression with ARIMA(0,1,1)(0,1,1)[12] errors · ma1 −0.4 · sma1 −0.6 · temp 1.5 · promo 8.2 · sigma^2 12.5</div>
+<div class="copy">
+<p>\(y_t=1.5\,\text{temp}_t+8.2\,\text{promo}_t+\eta_t\)</p>
+<p>\((1-B)(1-B^{12})\eta_t=(1-0.4B)(1-0.6B^{12})w_t,\quad w_t\sim iid\ N(0,\ 12.5)\)</p>
+<p>ไม่มี intercept เพราะ difference แล้วค่าคงที่หายไป</p>
+</div>
+<p class="trap">AR/MA เป็นของ \(\eta_t\) ไม่ใช่ของ \(y_t\)</p>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 3 ข้อ</summary>
+<details class="tipcard"><summary>มี d แล้วทำไมไม่มี intercept</summary><div class="in">
+<div class="yes"><b>เพราะ</b><span>difference ลบค่าคงที่ทิ้ง arima() ไม่ประมาณ mean เมื่อ d หรือ D ≥ 1 ถ้าอยากได้ trend ใช้ drift</span></div>
+</div></details>
+<details class="tipcard"><summary>สัมประสิทธิ์ใกล้ 1</summary><div class="in">
+<div class="yes"><b>บอกว่า</b><span>รากใกล้ unit circle ควร difference แทน หรือถ้า AR กับ MA ใกล้กันมาก ส่อ redundancy</span></div>
+</div></details>
+<details class="tipcard"><summary>พารามิเตอร์มีนัยสำคัญไหม</summary><div class="in">
+<div class="yes"><b>มี ถ้า</b><span>\(|\text{coef}/\text{s.e.}|>2\) เช่น \(0.2544/0.1194=2.13\)</span></div>
+<div class="no"><b>ไม่มี ถ้า</b><span>ต่ำกว่า 2 พิจารณาตัดออก</span></div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-diag">
+<summary>ทักษะ 5 · ตรวจ residual: ACF, QQ, Ljung-Box
+<span class="meta">อ่าน output · 2022 ข้อ 6e 7c, 2023 ข้อ 4d 4e, 2025 ข้อ 5b 5c, PRACTICE 2 ข้อ 1 · <a href="exam-practice.html#u-diag">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> residual ที่ดีต้องเหมือน white noise</summary>
+<p>ถ้าโมเดลจับรูปแบบได้หมด ที่เหลือต้องเป็น noise ล้วน ไม่มี correlation, variance คงที่, normal</p>
+<p>ตรวจ 3 เรื่อง ตอบเรื่องละ 1 บรรทัดพร้อมตัวเลข ตกข้อเดียวก็ไม่เหมาะสม</p>
+<p class="src"><b>อาจารย์:</b> Class 8 residual ควร "normal, mean 0, variance คงที่, ไม่ correlate" · ทุกอย่างอยู่ใน tsdiag ยกเว้น normality</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> โค้ดและการอ่าน</summary>
+<pre class="r">library(TSA)
+hist(rstandard(fit)); qqnorm(rstandard(fit)); qqline(rstandard(fit))
+shapiro.test(rstandard(fit))
+tsdiag(fit, gof = 30, omit.initial = T)</pre>
+<table class="why">
+<tr><th>เรื่อง</th><th>ดูที่</th><th>ผ่านเมื่อ</th></tr>
+<tr><td>outlier, variance คงที่</td><td>tsdiag แผงบน</td><td>อยู่ใน ±3 ความกว้างพอๆ กัน</td></tr>
+<tr><td>ไม่ correlate</td><td>tsdiag แผงกลาง ACF และแผงล่าง Ljung-Box</td><td>แท่งในเส้นประ · จุดอยู่เหนือ 0.05 ทุก lag</td></tr>
+<tr><td>normal</td><td>hist, QQ, shapiro</td><td>ระฆังคว่ำ · จุดเกาะเส้น · p เกิน 0.05</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> H0 ของแต่ละ test</summary>
+<table class="why">
+<tr><th>test</th><th>\(H_0\)</th><th>p เกิน 0.05 แปลว่า</th></tr>
+<tr><td>Ljung-Box</td><td>residual ไม่ correlate โมเดลเหมาะสม</td><td>ผ่าน</td></tr>
+<tr><td>Shapiro-Wilk</td><td>normal</td><td>ผ่าน</td></tr>
+<tr><td>ArchTest</td><td>ไม่มี ARCH effect</td><td>variance คงที่</td></tr>
+<tr><td>ADF</td><td>ไม่ stationary</td><td>ยังไม่นิ่ง ตรงข้ามกับสามตัวบน</td></tr>
+</table>
+<p>เส้นประ ACF = \(\pm2/\sqrt n\) · 20 lag หลุด 1 แท่งเกิดได้โดยบังเอิญที่ระดับ 5%</p>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 4 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> เห็นแค่ ACF ตรวจอะไรได้บ้าง · 2022 ข้อ 6e</summary>
+<div class="copy">
+<p>สนับสนุน residual ไม่ correlate เกือบทุก lag อยู่ในเส้นขอบ spike ใกล้ lag 18 อันเดียวเกิดได้โดยบังเอิญ</p>
+<p>ตรวจไม่ได้: normal และ variance คงที่ ต้องใช้ QQ plot, Shapiro และ std. residual ตามเวลา</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> tsdiag Ljung-Box ตก · PRACTICE 2 ข้อ 1</summary>
+<div class="copy">
+<p>std. residual อยู่ใน ±3 ไม่มี outlier รุนแรง</p>
+<p>Ljung-Box p ต่ำกว่า 0.05 ตั้งแต่ lag 2 → reject \(H_0\) residual ยังมี correlation</p>
+<p>โมเดลไม่เหมาะสม</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> เทียบ QQ สองโมเดล log กับไม่ log · 2023 ข้อ 4e</summary>
+<div class="copy">
+<p>M1 จุดโค้ง หางขวายาว → เบ้ ไม่ normal variance โตตามระดับ</p>
+<p>M2 ใช้ log จุดเกาะเส้น → ใกล้ normal</p>
+<p>log ทำให้ variance นิ่งขึ้น เลือก M2</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ D</b> ผ่าน Ljung-Box แต่ residual² มี correlation</summary>
+<div class="copy">
+<p>ACF residual อยู่ในเส้น Ljung-Box p 0.18–0.65 ไม่มี correlation</p>
+<p>ACF ของ residual² สูง ArchTest p = 1.1e-15 → variance ไม่คงที่</p>
+<p>mean model ใช้ได้ ต้องโมเดล variance ด้วย GARCH</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 3 ข้อ</summary>
+<details class="tipcard"><summary>ACF residual หลุดที่ lag 12</summary><div class="in">
+<div class="yes"><b>แปลว่า</b><span>ยังเหลือฤดูกาล ให้เพิ่ม seasonal term เช่น ARIMA(1,0,0)(1,0,0)[12]</span></div>
+</div></details>
+<details class="tipcard"><summary>Ljung-Box ผ่าน แต่ไม่ normal ใช้ได้ไหม</summary><div class="in">
+<div class="yes"><b>ได้บางส่วน</b><span>ค่าพยากรณ์จุดใช้ได้ แต่ prediction interval ที่อิง normal แคบเกินจริง</span></div>
+</div></details>
+<details class="tipcard"><summary>อาจารย์พูดว่า "อยากให้ p-value ต่ำ" ตอน Ljung-Box</summary><div class="in">
+<div class="no"><b>ระวัง</b><span>ที่สรุปท้ายคือ p ต่ำ = reject = ไม่ผ่าน ยึดอันนี้</span></div>
+<p class="src"><b>อาจารย์:</b> Class 10 1:50:50–1:52:26</p>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-garch">
+<summary>ทักษะ 9 · R: GARCH ครบขั้น
+<span class="meta">R · 2024 ข้อ 4 12 คะแนน ข้อมูล CPALL · <a href="exam-practice.html#u-garch">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> mean นิ่ง แต่ variance ผันผวนเป็นช่วง</summary>
+<p>ผลตอบแทนหุ้นมักนิ่งที่ mean แต่ช่วงผันผวนเกาะกลุ่ม เรียก volatility clustering GARCH โมเดล variance ของวันนี้จาก shock และ variance ของเมื่อวาน</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 5 ขั้นตาม Class 11</summary>
+<pre class="r">library(tseries); library(FinTS); library(rugarch)
+x &lt;- scan("CPALL.txt")
+adf.test(x)                          # 1 นิ่งไหม  H0: non stationary
+plot.ts(x)                           # 2 ดู volatility clustering
+ArchTest(x)                          # 3 H0: no ARCH effect
+summary(garch(x, order = c(1, 1)))   # ลองหลาย order
+sp &lt;- ugarchspec(variance.model = list(model = "sGARCH", garchOrder = c(1, 1)),
+                 mean.model = list(armaOrder = c(0, 0)))
+f &lt;- ugarchfit(sp, x); f             # 4 สมการสุดท้าย
+ugarchforecast(f, n.ahead = 3)       # 5 พยากรณ์ sigma</pre>
+<p>เลือก order ตามลำดับ: Ljung-Box ของ residual² ผ่าน → พารามิเตอร์ significant → Jarque-Bera สำคัญน้อยสุด</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> สมการและสูตร</summary>
+<table class="why">
+<tr><th>เรื่อง</th><th>สูตร</th><th>แทนเลขให้ดู</th></tr>
+<tr><td>mean</td><td>\(x_t=\mu+u_t,\ u_t=\sigma_t\varepsilon_t,\ \varepsilon_t\sim iid\ N(0,1)\)</td><td>\(x_t=0.0318+u_t\)</td></tr>
+<tr><td>GARCH(1,1)</td><td>\(\sigma_t^2=\omega+\alpha_1u_{t-1}^2+\beta_1\sigma_{t-1}^2\)</td><td>\(0.1182+0.4722u_{t-1}^2+0.4529\sigma_{t-1}^2\)</td></tr>
+<tr><td>variance ระยะยาว</td><td>\(\bar\sigma^2=\dfrac{\omega}{1-\alpha_1-\beta_1}\)</td><td>\(\dfrac{0.118}{0.075}=1.573\)</td></tr>
+<tr><td>นิ่งเมื่อ</td><td>\(\alpha_1+\beta_1<1\)</td><td>\(0.472+0.453=0.925\)</td></tr>
+<tr><td>ลำดับตัวเลขกลับด้าน</td><td>garch(order = c(β, α)) · garchOrder = c(α, β)</td><td>tseries กับ rugarch สลับกัน</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> ทั้งข้อ · 2024 ข้อ 4 CPALL</summary>
+<div class="copy">
+<p>ADF p = 0.01 → stationary · กราฟมี volatility clustering · ArchTest p = 0.0006 → มี ARCH effect</p>
+<p>เทียบ ARCH(1), GARCH(1,1), GARCH(2,1) GARCH(1,1) พารามิเตอร์ significant ครบ LB ของ residual² p = 0.89 JB p = 0.55</p>
+<p>\(x_t=0.0318+u_t,\quad u_t=\sigma_t\varepsilon_t,\quad \varepsilon_t\sim iid\ N(0,1)\)</p>
+<p>\(\sigma_t^2=0.1182+0.4722\,u_{t-1}^2+0.4529\,\sigma_{t-1}^2\)</p>
+<p>mu p = 0.46 ไม่มีนัยสำคัญ ผลตอบแทนเฉลี่ยเป็น 0 ได้</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> คำนวณ σ² พรุ่งนี้ด้วยมือ</summary>
+<div class="q">\(u_t=1.5,\ \sigma_t^2=0.6\)</div>
+<div class="copy">
+<p>\(\sigma_{t+1}^2=0.118+0.472(1.5)^2+0.453(0.6)=0.118+1.062+0.2718=1.4518\)</p>
+<p>\(\sigma_{t+1}=\sqrt{1.4518}=1.205\)</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>1.062</td><td>\(1.5^2=2.25\), \(0.472\times2.25=1.062\)</td></tr>
+<tr><td>0.2718</td><td>\(0.453\times0.6\)</td></tr></table>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> หา \(u\) จาก x ก่อนแทนสูตร</summary>
+<div class="q">\(x_T=-0.3286,\ \mu=0.0683\)</div>
+<div class="copy">
+<p>\(u_T=x_T-\mu=-0.3286-0.0683=-0.3969\)</p>
+<p>แทน \(u_T^2=0.1575\) ในสมการ σ² ต่อ</p>
+</div>
+<p class="trap">อย่าแทน x ตรงๆ ต้องลบ μ ก่อน</p>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 2 ข้อ</summary>
+<details class="tipcard"><summary>ทำไมไม่ใช้ ARIMA อย่างเดียว</summary><div class="in">
+<div class="yes"><b>เพราะ</b><span>ARIMA สมมติ variance คงที่ ถ้า ArchTest reject หรือ ACF ของ residual² สูง prediction interval ของ ARIMA จะผิด</span></div>
+</div></details>
+<details class="tipcard"><summary>เลือก order ด้วยอะไรก่อน</summary><div class="in">
+<div class="yes"><b>ลำดับ</b><span>LB ของ residual² ต้องผ่านก่อน แล้วค่อยดู significance แล้วค่อย JB</span></div>
+<p class="src"><b>อาจารย์:</b> Class 11 Jarque-Bera สำคัญน้อยสุด</p>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-choose">
+<summary>ทักษะ 12 · เลือกโมเดลจากโจทย์บรรยาย และอ่าน CCF
+<span class="meta">ความเข้าใจ · 2022 ข้อ 3, 2025 ข้อ 3–4 · <a href="exam-practice.html#u-choose">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> หาคำสัญญาณในโจทย์ แล้วจับคู่โมเดล</summary>
+<p>ถามสองข้อ มีตัวแปรอื่นไหม และส่งผลทางเดียวหรือไปมา แล้วดูว่าข้อมูลรายวันมีวันหยุด หรือผันผวนเป็นช่วง</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> ตารางจับคู่</summary>
+<table class="why">
+<tr><th>โจทย์บอกว่า</th><th>เลือก</th></tr>
+<tr><td>อนุกรมเดียว ฤดูกาลคงที่ ไม่มีข้อมูลอื่น</td><td>SARIMA</td></tr>
+<tr><td>มี X ที่กำหนดเองหรือรู้ล่วงหน้า ส่งผลทางเดียว</td><td>ARIMAX</td></tr>
+<tr><td>หลายตัวแปรส่งผลกันไปมา</td><td>VAR</td></tr>
+<tr><td>หุ้น ผันผวนเป็นช่วง ACF ของ return² ลดช้า</td><td>GARCH</td></tr>
+<tr><td>รายวัน ฤดูกาลหลายชั้น วันหยุดเทศกาล trend หักเปลี่ยน</td><td>Prophet</td></tr>
+<tr><td>สนใจสัมประสิทธิ์ของ X แต่ error สัมพันธ์กัน</td><td>GLS</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> อ่าน CCF</summary>
+<table class="why">
+<tr><th>เรื่อง</th><th>ความหมาย</th></tr>
+<tr><td>ccf(sales, x) ที่ lag k</td><td>cor ระหว่าง sales ใน t + k กับ x ใน t</td></tr>
+<tr><td>แท่งสูงที่ lag +3</td><td>x นำ sales 3 ช่วง ใช้เงินกับ x แล้วยอดขึ้นในอีก 3 ช่วง</td></tr>
+<tr><td>แท่งที่ lag ติดลบ</td><td>sales นำ x</td></tr>
+<tr><td>เส้นประ</td><td>\(\pm2/\sqrt n\) แท่งในเส้นถือว่าไม่สัมพันธ์</td></tr>
+</table>
+<p class="trap">ทิศ lag ขึ้นกับลำดับตัวแปรใน ccf() เขียนนิยามก่อนตอบทุกครั้ง</p>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> เลือกโมเดลให้ 6 ชุด · 2025 ข้อ 3</summary>
+<div class="copy">
+<p>ยอดสั่งรายวัน วันหยุดสูง → Prophet</p>
+<p>หุ้นผันผวนเป็นช่วง → GARCH</p>
+<p>ยอดขายกับงบ Ads ที่รู้ค่า → ARIMAX</p>
+<p>รายเดือนตัวเดียว ฤดูกาลรายปี → SARIMA</p>
+<p>GDP สองประเทศส่งผลถึงกัน → VAR</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> อ่าน CCF ให้ผู้บริหาร · 2025 ข้อ 4</summary>
+<div class="q">ccf(sales, coupon) แท่งเดียวเกินเส้นที่ lag +3 ราว 0.85 · BOGO ไม่มีแท่งเกินเลย</div>
+<div class="copy">
+<p>ccf(sales, coupon) ที่ lag k คือ cor ของ sales สัปดาห์ t + k กับ coupon สัปดาห์ t</p>
+<p>Coupon: 0.85 ที่ lag +3 ใช้คูปองแล้วยอดขึ้นในอีกราว 3 สัปดาห์</p>
+<p>BOGO: ไม่มี correlation ที่มีนัยสำคัญทุก lag</p>
+<p>Insight: ทำคูปองต่อ เตรียมสต็อก 3 สัปดาห์หลังแคมเปญ ทบทวนงบ BOGO</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> GLS, ARIMAX, VAR ต่างกันยังไง · 2022 ข้อ 3</summary>
+<div class="copy">
+<p>GLS: regression ที่ error มี autocorrelation แก้ s.e. ให้ถูก ใช้เมื่ออยากทดสอบผลของ X</p>
+<p>ARIMAX: X ส่งผลทางเดียว รู้ค่าอนาคตของ X เป้าหมายคือพยากรณ์</p>
+<p>VAR: ตัวแปรส่งผลถึงกัน พยากรณ์ทุกตัวพร้อมกัน</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 2 ข้อ</summary>
+<details class="tipcard"><summary>correlation ใน CCF แปลว่า X ทำให้ Y ขึ้นไหม</summary><div class="in">
+<div class="no"><b>ไม่ใช่</b><span>บอกแค่ความสัมพันธ์และจังหวะเวลา ถ้าจะพูดเชิงพยากรณ์ใช้ Granger causality</span></div>
+</div></details>
+<details class="tipcard"><summary>VAR บนข้อมูลที่ difference แล้ว</summary><div class="in">
+<div class="yes"><b>ต้อง</b><span>undifference ค่าพยากรณ์เอง อาจารย์แนะนำ type = "both" แทน differencing</span></div>
+<p class="src"><b>อาจารย์:</b> Class 10 1:56:48</p>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-decomp">
+<summary>ทักษะ 11 · Multiplicative decomposition และ seasonal index
+<span class="meta">คำนวณ ใช้ Excel ได้ · 2022 ข้อ 8 10 คะแนน, 2025 ข้อ 5f · <a href="exam-practice.html#u-decomp">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ค่าพยากรณ์ = เส้น trend × ตัวคูณของฤดู</summary>
+<p>แยกข้อมูลเป็น trend กับ seasonal index ฤดูที่ขายดีได้ index เกิน 1 ฤดูที่ขายไม่ดีได้ต่ำกว่า 1</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 4 ขั้นใน Excel</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th><th>Excel</th></tr>
+<tr><td>1</td><td>regress Y บน t = 1, 2, … ได้ \(T_t=b_0+b_1t\)</td><td>=INTERCEPT, =SLOPE</td></tr>
+<tr><td>2</td><td>Detrend \(Y_t/T_t\) ทุกจุด</td><td>=B2/C2</td></tr>
+<tr><td>3</td><td>เฉลี่ย \(Y/T\) ของฤดูเดียวกัน แล้วหารด้วยค่าเฉลี่ยของทุก index ให้เฉลี่ยเป็น 1</td><td>=AVERAGE</td></tr>
+<tr><td>4</td><td>\(F_t=T_t\times SI\) แทน t ของอนาคต</td><td></td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> คูณกับบวก</summary>
+<table class="why">
+<tr><th>แบบ</th><th>สูตร</th><th>ฤดูกาล</th><th>ปรับให้</th></tr>
+<tr><td>คูณ</td><td>\(F_t=(b_0+b_1t)\,SI_t\)</td><td>เป็นเปอร์เซ็นต์คงที่ โตตาม trend</td><td>เฉลี่ย index = 1</td></tr>
+<tr><td>บวก</td><td>\(F_t=(b_0+b_1t)+S_t\)</td><td>เป็นจำนวนคงที่</td><td>เฉลี่ย S = 0</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> ไอศกรีมรายไตรมาส · 2022 ข้อ 8</summary>
+<div class="q">Q1 16, 14, 17 · Q2 25, 27, 31 · Q3 31, 32, 40 · Q4 24, 23, 27 · Intercept 19.83, slope 0.88</div>
+<div class="copy">
+<p>\(T_t=19.83+0.88t\)</p>
+<p>เฉลี่ย Y/T: Q1 0.6543, Q2 1.1053, Q3 1.3221, Q4 0.9241 · ค่าเฉลี่ยรวม 1.0015</p>
+<p>SI: Q1 0.6534, Q2 1.1037, Q3 1.3202, Q4 0.9227</p>
+<p>t = 13: \(31.27\times0.6534=20.43\) · t = 14: \(32.15\times1.1037=35.48\)</p>
+<p>t = 15: \(33.03\times1.3202=43.61\) · t = 16: \(33.91\times0.9227=31.29\)</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>0.6543</td><td>Q1 อยู่ที่ t = 1, 5, 9: \((16/20.71+14/24.23+17/27.75)/3\)</td></tr>
+<tr><td>0.6534</td><td>\(0.6543/1.0015\)</td></tr>
+<tr><td>31.27</td><td>\(19.83+0.88\times13\)</td></tr></table>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> แบบบวก ข้อมูลเดียวกัน</summary>
+<div class="copy">
+<p>\(Y_t-T_t\) เฉลี่ยแยกไตรมาส ปรับให้เฉลี่ยรวมเป็น 0</p>
+<p>\(S_1=-8.60,\ S_2=2.52,\ S_3=8.31,\ S_4=-2.24\)</p>
+<p>ปี 2018: 22.67, 34.67, 41.34, 31.67</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 2 ข้อ</summary>
+<details class="tipcard"><summary>เลือกคูณหรือบวก</summary><div class="in">
+<div class="yes"><b>คูณ ถ้า</b><span>ความแกว่งของฤดูโตตามระดับข้อมูล</span></div>
+<div class="yes"><b>บวก ถ้า</b><span>ความแกว่งเท่าเดิมทุกปี</span></div>
+</div></details>
+<details class="tipcard"><summary>ข้อมูลรายเดือนไม่ครบปีสุดท้าย</summary><div class="in">
+<div class="yes"><b>ทำ</b><span>เฉลี่ยเท่าที่มี บางเดือนได้ 4 ค่า บางเดือน 3 ค่า เช่น rain 47 เดือน t = 48 คือ Dec 2025</span></div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<!-- ========== ทักษะ 8 ========== -->
+<details class="skill" id="cs-aic">
+<summary>ทักษะ 8 · เลือกโมเดลด้วย AIC, BIC และ log-likelihood
+<span class="meta">อ่าน output + คำนวณเล็กน้อย · ออก 2022 ข้อ 6b 6c 7a, 2023 ข้อ 4b 4c, 2024 ข้อ 3ง 3ฉ · <a href="exam-practice.html#u-aic">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> likelihood สูงดี แต่โดนหักค่าพารามิเตอร์</summary>
+<p>likelihood คือโอกาสที่โมเดลนี้จะเกิด ยิ่งสูงยิ่งเข้ากับข้อมูล เพิ่มพารามิเตอร์แล้ว log L ไม่มีทางลด เลยต้องหักคะแนนด้วย 2k</p>
+<p>AIC ใน R ยิ่งต่ำยิ่งดี เลือกได้ 2–3 ตัวแล้วไปตรวจ residual ต่อ</p>
+<p class="src"><b>อาจารย์:</b> Class 7-1 0:32:15 "โอกาสที่โมเดลนี้จะเกิด" · 0:37 มีโมเดล 2–3 ตัวในใจ แล้วตรวจก่อนใช้</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> อ่านตาราง AIC 5 ขั้น</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th></tr>
+<tr><td>1</td><td>เช็คว่าทุกโมเดลเทียบกันได้ ดูเกร็ด "เทียบได้ถ้า" ข้างล่าง</td></tr>
+<tr><td>2</td><td>แถวคือ p คอลัมน์คือ q เริ่มที่ 0</td></tr>
+<tr><td>3</td><td>หาค่าต่ำสุด แล้วไล่ดูตัวที่ห่างไม่ถึง 2</td></tr>
+<tr><td>4</td><td>ในกลุ่มที่ห่างไม่ถึง 2 เลือกตัวพารามิเตอร์น้อยสุด</td></tr>
+<tr><td>5</td><td>ปิดว่าต้องตรวจ residual และ forecast ต่อ</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> สูตรและการนับ k</summary>
+<table class="why">
+<tr><th>เรื่อง</th><th>สูตร</th><th>แทนเลขให้ดู</th></tr>
+<tr><td>AIC</td><td>\(AIC=-2\log L+2k\)</td><td>\(\log L=-247.66,\ k=4\): \(495.32+8=503.32\)</td></tr>
+<tr><td>BIC</td><td>\(BIC=-2\log L+k\ln n\)</td><td>n = 100: \(\ln 100=4.61\) หักหนักกว่า AIC</td></tr>
+<tr><td>นับ k</td><td>ทุกตัวที่ R ประมาณ รวม intercept และ \(\sigma^2\)</td><td>ARMA(1,1) มี mean: ar1, ma1, intercept, \(\sigma^2\) ได้ k = 4</td></tr>
+<tr><td>BIC หนักกว่าเมื่อไร</td><td>\(\ln n>2\) เมื่อ \(n\ge8\)</td><td>ข้อมูลจริงแทบทุกชุด BIC เลือกโมเดลเล็กกว่า</td></tr>
+</table>
+<p class="src"><b>อาจารย์:</b> Class 7-1 0:34:16 intercept กับ \(\sigma^2\) นับเป็นพารามิเตอร์ ตรงกับ R แม้สไลด์หน้า 18 เขียนว่าไม่นับ \(\sigma^2\)</p>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
+
+<details class="ex1"><summary><b>แบบ A</b> อ่านตาราง AIC เลือกโมเดล · 2022 ข้อ 6b</summary>
+<div class="q">AIC ต่ำสุด ARMA(2,2) 3959.7, ARMA(2,1) 3960.5, AR(1) 3961.0, MA(1) 3961.5 เลือกตัวไหน</div>
+<div class="copy">
+<p>AIC ต่ำสุดคือ ARMA(2,2) 3959.7</p>
+<p>ARMA(2,1), AR(1), MA(1) ห่างไม่ถึง 2 หลักฐานสนับสนุน ARMA(2,2) อ่อน</p>
+<p>ตามหลัก parsimony เลือก AR(1) หรือ MA(1) แล้วตรวจ residual ต่อ</p>
+</div>
+</details>
+
+<details class="ex1"><summary><b>แบบ B</b> คำนวณ AIC จาก log L · output Class 8</summary>
+<div class="q">ARIMA(1,0,1) มี intercept, log likelihood −247.66 หา AIC</div>
+<div class="copy">
+<p>k = 4 คือ ar1, ma1, intercept, \(\sigma^2\)</p>
+<p>\(AIC=-2(-247.66)+2(4)=495.32+8=503.32\)</p>
+</div>
+<table class="why">
+<tr><th>บรรทัด</th><th>ตัวเลขมาจากไหน</th></tr>
+<tr><td>2</td><td>ลบคูณลบได้บวก \(-2\times-247.66=495.32\) · R พิมพ์ 503.31 ต่างจากปัดเศษ</td></tr>
+</table>
+</details>
+
+<details class="ex1"><summary><b>แบบ C</b> โจทย์หลอกเทียบข้ามตระกูล</summary>
+<div class="q">ETS(A,N,N) AIC 260 · ARIMA(0,1,1) AIC 250 ตัวไหนดีกว่า</div>
+<div class="copy">
+<p>เทียบ AIC ไม่ได้ เพราะ likelihood ของ ETS กับ ARIMA คำนวณคนละแบบ</p>
+<p>ให้เทียบ RMSE หรือ MAE บน test set หรือใช้ tsCV แทน</p>
+</div>
+<p class="src"><b>อาจารย์:</b> Class 9-2 0:41:46 "ETS ของหนู AIC น้อยกว่า Arima เทียบกันไม่ได้"</p>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> ดูในคลังเกร็ด ข้อ 1–9</summary>
+<p><a href="#tip-logl">เทียบ log L ได้ไหม</a> · <a href="#tip-noaic">ไม่ใช้ AIC ใช้อะไร</a> · <a href="#tip-diff2">ต่างกันเท่าไรถึงนับ</a> · <a href="#tip-sas">AIC ยิ่งมากยิ่งดีได้ไหม</a> · <a href="#tip-weird">เพิ่มพารามิเตอร์แล้ว AIC ขึ้นมาก</a> · <a href="#tip-family">ETS เทียบ ARIMA</a> · <a href="#tip-logscale">log กับไม่ log</a> · <a href="#tip-dcomp">d ต่างกัน</a> · <a href="#tip-aicvsrmse">AIC หรือ RMSE</a></p>
+</details>
+
+</div>
+</details>
+
+
+<details class="skill" id="cs-period">
+<summary>ทักษะ 15 · R: periodogram หาความถี่และคาบ
+<span class="meta">R · 2025 ข้อ 5a 2 คะแนน · <a href="exam-practice.html#u-period">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ยอดสูงสุดบอกรอบที่แรงที่สุด</summary>
+<p>periodogram แยกข้อมูลเป็นคลื่นหลายความถี่ ความถี่ที่ยอดสูงสุดคือรอบหลักของข้อมูล คาบ = 1 / ความถี่</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 3 บรรทัด</summary>
+<pre class="r">s &lt;- spectrum(rain$rain, log = "no")   # ใส่ตัวเลขเปล่า แกนเป็นรอบต่อเดือน
+s$freq[which.max(s$spec)]        # 0.0833
+1 / s$freq[which.max(s$spec)]    # 12</pre>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> หน่วยของแกน</summary>
+<table class="why">
+<tr><th>ใส่อะไรเข้า spectrum</th><th>แกนความถี่</th><th>ตัวอย่าง</th></tr>
+<tr><td>ตัวเลขเปล่า</td><td>รอบต่อจุด</td><td>f = 0.0833 → T = 12 เดือน</td></tr>
+<tr><td>ts frequency = 12</td><td>รอบต่อปี</td><td>f = 1 → T = 1 ปี = 12 เดือน</td></tr>
+<tr><td>ข้อมูลรายไตรมาส ตัวเลขเปล่า</td><td>รอบต่อไตรมาส</td><td>f = 0.25 → T = 4 ไตรมาส</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> rain · 2025 ข้อ 5a</summary>
+<div class="copy">
+<p>periodogram ยอดสูงสุดที่ f = 0.0833 รอบต่อเดือน</p>
+<p>\(T=1/0.0833=12\) เดือน คือรอบฤดูฝนรายปี</p>
+<p>ข้อต่อไปตั้ง ts(…, frequency = 12)</p>
+</div>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> รายไตรมาส</summary>
+<div class="copy">
+<p>ยอดที่ f = 0.25 → \(T=4\) ไตรมาส = หนึ่งปี · ตั้ง ts(q, frequency = 4)</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 1 ข้อ</summary>
+<details class="tipcard"><summary>ยอดที่ความถี่ใกล้ 0 สูงมาก</summary><div class="in">
+<div class="yes"><b>แปลว่า</b><span>มี trend ไม่ใช่รอบ ดูยอดถัดไปเป็นรอบฤดู หรือ detrend ก่อน</span></div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-sacf">
+<summary>ทักษะ 16 · sample ACF ด้วยมือ, correlogram, \(\nabla x_t\)
+<span class="meta">คำนวณ · 2024 ข้อ 2 และ 3ข · <a href="exam-practice.html#u-sacf">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> จับคู่ค่าที่ห่างกัน h แล้วดูว่าขึ้นลงไปด้วยกันไหม</summary>
+<p>ลบค่าเฉลี่ยออกก่อน แล้วคูณคู่ที่ห่างกัน h ผลรวมบวกคือไปทางเดียวกัน หารด้วยผลรวมกำลังสองให้เป็นค่าระหว่าง −1 ถึง 1</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 5 ขั้น</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th></tr>
+<tr><td>1</td><td>หา \(\bar x\)</td></tr>
+<tr><td>2</td><td>ส่วนเบี่ยงเบน \(d_t=x_t-\bar x\)</td></tr>
+<tr><td>3</td><td>\(\sum d_t^2\) เป็นตัวหาร</td></tr>
+<tr><td>4</td><td>lag h: \(\sum d_td_{t+h}\) มี n − h คู่</td></tr>
+<tr><td>5</td><td>\(\hat\rho(h)=\) ขั้น 4 ÷ ขั้น 3 แล้ววาดแท่ง เทียบเส้น \(\pm2/\sqrt n\)</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> สูตร</summary>
+<table class="why">
+<tr><th>เรื่อง</th><th>สูตร</th><th>หมายเหตุ</th></tr>
+<tr><td>sample autocov</td><td>\(\hat\gamma(h)=\frac1n\sum_{t=1}^{n-h}(x_t-\bar x)(x_{t+h}-\bar x)\)</td><td>หารด้วย n เสมอ ไม่ใช่ n − h</td></tr>
+<tr><td>sample ACF</td><td>\(\hat\rho(h)=\hat\gamma(h)/\hat\gamma(0)\)</td><td>1/n หักล้างกัน</td></tr>
+<tr><td>เส้นประ</td><td>\(\pm1.96/\sqrt n\approx\pm2/\sqrt n\)</td><td>ขอบ 95% ถ้าเป็น white noise</td></tr>
+<tr><td>difference</td><td>\(\nabla x_t=x_t-x_{t-1}\)</td><td>ตัวแรกไม่มีค่า</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> ห้าจุด 4, 6, 5, 9, 11</summary>
+<div class="copy">
+<p>\(\bar x=35/5=7\) · ส่วนเบี่ยงเบน −3, −1, −2, 2, 4 · \(\sum d^2=34\)</p>
+<p>lag 1: \(3+2-4+8=9\Rightarrow\hat\rho(1)=9/34=0.265\)</p>
+<p>lag 2: \(6-2-8=-4\Rightarrow\hat\rho(2)=-4/34=-0.118\)</p>
+<p>\(\nabla x_t\): —, 2, −1, 4, 2 · เส้น \(\pm2/\sqrt5=\pm0.894\) ไม่มี lag ไหนมีนัยสำคัญ</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>9</td><td>\((-3)(-1)+(-1)(-2)+(-2)(2)+(2)(4)\) ลบคูณลบเป็นบวก</td></tr>
+<tr><td>−4</td><td>\((-3)(-2)+(-1)(2)+(-2)(4)\)</td></tr></table>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> หุ้น Google 6 วัน · 2024 ข้อ 2</summary>
+<div class="copy">
+<p>\(\bar x=192.437\) · \(\sum d^2=97.663\)</p>
+<p>\(\hat\rho(1)=40.454/97.663=0.414,\quad \hat\rho(2)=-28.876/97.663=-0.296\)</p>
+<p>เส้น \(\pm2/\sqrt6=\pm0.816\) ไม่มี lag ไหนมีนัยสำคัญ</p>
+</div>
+</details>
+</details>
+
+<details class="blk tip"><summary><span class="chip c-tip">เกร็ดตอบ</span> 1 ข้อ</summary>
+<details class="tipcard"><summary>เส้นประใน correlogram คืออะไร · 2024 ข้อ 3ข</summary><div class="in">
+<div class="say">เส้นประคือขอบ 95% ของ \(\hat\rho(h)\) เมื่ออนุกรมเป็น white noise คำนวณจาก \(\pm1.96/\sqrt n\) แท่งที่ออกนอกเส้นต่างจาก 0 อย่างมีนัยสำคัญ</div>
+</div></details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-etsarima">
+<summary>ทักษะ 18 · ETS(A,N,N) กับ ARIMA(0,1,1)
+<span class="meta">ความเข้าใจ · 2024 ข้อ 3จ · <a href="exam-practice.html#u-etsarima">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> สองชื่อ โมเดลเดียวกัน</summary>
+<p>simple exponential smoothing ให้ค่าพยากรณ์เท่ากับ ARIMA(0,1,1) แปลง α เป็น θ ได้ตรงๆ</p>
+<p class="src"><b>อาจารย์:</b> Class 9-2 0:40:38 "ข้อสอบเก่าผมเคยออก" ต้องรู้ SES ↔ ARIMA(0,1,1) และ Holt ↔ ARIMA(0,2,2)</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> สูตรแปลง</summary>
+<table class="why">
+<tr><th>ETS</th><th>ARIMA</th><th>แปลง</th></tr>
+<tr><td>ETS(A,N,N) หรือ SES</td><td>ARIMA(0,1,1) \(\nabla X_t=w_t+\theta w_{t-1}\)</td><td>\(\theta=\alpha-1\), \(\alpha=1+\theta\)</td></tr>
+<tr><td>ETS(A,A,N) หรือ Holt</td><td>ARIMA(0,2,2)</td><td></td></tr>
+<tr><td>sigma ของ ETS</td><td>σ² ของ ARIMA</td><td>ยกกำลังสอง</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 ทาง</summary>
+<details class="ex1"><summary><b>แบบ A</b> จาก α ไป θ · 2024 ข้อ 3จ</summary>
+<div class="q">ETS(A,N,N) ของ Nile alpha = 0.2455, sigma = 144.2318</div>
+<div class="copy">
+<p>ได้ ETS(A,N,N) เทียบเท่า ARIMA(0,1,1) ที่ \(\theta=\alpha-1\)</p>
+<p>\(\hat\theta=0.2455-1=-0.7545,\quad \hat\sigma^2\approx144.2318^2=20802.8\)</p>
+<p>\((1-B)X_t=(1-0.7545B)w_t,\quad w_t\sim N(0,\ 20803)\)</p>
+</div>
+<p class="src">ฟิตตรงได้ ma1 = −0.7329 ใกล้กันแต่ไม่เท่า เพราะ likelihood คนละแบบ</p>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> จาก θ ไป α</summary>
+<div class="copy">
+<p>ma1 = −0.6: \(\alpha=1+(-0.6)=0.4\)</p>
+<p>\(\hat X_{t+1}=0.4X_t+0.6\hat X_t\) ค่าล่าสุดได้น้ำหนัก 0.4</p>
+</div>
+<p class="trap">โจทย์เขียน MA แบบ \(w_t-\theta w_{t-1}\) สูตรกลายเป็น \(\alpha=1-\theta\)</p>
+</details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-detrend">
+<summary>ทักษะ 17 · Detrending และ OLS trend ที่ error สัมพันธ์กัน
+<span class="meta">ความเข้าใจ · 2024 ข้อ 3ก, PRACTICE 1 ข้อ 6 · <a href="exam-practice.html#u-detrend">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ถอด trend สองทาง: ลบเส้น หรือ difference</summary>
+<p>regress x บน t ได้เส้น trend ลบออกได้อนุกรมที่ถอด trend · หรือ difference \(\nabla x_t\) ก็ลบ trend เส้นตรงได้เหมือนกัน</p>
+<p class="src"><b>อาจารย์:</b> Class 13 เฉลย 2024 ข้อ 3ก "ทำ regression เพื่อ detrend ก็ได้ ... decomposition ก็ได้" ตอบสั้นได้เต็ม</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> detrend เทียบ difference</summary>
+<table class="why">
+<tr><th></th><th>detrend</th><th>difference</th></tr>
+<tr><td>ทำ</td><td>\(x_t-\hat\beta_0-\hat\beta_1t\)</td><td>\(x_t-x_{t-1}\)</td></tr>
+<tr><td>ถ้า \(x_t=\beta_0+\beta_1t+y_t\)</td><td>ได้ \(y_t\)</td><td>ได้ \(\beta_1+y_t-y_{t-1}\)</td></tr>
+<tr><td>ข้อดี</td><td>ได้ค่าความชันไปตีความ</td><td>ไม่ต้องประมาณอะไร ใช้กับ random walk ได้</td></tr>
+<tr><td>ข้อเสีย</td><td>ใช้ไม่ได้ถ้า trend เป็น stochastic</td><td>ใส่ MA เพิ่มให้ noise</td></tr>
+</table>
+<p>OLS ที่ error มี autocorrelation: ค่าสัมประสิทธิ์ยังใช้ได้ แต่ s.e. และ p-value ผิด ใช้ GLS แก้</p>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 1 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> Nile OLS trend · 2024 ข้อ 3ก</summary>
+<div class="q">intercept 6129.46, slope −2.7143, p = 1.07e-06 ใช้ทำอะไรได้</div>
+<div class="copy">
+<p>\(\hat T_t=6129.46-2.7143t\) น้ำลดลงราว 2.71 ต่อปี ความชันมีนัยสำคัญ</p>
+<p>ใช้ detrend \(x_t-\hat T_t\) หรือใช้เป็นเส้น trend ใน decomposition \(F_t=(b_0+b_1t)SI_t\)</p>
+</div>
+</details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-ma1">
+<summary>ทักษะ 14 · MA(1): \(\rho_1\), \(|\rho_1|\le\tfrac12\), θ กับ 1/θ
+<span class="meta">คำนวณ · 2023 ข้อ 2 10 คะแนน, PRACTICE 1 ข้อ 4 · <a href="exam-practice.html#u-ma1">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> MA(1) จำได้แค่ lag เดียว และจำได้ไม่เกินครึ่ง</summary>
+<p>shock ค้างอยู่ 1 ช่วง ACF จึงมีค่าแค่ lag 1 แล้วตัด ค่า \(\rho_1\) สูงสุดแค่ ½ ที่ θ = 1</p>
+<p>θ กับ 1/θ ให้ ACF เท่ากัน เลือกตัวที่ \(|\theta|<1\) เพราะ invertible</p>
+<p class="src"><b>อาจารย์:</b> Class 13 พิสูจน์ \(|\rho_1|\le\tfrac12\) ต้องใช้แคลคูลัส แทนค่าทีละตัวได้ 0 คะแนน</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> พิสูจน์ \(|\rho_1|\le\tfrac12\) 5 ขั้น</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>เขียนว่า</th></tr>
+<tr><td>1</td><td>\(\gamma(0)=\sigma^2(1+\theta^2)\), \(\gamma(1)=\theta\sigma^2\)</td></tr>
+<tr><td>2</td><td>\(\rho(1)=\dfrac{\theta}{1+\theta^2}\)</td></tr>
+<tr><td>3</td><td>quotient rule \(\dfrac{d\rho}{d\theta}=\dfrac{1-\theta^2}{(1+\theta^2)^2}\)</td></tr>
+<tr><td>4</td><td>ตั้งเท่ากับ 0 ได้ \(\theta=\pm1\)</td></tr>
+<tr><td>5</td><td>θ = 1 ได้ ½ สูงสุด · θ = −1 ได้ −½ ต่ำสุด · \(\rho\to0\) เมื่อ \(\theta\to\pm\infty\)</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> แคลคูลัสที่ต้องใช้</summary>
+<table class="why">
+<tr><th>สมบัติ</th><th>สูตร</th><th>แทนเลขให้ดู</th></tr>
+<tr><td>quotient rule</td><td>\(\left(\dfrac uv\right)'=\dfrac{u'v-uv'}{v^2}\)</td><td>u = θ, u' = 1 · v = 1 + θ², v' = 2θ</td></tr>
+<tr><td>จุดสูงสุดต่ำสุด</td><td>อนุพันธ์ = 0</td><td>\(1-\theta^2=0\)</td></tr>
+<tr><td>θ กับ 1/θ</td><td>คูณ \(\theta^2/\theta^2\)</td><td>\(\dfrac{1/\theta}{1+1/\theta^2}=\dfrac{\theta}{\theta^2+1}\)</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> θ = 0.8 · PRACTICE 1 ข้อ 4</summary>
+<div class="copy">
+<p>\(\rho(0)=1,\quad \rho(1)=\dfrac{0.8}{1.64}=0.488,\quad \rho(h)=0\ \text{เมื่อ}\ h\ge2\)</p>
+</div>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> θ = −0.5 เทียบ θ = −2</summary>
+<div class="copy">
+<p>\(\rho_1=\dfrac{-0.5}{1.25}=-0.4,\qquad \rho_1=\dfrac{-2}{5}=-0.4\)</p>
+<p>ACF เท่ากัน แยกไม่ออก เลือก θ = −0.5 เพราะ invertible</p>
+</div>
+</details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-yw">
+<summary>ทักษะ 10 · Yule-Walker: ประมาณ φ และ σ² จาก \(\hat\gamma(h)\)
+<span class="meta">คำนวณ · 2022 ข้อ 5 8 คะแนน, PRACTICE 2 ข้อ 5 · <a href="exam-practice.html#u-yw">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> เอาสูตรทฤษฎีมาแทนค่าจาก sample</summary>
+<p>รู้ว่าโมเดลให้ γ เป็นฟังก์ชันของพารามิเตอร์ แทน γ ด้วย \(\hat\gamma\) จากข้อมูลแล้วแก้สมการหาพารามิเตอร์</p>
+<p class="src"><b>อาจารย์:</b> Class 8 "เจอ γ ให้แทนด้วย γ̂ จาก sample เจอ ρ ให้แทนด้วย ρ̂"</p>
+</details>
+
+<details class="blk step"><summary><span class="chip c-step">ขั้นตอน</span> 4 ขั้น</summary>
+<table class="why">
+<tr><th>ขั้น</th><th>ทำอะไร</th></tr>
+<tr><td>1</td><td>\(\hat\rho_h=\hat\gamma_h/\hat\gamma_0\)</td></tr>
+<tr><td>2</td><td>เขียนสมการตามโมเดล ดูตารางสมบัติ</td></tr>
+<tr><td>3</td><td>แก้สมการ AR(2) ใช้แทนค่า: ย้าย \(\phi_1\) จากสมการแรก แทนในสมการสอง</td></tr>
+<tr><td>4</td><td>หา \(\hat\sigma^2\)</td></tr>
+</table>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> สูตรตามโมเดล</summary>
+<table class="why">
+<tr><th>โมเดล</th><th>พารามิเตอร์</th><th>σ²</th></tr>
+<tr><td>AR(1)</td><td>\(\hat\phi=\hat\rho_1\)</td><td>\(\hat\gamma_0(1-\hat\phi^2)\)</td></tr>
+<tr><td>AR(2)</td><td>\(\rho_1=\phi_1+\phi_2\rho_1\) · \(\rho_2=\phi_1\rho_1+\phi_2\)</td><td>\(\hat\gamma_0(1-\hat\phi_1\hat\rho_1-\hat\phi_2\hat\rho_2)\)</td></tr>
+<tr><td>MA(1)</td><td>\(\hat\rho_1\theta^2-\theta+\hat\rho_1=0\) เลือก \(|\theta|<1\)</td><td>\(\hat\gamma_0/(1+\hat\theta^2)\)</td></tr>
+</table>
+<p>สมการ AR(2) มาจาก \(\rho_h=\phi_1\rho_{h-1}+\phi_2\rho_{h-2}\) แทน h = 1, 2 ใช้ \(\rho_0=1\), \(\rho_{-1}=\rho_1\)</p>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> AR(2) · 2022 ข้อ 5</summary>
+<div class="q">\(\hat\gamma(0)=2.4,\ \hat\gamma(1)=0.072,\ \hat\gamma(2)=0.792\)</div>
+<div class="copy">
+<p>\(\hat\rho_1=0.072/2.4=0.03,\quad \hat\rho_2=0.792/2.4=0.33\)</p>
+<p>\(0.03=\phi_1+0.03\phi_2\Rightarrow\phi_1=0.03-0.03\phi_2\)</p>
+<p>\(0.33=0.03(0.03-0.03\phi_2)+\phi_2=0.0009+0.9991\phi_2\)</p>
+<p>\(\hat\phi_2=0.3291/0.9991=0.3294,\quad \hat\phi_1=0.03-0.03(0.3294)=0.0201\)</p>
+<p>\(\hat\sigma^2=2.4(1-0.0201\times0.03-0.3294\times0.33)=2.4(0.8907)=2.138\)</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>0.9991</td><td>\(\phi_2-0.0009\phi_2\) รวมพจน์ \(\phi_2\)</td></tr>
+<tr><td>0.3291</td><td>ย้าย 0.0009 ไปซ้าย \(0.33-0.0009\)</td></tr></table>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> AR(1) ข้อมูลเดียวกัน · PRACTICE 2 ข้อ 5</summary>
+<div class="copy">
+<p>\(\hat\phi=\hat\rho_1=0.03,\quad \hat\sigma^2=2.4(1-0.03^2)=2.398\)</p>
+</div>
+</details>
+<details class="ex1"><summary><b>แบบ C</b> MA(1) · \(\hat\gamma_0=2.5,\ \hat\rho_1=0.4\)</summary>
+<div class="copy">
+<p>\(0.4\theta^2-\theta+0.4=0\Rightarrow\theta=\dfrac{1\pm0.6}{0.8}=2,\ 0.5\)</p>
+<p>เลือก invertible \(\hat\theta=0.5\) · \(\hat\sigma^2=2.5/1.25=2\)</p>
+</div>
+<p class="trap">ถ้า \(\hat\rho_1>0.5\) เช่น 0.6 ได้ D ติดลบ ไม่มีคำตอบ MA(1) ไม่เหมาะกับข้อมูล</p>
+</details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-psi">
+<summary>ทักษะ 7 · ψ weights และ π weights
+<span class="meta">คำนวณ · 2022 ข้อ 4, PRACTICE 2 ข้อ 3e · สองปีหลังไม่ออก · <a href="exam-practice.html#u-psi">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> เขียน X เป็นผลรวมของ shock ในอดีต</summary>
+<p>ψ: \(X_t=\sum\psi_jw_{t-j}\) ใช้ได้เมื่อ causal · π: \(w_t=\sum\pi_jX_{t-j}\) ใช้ได้เมื่อ invertible ตรวจรากก่อนเสมอ</p>
+<p class="src"><b>อาจารย์:</b> Class 13 สองปีหลังถามแค่ causal/invertible ไม่ถึง ψ</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> สองวิธี</summary>
+<table class="why">
+<tr><th>วิธี</th><th>สูตร</th><th>ใช้กับ</th></tr>
+<tr><td>อนุกรมเรขาคณิต</td><td>\(\dfrac{1}{1-az}=1+az+a^2z^2+\dots\) แล้วคูณ \(\theta(z)\)</td><td>AR อันดับ 1</td></tr>
+<tr><td>เทียบสัมประสิทธิ์</td><td>\(\Phi(z)\psi(z)=\theta(z)\) เทียบเลขหน้า \(z^0, z^1, \dots\)</td><td>ทุกกรณี รวม AR(2)</td></tr>
+<tr><td>π</td><td>\(\pi(z)=\Phi(z)/\theta(z)\)</td><td>สลับบทบาท</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 2 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> ARMA(1,1) · 2022 ข้อ 4 · \(X_t-0.5X_{t-1}=w_t+0.4w_{t-1}\)</summary>
+<div class="copy">
+<p>causal: \(x=2>1\)</p>
+<p>\(\psi(z)=(1+0.4z)(1+0.5z+0.25z^2+0.125z^3+0.0625z^4)\)</p>
+<p>\(\psi=1,\ 0.9,\ 0.45,\ 0.225,\ 0.1125\)</p>
+<p>invertible: \(x=-2.5\) · \(\pi(z)=(1-0.5z)(1-0.4z+0.16z^2-0.064z^3+0.0256z^4)\)</p>
+<p>\(\pi=1,\ -0.9,\ 0.36,\ -0.144,\ 0.0576\)</p>
+</div>
+<table class="why"><tr><th>ตัวเลข</th><th>มาจากไหน</th></tr>
+<tr><td>0.9</td><td>เลขหน้า z: \(0.5\cdot1+0.4\cdot1\)</td></tr>
+<tr><td>0.45</td><td>เลขหน้า \(z^2\): \(0.25+0.4\times0.5\)</td></tr></table>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> AR(2) เทียบสัมประสิทธิ์ · \(X_t+0.81X_{t-2}=w_t+\tfrac13w_{t-1}\)</summary>
+<div class="copy">
+<p>\((1+0.81z^2)(\psi_0+\psi_1z+\psi_2z^2+\dots)=1+\tfrac13z\)</p>
+<p>\(\psi_0=1,\ \psi_1=\tfrac13,\ \psi_2=-0.81,\ \psi_3=-0.27,\ \psi_4=0.6561\)</p>
+</div>
+<p class="src">\(z^2\): \(\psi_2+0.81\psi_0=0\) · \(z^3\): \(\psi_3+0.81\psi_1=0\) · \(z^4\): \(\psi_4+0.81\psi_2=0\)</p>
+</details>
+</details>
+
+</div>
+</details>
+
+<details class="skill" id="cs-acfpacf">
+<summary>ทักษะ 13 · บรรยาย ACF/PACF และทายโมเดลจากกราฟ
+<span class="meta">ความเข้าใจ · 2022 ข้อ 2 6a, PRACTICE 1–2 · <a href="exam-practice.html#u-acfpacf">ฝึกเต็ม</a></span></summary>
+<div class="body">
+
+<details class="blk idea"><summary><span class="chip c-idea">แนวคิด</span> ตัวไหนตัด ตัวไหนค่อยๆ ลด</summary>
+<p>MA จำ shock ได้ q ช่วง ACF เลยตัดหลัง q · AR ส่งค่าตัวเองต่อไปเรื่อยๆ ACF เลยค่อยๆ ลด แต่ PACF ตัดหลัง p</p>
+<p class="src"><b>อาจารย์:</b> Class 13 ข้อบรรยาย ACF/PACF ไม่ออก เพราะเปิดตำราได้ ทายโมเดลจากกราฟยังต้องทำเป็น</p>
+</details>
+
+<details class="blk prop"><summary><span class="chip c-prop">สมบัติที่ต้องรู้</span> ตารางเดียวตอบได้ทุกข้อ</summary>
+<table class="why">
+<tr><th>โมเดล</th><th>ACF</th><th>PACF</th></tr>
+<tr><td>AR(p)</td><td>ค่อยๆ ลด exponential หรือคลื่นหด</td><td>ตัดหลัง lag p</td></tr>
+<tr><td>MA(q)</td><td>ตัดหลัง lag q</td><td>ค่อยๆ ลด</td></tr>
+<tr><td>ARMA(p,q)</td><td>ค่อยๆ ลดหลัง lag q</td><td>ค่อยๆ ลดหลัง lag p</td></tr>
+<tr><td>ARIMA d ≥ 1</td><td>ลดช้ามาก ใกล้ 1 หลาย lag</td><td>lag 1 ใกล้ 1</td></tr>
+<tr><td>ฤดูกาล AR(P)ₛ</td><td>ค่อยๆ ลดที่ s, 2s, 3s เป็น 0 ที่อื่น</td><td>มีค่าที่ s…Ps แล้วตัด</td></tr>
+<tr><td>ฤดูกาล MA(Q)ₛ</td><td>มีค่าที่ s…Qs แล้วตัด</td><td>ค่อยๆ ลดที่ s, 2s</td></tr>
+<tr><td>AR(1)</td><td>\(\rho_h=\phi^h\) สลับเครื่องหมายถ้า φ &lt; 0</td><td>\(\phi_{11}=\phi\)</td></tr>
+<tr><td>MA(1)</td><td>\(\rho_1=\theta/(1+\theta^2)\), \(|\rho_1|\le\tfrac12\)</td><td>ค่อยๆ ลด</td></tr>
+</table>
+</details>
+
+<details class="blk ex"><summary><span class="chip c-ex">ตัวอย่างโจทย์</span> 3 แบบ</summary>
+<details class="ex1"><summary><b>แบบ A</b> ฤดูกาล \(AR(2)_3\) และ \(MA(2)_4\) · 2022 ข้อ 2</summary>
+<div class="copy">
+<p>\(AR(2)_3\): \(X_t=\Phi_1X_{t-3}+\Phi_2X_{t-6}+w_t\) ACF ค่อยๆ ลดที่ lag 3, 6, 9 เป็น 0 ที่อื่น PACF มีที่ 3 กับ 6 แล้วตัด</p>
+<p>\(MA(2)_4\): ACF มีแค่ lag 4 กับ 8 แล้วตัด PACF ค่อยๆ ลดที่ 4, 8, 12</p>
+</div>
+</details>
+<details class="ex1"><summary><b>แบบ B</b> spike เดียวที่ lag 1 ทั้งคู่ · 2022 ข้อ 6a</summary>
+<div class="copy">
+<p>ACF ตัดหลัง lag 1 ชี้ MA(1) · PACF ตัดหลัง lag 1 ชี้ AR(1)</p>
+<p>ค่า lag 1 เล็กราว 0.12 สองโมเดลแทบเหมือนกัน เลือกตัวใดก็ได้</p>
+</div>
+</details>
+<details class="ex1"><summary><b>แบบ C</b> lag scatterplot · PRACTICE 1 ข้อ 2</summary>
+<div class="copy">
+<p>lag 1 เอียงลงชัด lag 2 เอียงขึ้นอ่อน lag 3–4 กลม → \(q=2\)</p>
+</div>
+</details>
+</details>
+
+</div>
+</details>
+
+<h2 id="tips">ส่วน ข · คลังเกร็ดไว้อ้างตอนตอบ</h2>
+<p>รูปแบบเดียวกันทุกข้อ คำถาม → ได้ถ้า / ไม่ได้ถ้า → ประโยคลอกตอบ → ที่มา</p>
+
+<h3>เลือกโมเดล</h3>
+
+<details class="tipcard" id="tip-logl"><summary>1 · เทียบ log likelihood ของสองโมเดลตรง ๆ ได้ไหม</summary><div class="in">
+<div class="yes"><b>ได้ ถ้า</b><span>ข้อมูลชุดเดียวกัน d เท่ากัน transform เท่ากัน และจำนวนพารามิเตอร์เท่ากัน</span></div>
+<div class="no"><b>ไม่ได้ ถ้า</b><span>k ต่างกัน เพราะโมเดลใหญ่ได้ log L สูงกว่าเสมอ หรือ d ต่างกัน, log กับไม่ log, ETS กับ ARIMA เพราะ likelihood คิดบนข้อมูลคนละชุด</span></div>
+<div class="say">log L ไม่หักค่าพารามิเตอร์ เพิ่มพารามิเตอร์ log L ไม่มีทางลด ใช้ log L เลือกจะได้โมเดลใหญ่สุดเสมอ ให้ใช้ AIC หรือ BIC แทน</div>
+<p class="src"><b>อาจารย์:</b> Class 7-1 0:32 AIC คือ balance likelihood กับจำนวนพารามิเตอร์ · d กับ transform เป็นหลักทั่วไป อาจารย์ไม่ได้พูดตรง ๆ</p>
+</div></details>
+
+<details class="tipcard" id="tip-noaic"><summary>2 · ถ้าไม่ใช้ AIC ใช้อะไรแทน</summary><div class="in">
+<table class="why">
+<tr><th>สถานการณ์</th><th>ใช้</th><th>เพราะ</th></tr>
+<tr><td>อยากได้โมเดลเล็ก</td><td>BIC</td><td>หัก \(k\ln n\) หนักกว่า 2k เมื่อ n ≥ 8</td></tr>
+<tr><td>ข้อมูลน้อย</td><td>AICc</td><td>แก้ AIC สำหรับ n เล็ก auto.arima ใช้ตัวนี้</td></tr>
+<tr><td>VAR</td><td>VARselect: AIC, HQ, SC, FPE</td><td>SC คือ BIC</td></tr>
+<tr><td>ข้ามตระกูล ETS กับ ARIMA หรือ NNAR</td><td>RMSE, MAE บน test set หรือ tsCV</td><td>AIC เทียบข้ามตระกูลไม่ได้</td></tr>
+</table>
+<div class="say">AIC ไม่ใช่เกณฑ์เดียว ต้องดู BIC, residual diagnostics, นัยสำคัญของพารามิเตอร์ และความแม่นนอกตัวอย่างด้วย</div>
+<p class="src"><b>อาจารย์:</b> Class 9-2 0:35:01 auto.arima ใช้ AICc · Class 10 1:28 "SC มันคือ BIC"</p>
+</div></details>
+
+<details class="tipcard" id="tip-diff2"><summary>3 · AIC ต่างกันเท่าไรถึงถือว่าต่างจริง</summary><div class="in">
+<div class="no"><b>ไม่ต่าง ถ้า</b><span>ต่างไม่ถึง 2 ถือว่าพอ ๆ กัน เลือกตัวพารามิเตอร์น้อยกว่า</span></div>
+<div class="say">AIC ห่างไม่ถึง 2 หลักฐานแยกสองโมเดลอ่อน ตาม parsimony เลือกโมเดลที่เล็กกว่า</div>
+</div></details>
+
+<details class="tipcard" id="tip-sas"><summary>4 · AIC ยิ่งมากยิ่งดีได้ไหม</summary><div class="in">
+<div class="yes"><b>ได้ ถ้า</b><span>โปรแกรมใช้ +2 log L เช่น SAS บางรุ่น</span></div>
+<div class="no"><b>ไม่ได้ ถ้า</b><span>เป็น R ซึ่งใช้ −2 log L ต่ำดีเสมอ</span></div>
+<p class="src"><b>อาจารย์:</b> Class 7-1 0:36:54 "ระวังซอฟต์แวร์"</p>
+</div></details>
+
+<details class="tipcard" id="tip-weird"><summary>5 · เพิ่มพารามิเตอร์ 1 ตัวแล้ว AIC ขึ้นเกิน 2 แปลกไหม</summary><div class="in">
+<div class="yes"><b>แปลก</b><span>log L ของโมเดลใหญ่ต้องไม่น้อยกว่าตัวเล็ก AIC ขึ้นได้ไม่เกิน 2 ถ้าเกินคือ R หาค่าสูงสุดไม่เจอ</span></div>
+<div class="say">ทางทฤษฎี AIC ของโมเดลที่ใหญ่กว่า 1 พารามิเตอร์ต้องไม่สูงกว่าเกิน 2 ค่านี้ผิดปกติ น่าจะเกิดจาก optimizer ไม่ converge</div>
+</div></details>
+
+<details class="tipcard" id="tip-family"><summary>6 · ETS กับ ARIMA ตัดสินด้วยอะไร</summary><div class="in">
+<div class="no"><b>ไม่ใช่</b><span>AIC หรือ AICc เพราะ likelihood คิดคนละแบบ</span></div>
+<div class="yes"><b>ใช้</b><span>accuracy บน test set เดียวกัน หรือ tsCV</span></div>
+<p class="src"><b>อาจารย์:</b> Class 9-2 0:41:46 · Class 10 2:11:58 ห้ามเทียบ AIC ข้ามตระกูล</p>
+</div></details>
+
+
+<details class="tipcard" id="tip-logscale"><summary>7 · AIC ของโมเดล log กับไม่ log เทียบกันได้ไหม</summary><div class="in">
+<div class="no"><b>ไม่ได้</b><span>likelihood คิดบนข้อมูลคนละสเกล ค่า AIC ห่างกันเพราะหน่วย ไม่ใช่เพราะโมเดลดีกว่า</span></div>
+<div class="yes"><b>ใช้แทน</b><span>ดู residual diagnostics หรือแปลงค่าพยากรณ์กลับสเกลเดิมแล้วเทียบ RMSE บน test</span></div>
+<p class="src"><b>อาจารย์:</b> Class 13 เน้นว่า AIC เทียบไม่ได้ระหว่างโมเดลที่ log กับไม่ log</p>
+</div></details>
+
+<details class="tipcard" id="tip-dcomp"><summary>8 · d ต่างกันเทียบ AIC ได้ไหม</summary><div class="in">
+<div class="no"><b>ไม่ได้</b><span>difference แล้วข้อมูลที่คิด likelihood เปลี่ยน จำนวนจุดก็ลดลง เช่น ARIMA ที่มี D = 1 ได้ 227.9 ส่วน ETS ได้ 344.2 ห่างกันเพราะสเกลและตระกูล</span></div>
+<div class="yes"><b>ได้ ถ้า</b><span>d, D เท่ากัน ข้อมูลชุดเดียวกัน เช่น lap ทั้งสองโมเดลใช้ d = 1 เทียบ AICc ได้</span></div>
+</div></details>
+
+<details class="tipcard" id="tip-aicvsrmse"><summary>9 · ใช้ AIC หรือ RMSE บน test เลือกโมเดล</summary><div class="in">
+<table class="why">
+<tr><th>สถานการณ์</th><th>ใช้</th></tr>
+<tr><td>ตระกูลเดียวกัน ข้อมูลเดียวกัน d เท่ากัน</td><td>AIC, AICc, BIC บน train</td></tr>
+<tr><td>ข้ามตระกูล หรือมี NNAR</td><td>RMSE, MAE บน test หรือ tsCV</td></tr>
+<tr><td>σ² train ต่ำมาก แต่ RMSE test สูง</td><td>overfitting อย่าเลือก</td></tr>
+</table>
+</div></details>
+
+<h3>Test และ diagnostic</h3>
+
+<details class="tipcard" id="tip-h0"><summary>10 · H0 ของทุก test ในวิชา</summary><div class="in">
+<table class="why">
+<tr><th>test</th><th>\(H_0\)</th><th>p &lt; 0.05 แปลว่า</th></tr>
+<tr><td>ADF adf.test</td><td>ไม่ stationary มี unit root</td><td>stationary</td></tr>
+<tr><td>Ljung-Box</td><td>residual ไม่ correlate โมเดลเหมาะสม</td><td>โมเดลไม่ผ่าน</td></tr>
+<tr><td>Shapiro-Wilk</td><td>normal</td><td>ไม่ normal</td></tr>
+<tr><td>Jarque-Bera</td><td>normal</td><td>ไม่ normal</td></tr>
+<tr><td>ArchTest</td><td>ไม่มี ARCH effect</td><td>มี ARCH ต้องใช้ GARCH</td></tr>
+<tr><td>Granger</td><td>X ไม่ Granger-cause Y</td><td>lag ของ X ช่วยพยากรณ์ Y</td></tr>
+<tr><td>t-test ของสัมประสิทธิ์</td><td>สัมประสิทธิ์ = 0</td><td>มีนัยสำคัญ ใช้ \(|\text{coef}/\text{s.e.}|>2\) แทนได้</td></tr>
+</table>
+<div class="say">ADF ตรงข้ามกับตัวอื่น p น้อยคือดี ส่วน Ljung-Box, Shapiro, JB p มากคือผ่าน</div>
+</div></details>
+
+<details class="tipcard" id="tip-onespike"><summary>11 · ACF ของ residual หลุดเส้น 1 แท่ง ตกไหม</summary><div class="in">
+<div class="yes"><b>ไม่ตก ถ้า</b><span>หลุดเล็กน้อย 1 จาก 20 lag ที่ระดับ 5% เกิดได้โดยบังเอิญ และ Ljung-Box ยังผ่าน</span></div>
+<div class="no"><b>ตก ถ้า</b><span>หลุดที่ lag สำคัญ เช่น 1, 2 หรือ 12 ของข้อมูลรายเดือน หรือ Ljung-Box ต่ำกว่า 0.05</span></div>
+</div></details>
+
+<details class="tipcard" id="tip-notchecked"><summary>12 · กราฟที่ให้มาตรวจอะไรไม่ได้</summary><div class="in">
+<table class="why">
+<tr><th>ให้มา</th><th>ตรวจไม่ได้</th><th>ต้องใช้</th></tr>
+<tr><td>ACF ของ residual</td><td>normal, variance คงที่</td><td>QQ, Shapiro, std. residual ตามเวลา</td></tr>
+<tr><td>QQ plot</td><td>correlation</td><td>ACF, Ljung-Box</td></tr>
+<tr><td>tsdiag ทั้งชุด</td><td>normal, variance เปลี่ยนเป็นช่วง</td><td>shapiro, ACF ของ residual², ArchTest</td></tr>
+</table>
+</div></details>
+
+<h3>Stationary, transform, differencing</h3>
+
+<details class="tipcard" id="tip-statquick"><summary>13 · ตอบเร็วว่า stationary ไหม</summary><div class="in">
+<table class="why">
+<tr><th>โมเดล</th><th>stationary</th></tr>
+<tr><td>white noise, MA(q) จำกัด</td><td>เสมอ</td></tr>
+<tr><td>AR, ARMA</td><td>เมื่อ causal รากของ Φ เกิน 1</td></tr>
+<tr><td>random walk \(x_t=x_{t-1}+w_t\)</td><td>ไม่ \(\operatorname{Var}=t\sigma^2\)</td></tr>
+<tr><td>มี \(\beta t\) ใน mean</td><td>ไม่ mean ขึ้นกับ t</td></tr>
+<tr><td>ARIMA d ≥ 1</td><td>ตัวมันไม่ แต่หลัง difference นิ่ง</td></tr>
+</table>
+</div></details>
+
+<details class="tipcard" id="tip-log"><summary>14 · ควร log หรือ Box-Cox เมื่อไร</summary><div class="in">
+<div class="yes"><b>ควร ถ้า</b><span>ความแกว่งโตตามระดับข้อมูล หรือ QQ ของ residual หางยาวข้างเดียว</span></div>
+<div class="no"><b>อย่าลืม</b><span>auto.arima ไม่ transform ให้ ต้องทำเอง และแปลงค่าพยากรณ์กลับด้วย exp</span></div>
+<p class="src"><b>อาจารย์:</b> Class 9-2 0:36:27</p>
+</div></details>
+
+<details class="tipcard" id="tip-d"><summary>15 · difference กี่ครั้ง</summary><div class="in">
+<div class="yes"><b>d = 1</b><span>trend เส้นตรง ขึ้นหรือลงอย่างเดียว</span></div>
+<div class="yes"><b>d = 2</b><span>trend กำลังสอง</span></div>
+<div class="yes"><b>D = 1</b><span>ฤดูกาลคงที่ทุกปี ACF ลดช้าที่ lag 12, 24</span></div>
+<div class="no"><b>เกิน ถ้า</b><span>ราก MA เท่ากับ 1 หรือ ma1 ใกล้ −1 · ACF lag 1 ใกล้ −0.5</span></div>
+<p class="src"><b>อาจารย์:</b> Class 6 เลือก d ตามรูป trend · Class 7-1 "อย่าให้ differencing เยอะเกินไป"</p>
+</div></details>
+
+<h3>R output</h3>
+
+<details class="tipcard" id="tip-sigma"><summary>16 · sigma กับ sigma^2 ใน output</summary><div class="in">
+<div class="yes"><b>arima</b><span>พิมพ์ sigma^2 ใส่ใน \(N(0,\sigma^2)\) ได้เลย</span></div>
+<div class="yes"><b>ets</b><span>พิมพ์ sigma เป็นส่วนเบี่ยงเบนมาตรฐาน ต้องยกกำลังสอง</span></div>
+</div></details>
+
+<details class="tipcard" id="tip-intercept"><summary>17 · intercept ใน arima คือ mean ไม่ใช่ค่าคงที่</summary><div class="in">
+<div class="yes"><b>เขียน</b><span>\(\Phi(B)(X_t-\mu)=\theta(B)w_t\)</span></div>
+<div class="no"><b>ไม่ใช่</b><span>\(X_t=c+\phi X_{t-1}+\dots\) ที่ c = intercept · ค่าคงที่จริงคือ \(c=\mu(1-\phi_1-\dots-\phi_p)\)</span></div>
+</div></details>
+
+</main>
+<script>
+(function () {
+  const q = document.getElementById('q'), hits = document.getElementById('hits');
+  const all = () => document.querySelectorAll('main details');
+  document.getElementById('openall').onclick = () => all().forEach(d => d.open = true);
+  document.getElementById('closeall').onclick = () => all().forEach(d => d.open = false);
+  // ค้น: เปิด details ที่มีคำ และพับอันที่ไม่มี
+  q.addEventListener('input', () => {
+    const s = q.value.trim().toLowerCase();
+    let n = 0;
+    document.querySelectorAll('details.skill, details.tipcard').forEach(d => {
+      const ok = !s || d.textContent.toLowerCase().includes(s);
+      d.style.display = ok ? '' : 'none';
+      if (s && ok) { n++; d.open = true; d.querySelectorAll('details').forEach(x => { x.open = x.textContent.toLowerCase().includes(s); }); }
+    });
+    hits.textContent = s ? 'เจอ ' + n + ' กล่อง' : '';
+  });
+  // ลิงก์ไปเกร็ด: กางให้เอง
+  // ลิงก์ในหน้า: กางกล่องปลายทางให้เอง
+  document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', () => {
+    const d = document.querySelector(a.getAttribute('href'));
+    if (d && d.tagName === 'DETAILS') d.open = true;
+  }));
+})();
+</script>
+</body>
+</html>
