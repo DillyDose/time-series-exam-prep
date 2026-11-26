@@ -1789,17 +1789,18 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <li><b>lag 0</b>: เขียน \(\gamma(0)=cov(x_t,x_t)\) แทนสมการลงไปทั้งสองฝั่ง</li>
 <li>คูณกระจาย cov ทีละคู่ ทุกพจน์ฝั่งซ้ายกับทุกพจน์ฝั่งขวา</li>
 <li>ดูทีละคู่ว่าชนไหม คู่ที่ w เวลาเดียวกันชน ได้ \(\sigma^2\) ดึงสัมประสิทธิ์ออกมาคูณกัน คู่ที่คนละเวลาได้ 0 เพราะ white noise เป็น independent</li>
-<li><b>lag 1</b>: เขียน \(\gamma(1)=cov(x_t,x_{t+1})\) ฝั่งขวาเลื่อน index ไปหนึ่ง แล้วหาคู่ที่ชนเหมือนเดิม</li>
-<li>ทำ lag 2, 3, … ต่อจนถึง lag ที่ไม่มีคู่ไหนชนเลย lag นั้นและ lag ที่สูงกว่าเป็น 0</li>
+<li><b>lag 1</b>: เขียน \(\gamma(1)=cov(x_t,x_{t-1})\) ฝั่งขวา<b>ถอย</b> index ลงหนึ่งทุกตัว แล้วหาคู่ที่ชนเหมือนเดิม</li>
+<li>ทำ lag 2, 3, … ต่อ ฝั่งขวาเป็น \(x_{t-2}, x_{t-3},\dots\) จนถึง lag ที่ไม่มีคู่ไหนชนเลย lag นั้นและ lag ที่สูงกว่าเป็น 0</li>
 <li>สรุป mean กับ \(\gamma(h)\) ไม่มี t → stationary</li>
 </ol>
+<p><b>ทุกข้อในทักษะนี้ใช้ \(\gamma(h)=cov(x_t,x_{t-h})\)</b> คือจับคู่ \(x_t\) กับจุดที่ถอยหลังไป h ช่อง ใช้ \(x_{t+h}\) ก็ได้ผลเท่ากัน อาจารย์บอกใน Class 2 ว่า \"จะได้อันเดียวกันเลย\" แต่ให้เลือกแบบเดียวแล้วใช้ทั้งข้อ</p>
 <p>ถ้ามี w คูณกันหรือยกกำลัง ใช้ \(cov(X,Y)=E(XY)-E(X)E(Y)\) ตาม ก13 แล้วหาคู่ที่ชนใน E แทน w ที่อยู่ตัวเดียวทำให้ E เป็น 0 ใช้ moment ของ normal: \(E(w)=0\), \(E(w^2)=\sigma^2\), \(E(w^3)=0\), \(E(w^4)=3\sigma^4\)</p>
 <table class="why"><caption>ตัวอย่างที่อาจารย์ทำในห้อง: \(x_t=w_{t-1}+2w_t+w_{t+1}\)</caption>
 <tr><th>lag</th><th>เขียน</th><th>คู่ที่ชน</th><th>\(\gamma(h)\)</th></tr>
 <tr><td>0</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t-1}+2w_t+w_{t+1})\)</td><td>\(w_{t-1}\)·\(w_{t-1}\), \(2w_t\)·\(2w_t\), \(w_{t+1}\)·\(w_{t+1}\)</td><td>\(\sigma^2+4\sigma^2+\sigma^2=6\sigma^2\)</td></tr>
-<tr><td>1</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_t+2w_{t+1}+w_{t+2})\)</td><td>\(2w_t\)·\(w_t\), \(w_{t+1}\)·\(2w_{t+1}\)</td><td>\(2\sigma^2+2\sigma^2=4\sigma^2\)</td></tr>
-<tr><td>2</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t+1}+2w_{t+2}+w_{t+3})\)</td><td>\(w_{t+1}\)·\(w_{t+1}\)</td><td>\(\sigma^2\)</td></tr>
-<tr><td>3</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t+2}+2w_{t+3}+w_{t+4})\)</td><td>ไม่มี</td><td>0</td></tr>
+<tr><td>1</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t-2}+2w_{t-1}+w_t)\)</td><td>\(w_{t-1}\)·\(2w_{t-1}\), \(2w_t\)·\(w_t\)</td><td>\(2\sigma^2+2\sigma^2=4\sigma^2\)</td></tr>
+<tr><td>2</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t-3}+2w_{t-2}+w_{t-1})\)</td><td>\(w_{t-1}\)·\(w_{t-1}\)</td><td>\(\sigma^2\)</td></tr>
+<tr><td>3</td><td>\(cov(w_{t-1}+2w_t+w_{t+1},\ w_{t-4}+2w_{t-3}+w_{t-2})\)</td><td>ไม่มี</td><td>0</td></tr>
 </table>
 <p class="trap">⚠ อาจารย์เตือนสองเรื่อง (1) อย่าเดา pattern นักศึกษาตอบ lag 2 = 2σ² เพราะเห็น 6 → 4 → 2 อาจารย์บอกว่า "โดนหลอก" ต้องคูณกระจายจริง (2) อย่าหยุดเร็ว \(x_t=w_t-w_{t-3}\) มี lag 1, 2 เป็น 0 แต่ lag 3 = −σ²</p>
 </div>
@@ -1813,19 +1814,19 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="model-answer">
 <div class="copy">
 <p>Mean: \(E(X_t)=E(w_tw_{t-1})=E(w_t)E(w_{t-1})=0\cdot0=0\)</p>
-<p>เพราะ mean = 0 ได้ \(\gamma(h)=cov(X_t,X_{t+h})=E(X_tX_{t+h})-0\)</p>
+<p>เพราะ mean = 0 ได้ \(\gamma(h)=cov(X_t,X_{t-h})=E(X_tX_{t-h})-0\)</p>
 <p><b>lag 0</b>: \(\gamma(0)=cov(w_tw_{t-1},\ w_tw_{t-1})=E(w_tw_{t-1}\cdot w_tw_{t-1})=E(w_t^2)E(w_{t-1}^2)=\sigma^2\cdot\sigma^2=\sigma^4\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(w_tw_{t-1},\ w_{t+1}w_t)=E(w_tw_{t-1}\cdot w_{t+1}w_t)\)</p>
-<p>\(=E(w_t^2)E(w_{t-1})E(w_{t+1})=\sigma^2\cdot0\cdot0=0\)</p>
-<p><b>lag 2</b>: \(\gamma(2)=cov(w_tw_{t-1},\ w_{t+2}w_{t+1})=E(w_t)E(w_{t-1})E(w_{t+1})E(w_{t+2})=0\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(w_tw_{t-1},\ w_{t-1}w_{t-2})=E(w_tw_{t-1}\cdot w_{t-1}w_{t-2})\)</p>
+<p>\(=E(w_t)E(w_{t-1}^2)E(w_{t-2})=0\cdot\sigma^2\cdot0=0\)</p>
+<p><b>lag 2</b>: \(\gamma(2)=cov(w_tw_{t-1},\ w_{t-2}w_{t-3})=E(w_t)E(w_{t-1})E(w_{t-2})E(w_{t-3})=0\)</p>
 <p>lag ≥ 2 ไม่มี w ชนกันเลย \(\gamma(h)=0\)</p>
 <p>\(E(X_t)=0\) · \(\gamma(0)=\sigma^4\) · \(\gamma(h)=0\) เมื่อ \(h\ge1\) ไม่ขึ้นกับ t สรุป \(X_t\) stationary</p>
 </div>
 <table class="why"><caption>หาคู่ที่ชนทีละ lag</caption>
 <tr><th>lag</th><th>w ในสองฝั่ง</th><th>ชน</th><th>ผล</th></tr>
 <tr><td>0</td><td>\(w_t, w_{t-1}\) กับ \(w_t, w_{t-1}\)</td><td>ชนทั้งสองตัว</td><td>\(\sigma^2\cdot\sigma^2=\sigma^4\)</td></tr>
-<tr><td>1</td><td>\(w_t, w_{t-1}\) กับ \(w_{t+1}, w_t\)</td><td>ชนแค่ \(w_t\) · \(w_{t-1}\), \(w_{t+1}\) อยู่ตัวเดียว</td><td>มี E(w) = 0 คูณอยู่ ได้ 0</td></tr>
-<tr><td>2</td><td>\(w_t, w_{t-1}\) กับ \(w_{t+2}, w_{t+1}\)</td><td>ไม่มี</td><td>0 และ lag สูงกว่านี้ก็ 0</td></tr>
+<tr><td>1</td><td>\(w_t, w_{t-1}\) กับ \(w_{t-1}, w_{t-2}\)</td><td>ชนแค่ \(w_{t-1}\) · \(w_t\), \(w_{t-2}\) อยู่ตัวเดียว</td><td>มี E(w) = 0 คูณอยู่ ได้ 0</td></tr>
+<tr><td>2</td><td>\(w_t, w_{t-1}\) กับ \(w_{t-2}, w_{t-3}\)</td><td>ไม่มี</td><td>0 และ lag สูงกว่านี้ก็ 0</td></tr>
 </table>
 <p class="trap">⚠ ข้อนี้ต่างจาก MA ตรงที่ lag 1 มีคู่ชนแต่ยังได้ 0 เพราะต้องชน<b>ครบทุกตัว</b> w ที่เหลืออยู่ตัวเดียวทำให้ทั้งพจน์เป็น 0 ผลคือ white noise ที่ไม่ใช่ iid</p>
 </div>
@@ -1842,15 +1843,17 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>ให้ \(Var(X)=\sigma_X^2\)</p>
 <p>Mean: \(E(Y_t)=(-1)^tE(X)=(-1)^t\cdot0=0\)</p>
 <p><b>lag 0</b>: \(\gamma(0)=cov((-1)^tX,\ (-1)^tX)=(-1)^t(-1)^t\,cov(X,X)=(-1)^{2t}\sigma_X^2=\sigma_X^2\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov((-1)^tX,\ (-1)^{t+1}X)=(-1)^{2t+1}\sigma_X^2=-\sigma_X^2\)</p>
-<p><b>lag h</b>: \(\gamma(h)=cov((-1)^tX,\ (-1)^{t+h}X)=(-1)^{2t+h}\sigma_X^2=(-1)^h\sigma_X^2\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov((-1)^tX,\ (-1)^{t-1}X)=(-1)^{2t-1}\sigma_X^2=-\sigma_X^2\)</p>
+<p><b>lag h</b>: \(\gamma(h)=cov((-1)^tX,\ (-1)^{t-h}X)=(-1)^{2t-h}\sigma_X^2\)</p>
+<p>\(=(-1)^{2t}(-1)^{-h}\sigma_X^2=(-1)^{-h}\sigma_X^2=(-1)^h\sigma_X^2\)</p>
 <p>\(E(Y_t)=0\) และ \(\gamma(h)=(-1)^h\sigma_X^2\) ไม่ขึ้นกับ t สรุป \(Y_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
 <tr><td>1</td><td>ดึง \((-1)^t\) ออกจาก cov</td><td>เป็นแค่ +1 หรือ −1 ไม่ใช่ตัวสุ่ม ดึงออกเหมือนดึง 2 ออกจาก \(cov(2w_t,2w_t)\)</td></tr>
 <tr><td>2</td><td>\(cov(X,X)=\sigma_X^2\)</td><td>ตัวสุ่มมีตัวเดียวคือ X ชนกับตัวเองทุก lag ไม่มี lag ไหนเป็น 0</td></tr>
-<tr><td>3</td><td>\((-1)^{2t}=1\)</td><td>2t เป็นเลขคู่เสมอ t หายไป เหลือ \((-1)^h\)</td></tr>
+<tr><td>3</td><td>\((-1)^{2t-h}=(-1)^{2t}(-1)^{-h}\)</td><td>กฎเลขยกกำลัง \(a^{m-n}=a^m\cdot a^{-n}\) · 2t เป็นเลขคู่เสมอ \((-1)^{2t}=1\) t หายไป</td></tr>
+<tr><td>4</td><td>\((-1)^{-h}=(-1)^h\)</td><td>\((-1)^{-h}=1/(-1)^h\) และ \(1/1=1\), \(1/(-1)=-1\) ได้ค่าเดิม</td></tr>
 </table>
 <p class="trap">⚠ ความนิ่งดูแค่ว่ามี t หรือไม่ ไม่สนว่า γ ติดลบหรือสลับเครื่องหมาย</p>
 </div>
@@ -1872,12 +1875,12 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>คูณกระจายได้ 9 คู่ คู่ที่ชนมี 3 คู่ คือ \(w_t\) กับ \(w_t\), \(w_{t-1}\) กับ \(w_{t-1}\), \(w_{t-2}\) กับ \(w_{t-2}\) อีก 6 คู่คนละเวลาเป็น 0</p>
 <p>\(=cov(w_t,w_t)+(-0.5)(-0.5)cov(w_{t-1},w_{t-1})+(-0.5)(-0.5)cov(w_{t-2},w_{t-2})\)</p>
 <p>\(=\sigma^2+0.25\sigma^2+0.25\sigma^2=1.5\sigma^2\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+1}-0.5w_t-0.5w_{t-1})\)</p>
-<p>\(=(1)(-0.5)cov(w_t,w_t)+(-0.5)(-0.5)cov(w_{t-1},w_{t-1})\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t-1}-0.5w_{t-2}-0.5w_{t-3})\)</p>
+<p>\(=(-0.5)(1)cov(w_{t-1},w_{t-1})+(-0.5)(-0.5)cov(w_{t-2},w_{t-2})\)</p>
 <p>\(=-0.5\sigma^2+0.25\sigma^2=-0.25\sigma^2\)</p>
-<p><b>lag 2</b>: \(\gamma(2)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+2}-0.5w_{t+1}-0.5w_t)\)</p>
-<p>\(=(1)(-0.5)cov(w_t,w_t)=-0.5\sigma^2\)</p>
-<p><b>lag 3</b>: \(\gamma(3)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t+3}-0.5w_{t+2}-0.5w_{t+1})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p>
+<p><b>lag 2</b>: \(\gamma(2)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t-2}-0.5w_{t-3}-0.5w_{t-4})\)</p>
+<p>\(=(-0.5)(1)cov(w_{t-2},w_{t-2})=-0.5\sigma^2\)</p>
+<p><b>lag 3</b>: \(\gamma(3)=cov(w_t-0.5w_{t-1}-0.5w_{t-2},\ w_{t-3}-0.5w_{t-4}-0.5w_{t-5})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p>
 <p>Mean และ autocovariance ไม่ขึ้นกับ t สรุป \(\nabla X_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
@@ -1885,8 +1888,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <tr><td>1</td><td>\(-2(t-1)\)</td><td>\(X_{t-1}\) คือเอา t − 1 ไปแทน t ทุกที่ w ก็เลื่อนไปหนึ่งช่อง · \(-2t-(-2t+2)=-2\)</td></tr>
 <tr><td>2</td><td>\(0.5w_{t-1}-w_{t-1}=-0.5w_{t-1}\)</td><td>รวมพจน์ \(w_{t-1}\) ที่มาจากทั้งสองวงเล็บ</td></tr>
 <tr><td>3</td><td>ตัด −2 ทิ้งใน cov</td><td>ค่าคงที่ไม่ใช่ตัวสุ่ม cov กับอะไรก็ได้ 0</td></tr>
-<tr><td>4</td><td>lag 1 ชนสองคู่</td><td>ฝั่งขวาเลื่อน index ไปหนึ่ง \(w_t\) ชนกับ \(-0.5w_t\) และ \(-0.5w_{t-1}\) ชนกับ \(-0.5w_{t-1}\)</td></tr>
-<tr><td>5</td><td>lag 3 ไม่ชน</td><td>ฝั่งซ้ายมี \(w_t\) ถึง \(w_{t-2}\) ฝั่งขวามี \(w_{t+1}\) ถึง \(w_{t+3}\) ไม่มีเวลาซ้ำ</td></tr>
+<tr><td>4</td><td>lag 1 ชนสองคู่</td><td>ฝั่งขวาถอย index ลงหนึ่ง \(-0.5w_{t-1}\) ชนกับ \(w_{t-1}\) และ \(-0.5w_{t-2}\) ชนกับ \(-0.5w_{t-2}\)</td></tr>
+<tr><td>5</td><td>lag 3 ไม่ชน</td><td>ฝั่งซ้ายมี \(w_t\) ถึง \(w_{t-2}\) ฝั่งขวามี \(w_{t-3}\) ถึง \(w_{t-5}\) ไม่มีเวลาซ้ำ</td></tr>
 </table>
 <p class="trap">⚠ ข้อนี้ 15 คะแนนอยู่ที่ข้อ b ต้องเขียน γ ให้ครบทุก lag ไม่ใช่แค่บอกว่า "mean คงที่ จึงนิ่ง" · ใน Class 13 อาจารย์บอกคำตอบ γ(0) ของ ∇X เป็น 1.25σ² ซึ่งน่าจะลอกมาจาก γ(0) ของ X_t ที่เป็น 1 + 0.25 คิดจริงได้ 1 + 0.25 + 0.25 = 1.5σ² ให้เขียนทุกคู่ที่ชนให้เห็น · อาจารย์บอกว่าแนวข้อนี้ "จะออกข้อสอบอยู่ในพาร์ทแรกที่เป็นคอนเซ็ปต์"</p>
 </div>
@@ -1936,10 +1939,11 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>\(cov(w_tw_{t-1},w_t^2)=E(w_t^3)E(w_{t-1})-0\cdot\sigma^2=0\)</p>
 <p>\(cov(w_t^2,w_t^2)=E(w_t^4)-[E(w_t^2)]^2=3\sigma^4-\sigma^4=2\sigma^4\)</p>
 <p>\(\gamma(0)=\tfrac14\sigma^4+0+\tfrac14(2\sigma^4)=\tfrac34\sigma^4\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(\tfrac12w_tw_{t-1}+\tfrac12w_t^2,\ \tfrac12w_{t+1}w_t+\tfrac12w_{t+1}^2)\)</p>
-<p>\(=\tfrac14[cov(w_tw_{t-1},w_{t+1}w_t)+cov(w_tw_{t-1},w_{t+1}^2)+cov(w_t^2,w_{t+1}w_t)+cov(w_t^2,w_{t+1}^2)]\)</p>
-<p>\(=\tfrac14[0+0+0+(E(w_t^2)E(w_{t+1}^2)-\sigma^2\cdot\sigma^2)]=\tfrac14[\sigma^4-\sigma^4]=0\)</p>
-<p><b>lag 2</b>: ฝั่งซ้ายมี \(w_t, w_{t-1}\) ฝั่งขวามี \(w_{t+2}, w_{t+1}\) ไม่มีคู่ชน \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(\tfrac12w_tw_{t-1}+\tfrac12w_t^2,\ \tfrac12w_{t-1}w_{t-2}+\tfrac12w_{t-1}^2)\)</p>
+<p>\(=\tfrac14[cov(w_tw_{t-1},w_{t-1}w_{t-2})+cov(w_tw_{t-1},w_{t-1}^2)\)</p>
+<p>\(\quad+cov(w_t^2,w_{t-1}w_{t-2})+cov(w_t^2,w_{t-1}^2)]\)</p>
+<p>\(=\tfrac14[0+0+0+(E(w_t^2)E(w_{t-1}^2)-\sigma^2\cdot\sigma^2)]=\tfrac14[\sigma^4-\sigma^4]=0\)</p>
+<p><b>lag 2</b>: ฝั่งซ้ายมี \(w_t, w_{t-1}\) ฝั่งขวามี \(w_{t-2}, w_{t-3}\) ไม่มีคู่ชน \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
 <p>\(E(X_t)=\sigma^2/2\) · \(\gamma(0)=\tfrac34\sigma^4\) · \(\gamma(h)=0\) เมื่อ \(h\ge1\) ไม่ขึ้นกับ t สรุป \(X_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
@@ -1949,8 +1953,8 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <tr><td>3</td><td>cov ของผลคูณ</td><td>ใช้ ก13 \(E(XY)-E(X)E(Y)\) แล้วดูว่า w ชนครบทุกตัวไหม</td></tr>
 <tr><td>4</td><td>\(cov(w_tw_{t-1},w_t^2)=0\)</td><td>\(w_t\) ชนเป็น \(w_t^3\) แต่ \(w_{t-1}\) อยู่ตัวเดียว E = 0</td></tr>
 <tr><td>5</td><td>\(3\sigma^4\)</td><td>moment ที่ 4 ของ normal \(E(w^4)=3\sigma^4\)</td></tr>
-<tr><td>6</td><td>lag 1 สามคู่แรกเป็น 0</td><td>แต่ละคู่มี w ที่อยู่ตัวเดียว คือ \(w_{t-1}\) หรือ \(w_{t+1}\)</td></tr>
-<tr><td>7</td><td>คู่สุดท้ายลบ mean ด้วย</td><td>\(w_t^2\) กับ \(w_{t+1}^2\) มี mean = σ² ไม่ใช่ 0 ต้องลบ \(\sigma^2\cdot\sigma^2\) ตาม ก13 ได้ 0</td></tr>
+<tr><td>6</td><td>lag 1 สามคู่แรกเป็น 0</td><td>แต่ละคู่มี w ที่อยู่ตัวเดียว คือ \(w_t\) หรือ \(w_{t-2}\)</td></tr>
+<tr><td>7</td><td>คู่สุดท้ายลบ mean ด้วย</td><td>\(w_t^2\) กับ \(w_{t-1}^2\) มี mean = σ² ไม่ใช่ 0 ต้องลบ \(\sigma^2\cdot\sigma^2\) ตาม ก13 ได้ 0</td></tr>
 </table>
 <p class="trap">⚠ อาจารย์เฉลยใน Class 13 ด้วยสมบัติของ normal \(E(w^3)=0\) และ \(E(w^4)=3\sigma^4\) ได้ γ(0) = 3σ⁴/4 · อาจารย์บอกว่าข้อนี้ "ยากสุดแล้วถ้าจะออก" และ "ถ้าทำข้อนี้ได้ ข้อแรกของข้อสอบปีที่แล้วคุณก็ทำได้"</p>
 </div>
@@ -1965,15 +1969,15 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="model-answer">
 <div class="copy">
 <p>Mean: \(E(Y_t)=7-3t+E(X_t)=7-3t+3t=7\) ไม่ขึ้นกับ t</p>
-<p><b>lag h</b>: \(\gamma_Y(h)=cov(7-3t+X_t,\ 7-3(t+h)+X_{t+h})\)</p>
-<p>\(7-3t\) และ \(7-3(t+h)\) ไม่ใช่ตัวสุ่ม cov กับอะไรก็ได้ 0 เหลือคู่เดียว</p>
-<p>\(=cov(X_t,X_{t+h})=\gamma_h\) ไม่ขึ้นกับ t</p>
+<p><b>lag h</b>: \(\gamma_Y(h)=cov(7-3t+X_t,\ 7-3(t-h)+X_{t-h})\)</p>
+<p>\(7-3t\) และ \(7-3(t-h)\) ไม่ใช่ตัวสุ่ม cov กับอะไรก็ได้ 0 เหลือคู่เดียว</p>
+<p>\(=cov(X_t,X_{t-h})=\gamma_h\) ไม่ขึ้นกับ t</p>
 <p>สรุป \(Y_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
 <tr><td>1</td><td>\(7-3t\) ออกนอก E</td><td>ไม่ใช่ตัวสุ่ม ก11</td></tr>
-<tr><td>2</td><td>คูณกระจาย cov</td><td>ได้ 4 คู่ สามคู่มีค่าคงที่อยู่ เป็น 0 หมด เหลือ \(cov(X_t,X_{t+h})\)</td></tr>
+<tr><td>2</td><td>คูณกระจาย cov</td><td>ได้ 4 คู่ สามคู่มีค่าคงที่อยู่ เป็น 0 หมด เหลือ \(cov(X_t,X_{t-h})\) โจทย์ให้มาเป็น \(Cov(X_t,X_{t+h})=\gamma_h\) ซึ่งเท่ากันเพราะห่างกัน h ช่องเหมือนกัน</td></tr>
 </table>
 <p class="trap">⚠ แนวคิดนี้คือ detrending ใน <a href="0003-estimation-correlogram-and-detrending.html#s4-detrend">L3 ตอน 4.2</a>: ลบเส้น trend ที่ถูกต้องออก ส่วนที่เหลือนิ่ง</p>
 </div>
@@ -2035,16 +2039,16 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <div class="copy">
 <p>Mean: \(E(X_t)=E(w_t)E(w_{t-2})=0\)</p>
 <p><b>lag 0</b>: \(\gamma(0)=cov(w_tw_{t-2},\ w_tw_{t-2})=E(w_t^2)E(w_{t-2}^2)-0=\sigma^4\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(w_tw_{t-2},\ w_{t+1}w_{t-1})=E(w_t)E(w_{t-2})E(w_{t+1})E(w_{t-1})=0\) ไม่มีคู่ชน</p>
-<p><b>lag 2</b>: \(\gamma(2)=cov(w_tw_{t-2},\ w_{t+2}w_t)=E(w_t^2)E(w_{t-2})E(w_{t+2})=\sigma^2\cdot0\cdot0=0\) ชนแค่ \(w_t\)</p>
-<p><b>lag 3</b>: \(\gamma(3)=cov(w_tw_{t-2},\ w_{t+3}w_{t+1})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(w_tw_{t-2},\ w_{t-1}w_{t-3})=E(w_t)E(w_{t-2})E(w_{t-1})E(w_{t-3})=0\) ไม่มีคู่ชน</p>
+<p><b>lag 2</b>: \(\gamma(2)=cov(w_tw_{t-2},\ w_{t-2}w_{t-4})=E(w_t)E(w_{t-2}^2)E(w_{t-4})=0\cdot\sigma^2\cdot0=0\) ชนแค่ \(w_{t-2}\)</p>
+<p><b>lag 3</b>: \(\gamma(3)=cov(w_tw_{t-2},\ w_{t-3}w_{t-5})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge3\)</p>
 <p>\(E(X_t)=0\) · \(\gamma(0)=\sigma^4\) · \(\gamma(h)=0\) เมื่อ \(h\ge1\) ไม่ขึ้นกับ t สรุป \(X_t\) stationary</p>
 </div>
 <table class="why"><caption>หาคู่ที่ชนทีละ lag</caption>
 <tr><th>lag</th><th>w ในสองฝั่ง</th><th>ชน</th></tr>
-<tr><td>1</td><td>\(w_t, w_{t-2}\) กับ \(w_{t+1}, w_{t-1}\)</td><td>ไม่มี</td></tr>
-<tr><td>2</td><td>\(w_t, w_{t-2}\) กับ \(w_{t+2}, w_t\)</td><td>ชนแค่ \(w_t\) ยังเหลือตัวเดียวอีกสองตัว ได้ 0</td></tr>
-<tr><td>3</td><td>\(w_t, w_{t-2}\) กับ \(w_{t+3}, w_{t+1}\)</td><td>ไม่มี</td></tr>
+<tr><td>1</td><td>\(w_t, w_{t-2}\) กับ \(w_{t-1}, w_{t-3}\)</td><td>ไม่มี</td></tr>
+<tr><td>2</td><td>\(w_t, w_{t-2}\) กับ \(w_{t-2}, w_{t-4}\)</td><td>ชนแค่ \(w_{t-2}\) ยังเหลือตัวเดียวอีกสองตัว ได้ 0</td></tr>
+<tr><td>3</td><td>\(w_t, w_{t-2}\) กับ \(w_{t-3}, w_{t-5}\)</td><td>ไม่มี</td></tr>
 </table>
 <p class="trap">⚠ ข้อนี้อยู่ในแบบฝึกท้าย Slide 2 อาจารย์ให้ทำเองใน Class 2 · เทียบกับ FINAL 2025 ข้อ 1 ที่เป็น \(w_tw_{t-1}\) วิธีเดียวกัน ต่างแค่ lag ที่มี w ชน</p>
 </div>
@@ -2062,16 +2066,16 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p><b>lag 0</b>: \(\gamma(0)=cov(w_t+w_{t-1}^2,\ w_t+w_{t-1}^2)\)</p>
 <p>\(=cov(w_t,w_t)+cov(w_t,w_{t-1}^2)+cov(w_{t-1}^2,w_t)+cov(w_{t-1}^2,w_{t-1}^2)\)</p>
 <p>\(=\sigma^2+0+0+(E(w^4)-[E(w^2)]^2)=\sigma^2+(3\sigma^4-\sigma^4)=\sigma^2+2\sigma^4\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(w_t+w_{t-1}^2,\ w_{t+1}+w_t^2)\)</p>
-<p>คู่ที่ชนมีคู่เดียวคือ \(w_t\) กับ \(w_t^2\): \(cov(w_t,w_t^2)=E(w_t^3)-E(w_t)E(w_t^2)=0-0=0\)</p>
-<p><b>lag 2</b>: \(\gamma(2)=cov(w_t+w_{t-1}^2,\ w_{t+2}+w_{t+1}^2)=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(w_t+w_{t-1}^2,\ w_{t-1}+w_{t-2}^2)\)</p>
+<p>คู่ที่ชนมีคู่เดียวคือ \(w_{t-1}^2\) กับ \(w_{t-1}\): \(cov(w_{t-1}^2,w_{t-1})=E(w_{t-1}^3)-E(w_{t-1}^2)E(w_{t-1})=0-0=0\)</p>
+<p><b>lag 2</b>: \(\gamma(2)=cov(w_t+w_{t-1}^2,\ w_{t-2}+w_{t-3}^2)=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
 <p>\(E(X_t)=\sigma^2\) · \(\gamma(0)=\sigma^2+2\sigma^4\) · \(\gamma(h)=0\) เมื่อ \(h\ge1\) ไม่ขึ้นกับ t สรุป stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
 <tr><td>1</td><td>คู่ไขว้ lag 0 เป็น 0</td><td>\(w_t\) กับ \(w_{t-1}^2\) คนละเวลา อาจารย์พูดว่า "ต่อให้มันเป็นฟังก์ชันไม่เหมือนกัน แต่คนละจุดเวลาก็ถือว่า covariance เป็นศูนย์"</td></tr>
 <tr><td>2</td><td>\(cov(w^2,w^2)\)</td><td>ก13: \(E(w^4)-[E(w^2)]^2\) และ normal มี \(E(w^4)=3\sigma^4\)</td></tr>
-<tr><td>3</td><td>lag 1 ชนแต่ได้ 0</td><td>\(w_t\) ชนกับ \(w_t^2\) ได้ \(E(w^3)=0\) สำหรับ normal</td></tr>
+<tr><td>3</td><td>lag 1 ชนแต่ได้ 0</td><td>\(w_{t-1}^2\) ชนกับ \(w_{t-1}\) ได้ \(E(w^3)=0\) สำหรับ normal</td></tr>
 </table>
 <p class="trap">⚠ อาจารย์ทำข้อคล้ายกัน \(x_t=w_t-\theta w_{t-1}^2\) ใน Class 2 ได้ mean \(-\theta\sigma^2\) ไม่ใช่ 0 และ \(\gamma(0)=\sigma^2+2\theta^2\sigma^4\) · ต้องจำ moment ของ normal 4 ตัว: E(w) = 0, E(w²) = σ², E(w³) = 0, E(w⁴) = 3σ⁴</p>
 </div>
@@ -2089,14 +2093,14 @@ tsdiag(fit, gof = 30, omit.initial = T)</code></pre>
 <p>(b) \(\nabla X_t=[5+0.3t+w_t]-[5+0.3(t-1)+w_{t-1}]=0.3+w_t-w_{t-1}\)</p>
 <p>Mean: \(E(\nabla X_t)=0.3\)</p>
 <p><b>lag 0</b>: \(\gamma(0)=cov(w_t-w_{t-1},\ w_t-w_{t-1})=\sigma^2+(-1)(-1)\sigma^2=2\sigma^2\)</p>
-<p><b>lag 1</b>: \(\gamma(1)=cov(w_t-w_{t-1},\ w_{t+1}-w_t)=(1)(-1)cov(w_t,w_t)=-\sigma^2\)</p>
-<p><b>lag 2</b>: \(\gamma(2)=cov(w_t-w_{t-1},\ w_{t+2}-w_{t+1})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
+<p><b>lag 1</b>: \(\gamma(1)=cov(w_t-w_{t-1},\ w_{t-1}-w_{t-2})=(-1)(1)cov(w_{t-1},w_{t-1})=-\sigma^2\)</p>
+<p><b>lag 2</b>: \(\gamma(2)=cov(w_t-w_{t-1},\ w_{t-2}-w_{t-3})=0\) ไม่มีคู่ชน · \(\gamma(h)=0\) เมื่อ \(h\ge2\)</p>
 <p>Mean และ autocovariance ไม่ขึ้นกับ t สรุป \(\nabla X_t\) stationary</p>
 </div>
 <table class="why"><caption>อธิบายทีละขั้น</caption>
 <tr><th>ขั้น</th><th>เขียนว่า</th><th>ทำแบบนี้เพราะ</th></tr>
 <tr><td>1</td><td>0.3</td><td>\(0.3t-0.3(t-1)=0.3\) ค่าคงที่ 5 ตัดกันหาย และตัดทิ้งใน cov</td></tr>
-<tr><td>2</td><td>lag 1 ชนคู่เดียว</td><td>\(w_t\) ฝั่งซ้ายชนกับ \(-w_t\) ฝั่งขวา</td></tr>
+<tr><td>2</td><td>lag 1 ชนคู่เดียว</td><td>\(-w_{t-1}\) ฝั่งซ้ายชนกับ \(w_{t-1}\) ฝั่งขวา</td></tr>
 </table>
 <p class="trap">⚠ อาจารย์ให้ทำข้อนี้เป็นการบ้านใน Class 3 กับ \(Y_t=\beta_0+\beta_1t+w_t\) · ผลต่างนี้คือ MA(1) ที่ θ = −1 ไม่ invertible คือ over-differencing ของ white noise เชื่อมกับข้อ 1.10</p>
 </div>
